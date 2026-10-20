@@ -20,8 +20,9 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Option « masquer les ports libres », export PNG du synoptique.
 
 ### Base d'équipements
-- 305 modèles de marque (69 marques), plus des modèles génériques, classés par
-  département et par marque, avec recherche :
+- 719 modèles de marque (69 marques), plus des modèles génériques. La palette est triée
+  par département, puis par **famille** (consoles, stageboxes, HF, antennes, line arrays,
+  subs, lyres, PTZ, switchs…), puis par marque, avec recherche et filtre par marque :
   - **Consoles** : Yamaha (RIVAGE PM5, CL, QL, TF, DM3, MG), Allen & Heath (dLive, Avantis,
     SQ, CQ, Qu, ZED), Midas (HD96, PRO2, M32, MR18), Behringer (X32, Wing, XR18), DiGiCo
     (Quantum, SD, S21), Soundcraft, PreSonus, Avid VENUE S6L, SSL Live ; stageboxes associées.
@@ -42,6 +43,17 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   récepteur est vérifiée comme les autres liaisons.
 - La connectique est indicative : vérifiez la fiche constructeur. Tout équipement
   modifié peut être enregistré comme nouveau modèle.
+
+### Bibliothèque perso (onglet Bibliothèque)
+- **Ajout manuel** : marque, modèle, département, famille, U, poids et connectique saisie
+  par groupes (« 16 × XLR entrées »).
+- **Analyse de fiche technique**, gratuite et hors ligne : un PDF est lu dans le navigateur
+  (pdf.js), ou bien on colle le texte des caractéristiques. L’outil repère la marque, le
+  modèle, les connecteurs (nombre et sens), la hauteur en U et le poids, et pré-remplit la
+  fiche ; chaque ligne détectée affiche le passage lu pour vérification.
+- **Partir d’un modèle existant** pour le copier et le modifier.
+- Les modèles perso apparaissent dans la palette (« Mes modèles »), restent d’un projet à
+  l’autre, et s’exportent / s’importent en JSON.
 
 ### Racks et bandeaux de câblage
 - Onglet **Racks** : vue avant et arrière, glisser-déposer du matériel unité par unité,

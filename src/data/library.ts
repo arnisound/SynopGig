@@ -309,8 +309,41 @@ const GENERIC: DeviceTemplate[] = [
   },
 ]
 
-/** Generic models first, then the brand catalogue. */
-export const LIBRARY: DeviceTemplate[] = [...GENERIC, ...PANEL_TEMPLATES, ...CATALOG]
+const GENERIC_FAMILY: Record<string, string> = {
+  mic: 'Micros filaires',
+  di: 'DI',
+  'stagebox-16-8': 'Stageboxes & moteurs',
+  'console-num': 'Consoles',
+  processor: 'Processeurs',
+  'amp-4ch': 'Amplis',
+  'speaker-passive': 'Enceintes',
+  'sub-passive': 'Subs',
+  'wedge-active': 'Retours',
+  'hf-receiver': 'HF — récepteurs',
+  'light-desk': 'Consoles lumière',
+  'node-dmx': 'Nodes & splitters DMX',
+  'splitter-dmx': 'Nodes & splitters DMX',
+  'spot-lyre': 'Lyres spot / profile',
+  'par-led': 'Barres & PAR LED',
+  'dimmer-6': 'Gradateurs',
+  camera: 'Caméras',
+  'video-mixer': 'Mélangeurs',
+  projector: 'Vidéoprojecteurs',
+  screen: 'LED',
+  'switch-8': 'Switchs',
+  'switch-fiber': 'Switchs PoE & fibre',
+  laptop: 'Accessoires réseau',
+  'distro-32': 'Distribution',
+  multiprise: 'Distribution',
+  'rack-power-1u': 'Distribution',
+}
+
+/** Generic models first, then patch panels and the brand catalogue. */
+export const LIBRARY: DeviceTemplate[] = [
+  ...GENERIC.map((t) => ({ ...t, family: GENERIC_FAMILY[t.id] })),
+  ...PANEL_TEMPLATES.map((t) => ({ ...t, family: 'Bandeaux de câblage' })),
+  ...CATALOG,
+]
 
 export const CATEGORY_COLORS: Record<string, string> = {
   Son: '#e5484d',
@@ -323,3 +356,6 @@ export const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export const ZONES = ['Plateau', 'Régie FOH', 'Coulisses', 'Grill', 'Façade', 'Retours']
+
+/** Display order of families, as laid out in the catalogue. */
+export const FAMILY_ORDER = [...new Set(CATALOG.map((t) => t.family).filter((f) => f !== undefined)), 'Bandeaux de câblage']

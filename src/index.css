@@ -389,3 +389,24 @@ table.wiring select { width: 100%; }
 
 .crash { max-width: 640px; margin: 15vh auto; padding: 24px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
 .crash pre { white-space: pre-wrap; background: var(--bg); padding: 10px; border-radius: 6px; color: var(--danger); }
+
+.brand-filter { width: 100%; margin-top: 6px; }
+.palette details.family { margin: 2px 0 2px 6px; }
+.palette details.family > summary { font-size: 12px; text-transform: none; letter-spacing: 0; color: var(--text); font-weight: 600; padding: 3px 0; }
+
+/* ---- Library */
+.page.library { display: grid; grid-template-columns: 300px 1fr; gap: 20px; max-width: 1300px; align-items: start; }
+.lib-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.card textarea { width: 100%; margin: 8px 0; font-family: ui-monospace, monospace; font-size: 12px; }
+.file-btn { display: inline-block; padding: 6px 12px; border: 1px dashed var(--accent); border-radius: 6px; cursor: pointer; color: var(--accent); font-weight: 600; }
+.file-btn input { display: none; }
+.status { background: color-mix(in srgb, var(--accent) 10%, var(--panel)); padding: 8px 10px; border-radius: 6px; margin: 8px 0 0; }
+.lib-item { display: flex; align-items: center; }
+.lib-item .case-item { flex: 1; }
+.lib-item.active .case-item { background: var(--bg); }
+table.groups td { padding: 4px; vertical-align: top; }
+table.groups input, table.groups select { width: 100%; }
+table.groups td:nth-child(2) { width: 70px; }
+.evidence { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+@media (max-width: 1000px) { .page.library { grid-template-columns: 1fr; } }

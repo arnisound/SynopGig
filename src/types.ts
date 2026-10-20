@@ -80,6 +80,8 @@ export interface DeviceTemplate {
   brand?: string
   model: string
   category: Category
+  /** Sub-group inside the category (consoles, line arrays, PTZ...). */
+  family?: string
   /** Height in rack units, if the device is rackable. */
   rackU?: number
   /** Weight in kg, used for flight case packing. */

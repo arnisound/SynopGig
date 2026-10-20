@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CaseEditor from './cases/CaseEditor'
 import { LIBRARY } from './data/library'
 import TechGuide from './guide/TechGuide'
+import LibraryPage from './library/LibraryPage'
 import Lists from './lists/Lists'
 import RackBuilder from './racks/RackBuilder'
 import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
 import SynopticEditor from './synoptic/SynopticEditor'
 import type { Project } from './types'
 
-type Tab = 'synoptic' | 'racks' | 'guide' | 'lists' | 'cases'
+type Tab = 'synoptic' | 'racks' | 'guide' | 'lists' | 'cases' | 'library'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'synoptic', label: 'Synoptique' },
@@ -18,6 +19,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'guide', label: 'Guide technicien' },
   { id: 'lists', label: 'Listes' },
   { id: 'cases', label: 'Flight cases' },
+  { id: 'library', label: 'Bibliothèque' },
 ]
 
 export default function App() {
@@ -68,7 +70,10 @@ export default function App() {
 
   const templates = useMemo(() => [...LIBRARY, ...project.customTemplates], [project.customTemplates])
 
-  const replace = (p: Project) => {
+  // The personal library follows the user from one project to the next.
+  const replace = (incoming: Project) => {
+    const mine = new Map([...project.customTemplates, ...incoming.customTemplates].map((t) => [t.id, t]))
+    const p = { ...incoming, customTemplates: [...mine.values()] }
     history.current = []
     committed.current = p
     setCanUndo(false)
@@ -129,6 +134,7 @@ export default function App() {
         )}
         {tab === 'lists' && <Lists project={project} />}
         {tab === 'cases' && <CaseEditor project={project} setProject={setProject} />}
+        {tab === 'library' && <LibraryPage project={project} setProject={setProject} />}
       </main>
     </div>
   )
