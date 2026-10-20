@@ -386,3 +386,6 @@ table.wiring select { width: 100%; }
   .page.racks { grid-template-columns: 1fr; }
   .rack-side { position: static; max-height: none; }
 }
+
+.crash { max-width: 640px; margin: 15vh auto; padding: 24px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+.crash pre { white-space: pre-wrap; background: var(--bg); padding: 10px; border-radius: 6px; color: var(--danger); }

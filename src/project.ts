@@ -320,6 +320,14 @@ export function loadProject(): Project {
   return demoProject()
 }
 
+export function clearSavedProject() {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Nothing stored or storage blocked.
+  }
+}
+
 export function saveProject(p: Project) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(p))
