@@ -1,0 +1,88 @@
+import type { ConnectorType, Port, SignalType } from '../types'
+
+export const SIGNALS: Record<SignalType, { label: string; color: string }> = {
+  'audio-analog': { label: 'Audio analogique', color: '#e5484d' },
+  'audio-digital': { label: 'Audio numérique (AES/MADI)', color: '#f76b15' },
+  speaker: { label: 'HP (puissance)', color: '#ffc53d' },
+  dmx: { label: 'DMX', color: '#46a758' },
+  network: { label: 'Réseau (Dante / Art-Net / sACN)', color: '#0090ff' },
+  video: { label: 'Vidéo', color: '#8e4ec6' },
+  power: { label: 'Énergie', color: '#8b8d98' },
+}
+
+export const CONNECTORS: Record<ConnectorType, string> = {
+  xlr3: 'XLR 3 pts',
+  xlr5: 'XLR 5 pts',
+  jack: 'Jack 6.35',
+  speakon: 'Speakon NL4',
+  rj45: 'RJ45',
+  ethercon: 'etherCON',
+  opticalcon: 'opticalCON',
+  hdmi: 'HDMI',
+  sdi: 'BNC SDI',
+  powercon: 'powerCON',
+  'powercon-true1': 'powerCON TRUE1',
+  schuko: 'Schuko 16A',
+  'p17-16a': 'P17 16A mono',
+  'p17-32a': 'P17 32A tri',
+  socapex: 'Socapex 19 pts',
+}
+
+/** Connectors that physically mate together without an adapter. */
+const MATING: ConnectorType[][] = [
+  ['rj45', 'ethercon'],
+  ['powercon-true1'],
+]
+
+function mates(a: ConnectorType, b: ConnectorType) {
+  if (a === b) return true
+  return MATING.some((g) => g.includes(a) && g.includes(b))
+}
+
+export type Severity = 'danger' | 'warning'
+
+export interface Issue {
+  severity: Severity
+  message: string
+}
+
+/**
+ * Checks a link between two ports. Problems are reported, never blocking:
+ * on a gig, the technician keeps the last word.
+ */
+export function checkLink(from: Port | undefined, to: Port | undefined): Issue[] {
+  if (!from || !to) return [{ severity: 'danger', message: 'Port introuvable' }]
+  const issues: Issue[] = []
+
+  if (from.signal !== to.signal) {
+    const speakerMix = from.signal === 'speaker' || to.signal === 'speaker'
+    const powerMix = from.signal === 'power' || to.signal === 'power'
+    issues.push({
+      severity: speakerMix || powerMix ? 'danger' : 'warning',
+      message: speakerMix
+        ? `Sortie HP vers ${SIGNALS[to.signal].label} : risque de destruction du matériel`
+        : powerMix
+          ? 'Énergie mélangée avec un signal : danger électrique'
+          : `Signal incompatible : ${SIGNALS[from.signal].label} → ${SIGNALS[to.signal].label}`,
+    })
+  }
+
+  if (!mates(from.connector, to.connector)) {
+    issues.push({
+      severity: 'warning',
+      message: `Adaptateur nécessaire : ${CONNECTORS[from.connector]} → ${CONNECTORS[to.connector]}`,
+    })
+  }
+
+  if (from.dir === 'in' && to.dir === 'in') {
+    issues.push({ severity: 'warning', message: 'Entrée reliée à une entrée' })
+  }
+  if (from.dir === 'out' && to.dir === 'out') {
+    issues.push({
+      severity: from.signal === 'speaker' || from.signal === 'power' ? 'danger' : 'warning',
+      message: 'Sortie reliée à une sortie',
+    })
+  }
+
+  return issues
+}
