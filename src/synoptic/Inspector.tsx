@@ -2,18 +2,20 @@ import { useState, type ReactNode } from 'react'
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { ZONES } from '../data/library'
 import { uid, type ResolvedCable } from '../project'
+import PanelEditor from '../racks/PanelEditor'
 import type {
   CableData,
   Category,
   ConnectorType,
   DeviceData,
   DeviceNode,
+  PanelSpec,
   Port,
   PortDirection,
   SignalType,
 } from '../types'
 
-const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
+const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Câblage', 'Autre']
 const DIRS: Record<PortDirection, string> = { in: 'Entrée', out: 'Sortie', io: 'Bidirectionnel' }
 
 interface Props {
@@ -21,6 +23,7 @@ interface Props {
   cable?: ResolvedCable
   onNode: (id: string, patch: Partial<DeviceData>) => void
   onCable: (id: string, patch: Partial<CableData>) => void
+  onPanel: (id: string, spec: PanelSpec) => void
   onSaveTemplate: (node: DeviceNode) => void
   onDelete: () => void
 }
@@ -70,7 +73,9 @@ function NewPort({ onAdd }: { onAdd: (p: Port) => void }) {
   )
 }
 
-export default function Inspector({ node, cable, onNode, onCable, onSaveTemplate, onDelete }: Props) {
+export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete }: Props) {
+  const [holes, setHoles] = useState<Set<string>>(new Set())
+
   if (cable) {
     const d = cable.edge.data ?? { cableId: '' }
     return (
@@ -167,21 +172,30 @@ export default function Inspector({ node, cable, onNode, onCable, onSaveTemplate
         <textarea rows={4} value={d.config.notes ?? ''} onChange={(e) => setConfig({ notes: e.target.value })} />
       </Field>
 
-      <h4>Ports ({d.ports.length})</h4>
-      <ul className="port-list">
-        {d.ports.map((p) => (
-          <li key={p.id}>
-            <span className="dot" style={{ background: SIGNALS[p.signal].color }} />
-            <input
-              value={p.label}
-              onChange={(e) => set({ ports: d.ports.map((x) => (x.id === p.id ? { ...x, label: e.target.value } : x)) })}
-            />
-            <small>{DIRS[p.dir]} · {CONNECTORS[p.connector]}</small>
-            <button className="icon" title="Supprimer le port" onClick={() => set({ ports: d.ports.filter((x) => x.id !== p.id) })}>×</button>
-          </li>
-        ))}
-      </ul>
-      <NewPort onAdd={(p) => set({ ports: [...d.ports, p] })} />
+      {d.panel ? (
+        <>
+          <h4>Bandeau de câblage</h4>
+          <PanelEditor spec={d.panel} selected={holes} onSelect={setHoles} onChange={(spec) => onPanel(node.id, spec)} />
+        </>
+      ) : (
+        <>
+          <h4>Ports ({d.ports.length})</h4>
+          <ul className="port-list">
+            {d.ports.map((p) => (
+              <li key={p.id}>
+                <span className="dot" style={{ background: SIGNALS[p.signal].color }} />
+                <input
+                  value={p.label}
+                  onChange={(e) => set({ ports: d.ports.map((x) => (x.id === p.id ? { ...x, label: e.target.value } : x)) })}
+                />
+                <small>{DIRS[p.dir]} · {CONNECTORS[p.connector]}</small>
+                <button className="icon" title="Supprimer le port" onClick={() => set({ ports: d.ports.filter((x) => x.id !== p.id) })}>×</button>
+              </li>
+            ))}
+          </ul>
+          <NewPort onAdd={(p) => set({ ports: [...d.ports, p] })} />
+        </>
+      )}
 
       <div className="actions">
         <button onClick={() => onSaveTemplate(node)}>Enregistrer comme modèle</button>

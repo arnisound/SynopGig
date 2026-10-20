@@ -29,7 +29,9 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
   // bidirectional ports spread on both sides to keep cables short.
   const spread = !data.ports.some((p) => p.dir === 'in' && p.signal !== 'power')
   const io = data.ports.filter((p) => p.dir === 'io')
-  const onLeft = (p: Port) => p.dir === 'in' || (spread && p.dir === 'io' && io.indexOf(p) % 2 === 0)
+  // Patch panels: inside face on the left, outside face on the right.
+  const onLeft = (p: Port) =>
+    p.face ? p.face === 'int' : p.dir === 'in' || (spread && p.dir === 'io' && io.indexOf(p) % 2 === 0)
   const inputs = visible.filter(onLeft)
   const outputs = visible.filter((p) => !onLeft(p))
   const hidden = data.ports.length - visible.length
@@ -46,8 +48,9 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
       <div className="device-head">
         <div className="device-name">{data.name}</div>
         <div className="device-meta">
-          {data.model} · {data.zone}
+          {data.brand ? `${data.brand} ${data.model}` : data.model} · {data.zone}
         </div>
+        {data.panel && <div className="panel-faces"><span>◂ intérieur rack</span><span>extérieur ▸</span></div>}
         {addr.length > 0 && <div className="device-addr">{addr.join(' · ')}</div>}
       </div>
       <div className="device-ports">

@@ -1,6 +1,6 @@
-import type { Banner, DeviceNode, FlightCase } from '../types'
+import type { Banner, FlightCase } from '../types'
 
-import { U, bannerSize, caseHeightMm } from './geometry'
+import { bannerSize, caseHeightMm } from './geometry'
 
 function fitText(text: string, fontSize: number, max: number) {
   // Rough glyph width for condensed display fonts.
@@ -122,50 +122,6 @@ export function CaseFront({ fc }: { fc: FlightCase }) {
       <Corner cx={w} cy={0} />
       <Corner cx={0} cy={h} />
       <Corner cx={w} cy={h} />
-    </svg>
-  )
-}
-
-/** Open rack view showing devices in their rack units. */
-export function RackView({ fc, devices }: { fc: FlightCase; devices: DeviceNode[] }) {
-  const rail = 30
-  const w = 482.6
-  const h = fc.rackU * U
-  const racked = devices.filter((d) => d.data.rackU)
-  const slots = racked.map((d, i) => ({
-    d,
-    hU: d.data.rackU!,
-    y: racked.slice(0, i).reduce((sum, x) => sum + x.data.rackU!, 0) * U,
-  }))
-  const cursor = racked.reduce((sum, x) => sum + x.data.rackU!, 0)
-  const over = cursor > fc.rackU
-  return (
-    <svg viewBox={`-10 -10 ${w + 20} ${Math.max(h, cursor * U) + 20}`} className="rack-svg" role="img" aria-label="Vue rack">
-      <rect x={0} y={0} width={w} height={h} fill="#111214" />
-      {Array.from({ length: fc.rackU }, (_, i) => (
-        <g key={i}>
-          <line x1={rail} x2={w - rail} y1={i * U} y2={i * U} stroke="#2b2d31" />
-          <text x={8} y={i * U + U / 2 + 5} fill="#8b8d98" fontSize={14}>{fc.rackU - i}</text>
-        </g>
-      ))}
-      <rect x={0} y={0} width={rail} height={h} fill="#55585e" opacity={0.6} />
-      <rect x={w - rail} y={0} width={rail} height={h} fill="#55585e" opacity={0.6} />
-      {slots.map(({ d, y, hU }) => {
-        const outside = y + hU * U > h
-        return (
-          <g key={d.id}>
-            <rect x={rail + 4} y={y + 2} width={w - rail * 2 - 8} height={hU * U - 4} rx={4} fill={outside ? '#5c1a1b' : '#2b2d31'} stroke={outside ? '#e5484d' : '#55585e'} strokeWidth={2} />
-            <text x={w / 2} y={y + (hU * U) / 2 + 6} textAnchor="middle" fill="#ececee" fontSize={16} fontWeight={600}>
-              {d.data.name} ({hU}U)
-            </text>
-          </g>
-        )
-      })}
-      {over && (
-        <text x={w / 2} y={h - 8} textAnchor="middle" fill="#e5484d" fontSize={18} fontWeight={700}>
-          Rack trop petit : {cursor}U pour {fc.rackU}U
-        </text>
-      )}
     </svg>
   )
 }

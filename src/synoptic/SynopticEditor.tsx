@@ -15,17 +15,20 @@ import {
   type NodeChange,
 } from '@xyflow/react'
 import { toPng } from 'html-to-image'
-import { useCallback, useEffect, useMemo, useState, type DragEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
-import { createDevice, nextCableId, resolveCables, slug, uid } from '../project'
+import { connectPorts, createCase, createDevice, resolveCables, setPanel, slug, uid } from '../project'
 import type { CableEdge, DeviceNode, DeviceTemplate, Project } from '../types'
 import DeviceNodeView from './DeviceNodeView'
+import RackFrameView, { type FrameNode } from './RackFrameView'
 import { ViewContext } from './viewContext'
 import Inspector from './Inspector'
 import Palette, { DND_TYPE } from './Palette'
 
-const nodeTypes = { device: DeviceNodeView }
+const nodeTypes = { device: DeviceNodeView, rackFrame: RackFrameView }
+
+type FlowNode = DeviceNode | FrameNode
 
 interface Props {
   project: Project
@@ -33,9 +36,10 @@ interface Props {
   templates: DeviceTemplate[]
   /** Elements to highlight and frame, sent from the technician guide. */
   focus: string[]
+  onOpenRacks?: () => void
 }
 
-export default function SynopticEditor({ project, setProject, templates, focus }: Props) {
+export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const [compact, setCompact] = useState(false)
   const { nodes, edges } = project
@@ -103,13 +107,54 @@ export default function SynopticEditor({ project, setProject, templates, focus }
     [edges, cableByEdge, highlight],
   )
 
+  // A frame around each rack's devices; dragging its title moves the whole rack.
+  const frames = useMemo(() => {
+    const racks = project.cases.filter((c) => c.kind === 'rack')
+    return racks.flatMap((c): FrameNode[] => {
+      const members = nodes.filter((n) => c.devices.includes(n.id))
+      if (members.length === 0) return []
+      const pad = 24
+      const x0 = Math.min(...members.map((n) => n.position.x)) - pad
+      const y0 = Math.min(...members.map((n) => n.position.y)) - pad - 28
+      const x1 = Math.max(...members.map((n) => n.position.x + (n.measured?.width ?? 220))) + pad
+      const y1 = Math.max(...members.map((n) => n.position.y + (n.measured?.height ?? 200))) + pad
+      return [{
+        id: `frame-${c.id}`,
+        type: 'rackFrame',
+        position: { x: x0, y: y0 },
+        data: { label: `${c.name} · ${c.rackU}U`, color: c.banner.bg },
+        style: { width: x1 - x0, height: y1 - y0 },
+        width: x1 - x0,
+        height: y1 - y0,
+        zIndex: -1,
+        selectable: false,
+        dragHandle: '.frame-head',
+      }]
+    })
+  }, [project.cases, nodes])
+  const framesRef = useRef(frames)
+  framesRef.current = frames
+
   const onNodesChange = useCallback(
-    (changes: NodeChange<DeviceNode>[]) => {
+    (all: NodeChange<FlowNode>[]) => {
+      const isFrame = (c: NodeChange<FlowNode>) => 'id' in c && c.id.startsWith('frame-')
+      const moves = all.filter((c) => isFrame(c) && c.type === 'position' && c.position)
+      const changes = all.filter((c) => !isFrame(c)) as NodeChange<DeviceNode>[]
       setProject((p) => {
+        let nodesNext = applyNodeChanges(changes, p.nodes)
+        for (const m of moves) {
+          if (m.type !== 'position' || !m.position) continue
+          const frame = framesRef.current.find((f) => f.id === m.id)
+          const rack = p.cases.find((c) => `frame-${c.id}` === m.id)
+          if (!frame || !rack) continue
+          const dx = m.position.x - frame.position.x
+          const dy = m.position.y - frame.position.y
+          nodesNext = nodesNext.map((n) => (rack.devices.includes(n.id) ? { ...n, position: { x: n.position.x + dx, y: n.position.y + dy } } : n))
+        }
         const removed = new Set(changes.filter((c) => c.type === 'remove').map((c) => c.id))
         return {
           ...p,
-          nodes: applyNodeChanges(changes, p.nodes),
+          nodes: nodesNext,
           edges: removed.size ? p.edges.filter((e) => !removed.has(e.source) && !removed.has(e.target)) : p.edges,
           cases: removed.size ? p.cases.map((c) => ({ ...c, devices: c.devices.filter((d) => !removed.has(d)) })) : p.cases,
         }
@@ -118,44 +163,32 @@ export default function SynopticEditor({ project, setProject, templates, focus }
     [setProject],
   )
 
+  const createRackFromSelection = () => {
+    const sel = nodes.filter((n) => n.selected)
+    const ids = new Set(sel.map((n) => n.id))
+    const c = createCase(project.cases)
+    c.kind = 'rack'
+    c.name = `Rack ${project.cases.filter((x) => x.kind === 'rack').length + 1}`
+    c.rackU = Math.max(4, sel.reduce((s, n) => s + (n.data.rackU ?? 0), 0) + 2)
+    c.devices = sel.map((n) => n.id)
+    c.banner = { ...c.banner, title: 'RACK', subtitle: c.name.toUpperCase() }
+    setProject((p) => ({
+      ...p,
+      cases: [...p.cases.map((x) => ({ ...x, devices: x.devices.filter((d) => !ids.has(d)) })), c],
+    }))
+    onOpenRacks?.()
+  }
+
   const onEdgesChange = useCallback(
     (changes: EdgeChange<CableEdge>[]) => setProject((p) => ({ ...p, edges: applyEdgeChanges(changes, p.edges) })),
     [setProject],
   )
 
-  const onConnect = useCallback(
-    (c: Connection) =>
-      setProject((p) => {
-        let { source, sourceHandle, target, targetHandle } = c
-        // Always store cables in signal direction: output → input.
-        const srcPort = p.nodes.find((n) => n.id === source)?.data.ports.find((x) => x.id === sourceHandle)
-        const tgtPort = p.nodes.find((n) => n.id === target)?.data.ports.find((x) => x.id === targetHandle)
-        if (srcPort?.dir === 'in' && tgtPort?.dir !== 'in') {
-          ;[source, sourceHandle, target, targetHandle] = [target, targetHandle, source, sourceHandle]
-        }
-        const busy = p.edges.some(
-          (e) =>
-            (e.source === source && e.sourceHandle === sourceHandle) ||
-            (e.target === target && e.targetHandle === targetHandle) ||
-            (e.source === target && e.sourceHandle === targetHandle) ||
-            (e.target === source && e.targetHandle === sourceHandle),
-        )
-        if (busy) {
-          alert('Ce port est déjà câblé. Supprimez le câble existant d’abord.')
-          return p
-        }
-        const edge: CableEdge = {
-          id: `e-${uid()}`,
-          source,
-          sourceHandle,
-          target,
-          targetHandle,
-          data: { cableId: nextCableId(p.edges) },
-        }
-        return { ...p, edges: [...p.edges, edge] }
-      }),
-    [setProject],
-  )
+  const onConnect = (c: Connection) => {
+    const next = connectPorts(project, { node: c.source, port: c.sourceHandle ?? '' }, { node: c.target, port: c.targetHandle ?? '' })
+    if (next) setProject(() => next)
+    else alert('Ce port est déjà câblé. Supprimez le câble existant d’abord.')
+  }
 
   const addAt = useCallback(
     (t: DeviceTemplate, position: { x: number; y: number }) =>
@@ -226,12 +259,15 @@ export default function SynopticEditor({ project, setProject, templates, focus }
           <span className={issueCount ? 'badge warn' : 'badge ok'}>
             {issueCount ? `${issueCount} liaison(s) à vérifier` : 'Toutes les liaisons sont conformes'}
           </span>
+          {nodes.some((n) => n.selected) && (
+            <button onClick={createRackFromSelection}>Créer un rack avec la sélection</button>
+          )}
           <button onClick={exportPng}>Exporter PNG</button>
           <button onClick={() => fitView({ duration: 400 })}>Tout voir</button>
         </div>
         <ViewContext.Provider value={{ used, compact, highlight }}>
           <ReactFlow
-            nodes={nodes}
+            nodes={[...frames, ...nodes] as FlowNode[]}
             edges={viewEdges}
             nodeTypes={nodeTypes}
             onNodesChange={onNodesChange}
@@ -246,7 +282,7 @@ export default function SynopticEditor({ project, setProject, templates, focus }
           >
             <Background gap={20} />
             <Controls />
-            <MiniMap pannable zoomable nodeColor={(n) => CATEGORY_COLORS[(n as DeviceNode).data.category] ?? '#888'} />
+            <MiniMap pannable zoomable nodeColor={(n) => (n.type === 'rackFrame' ? 'transparent' : CATEGORY_COLORS[(n as DeviceNode).data.category] ?? '#888')} />
           </ReactFlow>
         </ViewContext.Provider>
         <div className="legend">
@@ -270,6 +306,7 @@ export default function SynopticEditor({ project, setProject, templates, focus }
             edges: p.edges.map((e) => (e.id === id ? { ...e, data: { cableId: '', ...e.data, ...patch } } : e)),
           }))
         }
+        onPanel={(id, spec) => setProject((p) => setPanel(p, id, spec))}
         onSaveTemplate={(n) => {
           alert(`« ${n.data.model} » ajouté à la bibliothèque`)
           setProject((p) => ({
@@ -283,6 +320,8 @@ export default function SynopticEditor({ project, setProject, templates, focus }
                 rackU: n.data.rackU,
                 weight: n.data.weight,
                 ports: structuredClone(n.data.ports),
+                panel: n.data.panel && structuredClone(n.data.panel),
+                brand: n.data.brand,
               },
             ],
           }))

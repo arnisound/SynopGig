@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { CONNECTORS, SIGNALS } from '../data/connectors'
-import { download, resolveCables, slug, toCsv } from '../project'
+import { extId, intId } from '../data/panels'
+import { cableOn, download, internalRack, otherEnd, rackOfNode, resolveCables, slug, toCsv } from '../project'
 import type { Project } from '../types'
 
 function Table({ head, rows, alerts }: { head: string[]; rows: (string | number | undefined)[][]; alerts?: boolean }) {
@@ -26,9 +27,11 @@ export default function Lists({ project }: { project: Project }) {
   const base = slug(project.name)
 
   const cables = useMemo(() => {
-    const head = ['Repère', 'De', 'Port', 'Vers', 'Port', 'Connecteurs', 'Signal', 'Longueur (m)', 'Alertes']
+    const racks = rackOfNode(project.cases)
+    const head = ['Repère', 'Liaison', 'De', 'Port', 'Vers', 'Port', 'Connecteurs', 'Signal', 'Longueur (m)', 'Alertes']
     const rows = resolveCables(nodes, edges).map((c) => [
       c.edge.data?.cableId,
+      internalRack(racks, c.edge) ? `Interne ${internalRack(racks, c.edge)!.name}` : 'Site',
       c.from?.data.name,
       c.fromPort?.label,
       c.to?.data.name,
@@ -43,12 +46,41 @@ export default function Lists({ project }: { project: Project }) {
       c.issues.map((i) => i.message).join(' / '),
     ])
     return { head, rows }
+  }, [nodes, edges, project.cases])
+
+  const panels = useMemo(() => {
+    const head = ['Bandeau', 'Trou', 'Repère', 'Connecteur', 'Sens', 'Extérieur', 'Intérieur rack']
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    const end = (nodeId: string, port: string) => {
+      const e = cableOn(edges, { node: nodeId, port })
+      if (!e) return ''
+      const o = otherEnd(e, { node: nodeId, port })
+      const n = byId.get(o.node)
+      return `${e.data?.cableId} · ${n?.data.name} [${n?.data.ports.find((p) => p.id === o.port)?.label}]`
+    }
+    const rows = nodes
+      .filter((n) => n.data.panel)
+      .flatMap((n) =>
+        n.data.panel!.holes
+          .map((h, i) => ({ h, i }))
+          .filter(({ h }) => h.connector)
+          .map(({ h, i }) => [
+            n.data.name,
+            i + 1,
+            h.label,
+            CONNECTORS[h.connector!],
+            h.dir === 'in' ? 'Entrée' : h.dir === 'out' ? 'Sortie' : 'Bidir.',
+            end(n.id, extId(h.id)),
+            end(n.id, intId(h.id)),
+          ]),
+      )
+    return { head, rows }
   }, [nodes, edges])
 
   const bom = useMemo(() => {
     const devices = new Map<string, { cat: string; qty: number; weight: number }>()
     for (const n of nodes) {
-      const k = n.data.model
+      const k = n.data.brand ? `${n.data.brand} ${n.data.model}` : n.data.model
       const cur = devices.get(k) ?? { cat: n.data.category, qty: 0, weight: 0 }
       devices.set(k, { cat: cur.cat, qty: cur.qty + 1, weight: cur.weight + (n.data.weight ?? 0) })
     }
@@ -91,6 +123,7 @@ export default function Lists({ project }: { project: Project }) {
     { title: 'Nomenclature', file: 'nomenclature', ...bom },
     { title: 'Plan d’adressage IP', file: 'ip', ...ips },
     { title: 'Patch DMX', file: 'dmx', ...dmx },
+    { title: 'Bandeaux de câblage', file: 'bandeaux', ...panels },
   ]
 
   return (

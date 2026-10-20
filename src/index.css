@@ -263,3 +263,126 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
   main { overflow: visible; }
   .steps li { break-inside: avoid; }
 }
+
+/* ---- Shared bits */
+.small { font-size: 12px; }
+.row.wrap { flex-wrap: wrap; align-items: center; }
+.field.narrow { flex: 0 0 96px; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.seg { display: inline-flex; background: var(--bg); padding: 3px; border-radius: 8px; gap: 2px; }
+.seg button { border: none; background: none; }
+.seg button.active { background: var(--panel); box-shadow: 0 1px 2px #0002; font-weight: 600; }
+.conn-icon { display: block; flex: none; }
+
+/* ---- Palette groups */
+.palette details { margin-top: 8px; }
+.palette summary { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; padding: 4px 0; }
+.palette summary small { color: var(--muted); font-weight: 500; }
+.brand-group .brand { font-size: 11px; font-weight: 700; color: var(--muted); margin: 8px 6px 2px; }
+
+/* ---- Synoptic: patch panels & rack frames */
+.panel-faces { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; margin-top: 2px; }
+.rack-frame {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--frame);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--frame) 5%, transparent);
+  pointer-events: none;
+}
+.react-flow__node-rackFrame { pointer-events: none !important; }
+.frame-head {
+  pointer-events: all;
+  display: inline-block;
+  margin: -2px 0 0 -2px;
+  padding: 4px 12px;
+  background: var(--frame);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 10px 0 10px 0;
+  cursor: grab;
+}
+
+/* ---- Rack builder */
+.page.racks { display: grid; grid-template-columns: 220px 1fr 400px; gap: 20px; max-width: none; align-items: start; }
+.rack-stage, .rack-side { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; min-width: 0; }
+.rack-side { max-height: calc(100vh - 110px); overflow: auto; position: sticky; top: 0; }
+.rack-side section + section { margin-top: 16px; }
+.rack-views { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin: 12px 0; }
+.rack { width: 540px; max-width: 100%; }
+.rack-title { text-align: center; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+.rack-body {
+  position: relative;
+  box-sizing: content-box;
+  background: #0d0d0f;
+  border: 10px solid #3b3f45;
+  border-top-width: 14px;
+  border-bottom-width: 14px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px #000;
+}
+.rack-slot { position: absolute; left: 0; right: 0; border-bottom: 1px solid #1f2024; }
+.rack-slot:hover { background: #ffffff08; }
+.u-num { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #6f6f78; font-family: ui-monospace, monospace; }
+.u-num.right { left: auto; right: 3px; }
+.rack-item {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  align-items: stretch;
+  background: linear-gradient(#2b2d31, #222327);
+  border: 1px solid #44474d;
+  border-left: 4px solid var(--cat);
+  border-radius: 3px;
+  color: #ececee;
+  cursor: grab;
+  overflow: hidden;
+  font-size: 11px;
+}
+.rack-rear .rack-item { background: linear-gradient(#202124, #18191b); }
+.rack-item.selected { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 2; }
+.rack-item .ear { width: 10px; flex: none; background: repeating-linear-gradient(#55585e 0 6px, #2b2d31 6px 20px); opacity: 0.6; }
+.face-front { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 10px; position: relative; min-width: 0; }
+.face-front b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.face-front span { color: #a0a0a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.face-front code { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 10px; }
+.face-front .leds { position: absolute; right: 8px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: #30a46c; box-shadow: 0 0 6px #30a46c; }
+.face-rear { flex: 1; display: flex; align-items: center; gap: 8px; padding: 2px 6px; min-width: 0; }
+.rear-name { color: #a0a0a8; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+.rear-ports { display: flex; flex-wrap: wrap; gap: 2px; align-content: center; flex: 1; min-width: 0; }
+.holes { flex: 1; display: grid; grid-template-columns: repeat(16, 1fr); align-items: center; padding: 1px 2px; min-width: 0; }
+.hole {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: none;
+  color: #ececee;
+  border-radius: 4px;
+  min-width: 0;
+}
+.hole small { font-size: 7px; line-height: 1; white-space: nowrap; overflow: hidden; max-width: 100%; color: #c9ccd1; }
+.hole.picked { border-color: var(--accent); background: #f76b1533; }
+.rack-item.panel { border-left-color: #d6409f; }
+.panel-editor { margin-bottom: 12px; }
+.mini-holes { display: grid; gap: 2px; background: #0d0d0f; padding: 4px; border-radius: 6px; margin: 6px 0; }
+.mini-holes .hole { padding: 1px; }
+.hole-form { background: var(--bg); padding: 10px; border-radius: 8px; margin-top: 6px; }
+.pick-list { max-height: 320px; overflow: auto; margin-top: 6px; }
+.pick-list .palette-item span b { font-weight: 700; }
+table.wiring { font-size: 12px; }
+table.wiring td { padding: 4px 6px; }
+table.wiring select { width: 100%; }
+.port-cell { display: flex; gap: 6px; align-items: center; }
+.port-cell small { display: block; color: var(--muted); font-size: 10px; }
+.external { color: var(--muted); font-size: 11px; }
+.cable-id { color: var(--muted); font-size: 10px; }
+
+@media (max-width: 1300px) {
+  .page.racks { grid-template-columns: 1fr; }
+  .rack-side { position: static; max-height: none; }
+}

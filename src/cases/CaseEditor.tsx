@@ -2,7 +2,8 @@ import { useState, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createCase, download, slug, toCsv } from '../project'
 import type { CaseKind, FlightCase, Project } from '../types'
-import { BannerArt, CaseFront, RackView } from './CaseSvg'
+import RackFace from '../racks/RackFace'
+import { BannerArt, CaseFront } from './CaseSvg'
 import { bannerSize, caseHeightMm } from './geometry'
 
 const KINDS: Record<CaseKind, string> = {
@@ -268,7 +269,8 @@ export default function CaseEditor({ project, setProject }: Props) {
             {fc.kind === 'rack' && (
               <>
                 <h4>Vue rack ouvert</h4>
-                <RackView fc={fc} devices={devices} />
+                <RackFace fc={fc} nodes={nodes} edges={project.edges} side="front" />
+                <p className="muted small">Pour monter et câbler ce rack, ouvrez l’onglet Racks.</p>
               </>
             )}
           </div>

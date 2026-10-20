@@ -1,35 +1,11 @@
-import type { ConnectorType, DeviceTemplate, Port, PortDirection, SignalType } from '../types'
-
-function series(
-  prefix: string,
-  label: string,
-  count: number,
-  connector: ConnectorType,
-  signal: SignalType,
-  dir: PortDirection,
-): Port[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${prefix}${i + 1}`,
-    label: `${label} ${i + 1}`,
-    connector,
-    signal,
-    dir,
-  }))
-}
-
-function port(
-  id: string,
-  label: string,
-  connector: ConnectorType,
-  signal: SignalType,
-  dir: PortDirection,
-): Port {
-  return { id, label, connector, signal, dir }
-}
+import type { DeviceTemplate } from '../types'
+import { CATALOG } from './catalog'
+import { PANEL_TEMPLATES } from './panels'
+import { port, series } from './ports'
 
 const POWER_IN = port('pwr', 'Secteur', 'powercon-true1', 'power', 'in')
 
-export const LIBRARY: DeviceTemplate[] = [
+const GENERIC: DeviceTemplate[] = [
   // ---- Son
   {
     id: 'mic',
@@ -318,7 +294,23 @@ export const LIBRARY: DeviceTemplate[] = [
       ...series('out', 'Sortie', 3, 'powercon-true1', 'power', 'out'),
     ],
   },
+  {
+    id: 'rack-power-1u',
+    model: 'Distribution secteur rack 1U',
+    category: 'Énergie',
+    rackU: 1,
+    weight: 2,
+    ports: [
+      port('in', 'Entrée', 'powercon-true1', 'power', 'in'),
+      port('thru', 'Recopie', 'powercon-true1', 'power', 'out'),
+      ...series('out', 'Sortie TRUE1', 4, 'powercon-true1', 'power', 'out'),
+      ...series('iec', 'Sortie IEC', 4, 'iec', 'power', 'out'),
+    ],
+  },
 ]
+
+/** Generic models first, then the brand catalogue. */
+export const LIBRARY: DeviceTemplate[] = [...GENERIC, ...PANEL_TEMPLATES, ...CATALOG]
 
 export const CATEGORY_COLORS: Record<string, string> = {
   Son: '#e5484d',
@@ -326,6 +318,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Vidéo: '#8e4ec6',
   Réseau: '#0090ff',
   Énergie: '#8b8d98',
+  Câblage: '#d6409f',
   Autre: '#ad7f58',
 }
 

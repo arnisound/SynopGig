@@ -25,6 +25,10 @@ export type ConnectorType =
   | 'p17-16a'
   | 'p17-32a'
   | 'socapex'
+  | 'speakon8'
+  | 'iec'
+  | 'p17-63a'
+  | 'usb'
 
 export type PortDirection = 'in' | 'out' | 'io'
 
@@ -34,6 +38,26 @@ export interface Port {
   connector: ConnectorType
   signal: SignalType
   dir: PortDirection
+  /** Patch panel ports: outside face or inside (rack) face of a hole. */
+  face?: 'ext' | 'int'
+  /** Patch panel ports: id of the other face of the same hole. */
+  pair?: string
+}
+
+/** One D-series hole of a patch panel. */
+export interface PanelHole {
+  id: string
+  label: string
+  /** null = blanking plate. */
+  connector: ConnectorType | null
+  signal: SignalType
+  /** Direction seen from outside the rack. */
+  dir: PortDirection
+}
+
+export interface PanelSpec {
+  heightU: number
+  holes: PanelHole[]
 }
 
 export type Category =
@@ -42,10 +66,12 @@ export type Category =
   | 'Vidéo'
   | 'Réseau'
   | 'Énergie'
+  | 'Câblage'
   | 'Autre'
 
 export interface DeviceTemplate {
   id: string
+  brand?: string
   model: string
   category: Category
   /** Height in rack units, if the device is rackable. */
@@ -53,6 +79,7 @@ export interface DeviceTemplate {
   /** Weight in kg, used for flight case packing. */
   weight?: number
   ports: Port[]
+  panel?: PanelSpec
 }
 
 export interface DeviceConfig {
@@ -73,6 +100,8 @@ export type DeviceData = {
   weight?: number
   ports: Port[]
   config: DeviceConfig
+  brand?: string
+  panel?: PanelSpec
 }
 
 export type DeviceNode = Node<DeviceData, 'device'>
@@ -111,6 +140,8 @@ export interface FlightCase {
   banner: Banner
   /** Device node ids stored in this case. */
   devices: string[]
+  /** Rack cases: top rack unit (1 = top) of each mounted device. */
+  rackLayout?: Record<string, number>
   /** Free items (cables, accessories...). */
   extras: string
 }

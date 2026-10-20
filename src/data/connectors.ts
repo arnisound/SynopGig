@@ -26,6 +26,10 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   'p17-16a': 'P17 16A mono',
   'p17-32a': 'P17 32A tri',
   socapex: 'Socapex 19 pts',
+  speakon8: 'Speakon NL8',
+  iec: 'IEC C14',
+  'p17-63a': 'P17 63A tri',
+  usb: 'USB',
 }
 
 /** Connectors that physically mate together without an adapter. */

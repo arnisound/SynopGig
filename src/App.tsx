@@ -1,18 +1,20 @@
 import { ReactFlowProvider } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CaseEditor from './cases/CaseEditor'
 import { LIBRARY } from './data/library'
 import TechGuide from './guide/TechGuide'
 import Lists from './lists/Lists'
+import RackBuilder from './racks/RackBuilder'
 import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
 import SynopticEditor from './synoptic/SynopticEditor'
 import type { Project } from './types'
 
-type Tab = 'synoptic' | 'guide' | 'lists' | 'cases'
+type Tab = 'synoptic' | 'racks' | 'guide' | 'lists' | 'cases'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'synoptic', label: 'Synoptique' },
+  { id: 'racks', label: 'Racks' },
   { id: 'guide', label: 'Guide technicien' },
   { id: 'lists', label: 'Listes' },
   { id: 'cases', label: 'Flight cases' },
@@ -29,9 +31,47 @@ export default function App() {
     return () => clearTimeout(t)
   }, [project])
 
+  // Undo history: one snapshot per burst of edits, selection changes ignored.
+  const history = useRef<Project[]>([])
+  const committed = useRef(project)
+  const [canUndo, setCanUndo] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (signature(committed.current) === signature(project)) return
+      history.current = [...history.current.slice(-49), committed.current]
+      committed.current = project
+      setCanUndo(true)
+    }, 400)
+    return () => clearTimeout(t)
+  }, [project])
+
+  const undo = useCallback(() => {
+    const prev = history.current.pop()
+    if (!prev) return
+    committed.current = prev
+    setProject(prev)
+    setCanUndo(history.current.length > 0)
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement
+      if (el.closest('input, textarea, select')) return
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [undo])
+
   const templates = useMemo(() => [...LIBRARY, ...project.customTemplates], [project.customTemplates])
 
   const replace = (p: Project) => {
+    history.current = []
+    committed.current = p
+    setCanUndo(false)
     setProject(p)
     setFocus([])
   }
@@ -62,6 +102,7 @@ export default function App() {
           ))}
         </nav>
         <div className="file-actions">
+          <button onClick={undo} disabled={!canUndo} title="Annuler (Ctrl+Z)">↶ Annuler</button>
           <button onClick={() => confirm('Créer un projet vide ? Pensez à exporter le projet actuel.') && replace(emptyProject())}>Nouveau</button>
           <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Démo</button>
           <button onClick={() => fileInput.current?.click()}>Ouvrir</button>
@@ -72,9 +113,10 @@ export default function App() {
       <main>
         {tab === 'synoptic' && (
           <ReactFlowProvider>
-            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} />
+            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} />
           </ReactFlowProvider>
         )}
+        {tab === 'racks' && <RackBuilder project={project} setProject={setProject} templates={templates} />}
         {tab === 'guide' && (
           <TechGuide
             project={project}
@@ -90,4 +132,9 @@ export default function App() {
       </main>
     </div>
   )
+}
+
+/** Project content without view-only state (selection, measured sizes). */
+function signature(p: Project) {
+  return JSON.stringify(p, (k, v) => (k === 'selected' || k === 'measured' || k === 'dragging' ? undefined : v))
 }
