@@ -101,3 +101,58 @@ describe('demo project', () => {
     expect(p.edges.length - internal.length).toBe(9)
   })
 })
+
+describe('wireless and multipin chains', () => {
+  const chain = (links: [string, string, string, string][]) => {
+    const ids = [...new Set(links.flatMap(([a, , b]) => [a, b]))]
+    const nodes = ids.map((id) => createDevice(tpl(id), { x: 0, y: 0 }, []))
+    const byTpl = new Map(nodes.map((n) => [n.data.templateId, n.id]))
+    let p = { ...emptyProject(), nodes }
+    for (const [a, ap, b, bp] of links) {
+      p = connectPorts(p, { node: byTpl.get(a)!, port: ap }, { node: byTpl.get(b)!, port: bp })!
+      expect(p).not.toBeNull()
+    }
+    return resolveCables(p.nodes, p.edges).flatMap((c) => c.issues.map((i) => `${c.fromPort?.label} → ${c.toPort?.label}: ${i.message}`))
+  }
+
+  it('antennas → distributor → receiver', () => {
+    expect(
+      chain([
+        ['shure-ua874', 'out', 'shure-ua844', 'antA'],
+        ['shure-ua860', 'out', 'shure-ua844', 'antB'],
+        ['shure-ua844', 'outA1', 'shure-ad4q', 'antA'],
+        ['shure-ua844', 'outB1', 'shure-ad4q', 'antB'],
+        ['shure-ad4q', 'out1', 'yam-rio1608', 'in1'],
+      ]),
+    ).toEqual([])
+  })
+
+  it('in-ear transmitters → combiner → helical antenna', () => {
+    expect(
+      chain([
+        ['shure-p9t', 'ant', 'shure-pa821', 'in1'],
+        ['senn-sr-iem-g4', 'ant', 'shure-pa821', 'in2'],
+        ['shure-pa821', 'ant', 'rfvenue-cp-beam', 'in'],
+      ]),
+    ).toEqual([])
+  })
+
+  it('stage box → RMP 54p multicore → console fan-out', () => {
+    expect(
+      chain([
+        ['rmp54-box', 'rmp', 'rmp54-fanout-out', 'rmp'],
+        ['rmp54-fanout-out', 'out1', 'yam-cl5', 'in1'],
+      ]),
+    ).toEqual([])
+  })
+
+  it('includes the requested ranges', () => {
+    const has = (brand: string, model: string) => LIBRARY.some((t) => t.brand === brand && t.model.includes(model))
+    expect(has('Roland', 'V-160HD')).toBe(true)
+    expect(has('Panasonic', 'AW-RP150')).toBe(true)
+    expect(has('Fohhn', 'LFI-450')).toBe(true)
+    expect(has('Axiom Pro Audio', 'AX2010A')).toBe(true)
+    expect(has('Agora', 'Ghost G2')).toBe(true)
+    expect(has('Shure', 'UA844')).toBe(true)
+  })
+})

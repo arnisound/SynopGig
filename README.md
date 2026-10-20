@@ -20,15 +20,28 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Option « masquer les ports libres », export PNG du synoptique.
 
 ### Base d'équipements
-- 137 modèles de marque récurrents, plus des modèles génériques : consoles et stageboxes (Yamaha, Midas, Behringer,
-  Allen & Heath, DiGiCo), HF et ears (Shure, Sennheiser), micros et DI, amplis et
-  enceintes (L-Acoustics, d&b, Lab.gruppen, Powersoft, QSC, RCF), consoles lumière
-  (grandMA3, ChamSys, Avolites, ETC), nodes (Luminex, Swisson), automatiques (Robe,
-  Martin, Claypaky, Ayrton, Chauvet, Elation), vidéo (Blackmagic, Barco, Panasonic,
-  Epson, NovaStar, Brompton), réseau (Luminex GigaCore, Netgear) et énergie.
-- Classée par département et par marque, avec recherche. La connectique est
-  indicative : vérifiez la fiche constructeur.
-- Tout équipement modifié peut être enregistré comme nouveau modèle.
+- 305 modèles de marque (69 marques), plus des modèles génériques, classés par
+  département et par marque, avec recherche :
+  - **Consoles** : Yamaha (RIVAGE PM5, CL, QL, TF, DM3, MG), Allen & Heath (dLive, Avantis,
+    SQ, CQ, Qu, ZED), Midas (HD96, PRO2, M32, MR18), Behringer (X32, Wing, XR18), DiGiCo
+    (Quantum, SD, S21), Soundcraft, PreSonus, Avid VENUE S6L, SSL Live ; stageboxes associées.
+  - **Diffusion** : L-Acoustics, d&b, **Fohhn** (Linea Focus, LX, XS, amplis D/DI),
+    **Axiom Pro Audio** (AX2010, AX1012, AX800A, AX2065, SW, ED), Yamaha (DZR, DXS, CZR,
+    PX, XMV), QSC, RCF, Lab.gruppen, Powersoft…
+  - **HF et ears** : Shure, Sennheiser, Audio-Technica, Wisycom, Lectrosonics (récepteurs,
+    émetteurs main et ceinture, ears), **distributeurs et amplificateurs d’antennes,
+    combineurs, commutateur A/B, antennes** directives, omni et hélicoïdales.
+  - **Multipaire RMP 54 pts** (16 voies) : éclatés, boîte de scène, splitter.
+  - **Vidéo** : **Roland** (V-1HD+, V-02HD, V-8HD, V-60HD, V-160HD, VR-6HD, VR-120HD,
+    P-20HD), Blackmagic, **caméras PTZ** (Panasonic, Sony, Canon, BirdDog, PTZOptics) et
+    **pupitres** (AW-RP150/RP60, RM-IP500, RC-IP100, SKAARHOJ…), projecteurs, LED.
+  - **Réseau** : switchs **PoE et fibre** (Luminex GigaCore, Netgear M4250, Yamaha SWR/SWP1,
+    Cisco, Ubiquiti), **Agora Ghost G2**, convertisseurs fibre, injecteur PoE, touret fibre.
+  - Lumière (grandMA3, ChamSys, Avolites, ETC, Robe, Martin, Claypaky…) et énergie.
+- Signal **HF (antenne)** avec connecteurs BNC / N : la chaîne antenne → distributeur →
+  récepteur est vérifiée comme les autres liaisons.
+- La connectique est indicative : vérifiez la fiche constructeur. Tout équipement
+  modifié peut être enregistré comme nouveau modèle.
 
 ### Racks et bandeaux de câblage
 - Onglet **Racks** : vue avant et arrière, glisser-déposer du matériel unité par unité,

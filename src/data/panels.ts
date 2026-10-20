@@ -21,6 +21,8 @@ export const HOLE_TYPES: HoleType[] = [
   { connector: 'speakon8', signal: 'speaker', label: 'Speakon NL8 (HP)' },
   { connector: 'powercon-true1', signal: 'power', label: 'powerCON TRUE1' },
   { connector: 'sdi', signal: 'video', label: 'BNC (SDI / MADI)' },
+  { connector: 'bnc', signal: 'rf', label: 'BNC (antenne HF)' },
+  { connector: 'rmp54', signal: 'audio-analog', label: 'RMP 54 pts (16 voies)' },
   { connector: 'hdmi', signal: 'video', label: 'HDMI' },
   { connector: 'jack', signal: 'audio-analog', label: 'Jack 6.35' },
   { connector: 'usb', signal: 'network', label: 'USB' },

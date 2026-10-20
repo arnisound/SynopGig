@@ -8,6 +8,7 @@ export const SIGNALS: Record<SignalType, { label: string; color: string }> = {
   network: { label: 'Réseau (Dante / Art-Net / sACN)', color: '#0090ff' },
   video: { label: 'Vidéo', color: '#8e4ec6' },
   power: { label: 'Énergie', color: '#8b8d98' },
+  rf: { label: 'HF (antenne)', color: '#12a594' },
 }
 
 export const CONNECTORS: Record<ConnectorType, string> = {
@@ -30,6 +31,11 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   iec: 'IEC C14',
   'p17-63a': 'P17 63A tri',
   usb: 'USB',
+  bnc: 'BNC (HF 50 Ω)',
+  ntype: 'N (HF)',
+  dc: 'Alim DC (bloc)',
+  minijack: 'Mini-jack 3,5',
+  rmp54: 'RMP 54 pts (multipaire 16 voies)',
 }
 
 /** Connectors that physically mate together without an adapter. */

@@ -207,7 +207,11 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     const el = document.querySelector('.react-flow')
     const w = el?.clientWidth ?? 800
     const h = el?.clientHeight ?? 600
-    addAt(t, { x: (w / 2 - x) / zoom - 100, y: (h / 2 - y) / zoom - 60 })
+    const target = { x: (w / 2 - x) / zoom - 100, y: (h / 2 - y) / zoom - 60 }
+    // Successive clicks cascade instead of stacking on the same spot.
+    let k = 0
+    while (k < 20 && nodes.some((n) => Math.abs(n.position.x - (target.x + k * 40)) < 20 && Math.abs(n.position.y - (target.y + k * 40)) < 20)) k++
+    addAt(t, { x: target.x + k * 40, y: target.y + k * 40 })
   }
 
   const selectedNode = nodes.find((n) => n.selected)

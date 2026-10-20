@@ -47,6 +47,8 @@ export default function ConnectorIcon({ connector, signal, size = 24, wired, tit
       face = <path d="M12 6 a6 6 0 1 1 -0.1 0 M12 9 v6" stroke="#c9ccd1" strokeWidth={2} fill="none" />
       break
     case 'sdi':
+    case 'bnc':
+    case 'ntype':
       face = <><circle cx={12} cy={12} r={4.5} fill="none" stroke="#c9ccd1" strokeWidth={2} /><circle cx={12} cy={12} r={1.3} fill="#c9ccd1" /></>
       break
     case 'hdmi':
@@ -55,7 +57,11 @@ export default function ConnectorIcon({ connector, signal, size = 24, wired, tit
     case 'usb':
       face = <rect x={7} y={10} width={10} height={4} rx={1} fill="#c9ccd1" />
       break
+    case 'rmp54':
+      face = <>{pins(8, 6)}{pins(5, 3)}<circle cx={12} cy={12} r={1.2} fill="#c9ccd1" /></>
+      break
     case 'jack':
+    case 'minijack':
       face = <circle cx={12} cy={12} r={3} fill="#111" stroke="#c9ccd1" strokeWidth={1.5} />
       break
     default:

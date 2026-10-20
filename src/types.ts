@@ -8,6 +8,7 @@ export type SignalType =
   | 'network'
   | 'video'
   | 'power'
+  | 'rf'
 
 export type ConnectorType =
   | 'xlr3'
@@ -29,6 +30,11 @@ export type ConnectorType =
   | 'iec'
   | 'p17-63a'
   | 'usb'
+  | 'bnc'
+  | 'ntype'
+  | 'dc'
+  | 'minijack'
+  | 'rmp54'
 
 export type PortDirection = 'in' | 'out' | 'io'
 
