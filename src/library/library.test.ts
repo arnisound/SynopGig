@@ -36,6 +36,16 @@ describe('parseDatasheet', () => {
     ]))
   })
 
+  it('reads SFP cages and Lemo inputs', () => {
+    const r = parseDatasheet(
+      `Network switch
+       Ports: 8 x RJ45, 2 x SFP+ cages
+       Bodypack transmitter input: 1 x Lemo 3-pin`,
+      BRANDS,
+    )
+    expect(short(r)).toEqual(expect.arrayContaining(['2×sfp/network/io', '1×lemo3/audio-analog/in']))
+  })
+
   it('reads a stagebox data sheet', () => {
     const r = parseDatasheet(
       `Yamaha Rio1608-D2 I/O rack

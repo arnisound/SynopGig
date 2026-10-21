@@ -63,9 +63,12 @@ export const FOHHN: DeviceTemplate[] = [
     dev('fohhn-na3', F, 'NA-3 (passerelle Fohhn-Net / Ethernet)', 'Son', { kg: 0.5 }, [net('Ethernet', 'rj45'), ...fnet(), port('pwr', 'Alim DC', 'dc', 'power', 'in')]),
     dev('fohhn-na11', F, 'NA-11 (interface USB / Fohhn-Net)', 'Son', { kg: 0.2 }, [port('usb', 'USB (PC)', 'usb', NET, 'io'), port('fnetRj', 'Fohhn-Net RJ45', 'rj45', 'control', 'io'), port('fnetXlr', 'Fohhn-Net XLR', 'xlr3', 'control', 'io')]),
     dev('fohhn-abx5', F, 'ABX-5 (pont Dante / Airea / AES)', 'Son', { kg: 0.8 }, [port('pri', 'Dante primaire', 'rj45', NET, 'io'), port('sec', 'Dante secondaire', 'rj45', NET, 'io'), port('airea', 'Fohhn Airea', 'rj45', NET, 'io'), ...series('aes', 'Sortie AES/EBU', 2, 'xlr3', AES, 'out'), ...fnet()]),
-    dev('fohhn-abx6', F, 'ABX-6 (breakout Dante 8 canaux, SFP)', 'Son', { kg: 1 }, [port('pri', 'Dante primaire', 'rj45', NET, 'io'), port('sec', 'Dante secondaire', 'rj45', NET, 'io'), port('sfpA', 'SFP A', 'lc-fiber', NET, 'io'), port('sfpB', 'SFP B', 'lc-fiber', NET, 'io'), ...series('aes', 'Sortie AES/EBU', 4, 'xlr3', AES, 'out'), ...fnet()]),
+    dev('fohhn-abx6', F, 'ABX-6 (breakout Dante 8 canaux, SFP)', 'Son', { kg: 1 }, [port('pri', 'Dante primaire', 'rj45', NET, 'io'), port('sec', 'Dante secondaire', 'rj45', NET, 'io'), port('sfpA', 'SFP A', 'sfp', NET, 'io'), port('sfpB', 'SFP B', 'sfp', NET, 'io'), ...series('aes', 'Sortie AES/EBU', 4, 'xlr3', AES, 'out'), ...fnet()]),
   ]),
   ...family('Line arrays & colonnes', [
+    // Focus Venue: beam-steering concert system, modules stacked or flown straight.
+    dev('fohhn-fv100', F, 'Focus Venue FV-100 (module aigu actif, beam steering, 16 × 220 W)', 'Son', {}, [...dli(), port('opto', 'Optocore (option)', 'opticalcon', AES, 'io')]),
+    dev('fohhn-fv200', F, 'Focus Venue FV-200 (module bas-médium actif, 8 × 10", 4 × 1000 W)', 'Son', {}, [...dli(), port('opto', 'Optocore (option)', 'opticalcon', AES, 'io')]),
     dev('fohhn-lfi120', F, 'Linea Focus LFI-120 (colonne orientable active 8 × 4")', 'Son', { kg: 14 }, steer()),
     dev('fohhn-lfi220', F, 'Linea Focus LFI-220 (colonne orientable active 16 × 4")', 'Son', { kg: 22 }, steer()),
     dev('fohhn-lfi350', F, 'Linea Focus LFI-350 (colonne orientable active 24 × 4")', 'Son', { kg: 31 }, steer()),
@@ -103,6 +106,10 @@ export const FOHHN: DeviceTemplate[] = [
     dev('fohhn-xm4', F, 'XM-4 (retour de scène passif 12" + 1,4")', 'Son', { kg: 19 }, hpIn()),
   ]),
   ...family('Subs', [
+    dev('fohhn-ps400', F, 'PS-400 (sub 1 × 18", Focus Venue)', 'Son', {}, hpIn()),
+    dev('fohhn-ps450', F, 'PS-450 (sub 2 × 18", Focus Venue)', 'Son', {}, hpIn()),
+    dev('fohhn-ps800', F, 'PS-800 (sub passif, Focus Venue)', 'Son', {}, hpIn()),
+    dev('fohhn-ps850', F, 'PS-850 (sub passif 2 × 18", Speakon avant et arrière pour cardio)', 'Son', {}, [...hpIn(), port('inRear', 'Entrée HP arrière', 'speakon', HP, 'in'), port('linkRear', 'Link HP arrière', 'speakon', HP, 'out')]),
     dev('fohhn-xs10', F, 'XS-10 (sub passif)', 'Son', { kg: 30 }, hpIn()),
     dev('fohhn-xs20', F, 'XS-20 (sub passif)', 'Son', { kg: 35 }, hpIn()),
     dev('fohhn-xs22', F, 'XS-22 (sub actif 12")', 'Son', { kg: 25 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), ...series('hp', 'Sortie satellite', 2, 'speakon', HP, 'out'), ...fnet(), iec()]),

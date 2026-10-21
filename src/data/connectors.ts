@@ -53,6 +53,11 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   'usb-c': 'USB-C',
   'lc-fiber': 'Fibre LC duplex',
   'smpte-fiber': 'Fibre SMPTE 311 (caméra)',
+  sfp: 'Cage SFP / SFP+ (module fibre)',
+  lemo3: 'Lemo 3 broches (émetteur HF)',
+  'ca-com': 'CA-COM 19 pts (L-Acoustics)',
+  harting: 'Multibroche Harting',
+  'p17-32a-mono': 'P17 32A mono',
 }
 
 /** Connectors that physically mate together without an adapter. */
@@ -62,6 +67,8 @@ const MATING: ConnectorType[][] = [
   // A combo socket takes either an XLR or a jack plug.
   ['xlr-combo', 'xlr3'],
   ['xlr-combo', 'jack'],
+  // A fibre with LC plugs goes into the SFP module of the cage.
+  ['sfp', 'lc-fiber'],
 ]
 
 function mates(a: ConnectorType, b: ConnectorType) {

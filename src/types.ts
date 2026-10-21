@@ -52,6 +52,11 @@ export type ConnectorType =
   | 'usb-c'
   | 'lc-fiber'
   | 'smpte-fiber'
+  | 'sfp'
+  | 'lemo3'
+  | 'ca-com'
+  | 'harting'
+  | 'p17-32a-mono'
 
 export type PortDirection = 'in' | 'out' | 'io'
 

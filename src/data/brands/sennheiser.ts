@@ -10,7 +10,7 @@ const P48 = 'Sortie (48 V)'
 const mic = (id: string, model: string, kg: number, label = 'Sortie') => dev(id, S, model, 'Son', { kg }, xlrOut(label))
 // Bodypack transmitter: 3-pin jack 3.5 mm (ew) or Lemo 3 pins (Digital 6000/9000).
 const jackIn = (label = 'Entrée micro (jack 3,5 mm)'): Port[] => [port('mic', label, 'minijack', A, 'in')]
-const lemoIn = () => jackIn('Entrée micro (Lemo 3 broches)')
+const lemoIn = (): Port[] => [port('mic', 'Entrée micro (Lemo 3 broches)', 'lemo3', A, 'in')]
 // Lavalier / headset with its 3.5 mm jack or Lemo plug.
 const lav = (id: string, model: string, kg = 0.02) =>
   dev(id, S, model, 'Son', { kg }, [port('out', 'Sortie (jack 3,5 mm ou Lemo selon version)', 'minijack', A, 'out')])

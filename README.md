@@ -20,7 +20,7 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Option « masquer les ports libres », export PNG du synoptique.
 
 ### Base d'équipements
-- 1 359 modèles de marque (72 marques), plus des modèles génériques. La palette est triée
+- 1 371 modèles de marque (73 marques), plus des modèles génériques. La palette est triée
   par département, puis par **famille** (consoles, stageboxes, HF, antennes, line arrays,
   subs, lyres, PTZ, switchs…), puis par marque, avec recherche et filtre par marque :
   - **Consoles** : Yamaha (RIVAGE PM5, CL, QL, TF, DM3, MG), Allen & Heath (dLive, Avantis,
@@ -33,7 +33,7 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
     Digital, ULX-D, SLX-D, QLX-D, BLX, GLX-D, PSM, antennes, Microflex), **Sennheiser** (163 :
     micros, Digital 6000/9000, Spectera, EW-DX, EW-D, G4, 2000, IEM), **L-Acoustics** (70),
     **d&b audiotechnik** (83), **NEXO** (66), **Electro-Voice** (109), **Adamson** (29),
-    **Fohhn** (54), **Axiom Pro Audio** (44).
+    **Fohhn** (60, dont Focus Venue FV-100 / FV-200 et subs PS), **Axiom Pro Audio** (44).
   - **HF et ears** : Shure, Sennheiser, Audio-Technica, Wisycom, Lectrosonics (récepteurs,
     émetteurs main et ceinture, ears), **distributeurs et amplificateurs d’antennes,
     combineurs, commutateur A/B, antennes** directives, omni et hélicoïdales.
@@ -47,7 +47,9 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Connectique : XLR 3/4/5, combo XLR/jack, mini-XLR, jack, mini-jack, RCA, Toslink/ADAT,
   MIDI, Speakon NL4/NL8, bornes HP, bornier Euroblock, etherCON/RJ45, opticalCON, fibre LC
   et SMPTE, BNC, SDI, HDMI, DisplayPort, DVI, VGA, USB/USB-C, Sub-D 9/25, RMP 54, powerCON,
-  IEC, P17, Socapex… Un combo accepte une fiche XLR ou jack sans alerte d’adaptateur.
+  IEC, P17 (dont 32A mono), Socapex, cage SFP / SFP+, Lemo 3 broches (émetteurs HF), CA-COM
+  (L-Acoustics), multibroche Harting… Un combo accepte une fiche XLR ou jack, une cage SFP une
+  fibre LC, sans alerte d’adaptateur.
 - Signal **HF (antenne)** avec connecteurs BNC / N : la chaîne antenne → distributeur →
   récepteur est vérifiée comme les autres liaisons.
 - La connectique est indicative : vérifiez la fiche constructeur. Tout équipement

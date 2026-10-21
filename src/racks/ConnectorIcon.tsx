@@ -100,6 +100,19 @@ export default function ConnectorIcon({ connector, signal, size = 24, wired, tit
     case 'smpte-fiber':
       face = <>{[9, 15].map((x) => <rect key={x} x={x - 2} y={10} width={4} height={4} fill="#ffc53d" />)}</>
       break
+    case 'sfp':
+      face = <><rect x={6} y={9} width={12} height={6} rx={1} fill="none" stroke="#c9ccd1" strokeWidth={1.6} />{[10, 14].map((x) => <rect key={x} x={x - 1} y={11} width={2} height={2} fill="#ffc53d" />)}</>
+      break
+    case 'lemo3':
+      face = <><circle cx={12} cy={12} r={3.5} fill="none" stroke="#c9ccd1" strokeWidth={1.2} />{pins(3, 1.8)}</>
+      break
+    case 'ca-com':
+    case 'harting':
+      face = <><rect x={5} y={8} width={14} height={8} rx={1.5} fill="none" stroke="#c9ccd1" strokeWidth={1.6} />{[8, 11, 14, 17].map((x) => <circle key={x} cx={x - 0.5} cy={12} r={1} fill="#c9ccd1" />)}</>
+      break
+    case 'p17-32a-mono':
+      face = <>{pins(3, 5)}<circle cx={12} cy={12} r={8} fill="none" stroke="#3e7bfa" strokeWidth={1.5} /></>
+      break
     case 'jack':
     case 'minijack':
       face = <circle cx={12} cy={12} r={3} fill="#111" stroke="#c9ccd1" strokeWidth={1.5} />
