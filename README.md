@@ -47,7 +47,7 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
     Digital, ULX-D, SLX-D, QLX-D, BLX, GLX-D, PSM, antennes, Microflex), **Sennheiser** (163 :
     micros, Digital 6000/9000, Spectera, EW-DX, EW-D, G4, 2000, IEM), **L-Acoustics** (70),
     **d&b audiotechnik** (83), **NEXO** (66), **Electro-Voice** (109), **Adamson** (29),
-    **Fohhn** (60, dont Focus Venue FV-100 / FV-200 et subs PS), **Axiom Pro Audio** (44).
+    **Fohhn** (64, dont Focus Venue FV-100 / FV-200, subs PS et boîtiers ABX-1 à ABX-6), **Axiom Pro Audio** (44).
   - **HF et ears** : Shure, Sennheiser, Audio-Technica, Wisycom, Lectrosonics (récepteurs,
     émetteurs main et ceinture, ears), **distributeurs et amplificateurs d’antennes,
     combineurs, commutateur A/B, antennes** directives, omni et hélicoïdales.
