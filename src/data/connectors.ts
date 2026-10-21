@@ -1,4 +1,4 @@
-import type { ConnectorType, Port, SignalType } from '../types'
+import type { ConnectorType, Port, SignalType } from '../types.ts'
 
 export const SIGNALS: Record<SignalType, { label: string; color: string }> = {
   'audio-analog': { label: 'Audio analogique', color: '#e5484d' },

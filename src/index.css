@@ -414,3 +414,9 @@ table.groups td:nth-child(2) { width: 70px; }
 .evidence .doubt { color: #fff; background: var(--accent); padding: 0 6px; border-radius: 8px; font-weight: 600; }
 .evidence .sure { color: var(--ok); font-weight: 600; }
 @media (max-width: 1000px) { .page.library { grid-template-columns: 1fr; } }
+.modes { margin: 6px 0 4px; flex-wrap: wrap; }
+.field.wide { flex: 0 0 180px; }
+.suggestions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 0; }
+.suggestions button { font-size: 12px; padding: 3px 8px; border-style: dashed; }
+.evidence .ai { color: #fff; background: #8e4ec6; padding: 0 6px; border-radius: 8px; font-weight: 600; }
+.card a { color: var(--accent); }

@@ -1,4 +1,4 @@
-import type { ConnectorType, Port, PortDirection, SignalType } from '../types'
+import type { ConnectorType, Port, PortDirection, SignalType } from '../types.ts'
 
 /** A run of identical ports, e.g. "In" × 16 XLR inputs. */
 export interface PortGroup {

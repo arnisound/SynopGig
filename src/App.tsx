@@ -5,6 +5,7 @@ import CaseEditor from './cases/CaseEditor'
 import { LIBRARY } from './data/library'
 import TechGuide from './guide/TechGuide'
 import LibraryPage from './library/LibraryPage'
+import { useUserLibrary } from './library/useUserLibrary'
 import Lists from './lists/Lists'
 import RackBuilder from './racks/RackBuilder'
 import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
@@ -68,7 +69,8 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [undo])
 
-  const templates = useMemo(() => [...LIBRARY, ...project.customTemplates], [project.customTemplates])
+  const userLibrary = useUserLibrary()
+  const templates = useMemo(() => [...LIBRARY, ...userLibrary.templates, ...project.customTemplates], [userLibrary.templates, project.customTemplates])
 
   // The personal library follows the user from one project to the next.
   const replace = (incoming: Project) => {
@@ -134,7 +136,7 @@ export default function App() {
         )}
         {tab === 'lists' && <Lists project={project} />}
         {tab === 'cases' && <CaseEditor project={project} setProject={setProject} />}
-        {tab === 'library' && <LibraryPage project={project} setProject={setProject} />}
+        {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} />}
       </main>
     </div>
   )

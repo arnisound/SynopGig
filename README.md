@@ -48,19 +48,26 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - La connectique est indicative : vérifiez la fiche constructeur. Tout équipement
   modifié peut être enregistré comme nouveau modèle.
 
-### Bibliothèque perso (onglet Bibliothèque)
+### Bibliothèque (onglet Bibliothèque)
 - **Ajout manuel** : marque, modèle, département, famille, U, poids et connectique saisie
-  par groupes (« 16 × XLR entrées »).
-- **Analyse de fiche technique**, gratuite et hors ligne : un PDF est lu dans le navigateur
-  (pdf.js), ou bien on colle le texte des caractéristiques. L’outil repère la marque, le
-  modèle, les connecteurs (nombre et sens), la hauteur en U et le poids, et pré-remplit la
-  fiche ; chaque ligne détectée affiche le passage lu pour vérification. Les quantités ne
-  sont lues que si elles sont explicites (« 4 x XLR », « 16 inputs », « Inputs 1-4 ») :
-  les mesures (gain, impédance, réponse…) ne deviennent jamais des ports. Une ligne dont la
-  quantité est devinée ou contradictoire est marquée « à vérifier ».
-- **Partir d’un modèle existant** pour le copier et le modifier.
-- Les modèles perso apparaissent dans la palette (« Mes modèles »), restent d’un projet à
-  l’autre, et s’exportent / s’importent en JSON.
+  par groupes (« 16 × XLR entrées »), ou copie d’un modèle existant.
+- **Analyse de fiche technique** (PDF ou texte collé), trois modes au choix :
+  - **Analyse rapide** (règles, instantanée) : ne garde que les quantités écrites
+    (« 4 x XLR », « 16 inputs », « Inputs 1-4 ») ; les connecteurs cités sans quantité
+    sont proposés en suggestions à ajouter d’un clic.
+  - **IA locale gratuite** : un modèle Qwen 2.5 (0,5 / 1,5 / 3 B) tourne dans le
+    navigateur via WebLLM (WebGPU : Chrome ou Edge sur ordinateur). Téléchargé une fois,
+    privé, sans compte.
+  - **IA Gemini** avec une clé gratuite (aistudio.google.com/apikey), gardée dans le
+    navigateur : lit le PDF directement, meilleur résultat.
+  Les réponses de l’IA sont revérifiées (codes connus, quantités plafonnées) et restent
+  à relire avant d’enregistrer.
+- **Ma bibliothèque** : modèles perso dans la palette (« Mes modèles »), gardés d’un projet
+  à l’autre, export / import JSON.
+- **Bibliothèque USER** (partagée) : « Partager dans la bibliothèque USER » ouvre une issue
+  GitHub pré-remplie avec votre pseudo ; le workflow `user-library.yml` la valide et l’ajoute
+  à `public/user-library.json`, que toutes les copies de l’application chargent au
+  démarrage (palette : « Bibliothèque USER », avec le pseudo du créateur).
 
 ### Racks et bandeaux de câblage
 - Onglet **Racks** : vue avant et arrière, glisser-déposer du matériel unité par unité,

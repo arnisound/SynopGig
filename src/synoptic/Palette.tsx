@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CATEGORY_COLORS, FAMILY_ORDER } from '../data/library'
+import { USER_FAMILY } from '../library/userLibrary'
 import type { DeviceTemplate } from '../types'
 
 export const DND_TYPE = 'application/x-synopgig-template'
@@ -14,7 +15,7 @@ interface Props {
 
 const rank = (family: string) => {
   const i = FAMILY_ORDER.indexOf(family)
-  return family === MINE ? -1 : i < 0 ? 999 : i
+  return family === MINE ? -2 : family === USER_FAMILY ? -1 : i < 0 ? 999 : i
 }
 
 function byBrand(list: DeviceTemplate[]) {
@@ -35,7 +36,7 @@ export default function Palette({ templates, onAdd }: Props) {
     for (const t of templates) {
       if (brand && t.brand !== brand) continue
       if (q && !`${t.brand ?? ''} ${t.model} ${t.category} ${t.family ?? ''}`.toLowerCase().includes(q)) continue
-      const family = t.id.startsWith('custom-') ? MINE : (t.family ?? 'Divers')
+      const family = t.id.startsWith('custom-') ? MINE : t.id.startsWith('user-') ? USER_FAMILY : (t.family ?? 'Divers')
       const fams = cats.get(t.category) ?? new Map<string, DeviceTemplate[]>()
       fams.set(family, [...(fams.get(family) ?? []), t])
       cats.set(t.category, fams)
@@ -93,6 +94,7 @@ export default function Palette({ templates, onAdd }: Props) {
                       <small>
                         {t.panel ? `${t.panel.holes.filter((h) => h.connector).length} connecteurs` : `${t.ports.length} ports`}
                         {t.rackU ? ` · ${t.rackU}U` : ''}
+                        {t.author ? ` · par ${t.author}` : ''}
                       </small>
                     </button>
                   ))}
