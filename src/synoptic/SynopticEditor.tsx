@@ -10,24 +10,29 @@ import {
   getNodesBounds,
   getViewportForBounds,
   useReactFlow,
+  useStore,
+  type ReactFlowState,
   type Connection,
   type EdgeChange,
   type NodeChange,
 } from '@xyflow/react'
 import { toPng } from 'html-to-image'
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
-import { SIGNALS } from '../data/connectors'
+import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { connectPorts, createCase, createDevice, resolveCables, setPanel, slug, uid } from '../project'
 import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
+import CableEdgeView, { type CableFlowEdge } from './CableEdgeView'
 import DeviceNodeView from './DeviceNodeView'
+import { allocateLanes, type CableEnds } from './lanes'
 import RackFrameView, { type FrameNode } from './RackFrameView'
-import { DEFAULT_VIEW, viewOf, visibleParts } from './view'
+import { cableColor, DEFAULT_VIEW, viewOf, visibleParts } from './view'
 import { ViewContext } from './viewContext'
 import Inspector from './Inspector'
 import Palette, { DND_TYPE } from './Palette'
 
 const nodeTypes = { device: DeviceNodeView, rackFrame: RackFrameView }
+const edgeTypes = { cable: CableEdgeView }
 
 const DEPARTMENTS: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie']
 
@@ -52,16 +57,55 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const parts = useMemo(() => visibleParts(project, view), [project, view])
 
   // "Isolate the selection": the selected devices, their cables and what they reach.
+  const [hoverEdge, setHoverEdge] = useState<string>()
+
+  // Isolation: the selected devices or cables, and what they reach; a hovered cable alone.
   const isolated = useMemo(() => {
-    const sel = nodes.filter((n) => n.selected).map((n) => n.id)
-    if (!view.focusSelection || sel.length === 0) return undefined
-    const set = new Set(sel)
-    const cablesIn = new Set<string>()
-    for (const e of edges) if (set.has(e.source) || set.has(e.target)) cablesIn.add(e.id)
+    if (hoverEdge) {
+      const e = edges.find((x) => x.id === hoverEdge)
+      if (e) return { nodes: new Set([e.source, e.target]), edges: new Set([e.id]) }
+    }
+    if (!view.focusSelection) return undefined
+    const sel = new Set(nodes.filter((n) => n.selected).map((n) => n.id))
+    const selEdges = edges.filter((e) => e.selected)
+    if (sel.size === 0 && selEdges.length === 0) return undefined
+    const cablesIn = new Set(selEdges.map((e) => e.id))
+    for (const e of edges) if (sel.has(e.source) || sel.has(e.target)) cablesIn.add(e.id)
     const reach = new Set(sel)
     for (const e of edges) if (cablesIn.has(e.id)) reach.add(e.source).add(e.target)
     return { nodes: reach, edges: cablesIn }
-  }, [nodes, edges, view.focusSelection])
+  }, [nodes, edges, view.focusSelection, hoverEdge])
+
+  // Port positions on screen, as measured by React Flow (a string, so it only changes when they move).
+  const endsKey = useStore(
+    useCallback(
+      (s: ReactFlowState) =>
+        edges
+          .map((e) => {
+            const at = (node: string, handle?: string | null) => {
+              const n = s.nodeLookup.get(node)
+              const h = n?.internals.handleBounds?.source?.find((x) => x.id === handle)
+              if (!n || !h) return undefined
+              return [Math.round(n.internals.positionAbsolute.x + h.x + h.width / 2), Math.round(n.internals.positionAbsolute.y + h.y + h.height / 2), h.position]
+            }
+            const a = at(e.source, e.sourceHandle)
+            const b = at(e.target, e.targetHandle)
+            return a && b ? [e.id, ...a, ...b].join(',') : ''
+          })
+          .join(';'),
+      [edges],
+    ),
+  )
+  const lanes = useMemo(() => {
+    const ends: CableEnds[] = endsKey
+      .split(';')
+      .filter(Boolean)
+      .map((r) => {
+        const [id, sx, sy, sp, tx, ty, tp] = r.split(',')
+        return { id, sx: +sx, sy: +sy, sp: sp as CableEnds['sp'], tx: +tx, ty: +ty, tp: tp as CableEnds['tp'] }
+      })
+    return allocateLanes(ends)
+  }, [endsKey])
 
   const cables = useMemo(() => resolveCables(nodes, edges), [nodes, edges])
   const cableByEdge = useMemo(() => new Map(cables.map((c) => [c.edge.id, c])), [cables])
@@ -99,35 +143,56 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   }, [focus])
 
   const viewEdges = useMemo(
-    () =>
-      edges.map((e) => {
+    (): CableFlowEdge[] =>
+      edges.map((e, i) => {
         const c = cableByEdge.get(e.id)
-        const color = c?.fromPort ? SIGNALS[c.fromPort.signal].color : '#888'
-        const danger = c?.issues.some((i) => i.severity === 'danger')
+        const signal = c?.fromPort ? SIGNALS[c.fromPort.signal].color : '#888'
+        const color = view.colorMode === 'cable' ? cableColor(i) : signal
+        const danger = c?.issues.some((x) => x.severity === 'danger')
         const warn = (c?.issues.length ?? 0) > 0
-        const lit = highlight.has(e.id)
-        const faded = isolated && !isolated.edges.has(e.id)
-        const tag = view.labels === 'none' ? '' : `${e.data?.cableId ?? ''}${view.labels === 'full' && e.data?.length ? ` · ${e.data.length} m` : ''}`
+        const lit = highlight.has(e.id) || hoverEdge === e.id
+        const faded = !!isolated && !isolated.edges.has(e.id)
+        const id = e.data?.cableId ?? ''
+        const text = view.labels === 'none' ? '' : `${id}${view.labels === 'full' && e.data?.length ? ` · ${e.data.length} m` : ''}`
+        const lane = view.lanes ? lanes.get(e.id) : undefined
+        const title = [
+          `${id} — ${c?.from?.data.name ?? '?'} [${c?.fromPort?.label ?? '?'}] → ${c?.to?.data.name ?? '?'} [${c?.toPort?.label ?? '?'}]`,
+          [c?.fromPort && CONNECTORS[c.fromPort.connector], c?.fromPort && SIGNALS[c.fromPort.signal].label, e.data?.length && `${e.data.length} m`].filter(Boolean).join(' · '),
+          e.data?.note,
+          ...(c?.issues.map((x) => `⚠ ${x.message}`) ?? []),
+        ]
+          .filter(Boolean)
+          .join('\n')
         return {
           ...e,
-          type: view.edgeStyle,
+          type: 'cable',
           hidden: !parts.edgeIds.has(e.id),
           animated: lit || (view.flow && !faded),
-          label: faded ? undefined : `${tag}${warn && view.labels !== 'none' ? ' ⚠' : ''}` || undefined,
-          labelStyle: { fill: danger ? '#e5484d' : warn ? '#f76b15' : 'var(--text)', fontWeight: 600, fontSize: 11 },
-          labelBgStyle: { fill: 'var(--panel)' },
-          labelBgPadding: [4, 2] as [number, number],
+          zIndex: lit || e.selected ? 10 : 0,
           markerEnd: { type: MarkerType.ArrowClosed, color },
+          data: {
+            ...(e.data ?? { cableId: '' }),
+            style: view.edgeStyle,
+            centerX: lane?.centerX,
+            offset: lane?.offset ?? 20,
+            color,
+            tag: id,
+            label: `${text}${warn && view.labels !== 'none' ? ' ⚠' : ''}` || undefined,
+            labelColor: danger ? '#e5484d' : warn ? '#f76b15' : 'var(--text)',
+            endTags: view.endTags,
+            title,
+            faded,
+          },
           style: {
             stroke: color,
             strokeWidth: e.selected || lit ? view.thickness + 2 : view.thickness,
             strokeDasharray: warn ? '6 4' : undefined,
             filter: danger ? 'drop-shadow(0 0 3px #e5484d)' : undefined,
-            opacity: faded ? 0.12 : 1,
+            opacity: faded ? 0.08 : 1,
           },
         }
       }),
-    [edges, cableByEdge, highlight, view.edgeStyle, view.labels, view.thickness, view.flow, parts, isolated],
+    [edges, cableByEdge, highlight, hoverEdge, view.edgeStyle, view.labels, view.thickness, view.flow, view.colorMode, view.lanes, view.endTags, lanes, parts, isolated],
   )
 
   const viewNodes = useMemo(
@@ -282,6 +347,21 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       }
     })
 
+  // Finding a cable by its tag selects it, isolates it and frames its two ends.
+  const [find, setFind] = useState('')
+  const findCable = (v: string) => {
+    setFind(v)
+    const e = edges.find((x) => (x.data?.cableId ?? '').toLowerCase() === v.trim().toLowerCase())
+    if (!e) return
+    setProject((p) => ({
+      ...p,
+      nodes: p.nodes.map((n) => (n.selected ? { ...n, selected: false } : n)),
+      edges: p.edges.map((x) => (x.id === e.id ? { ...x, selected: true } : x.selected ? { ...x, selected: false } : x)),
+      view: { ...viewOf(p), focusSelection: true, hiddenSignals: [], department: 'all' },
+    }))
+    setTimeout(() => fitView({ nodes: [{ id: e.source }, { id: e.target }], duration: 500, padding: 0.3 }), 30)
+  }
+
   const issueCount = cables.filter((c) => c.issues.length > 0).length
 
   return (
@@ -302,6 +382,12 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           {nodes.some((n) => n.selected) && (
             <button onClick={createRackFromSelection}>Créer un rack avec la sélection</button>
           )}
+          <input className="cable-find" list="cable-ids" placeholder="Trouver un câble (C012)…" value={find} onChange={(e) => findCable(e.target.value)} />
+          <datalist id="cable-ids">
+            {cables.map((c) => (
+              <option key={c.edge.id} value={c.edge.data?.cableId}>{`${c.from?.data.name ?? '?'} → ${c.to?.data.name ?? '?'}`}</option>
+            ))}
+          </datalist>
           <button onClick={exportPng}>Exporter PNG</button>
           <button onClick={() => fitView({ duration: 400 })}>Tout voir</button>
         </div>
@@ -335,9 +421,18 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
               <span>Épaisseur des câbles</span>
               <input type="range" min={1} max={6} step={0.5} value={view.thickness} onChange={(e) => setView({ thickness: Number(e.target.value) })} />
             </label>
-            <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler l’appareil sélectionné</label>
+            <label className="field">
+              <span>Couleur des câbles</span>
+              <select value={view.colorMode} onChange={(e) => setView({ colorMode: e.target.value as SynopticView['colorMode'] })}>
+                <option value="signal">Selon le signal</option>
+                <option value="cable">Une couleur par câble</option>
+              </select>
+            </label>
+            <label className="toggle"><input type="checkbox" checked={view.lanes} onChange={(e) => setView({ lanes: e.target.checked })} /> Séparer les tracés (aucun segment commun)</label>
+            <label className="toggle"><input type="checkbox" checked={view.endTags} onChange={(e) => setView({ endTags: e.target.checked })} /> Repère aux deux extrémités</label>
+            <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler la sélection (appareil ou câble)</label>
             <label className="toggle"><input type="checkbox" checked={view.flow} onChange={(e) => setView({ flow: e.target.checked })} /> Animer le sens du signal</label>
-            <p className="muted small">Cliquez sur un signal de la légende pour masquer ou afficher ses câbles.</p>
+            <p className="muted small">Survolez un câble pour l’isoler et lire où il va. Cliquez sur un signal de la légende pour masquer ou afficher ses câbles.</p>
             <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser l’affichage</button>
           </div>
         )}
@@ -346,6 +441,9 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
             nodes={[...frames, ...viewNodes] as FlowNode[]}
             edges={viewEdges}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            onEdgeMouseEnter={(_, e) => setHoverEdge(e.id)}
+            onEdgeMouseLeave={() => setHoverEdge(undefined)}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}

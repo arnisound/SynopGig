@@ -96,7 +96,7 @@ export default function Dossier({ project, sections, printedOn }: { project: Pro
       {has('synoptic') && (
         <section className="d-page">
           <h2>Synoptique</h2>
-          <SynopticSvg project={project} usedOnly={view.compact} nodeIds={parts.nodeIds} edgeIds={parts.edgeIds} />
+          <SynopticSvg project={project} usedOnly={view.compact} nodeIds={parts.nodeIds} edgeIds={parts.edgeIds} colorByCable={view.colorMode === 'cable'} endTags={view.endTags} />
           <div className="d-legend">
             {Object.values(SIGNALS).map((s) => <span key={s.label}><i style={{ background: s.color }} />{s.label}</span>)}
           </div>
@@ -109,7 +109,7 @@ export default function Dossier({ project, sections, printedOn }: { project: Pro
           return (
             <section key={d} className="d-page">
               <h2>Synoptique — {d}</h2>
-              <SynopticSvg project={project} usedOnly nodeIds={p.nodeIds} edgeIds={p.edgeIds} />
+              <SynopticSvg project={project} usedOnly nodeIds={p.nodeIds} edgeIds={p.edgeIds} colorByCable={view.colorMode === 'cable'} endTags={view.endTags} />
             </section>
           )
         })}

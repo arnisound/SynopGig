@@ -20,9 +20,14 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - **Options d’affichage** (bouton « Affichage », enregistrées avec chaque projet) : un seul
   département (son, lumière, vidéo, réseau, énergie, avec en grisé ce qui y est branché),
   tracé des câbles (angles arrondis, angles droits, courbes, lignes droites), étiquettes
-  (repère et longueur, repère seul, aucune), épaisseur, isolement de l’appareil sélectionné,
-  animation du sens du signal, ports libres masqués. Un clic sur un signal de la légende
-  masque ou affiche ses câbles.
+  (repère et longueur, repère seul, aucune), épaisseur, couleur par signal ou **une couleur
+  par câble**, **tracés séparés** (chaque câble a son propre couloir, aucun segment commun),
+  **repère aux deux extrémités**, isolement de la sélection (appareil ou câble), animation
+  du sens du signal, ports libres masqués. Un clic sur un signal de la légende masque ou
+  affiche ses câbles.
+- **Chaque câble s’isole** : au survol il ressort seul, avec une bulle « C012 — Console
+  [Out 1] → Ampli [In 1] · XLR · 10 m » ; « Trouver un câble » le sélectionne par son repère,
+  l’isole et cadre ses deux extrémités.
 - Export PNG du synoptique.
 
 ### Base d'équipements

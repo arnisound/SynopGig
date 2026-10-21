@@ -514,3 +514,24 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
   .d-detail { color: #444; white-space: pre-line; }
   .d-warn { color: #b54708; }
 }
+
+/* ---- Cables */
+.cable-label, .cable-end-tag {
+  position: absolute;
+  pointer-events: none;
+  background: var(--panel);
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  white-space: nowrap;
+  color: var(--text);
+}
+.cable-label { font-size: 11px; }
+.cable-label.selected { box-shadow: 0 0 0 2px var(--accent); }
+.cable-end-tag { font-size: 9px; line-height: 13px; }
+.cable-find { width: 150px; }
+/* Labels stay above cables raised on hover or selection. */
+.react-flow__edgelabel-renderer { z-index: 20; }

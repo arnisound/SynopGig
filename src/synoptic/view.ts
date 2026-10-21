@@ -7,10 +7,16 @@ export const DEFAULT_VIEW: SynopticView = {
   thickness: 2,
   hiddenSignals: [],
   department: 'all',
-  focusSelection: false,
+  focusSelection: true,
   flow: false,
   compact: false,
+  lanes: true,
+  endTags: false,
+  colorMode: 'signal',
 }
+
+/** Distinct, readable colours for "one colour per cable". */
+export const cableColor = (i: number) => `hsl(${Math.round((i * 137.508) % 360)} 72% 46%)`
 
 /** The project's view settings, completed with the defaults (older projects have none). */
 export function viewOf(p: Project): SynopticView {

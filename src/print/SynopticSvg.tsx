@@ -2,6 +2,7 @@ import { SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { resolveCables } from '../project'
 import { portSides } from '../synoptic/portLayout'
+import { cableColor } from '../synoptic/view'
 import type { DeviceNode, Port, Project } from '../types'
 
 const HEAD = 40
@@ -21,7 +22,21 @@ interface Box {
  * Static drawing of the synoptic for printing: same positions as on screen,
  * vector output that stays sharp at any paper size, nothing to mount.
  */
-export default function SynopticSvg({ project, usedOnly, nodeIds, edgeIds }: { project: Project; usedOnly: boolean; nodeIds?: Set<string>; edgeIds?: Set<string> }) {
+export default function SynopticSvg({
+  project,
+  usedOnly,
+  nodeIds,
+  edgeIds,
+  colorByCable = false,
+  endTags = false,
+}: {
+  project: Project
+  usedOnly: boolean
+  nodeIds?: Set<string>
+  edgeIds?: Set<string>
+  colorByCable?: boolean
+  endTags?: boolean
+}) {
   const nodes = project.nodes.filter((n) => !nodeIds || nodeIds.has(n.id))
   const edges = project.edges.filter((e) => (!edgeIds || edgeIds.has(e.id)) && nodes.some((n) => n.id === e.source) && nodes.some((n) => n.id === e.target))
   if (nodes.length === 0) return <p className="muted">Synoptique vide.</p>
@@ -76,6 +91,7 @@ export default function SynopticSvg({ project, usedOnly, nodeIds, edgeIds }: { p
         const b = anchor(e.target, e.targetHandle)
         const k = Math.max(40, Math.abs(b.x - a.x) / 2)
         const color = (() => {
+          if (colorByCable) return cableColor(project.edges.indexOf(e))
           const s = cables.get(e.id)?.fromPort?.signal
           return s ? SIGNALS[s].color : '#888'
         })()
@@ -85,6 +101,9 @@ export default function SynopticSvg({ project, usedOnly, nodeIds, edgeIds }: { p
         return (
           <g key={e.id}>
             <path d={`M${a.x} ${a.y} C${a.x + a.dir * k} ${a.y} ${b.x + b.dir * k} ${b.y} ${b.x} ${b.y}`} fill="none" stroke={color} strokeWidth={1.8} />
+            {endTags && label && [a, b].map((end, i) => (
+              <text key={i} x={end.x + end.dir * 8} y={end.y - 3} fontSize={7} fontWeight={700} textAnchor={end.dir > 0 ? 'start' : 'end'} fill={color}>{label}</text>
+            ))}
             {label && (
               <g>
                 <rect x={mx - label.length * 3.4 - 3} y={my - 7} width={label.length * 6.8 + 6} height={13} rx={2} fill="#fff" stroke={color} strokeWidth={0.8} />

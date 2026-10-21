@@ -204,6 +204,12 @@ export interface SynopticView {
   flow: boolean
   /** Hide unused ports. */
   compact: boolean
+  /** Right-angle cables each get their own route, never a shared segment. */
+  lanes: boolean
+  /** Cable tag repeated next to both ports. */
+  endTags: boolean
+  /** Colour by signal, or one colour per cable. */
+  colorMode: 'signal' | 'cable'
 }
 
 export interface Project {
