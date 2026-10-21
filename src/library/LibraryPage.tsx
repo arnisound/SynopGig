@@ -4,6 +4,7 @@ import { CATEGORY_COLORS, FAMILY_ORDER, LIBRARY } from '../data/library'
 import { download, uid } from '../project'
 import type { Category, ConnectorType, DeviceTemplate, PortDirection, Project, SignalType } from '../types'
 import { availableEngines, ENGINE_LABELS, GEMINI_DEFAULT_MODEL, type AiResult, type Engine } from './ai'
+import { findKnownModels } from './findKnown'
 import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared, issueUrl } from './userLibrary'
@@ -97,6 +98,8 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
   const [query, setQuery] = useState('')
   const [userQuery, setUserQuery] = useState('')
   const [engines, setEngines] = useState<Engine[]>()
+  const [allowChrome, setAllowChrome] = useState(() => store.get('ai.chrome') === '1')
+  const [known, setKnown] = useState<DeviceTemplate[]>([])
   const [geminiKey, setGeminiKey] = useState(() => store.get('ai.geminiKey'))
   const [geminiModel, setGeminiModel] = useState(() => store.get('ai.geminiModel', GEMINI_DEFAULT_MODEL))
   const [pseudo, setPseudo] = useState(() => store.get('pseudo'))
@@ -105,11 +108,11 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
 
   useEffect(() => {
     let alive = true
-    availableEngines(geminiKey).then((e) => alive && setEngines(e))
+    availableEngines(geminiKey, allowChrome).then((e) => alive && setEngines(e))
     return () => {
       alive = false
     }
-  }, [geminiKey])
+  }, [geminiKey, allowChrome])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -143,10 +146,12 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
     setBusy(true)
     try {
       const ai = await import('./ai')
-      const { result, engine } = await ai.extractAuto({ text: source, pdf, personalKey: geminiKey, personalModel: geminiModel, onProgress: setStatus })
+      const started = Date.now()
+      const { result, engine } = await ai.extractAuto({ text: source, pdf, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setStatus })
+      const seconds = Math.max(1, Math.round((Date.now() - started) / 1000))
       setDraft(fromResult(result, result.groups.map((g) => row({ ...g, ai: true }))))
       setSuggestions([])
-      setStatus(`${result.groups.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} pour ${label}. Relisez avant d’enregistrer : une IA peut se tromper.`)
+      setStatus(`${result.groups.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} en ${seconds} s pour ${label}. Relisez avant d’enregistrer : une IA peut se tromper.`)
     } catch (e) {
       // No AI could answer: the quick analysis still gives a starting point.
       if (source.trim()) runRules(source, label)
@@ -156,10 +161,22 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
     }
   }
 
-  const analyse = async (withAi: boolean) => {
+  const analyse = async (withAi: boolean, force = false) => {
     const label = file ? file.name : 'le texte collé'
     const pdf = file && /\.pdf$/i.test(file.name) ? file : undefined
     if (!text.trim() && !pdf) return setStatus('Choisissez un PDF ou collez du texte.')
+    // Instant: the sheet names a model we already have.
+    const matches = force ? [] : findKnownModels(`${file?.name ?? ''}\n${text}`, [...userLibrary.templates, ...mine, ...LIBRARY])
+    setKnown(matches)
+    if (matches.length) {
+      setDraft(fromTemplate(matches[0], false))
+      setSuggestions([])
+      const where = matches[0].author ? 'la bibliothèque USER' : matches[0].id.startsWith('custom-') ? 'vos modèles' : 'la base'
+      setStatus(
+        `Trouvé instantanément dans ${where} : ${matches[0].brand ?? ''} ${matches[0].model}. Il est déjà dans la palette du synoptique, inutile de le recréer ; une copie modifiable est prête ci-dessous si besoin.`,
+      )
+      return
+    }
     if (withAi && engines?.length) await runAi(text, label, pdf)
     else if (text.trim()) runRules(text, label)
     else setStatus('Ce PDF ne contient pas de texte lisible et aucune IA n’est disponible : collez les caractéristiques depuis le site du fabricant.')
@@ -320,7 +337,7 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
               ? 'Recherche d’une IA disponible…'
               : engines.length
                 ? `IA utilisée : ${ENGINE_LABELS[engines[0]]}, gratuite.`
-                : 'Pas d’IA sur cet appareil : l’analyse rapide (sans IA) sera utilisée. Astuce : Chrome récent sur ordinateur a une IA intégrée.'}
+                : 'Analyse rapide (sans IA), instantanée.'}
           </p>
           <div className="row wrap">
             <label className="file-btn">
@@ -352,8 +369,23 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
                 <input value={geminiModel} onChange={(e) => { setGeminiModel(e.target.value); store.set('ai.geminiModel', e.target.value) }} />
               </label>
             </div>
+            <label className="toggle-line">
+              <input type="checkbox" checked={allowChrome} onChange={(e) => { setAllowChrome(e.target.checked); store.set('ai.chrome', e.target.checked ? '1' : '') }} />
+              Utiliser aussi l’IA intégrée à Chrome si aucune autre n’est disponible (gratuite, hors ligne, mais lente)
+            </label>
           </details>
           {status && <p className="status">{status}</p>}
+          {known.length > 0 && (
+            <div className="suggestions">
+              {known.length > 1 && <span className="muted small">Autres modèles reconnus :</span>}
+              {known.slice(1).map((t) => (
+                <button key={t.id} onClick={() => { setDraft(fromTemplate(t, false)); setStatus(`Copie de ${t.brand ?? ''} ${t.model} prête à modifier.`) }}>
+                  {t.brand} {t.model}
+                </button>
+              ))}
+              <button onClick={() => { setKnown([]); analyse(true, true) }}>Ce n’est pas le bon : analyser la fiche</button>
+            </div>
+          )}
         </section>
 
         {draft ? (

@@ -8,12 +8,16 @@ import type { PortGroup } from './portGroups'
  * for the public. The app picks the first engine available:
  * 1. the user's own Gemini key, if they chose to add one (advanced option);
  * 2. the SynopGig relay: a small free Cloudflare Worker holding the site
- *    owner's Gemini key (configured once at build time, see worker/README.md);
- * 3. the AI built into Chrome desktop (Gemini Nano, Prompt API): offline, free.
+ *    owner's Groq or Gemini key (configured once, see worker/README.md);
+ *    works in every browser and answers in a couple of seconds;
+ * 3. the AI built into Chrome desktop (Gemini Nano), only if the user turns
+ *    it on: free and offline but slow.
+ * Only the useful lines of the sheet are sent, which keeps answers fast.
  * Every answer is checked again here before use.
  */
 
-export const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
+/** Fast and generous free tier; thinking is turned off in the request. */
+export const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash-lite'
 
 /** Relay URL, set at build time from the AI_PROXY_URL repository variable. */
 export const AI_PROXY_URL: string = import.meta.env.VITE_AI_PROXY_URL ?? ''
@@ -154,9 +158,18 @@ export function geminiRequest(input: { text?: string; pdfBase64?: string }) {
   return {
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: 'user', parts }],
-    generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: geminiSchema(RESULT_SCHEMA) },
+    generationConfig: {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: geminiSchema(RESULT_SCHEMA),
+      // No "thinking" pass: several times faster, plenty for a connector list.
+      thinkingConfig: { thinkingBudget: 0 },
+    },
   }
 }
+
+/** A PDF with no text layer (scan) has to be read by the model itself. */
+export const isReadable = (text: string) => text.replace(/\s/g, '').length > 200
 
 async function toBase64(file: File) {
   const bytes = new Uint8Array(await file.arrayBuffer())
@@ -176,7 +189,9 @@ async function readGemini(res: Response) {
 
 export async function extractGemini(input: { text?: string; pdf?: File }, key: string, model = GEMINI_DEFAULT_MODEL): Promise<AiResult> {
   if (!key.trim()) throw new Error('Ajoutez votre clé Gemini dans les options avancées.')
-  const body = geminiRequest({ text: input.pdf ? undefined : input.text, pdfBase64: input.pdf ? await toBase64(input.pdf) : undefined })
+  const text = input.text ?? ''
+  const scan = !!input.pdf && !isReadable(text)
+  const body = geminiRequest({ text: scan ? undefined : focusText(text, 12000), pdfBase64: scan ? await toBase64(input.pdf!) : undefined })
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key.trim() },
@@ -185,15 +200,22 @@ export async function extractGemini(input: { text?: string; pdf?: File }, key: s
   return readGemini(res)
 }
 
-/** The relay forwards to Gemini with the site owner's key, kept secret on the server. */
+/** What the relay accepts: the prompt, the schema and the useful lines (or a scanned PDF). */
+export function relayRequest(input: { text?: string; pdfBase64?: string }) {
+  return { v: 2, system: SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, pdfBase64: input.pdfBase64 }
+}
+
+/** The relay forwards to Groq or Gemini with the site owner's key, kept secret on the server. */
 export async function extractRelay(input: { text?: string; pdf?: File }, url = AI_PROXY_URL): Promise<AiResult> {
-  const body = geminiRequest({
-    text: input.pdf ? undefined : focusText(input.text ?? '', 30000),
-    pdfBase64: input.pdf && input.pdf.size < 8_000_000 ? await toBase64(input.pdf) : undefined,
-  })
-  if (!input.pdf && !input.text?.trim()) throw new Error('rien à analyser')
+  const text = input.text ?? ''
+  const scan = !!input.pdf && !isReadable(text)
+  if (!scan && !text.trim()) throw new Error('rien à analyser')
+  if (scan && input.pdf!.size > 8_000_000) throw new Error('PDF scanné trop lourd : collez le texte des caractéristiques')
+  const body = relayRequest(scan ? { pdfBase64: await toBase64(input.pdf!) } : { text: focusText(text, 12000) })
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-  return readGemini(res)
+  const data = (await res.json().catch(() => ({}))) as { text?: string; error?: { message?: string } }
+  if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
+  return sanitizeAi(JSON.parse(data.text || '{}'))
 }
 
 // ---- AI built into Chrome (Prompt API, Gemini Nano)
@@ -250,22 +272,26 @@ export interface AutoOptions {
   pdf?: File
   personalKey?: string
   personalModel?: string
+  /** The AI built into Chrome is slow: only used when the user turns it on. */
+  allowChrome?: boolean
   onProgress: (msg: string) => void
 }
 
 /** Engines usable right now, best first. */
-export async function availableEngines(personalKey?: string): Promise<Engine[]> {
+export async function availableEngines(personalKey?: string, allowChrome = false): Promise<Engine[]> {
   const list: Engine[] = []
   if (personalKey?.trim()) list.push('personal')
   if (AI_PROXY_URL) list.push('relay')
-  const chrome = await chromeAiStatus()
-  if (chrome !== 'missing' && chrome !== 'unavailable') list.push('chrome')
+  if (allowChrome) {
+    const chrome = await chromeAiStatus()
+    if (chrome !== 'missing' && chrome !== 'unavailable') list.push('chrome')
+  }
   return list
 }
 
 /** Tries each available engine in turn; throws when none could answer. */
 export async function extractAuto(o: AutoOptions): Promise<{ result: AiResult; engine: Engine }> {
-  const engines = await availableEngines(o.personalKey)
+  const engines = await availableEngines(o.personalKey, o.allowChrome)
   if (engines.length === 0) throw new Error('Aucune IA disponible sur cet appareil.')
   const errors: string[] = []
   for (const engine of engines) {

@@ -52,17 +52,17 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - **Ajout manuel** : marque, modèle, département, famille, U, poids et connectique saisie
   par groupes (« 16 × XLR entrées »), ou copie d’un modèle existant.
 - **Analyse de fiche technique** (PDF ou texte collé) : un seul bouton « Analyser », rien à
-  configurer pour l’utilisateur. L’application choisit seule, dans l’ordre :
-  1. le **relais IA SynopGig** (Worker Cloudflare gratuit qui garde la clé Gemini du
-     propriétaire du site, voir [`worker/README.md`](worker/README.md)) : marche partout et
-     lit même les PDF scannés ;
-  2. l’**IA intégrée à Chrome** (Gemini Nano, Chrome récent sur ordinateur) : gratuite et
-     hors ligne ;
-  3. sinon l’**analyse rapide** sans IA, qui ne garde que les quantités écrites dans la fiche
-     et propose les autres connecteurs en suggestions.
-  Si l’IA ne répond pas (quota atteint…), l’analyse rapide prend le relais. Les réponses de
-  l’IA sont revérifiées (codes connus, quantités plafonnées) et restent à relire. Une clé
-  Gemini personnelle reste possible dans les options avancées.
+  configurer pour l’utilisateur, sur tous les navigateurs :
+  1. **instantané** : si la fiche nomme un modèle déjà présent (base, bibliothèque USER ou
+     « Mes modèles »), il est proposé tout de suite, sans IA ;
+  2. sinon le **relais IA SynopGig** (Worker Cloudflare gratuit qui garde en secret la clé
+     Groq ou Gemini du propriétaire du site, voir [`worker/README.md`](worker/README.md)) :
+     réponse en 1 à 3 s, seules les lignes utiles de la fiche sont envoyées ; les PDF scannés
+     passent par Gemini ;
+  3. sinon, ou si l’IA ne répond pas, l’**analyse rapide** sans IA, qui ne garde que les
+     quantités écrites et propose les autres connecteurs en suggestions.
+  Les réponses de l’IA sont revérifiées et restent à relire. En options avancées : clé
+  Gemini personnelle, et IA intégrée à Chrome (gratuite et hors ligne, mais lente).
 - **Ma bibliothèque** : modèles perso dans la palette (« Mes modèles »), gardés d’un projet
   à l’autre, export / import JSON.
 - **Bibliothèque USER** (partagée) : « Partager dans la bibliothèque USER » ouvre une issue
