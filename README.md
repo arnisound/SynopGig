@@ -43,6 +43,9 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
     **pupitres** (AW-RP150/RP60, RM-IP500, RC-IP100, SKAARHOJ…), projecteurs, LED.
   - **Réseau** : switchs **PoE et fibre** (Luminex GigaCore, Netgear M4250, Yamaha SWR/SWP1,
     Cisco, Ubiquiti), **Agora Ghost G2**, convertisseurs fibre, injecteur PoE, touret fibre.
+  - **Ordinateurs & serveurs** (génériques) : PC rackables 1U / 2U (Dante, double alim) / 4U
+    (vidéo), serveurs 1U / 2U, NAS, Mac mini en tiroir 1U, console et switch KVM, tour,
+    mini PC, portable, écran de contrôle.
   - Lumière (grandMA3, ChamSys, Avolites, ETC, Robe, Martin, Claypaky…) et énergie.
 - Connectique : XLR 3/4/5, combo XLR/jack, mini-XLR, jack, mini-jack, RCA, Toslink/ADAT,
   MIDI, Speakon NL4/NL8, bornes HP, bornier Euroblock, etherCON/RJ45, opticalCON, fibre LC

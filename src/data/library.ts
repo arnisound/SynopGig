@@ -332,7 +332,7 @@ const GENERIC_FAMILY: Record<string, string> = {
   screen: 'LED',
   'switch-8': 'Switchs',
   'switch-fiber': 'Switchs PoE & fibre',
-  laptop: 'Accessoires réseau',
+  laptop: 'Ordinateurs & serveurs',
   'distro-32': 'Distribution',
   multiprise: 'Distribution',
   'rack-power-1u': 'Distribution',

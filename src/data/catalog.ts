@@ -1,5 +1,5 @@
 import type { DeviceTemplate } from '../types'
-import { A, AES, HP, DMX, NET, V, PWR, RF, ins, outs, pair, dante, net, iec, t1, t1Link, pc32, dmxInOut, dmxOuts, antIn, cascade, antOut, dc, lineIn, hpIn, dev, family, port, series } from './catalogKit'
+import { A, AES, HP, DMX, NET, V, PWR, RF, CTRL, ins, outs, pair, dante, net, iec, t1, t1Link, pc32, dmxInOut, dmxOuts, antIn, cascade, antOut, dc, lineIn, hpIn, dev, family, port, series } from './catalogKit'
 import { SHURE } from './brands/shure'
 import { SENNHEISER } from './brands/sennheiser'
 import { FOHHN } from './brands/fohhn'
@@ -573,6 +573,18 @@ const VIDEO: DeviceTemplate[] = [
   ]),
 ]
 
+/** Computer rear panel: Ethernet and USB, then video outputs. */
+const pcIo = (lan: number, usb: number) => [...series('lan', 'Ethernet', lan, 'rj45', NET, 'io'), ...series('usb', 'USB', usb, 'usb', CTRL, 'io')]
+const displays = (hdmi: number, dp: number) => [...series('hdmi', 'HDMI out', hdmi, 'hdmi', V, 'out'), ...series('dp', 'DisplayPort out', dp, 'displayport', V, 'out')]
+/** Server: data ports, 10G fibre, remote management (IPMI) and a local VGA console. */
+const serverIo = (lan: number) => [
+  ...series('lan', 'Ethernet', lan, 'rj45', NET, 'io'),
+  ...series('sfp', 'SFP+ 10G', 2, 'sfp', NET, 'io'),
+  port('ipmi', 'Administration (IPMI)', 'rj45', NET, 'io'),
+  port('vga', 'Console VGA', 'vga', V, 'out'),
+  ...series('usb', 'USB', 2, 'usb', CTRL, 'io'),
+]
+
 const RESEAU: DeviceTemplate[] = [
   ...family('Switchs PoE & fibre', [
     dev('agora-ghost-g2', 'Agora', 'Ghost G2 (switch fibre 12 etherCON)', 'Réseau', { u: 1, kg: 4 }, [...series('p', 'Port', 12, 'ethercon', NET, 'io'), ...series('fibre', 'opticalCON DUO', 2, 'opticalcon', NET, 'io'), t1()]),
@@ -623,6 +635,22 @@ const RESEAU: DeviceTemplate[] = [
     dev('wifi-ap', 'Générique', 'Point d’accès Wi-Fi (tablettes)', 'Réseau', { kg: 0.5 }, [net('Ethernet (PoE)', 'rj45')]),
     dev('router-4g', 'Générique', 'Routeur 4G / 5G (internet de secours)', 'Réseau', { kg: 0.5 }, [...series('p', 'LAN', 4, 'rj45', NET, 'io'), dc()]),
     dev('fibre-drum', 'Générique', 'Touret fibre opticalCON (tactique)', 'Réseau', { kg: 12 }, [port('a', 'Bout A', 'opticalcon', NET, 'io'), port('b', 'Bout B', 'opticalcon', NET, 'io')]),
+  ]),
+  ...family('Ordinateurs & serveurs', [
+    dev('pc-rack-1u', 'Générique', 'PC rackable 1U (show control, lecture)', 'Réseau', { u: 1, kg: 9 }, [...pcIo(2, 2), ...displays(1, 1), iec()]),
+    dev('pc-rack-2u-dante', 'Générique', 'PC rackable 2U (playback audio, carte Dante)', 'Réseau', { u: 2, kg: 14 }, [...pcIo(2, 4), port('pri', 'Dante primaire', 'rj45', NET, 'io'), port('sec', 'Dante secondaire', 'rj45', NET, 'io'), ...displays(1, 1), iec()]),
+    dev('pc-rack-2u-redundant', 'Générique', 'PC rackable 2U (double alimentation)', 'Réseau', { u: 2, kg: 16 }, [...pcIo(2, 4), ...displays(1, 2), ...series('pwr', 'Secteur', 2, 'iec', PWR, 'in')]),
+    dev('pc-rack-4u-gpu', 'Générique', 'PC rackable 4U (station vidéo, carte graphique)', 'Réseau', { u: 4, kg: 22 }, [...pcIo(2, 6), ...displays(2, 4), iec()]),
+    dev('server-1u', 'Générique', 'Serveur rackable 1U (double alimentation)', 'Réseau', { u: 1, kg: 15 }, [...serverIo(4), ...series('pwr', 'Secteur', 2, 'iec', PWR, 'in')]),
+    dev('server-2u', 'Générique', 'Serveur rackable 2U (stockage, double alimentation)', 'Réseau', { u: 2, kg: 25 }, [...serverIo(4), ...series('pwr', 'Secteur', 2, 'iec', PWR, 'in')]),
+    dev('nas-rack-1u', 'Générique', 'NAS rackable 1U (4 disques)', 'Réseau', { u: 1, kg: 8 }, [...series('lan', 'LAN', 4, 'rj45', NET, 'io'), ...series('usb', 'USB', 2, 'usb', CTRL, 'io'), iec()]),
+    dev('nas-rack-2u', 'Générique', 'NAS rackable 2U (12 disques, 10G)', 'Réseau', { u: 2, kg: 15 }, [...series('lan', 'LAN', 4, 'rj45', NET, 'io'), ...series('sfp', 'SFP+ 10G', 2, 'sfp', NET, 'io'), ...series('pwr', 'Secteur', 2, 'iec', PWR, 'in')]),
+    dev('mac-mini-rack-1u', 'Générique', 'Mac mini en tiroir rack 1U', 'Réseau', { u: 1, kg: 3 }, [port('lan', 'Ethernet', 'rj45', NET, 'io'), port('hdmi', 'HDMI out', 'hdmi', V, 'out'), ...series('tb', 'USB-C / Thunderbolt', 3, 'usb-c', CTRL, 'io'), ...series('usb', 'USB', 2, 'usb', CTRL, 'io'), iec()]),
+    dev('kvm-console-1u', 'Générique', 'Console KVM rackable 1U (écran 17", clavier, tiroir)', 'Réseau', { u: 1, kg: 14 }, [port('vga', 'Entrée VGA', 'vga', V, 'in'), port('hdmi', 'Entrée HDMI', 'hdmi', V, 'in'), port('usb', 'USB (vers PC)', 'usb', CTRL, 'io'), iec()]),
+    dev('kvm-switch-8', 'Générique', 'Switch KVM 8 ports rackable 1U', 'Réseau', { u: 1, kg: 3 }, [...series('pc', 'PC', 8, 'rj45', CTRL, 'io'), port('vga', 'Console VGA', 'vga', V, 'out'), port('usb', 'Console USB', 'usb', CTRL, 'io'), dc()]),
+    dev('pc-tower', 'Générique', 'Ordinateur de bureau (tour)', 'Réseau', { kg: 9 }, [...pcIo(1, 4), ...displays(1, 2), iec()]),
+    dev('mini-pc', 'Générique', 'Mini PC (type NUC)', 'Réseau', { kg: 0.7 }, [...pcIo(1, 3), ...displays(1, 1), dc()]),
+    dev('control-monitor', 'Générique', 'Écran de contrôle 24"', 'Réseau', { kg: 4 }, [port('hdmi', 'Entrée HDMI', 'hdmi', V, 'in'), port('dp', 'Entrée DisplayPort', 'displayport', V, 'in'), iec()]),
   ]),
 ]
 

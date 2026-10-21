@@ -13,6 +13,7 @@ export const NET: SignalType = 'network'
 export const V: SignalType = 'video'
 export const PWR: SignalType = 'power'
 export const RF: SignalType = 'rf'
+export const CTRL: SignalType = 'control'
 
 export const ins = (n: number, label = 'In', c: ConnectorType = 'xlr3') => series('in', label, n, c, A, 'in')
 export const outs = (n: number, label = 'Out', c: ConnectorType = 'xlr3') => series('out', label, n, c, A, 'out')
