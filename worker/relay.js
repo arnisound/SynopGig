@@ -9,6 +9,8 @@
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
  *   GROQ_MODEL       optional (default llama-3.3-70b-versatile)
  *   GEMINI_MODEL     optional (default gemini-2.5-flash-lite)
+ *
+ * Open <worker address>/diagnostic in a browser to check the keys.
  */
 
 const DEFAULT_ORIGINS = 'https://arnisound.github.io,http://localhost:5173'
@@ -41,23 +43,57 @@ export function cleanRequest(body) {
   return { system, schema, text: hasText ? text : undefined, pdfBase64: hasPdf ? pdfBase64 : undefined }
 }
 
-async function askGroq(req, env) {
+/** The provider's own error message, short and without anything secret. */
+const reason = (data, status) => String(data?.error?.message ?? data?.error ?? `HTTP ${status}`).slice(0, 200)
+
+/** First JSON object of a reply, for models that wrap it in text. */
+function extractJson(text) {
+  if (!text) return undefined
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start < 0 || end <= start) return undefined
+  try {
+    return JSON.stringify(JSON.parse(text.slice(start, end + 1)))
+  } catch {
+    return undefined
+  }
+}
+
+async function groqCall(req, env, model, strictJson) {
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
     body: JSON.stringify({
-      model: env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+      model,
       temperature: 0,
-      max_completion_tokens: 2048,
-      response_format: { type: 'json_object' },
+      max_tokens: 2048,
+      ...(strictJson ? { response_format: { type: 'json_object' } } : {}),
       messages: [
-        { role: 'system', content: `${req.system}\nAnswer with a JSON object following this JSON schema:\n${JSON.stringify(req.schema)}` },
+        { role: 'system', content: `${req.system}\nAnswer with a single JSON object following this JSON schema, nothing else:\n${JSON.stringify(req.schema)}` },
         { role: 'user', content: `Data sheet:\n${req.text}` },
       ],
     }),
   })
   const data = await res.json().catch(() => ({}))
-  return { status: res.status, text: data.choices?.[0]?.message?.content }
+  return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error: res.ok ? undefined : reason(data, res.status) }
+}
+
+/** Main model in strict JSON mode, then without it, then a lighter model. */
+async function askGroq(req, env) {
+  const main = env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+  const tries = [
+    [main, true],
+    [main, false],
+    ['llama-3.1-8b-instant', false],
+  ]
+  let last
+  for (const [model, strict] of tries) {
+    last = await groqCall(req, env, model, strict)
+    if (last.status === 200 && last.text) return last
+    // A refused key will be refused again: no point retrying.
+    if (last.status === 401 || last.status === 403) break
+  }
+  return { ...last, error: `Groq ${last.status} : ${last.error ?? 'réponse illisible'}` }
 }
 
 /** Gemini wants upper-case OpenAPI types. */
@@ -88,7 +124,23 @@ async function askGemini(req, env) {
     }),
   })
   const data = await res.json().catch(() => ({}))
-  return { status: res.status, text: data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') }
+  const text = extractJson(data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join(''))
+  return { status: res.status, text, error: res.ok && text ? undefined : `Gemini ${res.status} : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
+}
+
+/** GET /diagnostic: tries each configured key on a tiny request. */
+async function diagnostic(env) {
+  const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
+  const out = { relais: 'SynopGig, en ligne', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
+  if (env.GROQ_API_KEY) {
+    const r = await groqCall(req, env, env.GROQ_MODEL || 'llama-3.3-70b-versatile', true).catch((e) => ({ status: 0, error: String(e) }))
+    out.groq = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+  }
+  if (env.GEMINI_API_KEY) {
+    const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
+    out.gemini = r.status === 200 && r.text ? 'OK' : `ERREUR ${r.error}`
+  }
+  return out
 }
 
 export default {
@@ -105,7 +157,11 @@ export default {
     const fail = (message, status) => reply({ error: { message } }, status)
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors })
-    if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement.', 405)
+    if (request.method === 'GET' && new URL(request.url).pathname === '/diagnostic') {
+      if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de diagnostics, réessayez plus tard.', 429)
+      return new Response(JSON.stringify(await diagnostic(env), null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+    }
+    if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
     if (!env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)
     if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop d’analyses en une heure, réessayez plus tard.', 429)
@@ -124,12 +180,14 @@ export default {
     if (env.GEMINI_API_KEY) order.push(askGemini)
     if (order.length === 0) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
 
-    let last = 0
+    const errors = []
+    let quota = false
     for (const ask of order) {
-      const { status, text } = await ask(req, env).catch(() => ({ status: 502 }))
-      if (status === 200 && text) return reply({ text })
-      last = status
+      const r = await ask(req, env).catch((e) => ({ status: 502, error: `réseau : ${String(e).slice(0, 100)}` }))
+      if (r.status === 200 && r.text) return reply({ text: r.text })
+      quota ||= r.status === 429
+      errors.push(r.error ?? `HTTP ${r.status}`)
     }
-    return fail(last === 429 ? 'Quota gratuit du jour atteint, réessayez demain.' : 'Erreur du service IA.', last === 429 ? 429 : 502)
+    return fail(quota ? `Quota gratuit atteint, réessayez plus tard (${errors.join(' · ')})` : errors.join(' · '), quota ? 429 : 502)
   },
 }

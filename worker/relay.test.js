@@ -33,6 +33,33 @@ describe('AI relay', () => {
     expect(upstream.mock.calls[0][1].headers.Authorization).toBe('Bearer G')
   })
 
+  it('accepts JSON wrapped in text and retries without strict mode', async () => {
+    const upstream = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: 'json_validate_failed' } }), { status: 400 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: 'Here you go: {"model":"Z"} done' } }] })))
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G' })
+    expect(await res.json()).toEqual({ text: '{"model":"Z"}' })
+    expect(JSON.parse(upstream.mock.calls[1][1].body).response_format).toBeUndefined()
+  })
+
+  it('says exactly why the provider refused', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
+    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'bad' })
+    expect(res.status).toBe(502)
+    expect((await res.json()).error.message).toBe('Groq 401 : Invalid API Key')
+  })
+
+  it('has a diagnostic page that never shows the keys', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
+    const res = await relay.fetch(new Request('https://relay.example/diagnostic'), { GROQ_API_KEY: 'gsk_secret' })
+    const text = await res.text()
+    expect(JSON.parse(text).groq).toBe('ERREUR 401 : Invalid API Key')
+    expect(JSON.parse(text).gemini).toContain('pas de clé')
+    expect(text).not.toContain('gsk_secret')
+  })
+
   it('sends scanned PDFs to Gemini, with thinking turned off', async () => {
     const upstream = vi.fn(async () => geminiOk())
     vi.stubGlobal('fetch', upstream)
