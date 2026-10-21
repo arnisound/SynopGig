@@ -20,7 +20,7 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Option « masquer les ports libres », export PNG du synoptique.
 
 ### Base d'équipements
-- 719 modèles de marque (69 marques), plus des modèles génériques. La palette est triée
+- 1 359 modèles de marque (72 marques), plus des modèles génériques. La palette est triée
   par département, puis par **famille** (consoles, stageboxes, HF, antennes, line arrays,
   subs, lyres, PTZ, switchs…), puis par marque, avec recherche et filtre par marque :
   - **Consoles** : Yamaha (RIVAGE PM5, CL, QL, TF, DM3, MG), Allen & Heath (dLive, Avantis,
@@ -29,6 +29,11 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   - **Diffusion** : L-Acoustics, d&b, **Fohhn** (Linea Focus, LX, XS, amplis D/DI),
     **Axiom Pro Audio** (AX2010, AX1012, AX800A, AX2065, SW, ED), Yamaha (DZR, DXS, CZR,
     PX, XMV), QSC, RCF, Lab.gruppen, Powersoft…
+  - **Gammes complètes** (fichiers `src/data/brands/`) : **Shure** (218 : micros, Axient
+    Digital, ULX-D, SLX-D, QLX-D, BLX, GLX-D, PSM, antennes, Microflex), **Sennheiser** (163 :
+    micros, Digital 6000/9000, Spectera, EW-DX, EW-D, G4, 2000, IEM), **L-Acoustics** (70),
+    **d&b audiotechnik** (83), **NEXO** (66), **Electro-Voice** (109), **Adamson** (29),
+    **Fohhn** (54), **Axiom Pro Audio** (44).
   - **HF et ears** : Shure, Sennheiser, Audio-Technica, Wisycom, Lectrosonics (récepteurs,
     émetteurs main et ceinture, ears), **distributeurs et amplificateurs d’antennes,
     combineurs, commutateur A/B, antennes** directives, omni et hélicoïdales.

@@ -1,5 +1,14 @@
-import type { Category, ConnectorType, DeviceTemplate, Port, PortDirection, SignalType } from '../types'
-import { port, series } from './ports'
+import type { DeviceTemplate } from '../types'
+import { A, AES, HP, DMX, NET, V, PWR, RF, ins, outs, pair, dante, net, iec, t1, t1Link, pc32, dmxInOut, dmxOuts, antIn, cascade, antOut, dc, lineIn, hpIn, dev, family, port, series } from './catalogKit'
+import { SHURE } from './brands/shure'
+import { SENNHEISER } from './brands/sennheiser'
+import { FOHHN } from './brands/fohhn'
+import { AXIOM } from './brands/axiom'
+import { L_ACOUSTICS } from './brands/l-acoustics'
+import { DB } from './brands/db'
+import { ADAMSON } from './brands/adamson'
+import { ELECTRO_VOICE } from './brands/electro-voice'
+import { NEXO } from './brands/nexo'
 
 /*
  * Recurring brand models in live sound, lighting and video.
@@ -7,51 +16,6 @@ import { port, series } from './ports'
  * check the manufacturer's data sheet before building a show on them.
  * Models are grouped by family, the sub-group shown in the palette.
  */
-
-const A: SignalType = 'audio-analog'
-const AES: SignalType = 'audio-digital'
-const HP: SignalType = 'speaker'
-const DMX: SignalType = 'dmx'
-const NET: SignalType = 'network'
-const V: SignalType = 'video'
-const PWR: SignalType = 'power'
-const RF: SignalType = 'rf'
-
-const ins = (n: number, label = 'In', c: ConnectorType = 'xlr3') => series('in', label, n, c, A, 'in')
-const outs = (n: number, label = 'Out', c: ConnectorType = 'xlr3') => series('out', label, n, c, A, 'out')
-const pair = (prefix: string, label: string, c: ConnectorType, s: SignalType, d: PortDirection = 'io'): Port[] => [
-  port(`${prefix}A`, `${label} A`, c, s, d),
-  port(`${prefix}B`, `${label} B`, c, s, d),
-]
-const dante = () => [port('pri', 'Dante primaire', 'ethercon', NET, 'io'), port('sec', 'Dante secondaire', 'ethercon', NET, 'io')]
-const net = (label = 'Réseau', c: ConnectorType = 'ethercon') => port('net', label, c, NET, 'io')
-const iec = () => port('pwr', 'Secteur', 'iec', PWR, 'in')
-const t1 = () => port('pwr', 'Secteur', 'powercon-true1', PWR, 'in')
-const t1Link = () => [t1(), port('pwr-out', 'Recopie secteur', 'powercon-true1', PWR, 'out')]
-const pc32 = () => port('pwr', 'Secteur', 'powercon', PWR, 'in')
-const dmxInOut = (c: ConnectorType = 'xlr5') => [port('dmxIn', 'DMX in', c, DMX, 'in'), port('dmxOut', 'DMX out', c, DMX, 'out')]
-const dmxOuts = (n: number) => series('dmx', 'DMX', n, 'xlr5', DMX, 'out')
-// Wireless: diversity antenna inputs, cascade outputs, transmitter antenna.
-const antIn = () => [port('antA', 'Antenne A', 'bnc', RF, 'in'), port('antB', 'Antenne B', 'bnc', RF, 'in')]
-const cascade = () => [port('cascA', 'Cascade A', 'bnc', RF, 'out'), port('cascB', 'Cascade B', 'bnc', RF, 'out')]
-const antOut = () => port('ant', 'Antenne', 'bnc', RF, 'out')
-const dc = (label = 'Alim DC') => port('pwr', label, 'dc', PWR, 'in')
-const lineIn = () => [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out')]
-const hpIn = (c: ConnectorType = 'speakon') => [port('in', 'Entrée HP', c, HP, 'in'), port('link', 'Link HP', c, HP, 'out')]
-
-function dev(
-  id: string,
-  brand: string,
-  model: string,
-  category: Category,
-  spec: { u?: number; kg?: number },
-  ports: Port[],
-): DeviceTemplate {
-  return { id, brand, model, category, rackU: spec.u, weight: spec.kg, ports }
-}
-
-/** Tags each model of a list with its family. */
-const family = (name: string, list: DeviceTemplate[]) => list.map((t) => ({ ...t, family: name }))
 
 const SON: DeviceTemplate[] = [
   ...family('Consoles', [
@@ -203,29 +167,6 @@ const SON: DeviceTemplate[] = [
     dev('neumann-kms105', 'Neumann', 'KMS 105', 'Son', { kg: 0.3 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
     dev('neumann-tlm103', 'Neumann', 'TLM 103', 'Son', { kg: 0.5 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
     dev('neumann-u87', 'Neumann', 'U 87 Ai', 'Son', { kg: 0.5 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
-    dev('senn-e604', 'Sennheiser', 'e604', 'Son', { kg: 0.1 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-e609', 'Sennheiser', 'e609 Silver', 'Son', { kg: 0.1 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-e902', 'Sennheiser', 'e902', 'Son', { kg: 0.3 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-e904', 'Sennheiser', 'e904', 'Son', { kg: 0.2 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-e906', 'Sennheiser', 'e906', 'Son', { kg: 0.2 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-e914', 'Sennheiser', 'e914', 'Son', { kg: 0.2 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
-    dev('senn-e935', 'Sennheiser', 'e935', 'Son', { kg: 0.4 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-e945', 'Sennheiser', 'e945', 'Son', { kg: 0.4 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-md421', 'Sennheiser', 'MD 421 II', 'Son', { kg: 0.4 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-md441', 'Sennheiser', 'MD 441-U', 'Son', { kg: 0.5 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('senn-mkh416', 'Sennheiser', 'MKH 416 (canon)', 'Son', { kg: 0.2 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
-    dev('shure-beta52', 'Shure', 'Beta 52A', 'Son', { kg: 0.6 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-beta56', 'Shure', 'Beta 56A', 'Son', { kg: 0.3 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-beta57', 'Shure', 'Beta 57A', 'Son', { kg: 0.3 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-beta58', 'Shure', 'Beta 58A', 'Son', { kg: 0.3 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-beta91', 'Shure', 'Beta 91A', 'Son', { kg: 0.5 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-beta98', 'Shure', 'Beta 98H/C (pince)', 'Son', { kg: 0.2 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
-    dev('shure-ksm32', 'Shure', 'KSM32', 'Son', { kg: 0.5 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
-    dev('shure-ksm9', 'Shure', 'KSM9', 'Son', { kg: 0.3 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
-    dev('shure-sm57', 'Shure', 'SM57', 'Son', { kg: 0.3 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-sm58', 'Shure', 'SM58', 'Son', { kg: 0.3 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-sm7b', 'Shure', 'SM7B', 'Son', { kg: 0.8 }, [port('out', 'Sortie', 'xlr3', A, 'out')]),
-    dev('shure-sm81', 'Shure', 'SM81', 'Son', { kg: 0.2 }, [port('out', 'Sortie (48 V)', 'xlr3', A, 'out')]),
   ]),
   ...family('DI', [
     dev('bss-ar133', 'BSS', 'AR133 (DI active)', 'Son', { kg: 0.9 }, [port('in', 'Entrée', 'jack', A, 'in'), port('thru', 'Thru', 'jack', A, 'out'), port('out', 'Sortie XLR', 'xlr3', A, 'out')]),
@@ -243,26 +184,6 @@ const SON: DeviceTemplate[] = [
     dev('at-atw-r5220', 'Audio-Technica', 'ATW-R5220 (récepteur double 5000)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), ...dante(), iec()]),
     dev('lectro-dsqd', 'Lectrosonics', 'DSQD (récepteur 4 voies)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...outs(4, 'Sortie XLR'), ...dante(), iec()]),
     dev('lectro-venue2', 'Lectrosonics', 'Venue 2 (récepteur 6 voies)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...outs(6, 'Sortie XLR'), net('Ethernet', 'rj45'), iec()]),
-    dev('senn-ek6042', 'Sennheiser', 'EK 6042 (récepteur caméra)', 'Son', { kg: 0.3 }, [...series('out', 'Sortie', 2, 'xlr3', A, 'out')]),
-    dev('senn-em100g4', 'Sennheiser', 'EM 100 G4 (récepteur)', 'Son', { kg: 1 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), dc()]),
-    dev('senn-em300g4', 'Sennheiser', 'EM 300-500 G4', 'Son', { u: 1, kg: 1.5 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), net('Ethernet', 'rj45'), port('pwr', 'Alim externe', 'dc', PWR, 'in')]),
-    dev('senn-em3732', 'Sennheiser', 'EM 3732-II (récepteur double)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), net('Ethernet', 'rj45'), iec()]),
-    dev('senn-em6000', 'Sennheiser', 'EM 6000 Dante (récepteur double)', 'Son', { u: 1, kg: 5 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), port('aes', 'AES3 out', 'xlr3', AES, 'out'), ...dante(), iec()]),
-    dev('senn-ewd-em', 'Sennheiser', 'EW-D EM (récepteur)', 'Son', { kg: 0.6 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), dc()]),
-    dev('senn-ewdx-em2', 'Sennheiser', 'EW-DX EM 2 (récepteur double)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), net('Ethernet', 'rj45'), iec()]),
-    dev('senn-ewd-em-dante', 'Sennheiser', 'EW-DX EM 2 Dante (récepteur double)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), ...dante(), iec()]),
-    dev('senn-ewdx-em4', 'Sennheiser', 'EW-DX EM 4 Dante', 'Son', { u: 1, kg: 4 }, [...antIn(), ...outs(4, 'Sortie XLR'), ...dante(), iec()]),
-    dev('shure-adx5d', 'Shure', 'ADX5D (récepteur portable)', 'Son', { kg: 0.5 }, [...series('out', 'Sortie TA3', 2, 'minijack', A, 'out'), port('pwr', 'Alim / batterie', 'dc', PWR, 'in')]),
-    dev('shure-ad4d', 'Shure', 'Axient Digital AD4D (récepteur double)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), ...dante(), iec()]),
-    dev('shure-ad4d-a', 'Shure', 'Axient Digital AD4D-A (récepteur double)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), port('aes', 'AES3 out', 'xlr3', AES, 'out'), ...dante(), iec()]),
-    dev('shure-ad4q', 'Shure', 'Axient Digital AD4Q', 'Son', { u: 1, kg: 5 }, [...antIn(), ...outs(4, 'Sortie XLR'), ...dante(), iec()]),
-    dev('shure-blx4r', 'Shure', 'BLX4R (récepteur)', 'Son', { u: 1, kg: 1 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), dc()]),
-    dev('shure-qlxd4', 'Shure', 'QLXD4 (récepteur)', 'Son', { u: 1, kg: 1.5 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), net('Ethernet', 'rj45'), dc()]),
-    dev('shure-slxd4', 'Shure', 'SLXD4 (récepteur)', 'Son', { u: 1, kg: 1 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), dc()]),
-    dev('shure-slxd4d', 'Shure', 'SLXD4D (récepteur double)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...outs(2, 'Sortie XLR'), net('Ethernet', 'rj45'), iec()]),
-    dev('shure-ulxd4', 'Shure', 'ULXD4 (récepteur)', 'Son', { u: 1, kg: 1.5 }, [...antIn(), port('out', 'Sortie XLR', 'xlr3', A, 'out'), port('outJ', 'Sortie jack', 'jack', A, 'out'), net('Ethernet', 'rj45'), dc()]),
-    dev('shure-ulxd4d', 'Shure', 'ULXD4D', 'Son', { u: 1, kg: 3 }, [...antIn(), ...outs(2, 'Sortie XLR'), ...pair('net', 'Ethernet', 'rj45', NET), iec()]),
-    dev('shure-ulxd4q', 'Shure', 'ULXD4Q', 'Son', { u: 1, kg: 4 }, [...antIn(), ...outs(4, 'Sortie XLR'), ...dante(), iec()]),
     dev('wisy-mrk960', 'Wisycom', 'MRK960 (récepteur double)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...outs(2, 'Sortie XLR'), port('aes', 'AES out', 'xlr3', AES, 'out'), net('Ethernet', 'rj45'), iec()]),
     dev('wisy-mrk980', 'Wisycom', 'MRK980 (récepteur double large bande)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...cascade(), ...outs(2, 'Sortie XLR'), port('aes', 'AES out', 'xlr3', AES, 'out'), ...dante(), iec()]),
   ]),
@@ -275,49 +196,12 @@ const SON: DeviceTemplate[] = [
     dev('dpa-6066', 'DPA', '6066 (serre-tête)', 'Son', { kg: 0.01 }, [port('out', 'Sortie (MicroDot)', 'minijack', A, 'out')]),
     dev('lectro-hhd', 'Lectrosonics', 'HHa (émetteur main)', 'Son', { kg: 0.3 }, []),
     dev('lectro-ssm', 'Lectrosonics', 'SSM (émetteur ceinture miniature)', 'Son', { kg: 0.05 }, [port('mic', 'Entrée micro (TA5F)', 'minijack', A, 'in')]),
-    dev('senn-ewd-sk', 'Sennheiser', 'EW-D SK (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (jack 3,5)', 'minijack', A, 'in')]),
-    dev('senn-ewd-skm', 'Sennheiser', 'EW-D SKM-S (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('senn-ewdx-sk', 'Sennheiser', 'EW-DX SK (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro', 'minijack', A, 'in')]),
-    dev('senn-ewdx-skm', 'Sennheiser', 'EW-DX SKM (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('senn-hsp4', 'Sennheiser', 'HSP 4 (serre-tête)', 'Son', { kg: 0.02 }, [port('out', 'Sortie', 'minijack', A, 'out')]),
-    dev('senn-mke2', 'Sennheiser', 'MKE 2 (cravate)', 'Son', { kg: 0.01 }, [port('out', 'Sortie', 'minijack', A, 'out')]),
-    dev('senn-sk500g4', 'Sennheiser', 'SK 500 G4 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (jack 3,5)', 'minijack', A, 'in')]),
-    dev('senn-sk6000', 'Sennheiser', 'SK 6000 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro', 'minijack', A, 'in')]),
-    dev('senn-skm500g4', 'Sennheiser', 'SKM 500 G4 (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('senn-skm6000', 'Sennheiser', 'SKM 6000 (émetteur main)', 'Son', { kg: 0.4 }, []),
-    dev('shure-ad1', 'Shure', 'AD1 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro', 'minijack', A, 'in')]),
-    dev('shure-ad2-ksm9', 'Shure', 'AD2/KSM9 (émetteur main)', 'Son', { kg: 0.4 }, []),
-    dev('shure-adx1', 'Shure', 'ADX1 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (TA4F)', 'minijack', A, 'in')]),
-    dev('shure-adx2-b58', 'Shure', 'ADX2/B58 (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('shure-qlxd1', 'Shure', 'QLXD1 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (TA4F)', 'minijack', A, 'in')]),
-    dev('shure-qlxd2-b87', 'Shure', 'QLXD2/B87A (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('shure-slxd1', 'Shure', 'SLXD1 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (TA4F)', 'minijack', A, 'in')]),
-    dev('shure-slxd2-b58', 'Shure', 'SLXD2/B58 (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('shure-twinplex-th53', 'Shure', 'TwinPlex TH53 (serre-tête)', 'Son', { kg: 0.02 }, [port('out', 'Sortie (TA4F)', 'minijack', A, 'out')]),
-    dev('shure-twinplex-tl47', 'Shure', 'TwinPlex TL47 (cravate)', 'Son', { kg: 0.01 }, [port('out', 'Sortie (TA4F)', 'minijack', A, 'out')]),
-    dev('shure-ulxd1', 'Shure', 'ULXD1 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (TA4F)', 'minijack', A, 'in')]),
-    dev('shure-ulxd2-b58', 'Shure', 'ULXD2/B58 (émetteur main)', 'Son', { kg: 0.3 }, []),
-    dev('shure-ulxd2-beta87', 'Shure', 'ULXD2/B87A (émetteur main)', 'Son', { kg: 0.3 }, []),
     dev('wisy-mth410', 'Wisycom', 'MTH410 (émetteur main)', 'Son', { kg: 0.3 }, []),
     dev('wisy-mtp60', 'Wisycom', 'MTP60 (émetteur ceinture)', 'Son', { kg: 0.1 }, [port('mic', 'Entrée micro (TA5F)', 'minijack', A, 'in')]),
   ]),
   ...family('Ears (in-ear)', [
     dev('at-m3t', 'Audio-Technica', 'M3 (émetteur ear)', 'Son', { u: 1, kg: 2 }, [antOut(), ...ins(2, 'Entrée'), dc()]),
     dev('at-m3r', 'Audio-Technica', 'M3R (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
-    dev('senn-ek2000', 'Sennheiser', 'EK 2000 IEM (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
-    dev('senn-ek-iem-g4', 'Sennheiser', 'EK IEM G4 (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
-    dev('senn-ie100', 'Sennheiser', 'IE 100 PRO (écouteurs)', 'Son', { kg: 0.02 }, [port('in', 'Entrée', 'minijack', A, 'in')]),
-    dev('senn-sr2000', 'Sennheiser', 'SR 2000 IEM (émetteur ear)', 'Son', { u: 1, kg: 3 }, [antOut(), ...ins(2, 'Entrée'), ...series('loop', 'Loop', 2, 'jack', A, 'out'), net('Ethernet', 'rj45'), iec()]),
-    dev('senn-sr2050', 'Sennheiser', 'SR 2050 IEM', 'Son', { u: 1, kg: 4 }, [antOut(), ...ins(2, 'Entrée', 'xlr3'), ...series('loop', 'Loop', 2, 'jack', A, 'out'), net('Ethernet', 'rj45'), iec()]),
-    dev('senn-sr-iem-g4', 'Sennheiser', 'SR IEM G4 (émetteur ear)', 'Son', { u: 1, kg: 2 }, [antOut(), ...ins(2, 'Entrée'), ...series('loop', 'Loop', 2, 'jack', A, 'out'), dc()]),
-    dev('shure-p10r', 'Shure', 'P10R+ (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
-    dev('shure-p3ra', 'Shure', 'P3RA (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
-    dev('shure-p9ra', 'Shure', 'P9RA+ (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
-    dev('shure-p10t', 'Shure', 'PSM1000 P10T', 'Son', { u: 1, kg: 4 }, [antOut(), ...ins(2, 'Entrée', 'xlr3'), ...series('loop', 'Loop', 2, 'jack', A, 'out'), net('Ethernet', 'rj45'), iec()]),
-    dev('shure-p3t', 'Shure', 'PSM300 P3T', 'Son', { u: 1, kg: 2 }, [antOut(), ...ins(2, 'Entrée', 'xlr3'), ...series('loop', 'Loop', 2, 'jack', A, 'out'), port('pwr', 'Alim externe', 'dc', PWR, 'in')]),
-    dev('shure-p9t', 'Shure', 'PSM900 P9T (émetteur ear)', 'Son', { u: 1, kg: 3 }, [antOut(), ...ins(2, 'Entrée'), ...series('loop', 'Loop', 2, 'jack', A, 'out'), iec()]),
-    dev('shure-se215', 'Shure', 'SE215 (écouteurs)', 'Son', { kg: 0.03 }, [port('in', 'Entrée', 'minijack', A, 'in')]),
-    dev('shure-se846', 'Shure', 'SE846 (écouteurs)', 'Son', { kg: 0.03 }, [port('in', 'Entrée', 'minijack', A, 'in')]),
     dev('wisy-mpr50', 'Wisycom', 'MPR50-IEM (récepteur ear ceinture)', 'Son', { kg: 0.2 }, [port('hp', 'Écouteurs', 'minijack', A, 'out')]),
     dev('wisy-mtk982', 'Wisycom', 'MTK982 (émetteur ear double)', 'Son', { u: 1, kg: 3 }, [antOut(), ...ins(4, 'Entrée'), net('Ethernet', 'rj45'), iec()]),
   ]),
@@ -328,46 +212,10 @@ const SON: DeviceTemplate[] = [
     dev('rfvenue-cp-beam', 'RF Venue', 'CP Beam (antenne hélicoïdale)', 'Son', { kg: 0.8 }, [port('in', 'Connecteur', 'bnc', RF, 'io')]),
     dev('rfvenue-distro4', 'RF Venue', 'DISTRO4 (distributeur d’antennes)', 'Son', { u: 1, kg: 2 }, [...antIn(), ...series('outA', 'Sortie A', 4, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 4, 'bnc', RF, 'out'), iec()]),
     dev('rfvenue-fin', 'RF Venue', 'Diversity Fin (antenne double)', 'Son', { kg: 1 }, [port('outA', 'Sortie A', 'bnc', RF, 'out'), port('outB', 'Sortie B', 'bnc', RF, 'out')]),
-    dev('senn-a1031', 'Sennheiser', 'A 1031-U (antenne omni passive)', 'Son', { kg: 0.2 }, [port('out', 'Connecteur', 'bnc', RF, 'io')]),
-    dev('senn-a2003', 'Sennheiser', 'A 2003 UHF (antenne directive passive)', 'Son', { kg: 0.5 }, [port('out', 'Connecteur', 'bnc', RF, 'io')]),
-    dev('senn-ab3700', 'Sennheiser', 'AB 3700 (booster d’antenne)', 'Son', { kg: 0.2 }, [port('in', 'Entrée antenne', 'bnc', RF, 'in'), port('out', 'Sortie', 'bnc', RF, 'out')]),
-    dev('senn-ab4', 'Sennheiser', 'AB 4 (booster d’antenne)', 'Son', { kg: 0.2 }, [port('in', 'Entrée antenne', 'bnc', RF, 'in'), port('out', 'Sortie', 'bnc', RF, 'out')]),
-    dev('senn-ac3200', 'Sennheiser', 'AC 3200-II (combineur ear 8→1)', 'Son', { u: 1, kg: 4 }, [...series('in', 'Entrée émetteur', 8, 'bnc', RF, 'in'), port('ant', 'Sortie antenne', 'bnc', RF, 'out'), iec()]),
-    dev('senn-ac41', 'Sennheiser', 'AC 41 (combineur ear 4→1)', 'Son', { u: 1, kg: 2 }, [...series('in', 'Entrée émetteur', 4, 'bnc', RF, 'in'), port('ant', 'Sortie antenne', 'bnc', RF, 'out'), dc()]),
-    dev('senn-ad3700', 'Sennheiser', 'AD 3700 (antenne directive active)', 'Son', { kg: 0.6 }, [port('out', 'Sortie', 'bnc', RF, 'out')]),
-    dev('senn-asa1', 'Sennheiser', 'ASA 1 (splitter d’antennes actif)', 'Son', { kg: 1 }, [...antIn(), ...series('outA', 'Sortie A', 4, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 4, 'bnc', RF, 'out'), dc()]),
-    dev('senn-asa214', 'Sennheiser', 'ASA 214 (splitter d’antennes 1→4)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...series('outA', 'Sortie A', 4, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 4, 'bnc', RF, 'out'), iec()]),
-    dev('senn-asa3000', 'Sennheiser', 'ASA 3000 (splitter d’antennes)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...series('outA', 'Sortie A', 8, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 8, 'bnc', RF, 'out'), iec()]),
-    dev('shure-ad610', 'Shure', 'AD610 ShowLink (point d’accès)', 'Son', { kg: 1 }, [net('Ethernet (PoE)', 'rj45')]),
-    dev('shure-axt630', 'Shure', 'AXT630 (distributeur d’antennes Axient)', 'Son', { u: 1, kg: 4 }, [...antIn(), ...series('outA', 'Sortie A', 4, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 4, 'bnc', RF, 'out'), ...cascade(), net('Ethernet', 'rj45'), iec()]),
-    dev('shure-ha8089', 'Shure', 'HA-8089 (antenne hélicoïdale ear)', 'Son', { kg: 1 }, [port('in', 'Connecteur', 'ntype', RF, 'io')]),
-    dev('shure-pa821', 'Shure', 'PA821B (combineur ear 8→1)', 'Son', { u: 1, kg: 4 }, [...series('in', 'Entrée émetteur', 8, 'bnc', RF, 'in'), port('ant', 'Sortie antenne', 'bnc', RF, 'out'), iec()]),
-    dev('shure-ua221', 'Shure', 'UA221 (splitter / combineur passif)', 'Son', { kg: 0.2 }, [port('in', 'Commun', 'bnc', RF, 'in'), ...series('out', 'Sortie', 2, 'bnc', RF, 'out')]),
-    dev('shure-ua834', 'Shure', 'UA834 (amplificateur d’antenne en ligne)', 'Son', { kg: 0.2 }, [port('in', 'Entrée antenne', 'bnc', RF, 'in'), port('out', 'Sortie', 'bnc', RF, 'out')]),
-    dev('shure-ua844', 'Shure', 'UA844+SWB (distributeur d’antennes 1→5)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...series('outA', 'Sortie A', 5, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 5, 'bnc', RF, 'out'), ...cascade(), iec()]),
-    dev('shure-ua845', 'Shure', 'UA845UWB (distributeur d’antennes 1→5)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...series('outA', 'Sortie A', 5, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 5, 'bnc', RF, 'out'), ...cascade(), net('Ethernet', 'rj45'), iec()]),
-    dev('shure-ua846', 'Shure', 'UA846Z2 (distributeur d’antennes 1→4)', 'Son', { u: 1, kg: 3 }, [...antIn(), ...series('outA', 'Sortie A', 4, 'bnc', RF, 'out'), ...series('outB', 'Sortie B', 4, 'bnc', RF, 'out'), iec()]),
-    dev('shure-ua860', 'Shure', 'UA860SWB (antenne omni passive)', 'Son', { kg: 0.3 }, [port('out', 'Connecteur', 'bnc', RF, 'io')]),
-    dev('shure-ua874', 'Shure', 'UA874 (antenne directive active)', 'Son', { kg: 0.6 }, [port('out', 'Sortie', 'bnc', RF, 'out')]),
     dev('rf-ab-switch', 'Générique', 'Commutateur d’antennes A/B (HF)', 'Son', { kg: 0.5 }, [...series('in', 'Antenne', 2, 'bnc', RF, 'in'), port('out', 'Sortie', 'bnc', RF, 'out'), dc()]),
     dev('rf-coax-n', 'Générique', 'Câble coaxial antenne N / BNC (rallonge)', 'Son', { kg: 1 }, [port('a', 'Côté antenne', 'ntype', RF, 'io'), port('b', 'Côté rack', 'bnc', RF, 'io')]),
   ]),
   ...family('Amplis', [
-    dev('db-10d', 'd&b audiotechnik', '10D', 'Son', { u: 2, kg: 9 }, [...ins(4, 'In analog/AES'), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('db-30d', 'd&b audiotechnik', '30D', 'Son', { u: 2, kg: 9 }, [...ins(4, 'In analog/AES'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('db-40d', 'd&b audiotechnik', '40D', 'Son', { u: 2, kg: 11 }, [...ins(4, 'In analog/AES'), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('db-d12', 'd&b audiotechnik', 'D12', 'Son', { u: 2, kg: 19 }, [...ins(2, 'In analog'), ...series('thru', 'Link', 2, 'xlr3', A, 'out'), port('net', 'CAN-Bus', 'rj45', NET, 'io'), ...series('hp', 'Sortie HP', 2, 'speakon', HP, 'out'), port('hp8', 'Sortie NL8', 'speakon8', HP, 'out'), pc32()]),
-    dev('db-d20', 'd&b audiotechnik', 'D20', 'Son', { u: 2, kg: 10 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('db-d40', 'd&b audiotechnik', 'D40', 'Son', { u: 2, kg: 11 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('db-d80', 'd&b audiotechnik', 'D80', 'Son', { u: 2, kg: 19 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('fohhn-d41200', 'Fohhn', 'D-4.1200 (ampli DSP)', 'Son', { u: 2, kg: 12 }, [...ins(4), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), net('Fohhn-Net', 'rj45'), pc32()]),
-    dev('fohhn-di42000', 'Fohhn', 'DI-4.2000 (ampli Dante)', 'Son', { u: 2, kg: 13 }, [...ins(4), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('la-larak2', 'L-Acoustics', 'LA-RAK II (3 × LA12X)', 'Son', { u: 9, kg: 82 }, [...ins(12, 'In analog/AES'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie CA-COM', 3, 'socapex', HP, 'out'), port('pwr', 'Secteur', 'p17-32a', PWR, 'in')]),
-    dev('la-la12x', 'L-Acoustics', 'LA12X', 'Son', { u: 2, kg: 15 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), port('hp8', 'Sortie NL8', 'speakon8', HP, 'out'), pc32()]),
-    dev('la-la2xi', 'L-Acoustics', 'LA2Xi', 'Son', { u: 1, kg: 9 }, [...ins(4), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), iec()]),
-    dev('la-la4x', 'L-Acoustics', 'LA4X', 'Son', { u: 2, kg: 12 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('la-la7-16', 'L-Acoustics', 'LA7.16', 'Son', { u: 2, kg: 15 }, [...ins(4, 'In analog'), ...dante(), ...series('hp', 'Sortie NL8', 2, 'speakon8', HP, 'out'), port('soca', 'Sortie SpeakON 16', 'socapex', HP, 'out'), pc32()]),
-    dev('la-la8', 'L-Acoustics', 'LA8', 'Son', { u: 2, kg: 21 }, [...ins(2, 'In analog/AES'), ...series('thru', 'Link', 2, 'xlr3', A, 'out'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), port('hp8', 'Sortie NL8', 'speakon8', HP, 'out'), pc32()]),
     dev('lab-d120-4l', 'Lab.gruppen', 'D 120:4L', 'Son', { u: 2, kg: 9 }, [...ins(4), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
     dev('lab-fp10000q', 'Lab.gruppen', 'FP 10000Q', 'Son', { u: 2, kg: 12 }, [...ins(4), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
     dev('lab-plm12k44', 'Lab.gruppen', 'PLM 12K44', 'Son', { u: 2, kg: 14 }, [...ins(4, 'In analog'), port('aes', 'AES in', 'xlr3', AES, 'in'), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
@@ -385,10 +233,6 @@ const SON: DeviceTemplate[] = [
     dev('yam-xmv4280', 'Yamaha', 'XMV4280-D (ampli Dante)', 'Son', { u: 1, kg: 6 }, [...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), iec()]),
   ]),
   ...family('Processeurs', [
-    dev('db-ds10', 'd&b audiotechnik', 'DS10 (pont audio Dante)', 'Son', { u: 1, kg: 2 }, [...dante(), ...series('aes', 'AES out', 4, 'xlr3', AES, 'out'), iec()]),
-    dev('db-ds100', 'd&b audiotechnik', 'DS100 (matrice Soundscape)', 'Son', { u: 1, kg: 5 }, [...dante(), net('Contrôle', 'ethercon'), iec()]),
-    dev('la-lms', 'L-Acoustics', 'LS10 (switch Milan / AVB)', 'Son', { u: 1, kg: 3 }, [...series('p', 'Port', 8, 'ethercon', NET, 'io'), ...series('sfp', 'Fibre', 2, 'opticalcon', NET, 'io'), iec()]),
-    dev('la-p1', 'L-Acoustics', 'P1 (processeur)', 'Son', { u: 1, kg: 4 }, [...ins(4), ...outs(4), ...dante(), port('aes', 'AES/EBU', 'xlr3', AES, 'io'), iec()]),
     dev('lake-lm26', 'Lake', 'LM 26', 'Son', { u: 1, kg: 4 }, [...ins(2), ...outs(6), ...dante(), iec()]),
     dev('lake-lm44', 'Lake', 'LM 44', 'Son', { u: 1, kg: 4 }, [...ins(4), ...outs(4), ...dante(), iec()]),
     dev('qsc-core110f', 'QSC', 'Q-SYS Core 110f', 'Son', { u: 1, kg: 4 }, [...ins(8), ...outs(8), ...pair('lan', 'Q-LAN', 'rj45', NET), iec()]),
@@ -399,36 +243,6 @@ const SON: DeviceTemplate[] = [
     dev('yam-mrx7d', 'Yamaha', 'MRX7-D (processeur)', 'Son', { u: 1, kg: 4 }, [...ins(8), ...outs(8), ...dante(), net('Réseau', 'rj45'), iec()]),
   ]),
   ...family('Line arrays & colonnes', [
-    dev('axiom-ax1012a', 'Axiom Pro Audio', 'AX1012A (courbure constante active)', 'Son', { kg: 33 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('axiom-ax1012p', 'Axiom Pro Audio', 'AX1012P (courbure constante passive)', 'Son', { kg: 30 }, hpIn()),
-    dev('axiom-ax2010a', 'Axiom Pro Audio', 'AX2010A (line array actif)', 'Son', { kg: 35 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('axiom-ax2010p', 'Axiom Pro Audio', 'AX2010P (line array passif)', 'Son', { kg: 32 }, hpIn()),
-    dev('axiom-ax2065a', 'Axiom Pro Audio', 'AX2065A (line array compact actif)', 'Son', { kg: 18 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('axiom-ax2065p', 'Axiom Pro Audio', 'AX2065P (line array compact passif)', 'Son', { kg: 16 }, hpIn()),
-    dev('axiom-ax800a', 'Axiom Pro Audio', 'AX800A (line array compact actif)', 'Son', { kg: 20 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('db-gsl8', 'd&b audiotechnik', 'GSL8', 'Son', { kg: 80 }, hpIn('speakon8')),
-    dev('db-j8', 'd&b audiotechnik', 'J8', 'Son', { kg: 60 }, hpIn('speakon8')),
-    dev('db-ksl8', 'd&b audiotechnik', 'KSL8', 'Son', { kg: 80 }, hpIn('speakon8')),
-    dev('db-t10', 'd&b audiotechnik', 'T10', 'Son', { kg: 19 }, hpIn()),
-    dev('db-v12', 'd&b audiotechnik', 'V12', 'Son', { kg: 46 }, hpIn()),
-    dev('db-v8', 'd&b audiotechnik', 'V8', 'Son', { kg: 46 }, hpIn()),
-    dev('db-xsl8', 'd&b audiotechnik', 'XSL8', 'Son', { kg: 64 }, hpIn('speakon8')),
-    dev('db-y12', 'd&b audiotechnik', 'Y12', 'Son', { kg: 27 }, hpIn()),
-    dev('db-y8', 'd&b audiotechnik', 'Y8', 'Son', { kg: 27 }, hpIn()),
-    dev('fohhn-lfi220', 'Fohhn', 'Linea Focus LFI-220 (colonne orientable active)', 'Son', { kg: 22 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), net('Dante / Fohhn-Net', 'ethercon'), ...t1Link()]),
-    dev('fohhn-lfi450', 'Fohhn', 'Linea Focus LFI-450 (colonne orientable active)', 'Son', { kg: 40 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), net('Dante / Fohhn-Net', 'ethercon'), ...t1Link()]),
-    dev('fohhn-lx150', 'Fohhn', 'Linea LX-150 (colonne)', 'Son', { kg: 18 }, hpIn()),
-    dev('fohhn-lx220', 'Fohhn', 'Linea LX-220 (colonne)', 'Son', { kg: 25 }, hpIn()),
-    dev('fohhn-lx61', 'Fohhn', 'Linea LX-61', 'Son', { kg: 12 }, hpIn()),
-    dev('la-a10', 'L-Acoustics', 'A10 Focus / Wide', 'Son', { kg: 18 }, hpIn()),
-    dev('la-a15', 'L-Acoustics', 'A15 Focus / Wide', 'Son', { kg: 31 }, hpIn()),
-    dev('la-k1', 'L-Acoustics', 'K1', 'Son', { kg: 106 }, hpIn('speakon8')),
-    dev('la-k2', 'L-Acoustics', 'K2', 'Son', { kg: 56 }, hpIn('speakon8')),
-    dev('la-k3', 'L-Acoustics', 'K3', 'Son', { kg: 43 }, hpIn('speakon8')),
-    dev('la-kara2', 'L-Acoustics', 'Kara II', 'Son', { kg: 26 }, hpIn('speakon8')),
-    dev('la-kara2i', 'L-Acoustics', 'Kara IIi', 'Son', { kg: 25 }, hpIn('speakon8')),
-    dev('la-kiva2', 'L-Acoustics', 'Kiva II', 'Son', { kg: 14 }, hpIn()),
-    dev('la-syva', 'L-Acoustics', 'Syva (colonne)', 'Son', { kg: 20 }, hpIn()),
     dev('qsc-kla12', 'QSC', 'KLA12 (line array amplifié)', 'Son', { kg: 30 }, [...lineIn(), iec()]),
     dev('rcf-evox12', 'RCF', 'EVOX 12 (colonne amplifiée)', 'Son', { kg: 33 }, [...lineIn(), iec()]),
     dev('rcf-hdl20a', 'RCF', 'HDL 20-A (line array amplifié)', 'Son', { kg: 23 }, [...lineIn(), ...t1Link()]),
@@ -437,24 +251,6 @@ const SON: DeviceTemplate[] = [
     dev('yam-vxl1', 'Yamaha', 'VXL1-16 (colonne)', 'Son', { kg: 4 }, hpIn()),
   ]),
   ...family('Enceintes', [
-    dev('axiom-ed12p', 'Axiom Pro Audio', 'ED12P (passive)', 'Son', { kg: 18 }, hpIn()),
-    dev('axiom-ed15p', 'Axiom Pro Audio', 'ED15P (passive)', 'Son', { kg: 24 }, hpIn()),
-    dev('axiom-ed210p', 'Axiom Pro Audio', 'ED210P (passive)', 'Son', { kg: 22 }, hpIn()),
-    dev('axiom-ed23p', 'Axiom Pro Audio', 'ED23P (passive)', 'Son', { kg: 10 }, hpIn()),
-    dev('axiom-ed25p', 'Axiom Pro Audio', 'ED25P (passive)', 'Son', { kg: 12 }, hpIn()),
-    dev('axiom-ed65p', 'Axiom Pro Audio', 'ED65P (passive)', 'Son', { kg: 8 }, hpIn()),
-    dev('db-44s', 'd&b audiotechnik', '44S', 'Son', { kg: 6 }, hpIn()),
-    dev('db-a-series', 'd&b audiotechnik', 'AL60', 'Son', { kg: 33 }, hpIn()),
-    dev('db-e12', 'd&b audiotechnik', 'E12', 'Son', { kg: 23 }, hpIn()),
-    dev('db-e6', 'd&b audiotechnik', 'E6', 'Son', { kg: 7 }, hpIn()),
-    dev('db-e8', 'd&b audiotechnik', 'E8', 'Son', { kg: 14 }, hpIn()),
-    dev('db-y10p', 'd&b audiotechnik', 'Y10P', 'Son', { kg: 20 }, hpIn()),
-    dev('fohhn-lx10', 'Fohhn', 'Linea LX-10', 'Son', { kg: 5 }, hpIn()),
-    dev('la-5xt-2', 'L-Acoustics', '108P (amplifiée)', 'Son', { kg: 12 }, [...lineIn(), iec()]),
-    dev('la-5xt', 'L-Acoustics', '5XT', 'Son', { kg: 3 }, hpIn()),
-    dev('la-x20', 'L-Acoustics', 'X20', 'Son', { kg: 30 }, hpIn()),
-    dev('la-x4i', 'L-Acoustics', 'X4i', 'Son', { kg: 1 }, hpIn()),
-    dev('la-x8', 'L-Acoustics', 'X8', 'Son', { kg: 12 }, hpIn()),
     dev('qsc-cp12', 'QSC', 'CP12 (amplifiée)', 'Son', { kg: 12 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
     dev('qsc-k102', 'QSC', 'K10.2 (amplifiée)', 'Son', { kg: 15 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
     dev('qsc-k122', 'QSC', 'K12.2 (amplifiée)', 'Son', { kg: 18 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), iec()]),
@@ -478,28 +274,6 @@ const SON: DeviceTemplate[] = [
     dev('yam-dzr315', 'Yamaha', 'DZR315 (amplifiée 3 voies)', 'Son', { kg: 33 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), iec()]),
   ]),
   ...family('Subs', [
-    dev('axiom-sw1800a', 'Axiom Pro Audio', 'SW1800A (sub actif 2×18")', 'Son', { kg: 95 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('axiom-sw18a', 'Axiom Pro Audio', 'SW18A (sub actif 18")', 'Son', { kg: 60 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('axiom-sw218a', 'Axiom Pro Audio', 'SW218A (sub actif 2×18")', 'Son', { kg: 105 }, [...lineIn(), ...t1Link()]),
-    dev('axiom-sw218xa', 'Axiom Pro Audio', 'SW218XA (sub actif 2×18")', 'Son', { kg: 110 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('db-b22', 'd&b audiotechnik', 'B22-SUB', 'Son', { kg: 75 }, hpIn()),
-    dev('db-e15xsub', 'd&b audiotechnik', 'E15X-SUB', 'Son', { kg: 32 }, hpIn()),
-    dev('db-jsub', 'd&b audiotechnik', 'J-SUB', 'Son', { kg: 113 }, hpIn()),
-    dev('db-ksl-sub', 'd&b audiotechnik', 'KSL-SUB', 'Son', { kg: 130 }, hpIn('speakon8')),
-    dev('db-slsub', 'd&b audiotechnik', 'SL-SUB', 'Son', { kg: 150 }, hpIn('speakon8')),
-    dev('db-vsub', 'd&b audiotechnik', 'V-SUB', 'Son', { kg: 64 }, hpIn()),
-    dev('db-ysub', 'd&b audiotechnik', 'Y-SUB', 'Son', { kg: 50 }, hpIn()),
-    dev('fohhn-xs10', 'Fohhn', 'XS-10 (sub)', 'Son', { kg: 30 }, hpIn()),
-    dev('fohhn-xs20', 'Fohhn', 'XS-20 (sub)', 'Son', { kg: 35 }, hpIn()),
-    dev('fohhn-xs22', 'Fohhn', 'XS-22 (sub actif)', 'Son', { kg: 40 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), ...series('hp', 'Sortie satellite', 2, 'speakon', HP, 'out'), iec()]),
-    dev('fohhn-xs30', 'Fohhn', 'XS-30 (sub)', 'Son', { kg: 50 }, hpIn()),
-    dev('la-k1sb', 'L-Acoustics', 'K1-SB', 'Son', { kg: 110 }, hpIn('speakon8')),
-    dev('la-ks21', 'L-Acoustics', 'KS21', 'Son', { kg: 49 }, hpIn()),
-    dev('la-ks28', 'L-Acoustics', 'KS28', 'Son', { kg: 79 }, hpIn()),
-    dev('la-sb10i', 'L-Acoustics', 'SB10i', 'Son', { kg: 22 }, hpIn()),
-    dev('la-sb18', 'L-Acoustics', 'SB18', 'Son', { kg: 52 }, hpIn()),
-    dev('la-sb28', 'L-Acoustics', 'SB28', 'Son', { kg: 93 }, hpIn()),
-    dev('la-sb6i', 'L-Acoustics', 'SB6i', 'Son', { kg: 14 }, hpIn()),
     dev('qsc-kla181', 'QSC', 'KLA181 (sub amplifié)', 'Son', { kg: 47 }, [...lineIn(), iec()]),
     dev('qsc-ks118', 'QSC', 'KS118 (sub amplifié)', 'Son', { kg: 46 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), iec()]),
     dev('qsc-ks212c', 'QSC', 'KS212C (sub amplifié cardio)', 'Son', { kg: 52 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), iec()]),
@@ -511,12 +285,6 @@ const SON: DeviceTemplate[] = [
     dev('yam-dxs18xlf-d', 'Yamaha', 'DXS18XLF-D (sub amplifié Dante)', 'Son', { kg: 49 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...dante(), iec()]),
   ]),
   ...family('Retours', [
-    dev('db-m2', 'd&b audiotechnik', 'M2 (retour)', 'Son', { kg: 42 }, hpIn()),
-    dev('db-m4', 'd&b audiotechnik', 'M4 (retour)', 'Son', { kg: 25 }, hpIn()),
-    dev('db-m6', 'd&b audiotechnik', 'M6 (retour)', 'Son', { kg: 18 }, hpIn()),
-    dev('db-max2', 'd&b audiotechnik', 'MAX2 (retour)', 'Son', { kg: 27 }, hpIn()),
-    dev('la-x12', 'L-Acoustics', 'X12 (retour)', 'Son', { kg: 20 }, hpIn()),
-    dev('la-x15', 'L-Acoustics', 'X15 HiQ (retour)', 'Son', { kg: 21 }, hpIn()),
     dev('rcf-nx15sma', 'RCF', 'NX 15-SMA (retour amplifié)', 'Son', { kg: 23 }, [...lineIn(), ...t1Link()]),
     dev('yam-dhr12m', 'Yamaha', 'DHR12M (retour amplifié)', 'Son', { kg: 19 }, [...lineIn(), iec()]),
   ]),
@@ -869,4 +637,14 @@ const ENERGIE: DeviceTemplate[] = [
   ]),
 ]
 
-export const CATALOG: DeviceTemplate[] = [...SON, ...LUMIERE, ...VIDEO, ...RESEAU, ...ENERGIE]
+/** One file per major brand (complete ranges), merged into the departments by family. */
+const BRANDS: DeviceTemplate[] = [...SHURE, ...SENNHEISER, ...FOHHN, ...AXIOM, ...L_ACOUSTICS, ...DB, ...ADAMSON, ...ELECTRO_VOICE, ...NEXO]
+
+/** Brand files join the sound department, each model under its family, in the order families appear above. */
+function withBrands(base: DeviceTemplate[], brands: DeviceTemplate[]) {
+  const all = [...base, ...brands]
+  const order = [...new Set(all.map((t) => t.family))]
+  return all.map((t, i) => ({ t, i })).sort((a, b) => order.indexOf(a.t.family) - order.indexOf(b.t.family) || a.i - b.i).map((x) => x.t)
+}
+
+export const CATALOG: DeviceTemplate[] = [...withBrands(SON, BRANDS), ...LUMIERE, ...VIDEO, ...RESEAU, ...ENERGIE]

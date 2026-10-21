@@ -1,0 +1,93 @@
+import type { DeviceTemplate } from '../../types'
+import { A, AES, HP, NET, PWR, ins, outs, pair, net, iec, pc32, lineIn, hpIn, dev, port, series, family } from '../catalogKit'
+
+/* L-Acoustics: indicative connectors, check the manufacturer's data sheet. */
+
+const avb = () => pair('net', 'Milan-AVB', 'ethercon', NET)
+const aesIn = (n: number) => series('aes', 'Entrée AES/EBU', n, 'xlr3', AES, 'in')
+const phoenix = () => hpIn('euroblock')
+
+export const L_ACOUSTICS: DeviceTemplate[] = [
+  ...family('Amplis', [
+    dev('la-larak2', 'L-Acoustics', 'LA-RAK II (rack tournée 3 × LA12X)', 'Son', { u: 9, kg: 82 }, [...ins(12, 'In analog/AES'), ...pair('net', 'Ethernet', 'ethercon', NET), ...series('hp', 'Sortie CA-COM', 3, 'socapex', HP, 'out'), port('pwr', 'Secteur', 'p17-32a', PWR, 'in')]),
+    dev('la-larak2avb', 'L-Acoustics', 'LA-RAK II AVB (3 × LA12X + switch LS10)', 'Son', { u: 9, kg: 88 }, [...ins(4, 'In analog/AES'), ...avb(), port('fib', 'Fibre Milan', 'opticalcon', NET, 'io'), ...series('hp', 'Sortie CA-COM', 3, 'socapex', HP, 'out'), port('pwr', 'Secteur', 'p17-32a', PWR, 'in')]),
+    dev('la-larak', 'L-Acoustics', 'LA-RAK (legacy, 3 × LA8)', 'Son', { u: 9, kg: 98 }, [...ins(6, 'In analog/AES'), ...pair('net', 'L-NET', 'ethercon', NET), ...series('hp', 'Sortie CA-COM', 3, 'socapex', HP, 'out'), port('pwr', 'Secteur', 'p17-32a', PWR, 'in')]),
+    dev('la-la12x', 'L-Acoustics', 'LA12X (contrôleur amplifié 4 × 3300 W)', 'Son', { u: 2, kg: 15 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...avb(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), port('hp8', 'Sortie NL8', 'speakon8', HP, 'out'), port('pwr', 'Secteur (powerCON 32 A)', 'powercon', PWR, 'in')]),
+    dev('la-la7-16', 'L-Acoustics', 'LA7.16 (contrôleur amplifié 16 canaux)', 'Son', { u: 2, kg: 16 }, [...ins(4, 'In analog/AES'), ...avb(), ...series('hp', 'Sortie NL8', 4, 'speakon8', HP, 'out'), pc32()]),
+    dev('la-la7-16i', 'L-Acoustics', 'LA7.16i (contrôleur amplifié 16 canaux, installation)', 'Son', { u: 2, kg: 16 }, [...ins(4, 'In analog/AES', 'euroblock'), ...avb(), ...series('hp', 'Sortie HP Phoenix', 16, 'euroblock', HP, 'out'), pc32()]),
+    dev('la-la4x', 'L-Acoustics', 'LA4X (contrôleur amplifié 4 × 1000 W)', 'Son', { u: 2, kg: 12 }, [...ins(4, 'In analog/AES'), ...series('thru', 'Link', 4, 'xlr3', A, 'out'), ...avb(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
+    dev('la-la8', 'L-Acoustics', 'LA8 (contrôleur amplifié, legacy)', 'Son', { u: 2, kg: 21 }, [...ins(2, 'In analog/AES'), ...series('thru', 'Link', 2, 'xlr3', A, 'out'), ...pair('net', 'L-NET', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), port('hp8', 'Sortie NL8', 'speakon8', HP, 'out'), pc32()]),
+    dev('la-la4', 'L-Acoustics', 'LA4 (contrôleur amplifié, legacy)', 'Son', { u: 2, kg: 12 }, [...ins(2, 'In analog/AES'), ...series('thru', 'Link', 2, 'xlr3', A, 'out'), ...pair('net', 'L-NET', 'ethercon', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
+    dev('la-la2xi', 'L-Acoustics', 'LA2Xi (contrôleur amplifié 4 canaux, installation)', 'Son', { u: 1, kg: 9 }, [...ins(4, 'In analog/AES', 'euroblock'), ...avb(), ...series('hp', 'Sortie HP Phoenix', 4, 'euroblock', HP, 'out'), iec()]),
+    dev('la-la1-16i', 'L-Acoustics', 'LA1.16i (contrôleur amplifié 16 canaux, installation)', 'Son', { u: 1, kg: 9 }, [...ins(4, 'In analog/AES', 'euroblock'), ...avb(), ...series('hp', 'Sortie HP Phoenix', 16, 'euroblock', HP, 'out'), iec()]),
+  ]),
+  ...family('Processeurs', [
+    dev('la-p1', 'L-Acoustics', 'P1 (processeur Milan-AVB)', 'Son', { u: 1, kg: 4 }, [...ins(4), ...aesIn(2), ...outs(4), ...avb(), iec()]),
+    dev('la-lms', 'L-Acoustics', 'LS10 (switch Milan-AVB)', 'Son', { u: 1, kg: 3 }, [...series('p', 'Port', 8, 'ethercon', NET, 'io'), ...series('sfp', 'Fibre', 2, 'opticalcon', NET, 'io'), iec()]),
+    dev('la-lisa-p2', 'L-Acoustics', 'L-ISA Processor II (moteur spatialisation immersive)', 'Son', { u: 1, kg: 9 }, [...avb(), ...pair('dnt', 'Dante / AES67', 'ethercon', NET), net('Contrôle'), iec()]),
+    dev('la-lisa-p1', 'L-Acoustics', 'L-ISA Processor (moteur spatialisation, legacy)', 'Son', { u: 2, kg: 12 }, [...pair('madi', 'MADI', 'bnc', AES), ...pair('dnt', 'Dante', 'ethercon', NET), net('Contrôle', 'rj45'), iec()]),
+  ]),
+  ...family('Line arrays & colonnes', [
+    dev('la-l2', 'L-Acoustics', 'L2 (line source progressive, 4 cellules)', 'Son', { kg: 200 }, hpIn('speakon8').map((p) => ({ ...p, label: `${p.label} (multibroche L2, approx. NL8)` }))),
+    dev('la-l2d', 'L-Acoustics', 'L2D (line source progressive, version downfill)', 'Son', { kg: 175 }, hpIn('speakon8').map((p) => ({ ...p, label: `${p.label} (multibroche L2, approx. NL8)` }))),
+    dev('la-k1', 'L-Acoustics', 'K1 (line source 3 voies grand format)', 'Son', { kg: 106 }, hpIn('speakon8')),
+    dev('la-k2', 'L-Acoustics', 'K2 (line source 3 voies)', 'Son', { kg: 56 }, hpIn('speakon8')),
+    dev('la-k3', 'L-Acoustics', 'K3 (line source 3 voies compacte)', 'Son', { kg: 43 }, hpIn('speakon8')),
+    dev('la-k3i', 'L-Acoustics', 'K3i (line source, installation)', 'Son', { kg: 43 }, hpIn('speakon8')),
+    dev('la-kara2', 'L-Acoustics', 'Kara II (line source 2 voies)', 'Son', { kg: 26 }, hpIn('speakon8')),
+    dev('la-kara2i', 'L-Acoustics', 'Kara IIi (line source 2 voies, installation)', 'Son', { kg: 25 }, hpIn('speakon8')),
+    dev('la-kara', 'L-Acoustics', 'Kara (line source 2 voies, legacy)', 'Son', { kg: 26 }, hpIn('speakon8')),
+    dev('la-kiva2', 'L-Acoustics', 'Kiva II (line source passive ultra-compacte)', 'Son', { kg: 14 }, hpIn()),
+    dev('la-kiva', 'L-Acoustics', 'Kiva (line source passive, legacy)', 'Son', { kg: 13 }, hpIn()),
+    dev('la-kudo', 'L-Acoustics', 'Kudo (line source K-PULSE, legacy)', 'Son', { kg: 61 }, hpIn('speakon8')),
+    dev('la-vdosc', 'L-Acoustics', 'V-DOSC (line source 3 voies, legacy)', 'Son', { kg: 115 }, hpIn('speakon8')),
+    dev('la-dvdosc', 'L-Acoustics', 'dV-DOSC (line source compacte, legacy)', 'Son', { kg: 33 }, hpIn('speakon8')),
+    dev('la-a15', 'L-Acoustics', 'A15 Focus / Wide (source constante modulaire)', 'Son', { kg: 31 }, hpIn()),
+    dev('la-a15i', 'L-Acoustics', 'A15i Focus / Wide (installation)', 'Son', { kg: 30 }, phoenix()),
+    dev('la-a10', 'L-Acoustics', 'A10 Focus / Wide (source constante compacte)', 'Son', { kg: 18 }, hpIn()),
+    dev('la-a10i', 'L-Acoustics', 'A10i Focus / Wide (installation)', 'Son', { kg: 17 }, phoenix()),
+    dev('la-arcs2', 'L-Acoustics', 'ARCS II (source constante 3 voies)', 'Son', { kg: 61 }, hpIn('speakon8')),
+    dev('la-arcs-wide', 'L-Acoustics', 'ARCS Wide (source constante 2 voies)', 'Son', { kg: 26 }, hpIn()),
+    dev('la-arcs-focus', 'L-Acoustics', 'ARCS Focus (source constante 2 voies)', 'Son', { kg: 30 }, hpIn()),
+    dev('la-arcs', 'L-Acoustics', 'ARCS (source constante, legacy)', 'Son', { kg: 52 }, hpIn()),
+    dev('la-syva', 'L-Acoustics', 'Syva (colonne line source)', 'Son', { kg: 20 }, hpIn()),
+    dev('la-soka', 'L-Acoustics', 'Soka (colonne fine, installation)', 'Son', { kg: 12 }, phoenix()),
+  ]),
+  ...family('Enceintes', [
+    dev('la-x20', 'L-Acoustics', 'X20 (coaxiale 2 × 10")', 'Son', { kg: 30 }, hpIn()),
+    dev('la-x8', 'L-Acoustics', 'X8 (coaxiale 8")', 'Son', { kg: 12 }, hpIn()),
+    dev('la-x8i', 'L-Acoustics', 'X8i (coaxiale 8", installation)', 'Son', { kg: 11 }, phoenix()),
+    dev('la-x6i', 'L-Acoustics', 'X6i (coaxiale 6", installation)', 'Son', { kg: 7 }, phoenix()),
+    dev('la-x4i', 'L-Acoustics', 'X4i (coaxiale 4", installation)', 'Son', { kg: 1 }, phoenix()),
+    dev('la-5xt', 'L-Acoustics', '5XT (coaxiale 5", legacy)', 'Son', { kg: 3 }, hpIn()),
+    dev('la-8xt', 'L-Acoustics', '8XT (coaxiale 8", legacy)', 'Son', { kg: 13 }, hpIn()),
+    dev('la-12xt', 'L-Acoustics', '12XT (coaxiale 12", legacy)', 'Son', { kg: 21 }, hpIn()),
+    dev('la-syva-low', 'L-Acoustics', 'Syva Low (extension grave pour Syva)', 'Son', { kg: 26 }, hpIn()),
+    dev('la-5xt-2', 'L-Acoustics', '108P (coaxiale 8" amplifiée)', 'Son', { kg: 12 }, [...lineIn(), iec()]),
+    dev('la-112p', 'L-Acoustics', '112P (coaxiale 12" amplifiée)', 'Son', { kg: 25 }, [...lineIn(), iec()]),
+    dev('la-mtd108a', 'L-Acoustics', 'MTD108a (coaxiale 8", legacy)', 'Son', { kg: 12 }, hpIn()),
+    dev('la-mtd112b', 'L-Acoustics', 'MTD112b (coaxiale 12", legacy)', 'Son', { kg: 26 }, hpIn()),
+    dev('la-mtd115b', 'L-Acoustics', 'MTD115b (coaxiale 15", legacy)', 'Son', { kg: 33 }, hpIn()),
+  ]),
+  ...family('Subs', [
+    dev('la-ks28', 'L-Acoustics', 'KS28 (sub 2 × 18")', 'Son', { kg: 79 }, hpIn()),
+    dev('la-ks21', 'L-Acoustics', 'KS21 (sub 21")', 'Son', { kg: 49 }, hpIn()),
+    dev('la-ks21i', 'L-Acoustics', 'KS21i (sub 21", installation)', 'Son', { kg: 48 }, phoenix()),
+    dev('la-k1sb', 'L-Acoustics', 'K1-SB (extension grave 4 × 15" pour K1/K2)', 'Son', { kg: 110 }, hpIn('speakon8')),
+    dev('la-sb28', 'L-Acoustics', 'SB28 (sub 2 × 18", legacy)', 'Son', { kg: 93 }, hpIn()),
+    dev('la-sb18', 'L-Acoustics', 'SB18 (sub 18")', 'Son', { kg: 52 }, hpIn()),
+    dev('la-sb18i', 'L-Acoustics', 'SB18i (sub 18", installation)', 'Son', { kg: 46 }, hpIn()),
+    dev('la-sb15m', 'L-Acoustics', 'SB15m (sub 15" pour Kiva II)', 'Son', { kg: 41 }, hpIn()),
+    dev('la-syva-sub', 'L-Acoustics', 'Syva Sub (sub pour Syva)', 'Son', { kg: 31 }, hpIn()),
+    dev('la-sb10i', 'L-Acoustics', 'SB10i (sub 10", installation)', 'Son', { kg: 22 }, phoenix()),
+    dev('la-sb6i', 'L-Acoustics', 'SB6i (sub 6", installation)', 'Son', { kg: 14 }, phoenix()),
+    dev('la-kilo', 'L-Acoustics', 'Kilo (extension grave pour Kiva, legacy)', 'Son', { kg: 33 }, hpIn()),
+    dev('la-sb218', 'L-Acoustics', 'SB218 (sub 2 × 18" pour V-DOSC, legacy)', 'Son', { kg: 109 }, hpIn()),
+    dev('la-dvsub', 'L-Acoustics', 'dV-SUB (sub pour dV-DOSC, legacy)', 'Son', { kg: 61 }, hpIn()),
+  ]),
+  ...family('Retours', [
+    dev('la-x15', 'L-Acoustics', 'X15 HiQ (retour coaxial 15")', 'Son', { kg: 21 }, hpIn()),
+    dev('la-x12', 'L-Acoustics', 'X12 (retour coaxial 12")', 'Son', { kg: 20 }, hpIn()),
+    dev('la-115xt-hiq', 'L-Acoustics', '115XT HiQ (retour coaxial 15", legacy)', 'Son', { kg: 30 }, hpIn()),
+  ]),
+]
