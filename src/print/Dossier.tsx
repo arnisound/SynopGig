@@ -6,9 +6,9 @@ import { rackOfNode, resolveCables } from '../project'
 import RackFace from '../racks/RackFace'
 import { BannerArt, CaseFront } from '../cases/CaseSvg'
 import { bannerSize, caseHeightMm } from '../cases/geometry'
-import { viewOf, visibleParts } from '../synoptic/view'
 import type { DeviceNode, Project } from '../types'
-import { SECTIONS, type SectionId } from './sections'
+import { departmentsOf, SECTIONS, type SectionId } from './sections'
+import type { Shot } from './SynopticShooter'
 import SynopticPages, { type SynopticMode } from './SynopticPages'
 
 const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux' }
@@ -37,7 +37,19 @@ const cssString = (t: string) => t.replace(/[\\"\n\r<>]/g, ' ')
 const deviceName = (n: DeviceNode) => (n.data.brand ? `${n.data.brand} ${n.data.model}` : n.data.model)
 
 /** The complete printed file of a project; the sections are chosen by the user. */
-export default function Dossier({ project, sections, printedOn, synopticMode }: { project: Project; sections: Set<SectionId>; printedOn: string; synopticMode: SynopticMode }) {
+export default function Dossier({
+  project,
+  sections,
+  printedOn,
+  synopticMode,
+  shots,
+}: {
+  project: Project
+  sections: Set<SectionId>
+  printedOn: string
+  synopticMode: SynopticMode
+  shots: Map<string, Shot | undefined>
+}) {
   const has = (id: SectionId) => sections.has(id)
   const { nodes, edges, cases } = project
   const tables = new Map(buildTables(project).map((t) => [t.file, t]))
@@ -45,9 +57,6 @@ export default function Dossier({ project, sections, printedOn, synopticMode }: 
   const racks = cases.filter((c) => c.kind === 'rack')
   const caseOf = rackOfNode(cases)
   const zones = [...new Set(nodes.map((n) => n.data.zone || 'Sans zone'))].sort()
-  const view = viewOf(project)
-  const parts = visibleParts(project, view)
-  const departments = [...new Set(nodes.map((n) => n.data.category))].filter((c) => c !== 'Câblage' && c !== 'Autre')
   const alerts = cables.filter((c) => c.issues.length > 0)
   const date = project.date ? new Date(project.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
 
@@ -99,32 +108,9 @@ export default function Dossier({ project, sections, printedOn, synopticMode }: 
         </section>
       )}
 
-      {has('synoptic') && (
-        <SynopticPages
-          project={project}
-          title="Synoptique"
-          filter={{ usedOnly: view.compact, nodeIds: parts.nodeIds, edgeIds: parts.edgeIds }}
-          mode={synopticMode}
-          colorByCable={view.colorMode === 'cable'}
-          endTags={view.endTags}
-        />
-      )}
+      {has('synoptic') && <SynopticPages title="Synoptique" shot={shots.get('all')} mode={synopticMode} />}
 
-      {has('departments') &&
-        departments.map((d) => {
-          const p = visibleParts(project, { ...view, department: d })
-          return (
-            <SynopticPages
-              key={d}
-              project={project}
-              title={`Synoptique — ${d}`}
-              filter={{ usedOnly: true, nodeIds: p.nodeIds, edgeIds: p.edgeIds }}
-              mode={synopticMode}
-              colorByCable={view.colorMode === 'cable'}
-              endTags={view.endTags}
-            />
-          )
-        })}
+      {has('departments') && departmentsOf(project).map((d) => <SynopticPages key={d} title={`Synoptique — ${d}`} shot={shots.get(`dept:${d}`)} mode={synopticMode} />)}
 
       {has('devices') && (
         <section className="d-page">
@@ -211,9 +197,7 @@ export default function Dossier({ project, sections, printedOn, synopticMode }: 
         })}
 
       {has('cases') &&
-        cases
-          .filter((c) => c.kind !== 'rack' || !has('racks'))
-          .map((c) => {
+        cases.map((c) => {
             const content = c.devices.map((id) => nodes.find((n) => n.id === id)).filter((n) => n !== undefined)
             const weight = content.reduce((s, m) => s + (m.data.weight ?? 0), 0) + (c.emptyWeight ?? 0)
             const { bw, bh } = bannerSize(c)

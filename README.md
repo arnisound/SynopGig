@@ -142,9 +142,12 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   synoptique par département, équipements par zone (rack, IP, DMX, mode, consignes), fiche
   détaillée de chaque équipement (chaque port, son câble, où il va, sa longueur), liste de
   câbles, alertes, nomenclature, plan IP, patch DMX, bandeaux de câblage, racks faces avant
-  et arrière, flight cases (vue, cotes, poids, contenu, bandeau) et feuille de montage à
+  et arrière, flight cases et racks (vue du case, cotes, poids, contenu, bandeau) et feuille de montage à
   cocher.
-- Le synoptique tient toujours sur la feuille A4 : en entier sur une page (tourné d’un quart
+- Le synoptique imprimé est **celui de l’écran**, dessiné hors écran avec tous les réglages
+  d’affichage (tracé, couloirs et écart, étiquettes, repères, couleurs, épaisseur, signaux
+  masqués, département), en thème clair et en haute définition.
+- Il tient toujours sur la feuille A4 : en entier sur une page (tourné d’un quart
   comme un plan s’il est large), ou en **grand format** : vue d’ensemble quadrillée + planches
   A4 à assembler (A1, B1…), imprimées assez grand pour lire chaque port.
 - Chaque page porte le nom du projet, « SynopGig · Arnisound tools · arnisoundtools.com » et
