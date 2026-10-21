@@ -1,18 +1,13 @@
-// Shared by the app and by scripts/add-user-material.ts (run by a GitHub
-// workflow): imports carry their .ts extension so Node can load them as-is.
 import { CONNECTORS, SIGNALS } from '../data/connectors.ts'
 import type { Category, ConnectorType, DeviceTemplate, PortDirection, SignalType } from '../types.ts'
 import { expandGroups, type PortGroup } from './portGroups.ts'
 
 /*
- * The USER library: equipment shared by users for everyone. A user opens a
- * pre-filled GitHub issue; a workflow validates it and appends it to
- * public/user-library.json, which every copy of the app loads at start-up.
+ * The USER library: equipment shared by users for everyone. One click sends
+ * it to the SynopGig relay (worker/relay.js), which stores it with the
+ * creator's pseudo; every copy of the app loads the list at start-up.
  */
 
-export const COMMUNITY_REPO = 'arnisound/SynopGig'
-export const USER_LIBRARY_URL = `https://raw.githubusercontent.com/${COMMUNITY_REPO}/main/public/user-library.json`
-export const ISSUE_PREFIX = '[Matériel USER]'
 export const USER_FAMILY = 'Bibliothèque USER'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
@@ -20,7 +15,7 @@ const DIRS: PortDirection[] = ['in', 'out', 'io']
 
 type GroupTuple = [prefix: string, count: number, connector: ConnectorType, signal: SignalType, dir: PortDirection]
 
-/** Compact form, small enough to travel in an issue URL. */
+/** Compact form sent to the relay. */
 export interface SharedModel {
   v: 1
   brand?: string
@@ -35,9 +30,7 @@ export interface SharedModel {
 export interface UserEntry extends Omit<SharedModel, 'v'> {
   id: string
   author: string
-  github?: string
   createdAt: string
-  issue?: number
 }
 
 export interface UserLibraryFile {
@@ -75,7 +68,7 @@ export function cleanPseudo(v: unknown) {
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: string }
 
-/** Strict check of anything coming from outside (issue, network, file). */
+/** Strict check of anything coming from outside (network, file). */
 export function validateShared(raw: unknown): Result<SharedModel> {
   if (!raw || typeof raw !== 'object') return { ok: false, error: 'Bloc JSON absent ou illisible.' }
   const r = raw as Record<string, unknown>
@@ -113,11 +106,6 @@ export function validateShared(raw: unknown): Result<SharedModel> {
   }
 }
 
-/** One entry per line: readable diffs in the repository history. */
-export function serializeLibrary(lib: UserLibraryFile) {
-  return `{"version":1,"entries":[\n${lib.entries.map((e) => JSON.stringify(e)).join(',\n')}\n]}\n`
-}
-
 export function toGroups(tuples: GroupTuple[]): PortGroup[] {
   return tuples.map(([prefix, count, connector, signal, dir]) => ({ prefix, count, connector, signal, dir }))
 }
@@ -137,42 +125,4 @@ export function entryToTemplate(e: UserEntry): DeviceTemplate | undefined {
     ports: expandGroups(toGroups(v.value.groups)),
     author: cleanPseudo(e.author) || 'anonyme',
   }
-}
-
-export function issueTitle(m: SharedModel) {
-  return `${ISSUE_PREFIX} ${m.brand ? `${m.brand} ` : ''}${m.model}`
-}
-
-export function issueBody(m: SharedModel, pseudo: string) {
-  return [
-    `Pseudo: ${cleanPseudo(pseudo) || 'anonyme'}`,
-    '',
-    'Matériel proposé depuis SynopGig pour la bibliothèque USER.',
-    'Ne modifiez pas le bloc ci-dessous : il est lu automatiquement.',
-    '',
-    '```json',
-    JSON.stringify(m),
-    '```',
-  ].join('\n')
-}
-
-export function issueUrl(m: SharedModel, pseudo: string) {
-  const q = new URLSearchParams({ title: issueTitle(m), body: issueBody(m, pseudo) })
-  return `https://github.com/${COMMUNITY_REPO}/issues/new?${q.toString()}`
-}
-
-/** Reads an issue written by issueBody. */
-export function parseIssue(body: string, login: string): Result<{ model: SharedModel; author: string }> {
-  const block = body.match(/```json\s*([\s\S]*?)```/)
-  if (!block) return { ok: false, error: 'Bloc ```json introuvable dans l’issue.' }
-  let raw: unknown
-  try {
-    raw = JSON.parse(block[1])
-  } catch {
-    return { ok: false, error: 'Le bloc JSON est illisible.' }
-  }
-  const v = validateShared(raw)
-  if (!v.ok) return v
-  const pseudo = cleanPseudo(body.match(/^Pseudo\s*:\s*(.+)$/im)?.[1])
-  return { ok: true, value: { model: v.value, author: pseudo || cleanPseudo(login) || 'anonyme' } }
 }

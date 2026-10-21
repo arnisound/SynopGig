@@ -65,10 +65,12 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   Gemini personnelle, et IA intégrée à Chrome (gratuite et hors ligne, mais lente).
 - **Ma bibliothèque** : modèles perso dans la palette (« Mes modèles »), gardés d’un projet
   à l’autre, export / import JSON.
-- **Bibliothèque USER** (partagée) : « Partager dans la bibliothèque USER » ouvre une issue
-  GitHub pré-remplie avec votre pseudo ; le workflow `user-library.yml` la valide et l’ajoute
-  à `public/user-library.json`, que toutes les copies de l’application chargent au
-  démarrage (palette : « Bibliothèque USER », avec le pseudo du créateur).
+- **Bibliothèque USER** (partagée) : un clic sur « Partager dans la bibliothèque USER » et
+  le matériel est disponible pour tous les utilisateurs (palette : « Bibliothèque USER »,
+  avec le pseudo du créateur), sans compte ni validation. Le créateur peut le retirer (×)
+  depuis le navigateur qui l’a partagé. Le stockage est assuré par le relais SynopGig
+  (stockage KV gratuit de Cloudflare, voir [`worker/README.md`](worker/README.md)) ;
+  `public/user-library.json` sert de copie de secours hors ligne.
 
 ### Racks et bandeaux de câblage
 - Onglet **Racks** : vue avant et arrière, glisser-déposer du matériel unité par unité,

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { extractGemini, focusText, geminiRequest, sanitizeAi } from './ai'
-import { encodeShared, entryToTemplate, issueBody, issueUrl, parseIssue, serializeLibrary, validateShared } from './userLibrary'
+import { encodeShared, entryToTemplate, validateShared } from './userLibrary'
 
 const model = encodeShared({ brand: 'Yamaha', model: 'MG10XU', category: 'Son', family: 'Consoles', weight: 2.1 }, [
   { prefix: 'In', count: 4, connector: 'xlr-combo', signal: 'audio-analog', dir: 'in' },
@@ -8,22 +8,6 @@ const model = encodeShared({ brand: 'Yamaha', model: 'MG10XU', category: 'Son', 
 ])
 
 describe('USER library', () => {
-  it('round-trips through a GitHub issue', () => {
-    const r = parseIssue(issueBody(model, 'Théo Son'), 'arnisound')
-    expect(r.ok && r.value.author).toBe('Théo Son')
-    expect(r.ok && r.value.model).toEqual(validateShared(model).ok && model)
-  })
-
-  it('falls back to the GitHub login without a pseudo', () => {
-    const body = issueBody(model, '').replace(/^Pseudo:.*$/m, '')
-    const r = parseIssue(body, 'someone')
-    expect(r.ok && r.value.author).toBe('someone')
-  })
-
-  it('keeps issue links short', () => {
-    expect(issueUrl(model, 'x').length).toBeLessThan(2000)
-  })
-
   it('rejects bad or hostile content', () => {
     expect(validateShared({ ...model, groups: [['In', 999, 'xlr3', 'audio-analog', 'in']] }).ok).toBe(false)
     expect(validateShared({ ...model, groups: [['In', 1, '__proto__', 'audio-analog', 'in']] }).ok).toBe(false)
@@ -37,12 +21,6 @@ describe('USER library', () => {
     expect(t?.ports).toHaveLength(6)
     expect(t?.author).toBe('Théo')
     expect(entryToTemplate({ ...model, id: 'custom-7', author: 'x', createdAt: '' })).toBeUndefined()
-  })
-
-  it('writes one entry per line', () => {
-    const s = serializeLibrary({ version: 1, entries: [{ ...model, id: 'user-1', author: 'a', createdAt: 'd' }, { ...model, id: 'user-2', author: 'b', createdAt: 'd' }] })
-    expect(JSON.parse(s).entries).toHaveLength(2)
-    expect(s.split('\n')).toHaveLength(5)
   })
 })
 

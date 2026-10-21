@@ -1,8 +1,11 @@
-# Relais IA gratuit de SynopGig
+# Relais gratuit de SynopGig (IA et bibliothèque USER)
 
 Ce petit programme (un *Worker* Cloudflare, gratuit) donne l’analyse IA des fiches techniques
 à **tout le monde, sur tous les navigateurs, sans rien configurer** : c’est lui qui garde en
 secret la clé IA gratuite du propriétaire du site. Réponse en 1 à 3 secondes.
+
+Il héberge aussi la **bibliothèque USER** : le matériel que les utilisateurs partagent en un
+clic depuis l’onglet Bibliothèque, visible par tous, avec le pseudo du créateur.
 
 Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantanée).
 
@@ -25,6 +28,24 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
    `src/library/ai.ts`) : actuellement `https://synopgig-ia.arnisound-tools.workers.dev`.
    Si vous changez de Worker, modifiez cette ligne (ou définissez `VITE_AI_PROXY_URL` au
    moment du build).
+
+## Activer la bibliothèque USER (une fois, 2 minutes)
+
+1. Dans Cloudflare : *Storage & Databases* → *KV* (ou *Workers & Pages* → *KV*) →
+   *Create* (ou *Create a namespace*), nom `SYNOPGIG_LIBRARY` → *Add*.
+2. Dans le Worker `synopgig-ia` : *Settings* → *Bindings* → *Add* → *KV namespace*.
+   *Variable name* : `LIBRARY` (exactement), *KV namespace* : `SYNOPGIG_LIBRARY` → *Save*
+   (ou *Deploy*).
+3. Recollez le contenu de [`relay.js`](relay.js) dans *Edit code* → *Deploy*.
+
+`/diagnostic` affiche alors `bibliotheque_user : OK (0 matériels partagés)`. Sans cette
+liaison, l’application fonctionne mais le bouton « Partager » répond « Partage non
+configuré ».
+
+Modération : chaque matériel est une clé `entry:user-…` du stockage KV. Pour en retirer
+un, supprimez sa clé dans *KV* → `SYNOPGIG_LIBRARY`, puis ouvrez `/diagnostic` : la liste
+visible par tous est reconstruite. Le quota gratuit
+(100 000 lectures et 1 000 écritures par jour) suffit largement.
 
 ## Changer d’hébergement
 
@@ -51,7 +72,8 @@ votre compte. Les clés ne sont jamais affichées.
 
 - Quotas gratuits : de l’ordre de 1 000 analyses par jour avec Groq, quelques centaines avec
   Gemini. Largement assez pour démarrer.
-- Le relais n’accepte que les analyses de fiches, venant du site (et de `localhost:5173` pour
-  le développement), avec au plus 30 analyses par heure et par visiteur.
+- Le relais n’accepte que les analyses de fiches et les partages de matériel, venant du site
+  (et de `localhost:5173` pour le développement), avec au plus 30 analyses et 20 partages
+  par heure et par visiteur ; la bibliothèque USER est limitée à 5 000 matériels.
 - Pour un autre domaine, ajoutez une variable `ALLOWED_ORIGINS` (adresses séparées par des
   virgules).

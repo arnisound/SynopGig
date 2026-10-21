@@ -7,7 +7,8 @@ import { availableEngines, ENGINE_LABELS, GEMINI_DEFAULT_MODEL, type AiResult, t
 import { findKnownModels } from './findKnown'
 import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
-import { encodeShared, issueUrl } from './userLibrary'
+import { encodeShared } from './userLibrary'
+import type { UserLibrary } from './useUserLibrary'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
 const DIRS: Record<PortDirection, string> = { in: 'Entrée', out: 'Sortie', io: 'Bidirectionnel' }
@@ -85,7 +86,7 @@ const fromResult = (r: AiResult, rows: Row[]): Draft => ({
 interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
-  userLibrary: { templates: DeviceTemplate[]; status: 'loading' | 'live' | 'offline' }
+  userLibrary: UserLibrary
 }
 
 export default function LibraryPage({ project, setProject, userLibrary }: Props) {
@@ -103,6 +104,7 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
   const [geminiKey, setGeminiKey] = useState(() => store.get('ai.geminiKey'))
   const [geminiModel, setGeminiModel] = useState(() => store.get('ai.geminiModel', GEMINI_DEFAULT_MODEL))
   const [pseudo, setPseudo] = useState(() => store.get('pseudo'))
+  const [sharing, setSharing] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
   const mine = project.customTemplates
 
@@ -236,9 +238,21 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
       return
     }
     const t = toTemplate(draft)
-    const url = issueUrl(encodeShared(t, draft.rows), pseudo)
-    window.open(url, '_blank', 'noopener')
-    setStatus('Une page GitHub s’est ouverte avec le matériel déjà rempli : cliquez sur « Submit new issue ». Il sera ajouté à la bibliothèque USER automatiquement, en quelques minutes.')
+    setSharing(true)
+    setStatus('Partage en cours…')
+    userLibrary
+      .share(encodeShared(t, draft.rows), pseudo)
+      .then((s) => setStatus(`« ${s.brand ? `${s.brand} ` : ''}${s.model} » est partagé : il est disponible pour tous dans la palette (« Bibliothèque USER »), avec votre pseudo.`))
+      .catch((e) => setStatus(`Partage impossible : ${e instanceof Error ? e.message : String(e)}`))
+      .finally(() => setSharing(false))
+  }
+
+  const unshare = (t: DeviceTemplate) => {
+    if (!confirm(`Retirer « ${t.model} » de la bibliothèque USER ? Il ne sera plus proposé aux autres utilisateurs.`)) return
+    userLibrary
+      .remove(t.id)
+      .then(() => setStatus(`« ${t.model} » a été retiré de la bibliothèque USER.`))
+      .catch((e) => setStatus(`Retrait impossible : ${e instanceof Error ? e.message : String(e)}`))
   }
 
   const remove = (t: DeviceTemplate) => {
@@ -306,11 +320,18 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
         <input className="search" placeholder="Rechercher (marque, modèle, pseudo)…" value={userQuery} onChange={(e) => setUserQuery(e.target.value)} />
         <div className="pick-list">
           {userResults.map((t) => (
-            <button key={t.id} className="palette-item" title="Copier dans ma bibliothèque pour le modifier" onClick={() => { setDraft(fromTemplate(t, false)); setSuggestions([]); setStatus(`Copie de ${t.model} (par ${t.author}) : modifiez-la puis enregistrez.`) }}>
-              <span className="dot" style={{ background: CATEGORY_COLORS[t.category] }} />
-              <span>{t.brand ? <b>{t.brand} </b> : null}{t.model}</span>
-              <small>par {t.author} · {t.ports.length} ports</small>
-            </button>
+            <div key={t.id} className="pick-row">
+              <button className="palette-item" title="Copier dans ma bibliothèque pour le modifier" onClick={() => { setDraft(fromTemplate(t, false)); setSuggestions([]); setStatus(`Copie de ${t.model} (par ${t.author}) : modifiez-la puis enregistrez.`) }}>
+                <span className="dot" style={{ background: CATEGORY_COLORS[t.category] }} />
+                <span>{t.brand ? <b>{t.brand} </b> : null}{t.model}</span>
+                <small>par {t.author} · {t.ports.length} ports</small>
+              </button>
+              {userLibrary.isMine(t.id) && (
+                <button className="icon" title="Retirer de la bibliothèque USER (partagé par vous)" onClick={() => unshare(t)}>
+                  ×
+                </button>
+              )}
+            </div>
           ))}
           {userLibrary.templates.length === 0 && <p className="muted small">Encore vide : soyez le premier à partager !</p>}
         </div>
@@ -484,8 +505,8 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
               <button className="primary" disabled={!draft.model.trim()} onClick={save}>
                 {draft.id ? 'Enregistrer les modifications' : 'Enregistrer dans ma bibliothèque'}
               </button>
-              <button disabled={!draft.model.trim() || draft.rows.length === 0} onClick={share} title="Ouvre une issue GitHub pré-remplie (compte GitHub nécessaire)">
-                Partager dans la bibliothèque USER
+              <button disabled={!draft.model.trim() || draft.rows.length === 0 || sharing} onClick={share} title="Rend ce matériel disponible pour tous les utilisateurs, avec votre pseudo">
+                {sharing ? 'Partage…' : 'Partager dans la bibliothèque USER'}
               </button>
             </div>
           </section>

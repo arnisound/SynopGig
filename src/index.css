@@ -374,6 +374,8 @@ button.primary { background: var(--accent); color: #fff; border-color: var(--acc
 .hole-form { background: var(--bg); padding: 10px; border-radius: 8px; margin-top: 6px; }
 .pick-list { max-height: 320px; overflow: auto; margin-top: 6px; }
 .pick-list .palette-item span b { font-weight: 700; }
+.pick-row { display: flex; align-items: center; gap: 2px; }
+.pick-row .palette-item { flex: 1; min-width: 0; }
 table.wiring { font-size: 12px; }
 table.wiring td { padding: 4px 6px; }
 table.wiring select { width: 100%; }

@@ -1,24 +1,69 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { DeviceTemplate } from '../types'
-import { entryToTemplate, USER_LIBRARY_URL, type UserLibraryFile } from './userLibrary'
+import { AI_PROXY_URL } from './ai'
+import { entryToTemplate, type SharedModel, type UserEntry, type UserLibraryFile } from './userLibrary'
+
+/** The USER library is kept by the SynopGig relay, next to the AI. */
+export const libraryUrl = (base = AI_PROXY_URL) => (base ? `${base.replace(/\/+$/, '')}/library` : '')
+
+// Keys that let this browser remove what it shared: { [entry id]: key }.
+const KEYS = 'synopgig.sharedKeys'
+const readKeys = (): Record<string, string> => {
+  try {
+    const v = JSON.parse(localStorage.getItem(KEYS) ?? '{}')
+    return v && typeof v === 'object' ? v : {}
+  } catch {
+    return {}
+  }
+}
+const writeKeys = (keys: Record<string, string>) => {
+  try {
+    localStorage.setItem(KEYS, JSON.stringify(keys))
+  } catch {
+    // Storage blocked: the equipment stays shared, it just cannot be removed from here.
+  }
+}
+
+async function call(url: string, init: RequestInit) {
+  const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json' } })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw Object.assign(new Error(data?.error?.message ?? `erreur ${res.status}`), { status: res.status })
+  return data
+}
+
+/** Shares a model with everyone; returns the stored entry and the key to remove it. */
+export async function shareModel(model: SharedModel, pseudo: string, url = libraryUrl()): Promise<{ entry: UserEntry; token: string }> {
+  if (!url) throw new Error('le partage n’est pas disponible sur cette version.')
+  return call(url, { method: 'POST', body: JSON.stringify({ model, pseudo }) })
+}
+
+export async function unshareModel(id: string, token: string, url = libraryUrl()) {
+  await call(`${url}/${encodeURIComponent(id)}`, { method: 'DELETE', body: JSON.stringify({ token }) }).catch((e) => {
+    // Already gone: nothing left to remove.
+    if (e.status !== 404) throw e
+  })
+}
+
+const toTemplates = (entries: unknown) => (Array.isArray(entries) ? (entries as UserEntry[]) : []).map(entryToTemplate).filter((t) => t !== undefined)
 
 /**
- * Loads the USER library: the live file from the repository (updated as soon
- * as a user shares equipment), else the copy shipped with the site.
+ * Loads the USER library from the relay (live: what users shared), else the
+ * copy shipped with the site. Sharing and removing update the list at once.
  */
 export function useUserLibrary() {
   const [templates, setTemplates] = useState<DeviceTemplate[]>([])
   const [status, setStatus] = useState<'loading' | 'live' | 'offline'>('loading')
+  const [keys, setKeys] = useState(readKeys)
 
   useEffect(() => {
     let cancelled = false
     const load = async (url: string) => {
       const res = await fetch(url, { cache: 'no-cache' })
       if (!res.ok) throw new Error(String(res.status))
-      const data = (await res.json()) as UserLibraryFile
-      return (Array.isArray(data.entries) ? data.entries : []).map(entryToTemplate).filter((t) => t !== undefined)
+      return toTemplates(((await res.json()) as UserLibraryFile).entries)
     }
-    load(USER_LIBRARY_URL)
+    const live = libraryUrl()
+    ;(live ? load(live) : Promise.reject(new Error('no relay')))
       .then((list) => !cancelled && (setTemplates(list), setStatus('live')))
       .catch(() =>
         load(`${import.meta.env.BASE_URL}user-library.json`)
@@ -30,5 +75,36 @@ export function useUserLibrary() {
     }
   }, [])
 
-  return { templates, status }
+  const share = useCallback(async (model: SharedModel, pseudo: string) => {
+    const { entry, token } = await shareModel(model, pseudo)
+    const t = entryToTemplate(entry)
+    if (!t) throw new Error('réponse du relais illisible.')
+    setTemplates((list) => [...list.filter((x) => x.id !== t.id), t])
+    setKeys((k) => {
+      const next = { ...k, [entry.id]: token }
+      writeKeys(next)
+      return next
+    })
+    return t
+  }, [])
+
+  const remove = useCallback(
+    async (id: string) => {
+      const token = keys[id]
+      if (!token) throw new Error('ce matériel a été partagé depuis un autre navigateur.')
+      await unshareModel(id, token)
+      setTemplates((list) => list.filter((x) => x.id !== id))
+      setKeys((k) => {
+        const next = { ...k }
+        delete next[id]
+        writeKeys(next)
+        return next
+      })
+    },
+    [keys],
+  )
+
+  return { templates, status, share, remove, isMine: (id: string) => id in keys }
 }
+
+export type UserLibrary = ReturnType<typeof useUserLibrary>
