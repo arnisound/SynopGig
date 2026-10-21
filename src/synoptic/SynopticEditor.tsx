@@ -19,14 +19,17 @@ import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } fro
 import { SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { connectPorts, createCase, createDevice, resolveCables, setPanel, slug, uid } from '../project'
-import type { CableEdge, DeviceNode, DeviceTemplate, Project } from '../types'
+import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
 import DeviceNodeView from './DeviceNodeView'
 import RackFrameView, { type FrameNode } from './RackFrameView'
+import { DEFAULT_VIEW, viewOf, visibleParts } from './view'
 import { ViewContext } from './viewContext'
 import Inspector from './Inspector'
 import Palette, { DND_TYPE } from './Palette'
 
 const nodeTypes = { device: DeviceNodeView, rackFrame: RackFrameView }
+
+const DEPARTMENTS: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie']
 
 type FlowNode = DeviceNode | FrameNode
 
@@ -41,8 +44,24 @@ interface Props {
 
 export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
-  const [compact, setCompact] = useState(false)
   const { nodes, edges } = project
+  const view = viewOf(project)
+  const { compact } = view
+  const setView = (patch: Partial<SynopticView>) => setProject((p) => ({ ...p, view: { ...viewOf(p), ...patch } }))
+  const [viewPanel, setViewPanel] = useState(false)
+  const parts = useMemo(() => visibleParts(project, view), [project, view])
+
+  // "Isolate the selection": the selected devices, their cables and what they reach.
+  const isolated = useMemo(() => {
+    const sel = nodes.filter((n) => n.selected).map((n) => n.id)
+    if (!view.focusSelection || sel.length === 0) return undefined
+    const set = new Set(sel)
+    const cablesIn = new Set<string>()
+    for (const e of edges) if (set.has(e.source) || set.has(e.target)) cablesIn.add(e.id)
+    const reach = new Set(sel)
+    for (const e of edges) if (cablesIn.has(e.id)) reach.add(e.source).add(e.target)
+    return { nodes: reach, edges: cablesIn }
+  }, [nodes, edges, view.focusSelection])
 
   const cables = useMemo(() => resolveCables(nodes, edges), [nodes, edges])
   const cableByEdge = useMemo(() => new Map(cables.map((c) => [c.edge.id, c])), [cables])
@@ -87,24 +106,38 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         const danger = c?.issues.some((i) => i.severity === 'danger')
         const warn = (c?.issues.length ?? 0) > 0
         const lit = highlight.has(e.id)
+        const faded = isolated && !isolated.edges.has(e.id)
+        const tag = view.labels === 'none' ? '' : `${e.data?.cableId ?? ''}${view.labels === 'full' && e.data?.length ? ` · ${e.data.length} m` : ''}`
         return {
           ...e,
-          type: 'smoothstep',
-          animated: lit,
-          label: `${e.data?.cableId ?? ''}${e.data?.length ? ` · ${e.data.length} m` : ''}${warn ? ' ⚠' : ''}`,
+          type: view.edgeStyle,
+          hidden: !parts.edgeIds.has(e.id),
+          animated: lit || (view.flow && !faded),
+          label: faded ? undefined : `${tag}${warn && view.labels !== 'none' ? ' ⚠' : ''}` || undefined,
           labelStyle: { fill: danger ? '#e5484d' : warn ? '#f76b15' : 'var(--text)', fontWeight: 600, fontSize: 11 },
           labelBgStyle: { fill: 'var(--panel)' },
           labelBgPadding: [4, 2] as [number, number],
           markerEnd: { type: MarkerType.ArrowClosed, color },
           style: {
             stroke: color,
-            strokeWidth: e.selected || lit ? 4 : 2,
+            strokeWidth: e.selected || lit ? view.thickness + 2 : view.thickness,
             strokeDasharray: warn ? '6 4' : undefined,
             filter: danger ? 'drop-shadow(0 0 3px #e5484d)' : undefined,
+            opacity: faded ? 0.12 : 1,
           },
         }
       }),
-    [edges, cableByEdge, highlight],
+    [edges, cableByEdge, highlight, view.edgeStyle, view.labels, view.thickness, view.flow, parts, isolated],
+  )
+
+  const viewNodes = useMemo(
+    () =>
+      nodes.map((n) => {
+        const hidden = !parts.nodeIds.has(n.id)
+        const dim = parts.context.has(n.id) || (isolated && !isolated.nodes.has(n.id))
+        return hidden || dim ? { ...n, hidden, className: dim ? 'dimmed' : undefined } : n
+      }),
+    [nodes, parts, isolated],
   )
 
   // A frame around each rack's devices; dragging its title moves the whole rack.
@@ -257,9 +290,12 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       <div className="canvas" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
         <div className="canvas-toolbar">
           <label className="toggle">
-            <input type="checkbox" checked={compact} onChange={(e) => setCompact(e.target.checked)} />
+            <input type="checkbox" checked={compact} onChange={(e) => setView({ compact: e.target.checked })} />
             Masquer les ports libres
           </label>
+          <button className={viewPanel ? 'active' : ''} onClick={() => setViewPanel((v) => !v)} aria-expanded={viewPanel}>
+            Affichage ▾
+          </button>
           <span className={issueCount ? 'badge warn' : 'badge ok'}>
             {issueCount ? `${issueCount} liaison(s) à vérifier` : 'Toutes les liaisons sont conformes'}
           </span>
@@ -269,9 +305,45 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           <button onClick={exportPng}>Exporter PNG</button>
           <button onClick={() => fitView({ duration: 400 })}>Tout voir</button>
         </div>
+        {viewPanel && (
+          <div className="view-panel">
+            <label className="field">
+              <span>Département</span>
+              <select value={view.department} onChange={(e) => setView({ department: e.target.value as Category | 'all' })}>
+                <option value="all">Tout le projet</option>
+                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d} seulement</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Tracé des câbles</span>
+              <select value={view.edgeStyle} onChange={(e) => setView({ edgeStyle: e.target.value as SynopticView['edgeStyle'] })}>
+                <option value="smoothstep">Angles arrondis</option>
+                <option value="step">Angles droits</option>
+                <option value="default">Courbes</option>
+                <option value="straight">Lignes droites</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Étiquettes</span>
+              <select value={view.labels} onChange={(e) => setView({ labels: e.target.value as SynopticView['labels'] })}>
+                <option value="full">Repère et longueur</option>
+                <option value="id">Repère seul</option>
+                <option value="none">Aucune</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Épaisseur des câbles</span>
+              <input type="range" min={1} max={6} step={0.5} value={view.thickness} onChange={(e) => setView({ thickness: Number(e.target.value) })} />
+            </label>
+            <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler l’appareil sélectionné</label>
+            <label className="toggle"><input type="checkbox" checked={view.flow} onChange={(e) => setView({ flow: e.target.checked })} /> Animer le sens du signal</label>
+            <p className="muted small">Cliquez sur un signal de la légende pour masquer ou afficher ses câbles.</p>
+            <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser l’affichage</button>
+          </div>
+        )}
         <ViewContext.Provider value={{ used, compact, highlight }}>
           <ReactFlow
-            nodes={[...frames, ...nodes] as FlowNode[]}
+            nodes={[...frames, ...viewNodes] as FlowNode[]}
             edges={viewEdges}
             nodeTypes={nodeTypes}
             onNodesChange={onNodesChange}
@@ -290,12 +362,20 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           </ReactFlow>
         </ViewContext.Provider>
         <div className="legend">
-          {Object.values(SIGNALS).map((s) => (
-            <span key={s.label}>
-              <i style={{ background: s.color }} />
-              {s.label}
-            </span>
-          ))}
+          {(Object.entries(SIGNALS) as [SignalType, (typeof SIGNALS)[SignalType]][]).map(([k, s]) => {
+            const off = view.hiddenSignals.includes(k)
+            return (
+              <button
+                key={k}
+                className={off ? 'off' : ''}
+                title={off ? 'Afficher ces câbles' : 'Masquer ces câbles'}
+                onClick={() => setView({ hiddenSignals: off ? view.hiddenSignals.filter((x) => x !== k) : [...view.hiddenSignals, k] })}
+              >
+                <i style={{ background: s.color }} />
+                {s.label}
+              </button>
+            )
+          })}
         </div>
       </div>
       <Inspector

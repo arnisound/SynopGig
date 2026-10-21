@@ -186,6 +186,26 @@ export interface GuideProgress {
   [stepId: string]: boolean
 }
 
+/** How the synoptic shows the cabling, saved with each project. */
+export interface SynopticView {
+  /** Cable path: curved, right angles (rounded or sharp) or straight. */
+  edgeStyle: 'default' | 'smoothstep' | 'step' | 'straight'
+  /** Cable labels: tag and length, tag only, or nothing. */
+  labels: 'full' | 'id' | 'none'
+  /** Line width, px. */
+  thickness: number
+  /** Signals whose cables are hidden. */
+  hiddenSignals: SignalType[]
+  /** One department only (its devices, and what they are plugged into, dimmed). */
+  department: Category | 'all'
+  /** A selected device dims every cable that does not reach it. */
+  focusSelection: boolean
+  /** Animated cables, in the direction of the signal. */
+  flow: boolean
+  /** Hide unused ports. */
+  compact: boolean
+}
+
 export interface Project {
   version: 1
   name: string
@@ -196,4 +216,5 @@ export interface Project {
   cases: FlightCase[]
   progress: GuideProgress
   customTemplates: DeviceTemplate[]
+  view?: Partial<SynopticView>
 }

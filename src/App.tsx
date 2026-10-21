@@ -6,6 +6,7 @@ import { LIBRARY } from './data/library'
 import TechGuide from './guide/TechGuide'
 import LibraryPage from './library/LibraryPage'
 import { useUserLibrary } from './library/useUserLibrary'
+import DossierDialog from './print/DossierDialog'
 import Lists from './lists/Lists'
 import RackBuilder from './racks/RackBuilder'
 import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
@@ -26,6 +27,7 @@ const TABS: { id: Tab; label: string }[] = [
 export default function App() {
   const [project, setProject] = useState<Project>(loadProject)
   const [tab, setTab] = useState<Tab>('synoptic')
+  const [dossier, setDossier] = useState(false)
   const [focus, setFocus] = useState<string[]>([])
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -114,9 +116,11 @@ export default function App() {
           <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Démo</button>
           <button onClick={() => fileInput.current?.click()}>Ouvrir</button>
           <button onClick={() => download(`${slug(project.name)}.synopgig.json`, JSON.stringify(project, null, 2), 'application/json')}>Enregistrer</button>
+          <button onClick={() => setDossier(true)} title="Dossier technique complet à imprimer ou en PDF">Dossier PDF</button>
           <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => { importFile(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </header>
+      {dossier && <DossierDialog project={project} onClose={() => setDossier(false)} />}
       <main>
         {tab === 'synoptic' && (
           <ReactFlowProvider>

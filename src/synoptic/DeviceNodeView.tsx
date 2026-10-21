@@ -3,6 +3,7 @@ import { memo, useContext } from 'react'
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import type { DeviceNode, Port } from '../types'
+import { portSides } from './portLayout'
 import { ViewContext } from './viewContext'
 
 function PortRow({ port, side, used }: { port: Port; side: 'left' | 'right'; used: boolean }) {
@@ -25,15 +26,7 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
   const { used, compact, highlight } = useContext(ViewContext)
   const usedHere = used.get(id) ?? new Set<string>()
   const visible = compact ? data.ports.filter((p) => usedHere.has(p.id)) : data.ports
-  // Devices without plain inputs (switches, laptops...) get their
-  // bidirectional ports spread on both sides to keep cables short.
-  const spread = !data.ports.some((p) => p.dir === 'in' && p.signal !== 'power')
-  const io = data.ports.filter((p) => p.dir === 'io')
-  // Patch panels: inside face on the left, outside face on the right.
-  const onLeft = (p: Port) =>
-    p.face ? p.face === 'int' : p.dir === 'in' || (spread && p.dir === 'io' && io.indexOf(p) % 2 === 0)
-  const inputs = visible.filter(onLeft)
-  const outputs = visible.filter((p) => !onLeft(p))
+  const { left: inputs, right: outputs } = portSides(data.ports, visible)
   const hidden = data.ports.length - visible.length
   const addr = [
     data.config.ip,

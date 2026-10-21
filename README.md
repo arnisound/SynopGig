@@ -17,7 +17,13 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Repères câbles automatiques (C001, C002…), longueur, note pour le technicien.
 - Configuration par équipement : zone, IP, univers/adresse DMX, mode/preset, consignes.
 - Ports éditables et sauvegarde d'un équipement comme nouveau modèle.
-- Option « masquer les ports libres », export PNG du synoptique.
+- **Options d’affichage** (bouton « Affichage », enregistrées avec chaque projet) : un seul
+  département (son, lumière, vidéo, réseau, énergie, avec en grisé ce qui y est branché),
+  tracé des câbles (angles arrondis, angles droits, courbes, lignes droites), étiquettes
+  (repère et longueur, repère seul, aucune), épaisseur, isolement de l’appareil sélectionné,
+  animation du sens du signal, ports libres masqués. Un clic sur un signal de la légende
+  masque ou affiche ses câbles.
+- Export PNG du synoptique.
 
 ### Base d'équipements
 - 1 371 modèles de marque (73 marques), plus des modèles génériques. La palette est triée
@@ -121,6 +127,15 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   dans un autre case), vue rack ouvert avec occupation en U, poids du contenu.
 - Impression des bandeaux **à taille réelle** avec étiquette de contenu, liste de
   colisage CSV.
+
+### Dossier technique complet (bouton « Dossier PDF »)
+- Un seul document à imprimer ou à enregistrer en PDF, parties au choix : couverture et
+  sommaire, synoptique (vue d’ensemble vectorielle, selon l’affichage choisi) et un
+  synoptique par département, équipements par zone (rack, IP, DMX, mode, consignes), fiche
+  détaillée de chaque équipement (chaque port, son câble, où il va, sa longueur), liste de
+  câbles, alertes, nomenclature, plan IP, patch DMX, bandeaux de câblage, racks faces avant
+  et arrière, flight cases (vue, cotes, poids, contenu, bandeau) et feuille de montage à
+  cocher.
 
 ### Projet
 - Sauvegarde automatique dans le navigateur, enregistrement/ouverture d'un

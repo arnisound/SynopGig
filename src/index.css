@@ -139,6 +139,27 @@ main { flex: 1; min-height: 0; overflow: auto; }
   max-width: calc(100% - 280px);
 }
 .legend i { display: inline-block; width: 14px; height: 3px; margin-right: 4px; vertical-align: middle; }
+.legend button { border: none; background: none; padding: 0; font-size: 11px; color: var(--text); cursor: pointer; }
+.legend button.off { opacity: 0.35; text-decoration: line-through; }
+.canvas-toolbar button.active { border-color: var(--accent); color: var(--accent); }
+.view-panel {
+  position: absolute;
+  top: 52px;
+  left: 8px;
+  z-index: 6;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 20px #0003;
+}
+.view-panel .field select, .view-panel .field input { width: 100%; }
+.view-panel .toggle { border: none; padding: 0; }
+.react-flow__node.dimmed { opacity: 0.3; }
 .react-flow__controls button { background: var(--panel); color: var(--text); border-color: var(--border); }
 .react-flow__minimap { background: var(--panel); }
 .react-flow__edge-textbg { fill: var(--panel); }
@@ -434,3 +455,62 @@ table.groups td:nth-child(2) { width: 70px; }
 .case-import input, .case-import textarea { width: 100%; }
 button.link { border: none; background: none; padding: 0; color: var(--accent); text-align: left; font-size: 12px; cursor: pointer; }
 .status-line { margin: 0; color: var(--muted); }
+
+/* ---- Modal */
+.modal-backdrop { position: fixed; inset: 0; z-index: 50; background: #0007; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 18px; width: min(520px, 100%); max-height: calc(100vh - 32px); overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.modal h3 { margin: 0; }
+.modal p { margin: 0; }
+.modal-list { display: flex; flex-direction: column; gap: 4px; }
+.modal-list .toggle { border: none; padding: 3px 0; }
+.modal .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* ---- Printed file (dossier) */
+.dossier { display: none; }
+@media print {
+  @page { margin: 12mm; }
+  body.printing-dossier #root { display: none !important; }
+  body.printing-dossier .dossier { display: block; }
+  .dossier { font-family: Arial, Helvetica, sans-serif; color: #111; background: #fff; font-size: 10pt; }
+  .dossier .d-page { break-before: page; }
+  .dossier .d-page:first-child { break-before: auto; }
+  .dossier h1 { font-size: 30pt; margin: 8mm 0 2mm; }
+  .dossier h2 { font-size: 15pt; margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 2px solid #c8892b; }
+  .dossier h2 small, .dossier h3 small { font-size: 9pt; font-weight: normal; color: #555; }
+  .dossier h3 { font-size: 11pt; margin: 4mm 0 2mm; }
+  .dossier table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  .dossier th, .dossier td { border: 1px solid #bbb; padding: 1.2mm 1.6mm; text-align: left; vertical-align: top; }
+  .dossier th { background: #eee; }
+  .dossier tr { break-inside: avoid; }
+  .dossier .muted { color: #666; }
+  .dossier .d-block { break-inside: avoid-page; margin-bottom: 4mm; }
+  .dossier .d-device { border-left: 4px solid #999; padding-left: 3mm; break-inside: avoid; }
+  .dossier .d-config { margin: 0 0 2mm; color: #333; }
+  .d-cover { text-align: center; padding-top: 20mm; }
+  .d-cover .d-sub { font-size: 14pt; color: #333; margin: 0; }
+  .d-cover .d-kind { font-size: 12pt; letter-spacing: 3px; text-transform: uppercase; color: #c8892b; font-weight: 700; margin: 6mm 0 10mm; }
+  .d-stats { display: flex; justify-content: center; gap: 8mm; margin: 0 0 12mm; }
+  .d-stats div { border: 1px solid #ccc; border-radius: 3mm; padding: 3mm 5mm; min-width: 22mm; }
+  .d-stats dt { font-size: 8pt; color: #666; }
+  .d-stats dd { margin: 1mm 0 0; font-size: 18pt; font-weight: 700; }
+  .d-cover h2 { border: none; text-align: left; width: 120mm; margin: 0 auto 2mm; }
+  .d-toc { text-align: left; width: 120mm; margin: 0 auto; line-height: 1.8; }
+  .d-foot { margin-top: 20mm; font-size: 8pt; color: #666; }
+  .synoptic-svg { width: 100%; height: auto; max-height: 235mm; display: block; }
+  .d-legend { display: flex; flex-wrap: wrap; gap: 4mm; font-size: 8pt; margin-top: 3mm; }
+  .d-legend i { display: inline-block; width: 6mm; height: 1mm; margin-right: 1.5mm; vertical-align: middle; }
+  .d-rack { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+  .d-rack > div { break-inside: avoid; }
+  .d-case { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+  .d-case .case-svg { width: 100%; height: auto; }
+  .d-specs { display: grid; grid-template-columns: auto 1fr; gap: 1mm 4mm; margin: 0; }
+  .d-specs div { display: contents; }
+  .d-specs dt { color: #666; }
+  .d-specs dd { margin: 0; font-weight: 700; }
+  .d-banner { width: 100%; height: auto; margin-top: 6mm; border: 1px dashed #999; }
+  .d-steps { list-style: none; padding: 0; margin: 0; }
+  .d-steps li { display: flex; gap: 3mm; border-left: 3px solid #999; padding: 1.2mm 0 1.2mm 3mm; margin-bottom: 1mm; break-inside: avoid; }
+  .d-check { font-size: 13pt; line-height: 1; }
+  .d-detail { color: #444; white-space: pre-line; }
+  .d-warn { color: #b54708; }
+}
