@@ -1,5 +1,5 @@
 /*
- * SynopGig AI relay: a free Cloudflare Worker that reads data sheets with the
+ * SynopGig AI relay (SynopGig, an Arnisound tools app — arnisoundtools.com): a free Cloudflare Worker that reads data sheets with the
  * site owner's free AI key, so the public has nothing to set up and every
  * browser gets an answer in a couple of seconds. Setup in worker/README.md.
  *
@@ -14,7 +14,7 @@
  * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
  */
 
-const DEFAULT_ORIGINS = 'https://arnisound.github.io,http://localhost:5173'
+const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
 const PROMPT_START = 'You are a live sound, lighting and video technician'
 const MAX_TEXT = 20000
 const MAX_PDF_BASE64 = 11_000_000
@@ -219,7 +219,7 @@ async function readPage(raw) {
   let res
   try {
     res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SynopGig/1.0; +https://arnisound.github.io/SynopGig/)', Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound tools; +https://arnisoundtools.com)', Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
       redirect: 'follow',
       signal: AbortSignal.timeout(10000),
     })

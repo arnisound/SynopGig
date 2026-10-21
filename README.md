@@ -1,5 +1,7 @@
 # SynopGig
 
+*Une application **Arnisound tools** — [arnisoundtools.com](https://arnisoundtools.com).*
+
 Application web pour **préparer et transmettre un montage technique de spectacle** :
 synoptique de câblage, guide pas-à-pas pour les techniciens, listes générées
 automatiquement et conception de **flight cases avec bandeaux personnalisés**.
@@ -21,7 +23,8 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   département (son, lumière, vidéo, réseau, énergie, avec en grisé ce qui y est branché),
   tracé des câbles (angles arrondis, angles droits, courbes, lignes droites), étiquettes
   (repère et longueur, repère seul, aucune), épaisseur, couleur par signal ou **une couleur
-  par câble**, **tracés séparés** (chaque câble a son propre couloir, aucun segment commun),
+  par câble**, **tracés séparés** (chaque câble a son propre couloir, aucun segment commun,
+  **écart réglable** de 6 à 40 px),
   **repère aux deux extrémités**, isolement de la sélection (appareil ou câble), animation
   du sens du signal, ports libres masqués. Un clic sur un signal de la légende masque ou
   affiche ses câbles.
@@ -141,6 +144,11 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   câbles, alertes, nomenclature, plan IP, patch DMX, bandeaux de câblage, racks faces avant
   et arrière, flight cases (vue, cotes, poids, contenu, bandeau) et feuille de montage à
   cocher.
+- Le synoptique tient toujours sur la feuille A4 : en entier sur une page (tourné d’un quart
+  comme un plan s’il est large), ou en **grand format** : vue d’ensemble quadrillée + planches
+  A4 à assembler (A1, B1…), imprimées assez grand pour lire chaque port.
+- Chaque page porte le nom du projet, « SynopGig · Arnisound tools · arnisoundtools.com » et
+  son numéro.
 
 ### Projet
 - Sauvegarde automatique dans le navigateur, enregistrement/ouverture d'un

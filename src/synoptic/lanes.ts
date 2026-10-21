@@ -14,16 +14,15 @@ export interface Lane {
   offset: number
 }
 
-const GAP = 10
 const MARGIN = 16
 
 /**
  * Gives every right-angle cable its own vertical run: when two runs would
  * sit on the same x over overlapping heights, the next one moves aside by
- * one lane. Cables that leave a device on the same side get different
+ * one lane (GAP px, set by the user). Cables that leave a device on the same side get different
  * stub lengths, so their first bends do not merge either.
  */
-export function allocateLanes(cables: CableEnds[]): Map<string, Lane> {
+export function allocateLanes(cables: CableEnds[], GAP = 10): Map<string, Lane> {
   const lanes = new Map<string, Lane>()
   const placed: { x: number; y0: number; y1: number }[] = []
   const stubs = new Map<string, number>()
@@ -37,7 +36,7 @@ export function allocateLanes(cables: CableEnds[]): Map<string, Lane> {
     const key = `${Math.round(c.sx / 40)}|${c.sp}`
     const k = stubs.get(key) ?? 0
     stubs.set(key, k + 1)
-    const offset = 16 + (k % 6) * 6
+    const offset = 16 + (k % 6) * Math.max(4, GAP * 0.6)
     if (!forward(c)) {
       lanes.set(c.id, { offset })
       continue

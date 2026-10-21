@@ -33,8 +33,9 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
 
 ## Changer d’hébergement
 
-Le relais n’accepte que les sites listés. Quand l’application quitte GitHub Pages, ajoutez
-sa nouvelle adresse dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type
+Le relais n’accepte que les sites listés. Par défaut : `https://arnisoundtools.com`,
+`https://www.arnisoundtools.com`, GitHub Pages et `localhost:5173`. Pour une autre adresse
+(par exemple un sous-domaine), ajoutez-la dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type
 **Text**, nom `ALLOWED_ORIGINS`, valeur par exemple
 `https://synopgig.fr,https://arnisound.github.io,http://localhost:5173` (adresses séparées par
 des virgules, sans `/` final).

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Project } from '../types'
 import Dossier from './Dossier'
+import type { SynopticMode } from './SynopticPages'
 import { SECTIONS, type SectionId } from './sections'
 
 const KEY = 'synopgig.dossier'
@@ -21,6 +22,21 @@ export default function DossierDialog({ project, onClose }: { project: Project; 
   const [chosen, setChosen] = useState<Set<SectionId>>(() => new Set(readChoice()))
   const [printing, setPrinting] = useState(false)
   const [printedOn, setPrintedOn] = useState('')
+  const [synopticMode, setSynopticMode] = useState<SynopticMode>(() => {
+    try {
+      return localStorage.getItem(`${KEY}.synoptic`) === 'tiles' ? 'tiles' : 'fit'
+    } catch {
+      return 'fit'
+    }
+  })
+  const chooseMode = (m: SynopticMode) => {
+    setSynopticMode(m)
+    try {
+      localStorage.setItem(`${KEY}.synoptic`, m)
+    } catch {
+      // Storage blocked: the choice lasts for this visit only.
+    }
+  }
 
   const save = (next: Set<SectionId>) => {
     setChosen(next)
@@ -68,6 +84,13 @@ export default function DossierDialog({ project, onClose }: { project: Project; 
             </label>
           ))}
         </div>
+        <label className="field">
+          <span>Synoptique sur papier</span>
+          <select value={synopticMode} onChange={(e) => chooseMode(e.target.value as SynopticMode)}>
+            <option value="fit">Tout sur une page A4 (portrait ou paysage selon sa forme)</option>
+            <option value="tiles">Grand format : vue d’ensemble + planches A4 à assembler, lisibles</option>
+          </select>
+        </label>
         <p className="muted small">Le synoptique imprimé suit l’affichage choisi sur le synoptique (département, signaux masqués, ports libres).</p>
         <div className="actions">
           <button onClick={() => save(new Set(ALL))}>Tout cocher</button>
@@ -75,7 +98,7 @@ export default function DossierDialog({ project, onClose }: { project: Project; 
           <button className="primary" disabled={chosen.size === 0} onClick={() => { setPrintedOn(new Date().toLocaleDateString('fr-FR')); setPrinting(true) }}>Imprimer / PDF</button>
         </div>
       </div>
-      {printing && createPortal(<Dossier project={project} sections={chosen} printedOn={printedOn} />, document.body)}
+      {printing && createPortal(<Dossier project={project} sections={chosen} printedOn={printedOn} synopticMode={synopticMode} />, document.body)}
     </div>
   )
 }

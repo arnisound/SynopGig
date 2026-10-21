@@ -103,7 +103,8 @@ export default function CaseEditor({ project, setProject }: Props) {
         )
         return `<section><h2>${escapeHtml(c.name)} — bandeau ${bw / 10} × ${bh / 10} cm</h2>${svg}
           <div class="label"><b>${escapeHtml(project.name)}</b> · Case n° ${escapeHtml(c.number)} · ${escapeHtml(c.name)}
-          <ul>${contents.map((l) => `<li>${escapeHtml(String(l))}</li>`).join('')}</ul></div></section>`
+          <ul>${contents.map((l) => `<li>${escapeHtml(String(l))}</li>`).join('')}</ul>
+          <div class="maker">SynopGig · Arnisound tools · arnisoundtools.com</div></div></section>`
       })
       .join('')
     const w = window.open('', '_blank')
@@ -117,6 +118,7 @@ export default function CaseEditor({ project, setProject }: Props) {
         @media screen { svg { max-width: 100%; height: auto; } }
         .label { margin-top: 10mm; border: 1px dashed #999; padding: 4mm; width: 90mm; font-size: 11px; }
         .label ul { margin: 2mm 0 0; padding-left: 4mm; }
+        .label .maker { margin-top: 2mm; font-size: 7px; color: #888; }
       </style></head><body>${html}<script>window.onload = () => window.print()</script></body></html>`)
     w.document.close()
   }

@@ -1,5 +1,5 @@
 /*
- * SynopGig USER library: a free Cloudflare Worker that keeps the equipment
+ * SynopGig USER library (SynopGig, an Arnisound tools app — arnisoundtools.com): a free Cloudflare Worker that keeps the equipment
  * users share with everyone, with the creator's pseudo. Independent from the
  * AI relay (relay.js). Setup in worker/README.md.
  *
@@ -13,7 +13,7 @@
  *   GET /diagnostic  check the storage and refresh the list
  */
 
-const DEFAULT_ORIGINS = 'https://arnisound.github.io,http://localhost:5173'
+const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
 
 const CATEGORIES = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
 const MAX_ENTRIES = 5000

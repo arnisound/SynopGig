@@ -11,6 +11,7 @@ export const DEFAULT_VIEW: SynopticView = {
   flow: false,
   compact: false,
   lanes: true,
+  laneGap: 12,
   endTags: false,
   colorMode: 'signal',
 }

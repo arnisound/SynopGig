@@ -75,6 +75,9 @@ main { flex: 1; min-height: 0; overflow: auto; }
 }
 .brand { font-weight: 800; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
 .logo { width: 28px; height: 28px; display: block; }
+.brand > span { display: flex; flex-direction: column; line-height: 1.05; }
+.maker { font-size: 10px; font-weight: 600; color: var(--muted); text-decoration: none; letter-spacing: 0.2px; }
+.maker:hover { color: var(--accent); }
 .project-name { font-weight: 600; width: 200px; }
 .project-meta { width: 140px; }
 .tabs { display: flex; gap: 2px; margin: 0 auto; background: var(--bg); padding: 3px; border-radius: 8px; }
@@ -279,6 +282,9 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
   .page.cases { grid-template-columns: 1fr; }
   .tabs { margin: 0; }
 }
+
+/* Every printed page names the app and its maker. */
+@page { @bottom-right { content: "SynopGig · Arnisound tools · arnisoundtools.com"; font: 7pt Arial, sans-serif; color: #777; } }
 
 @media print {
   .no-print, .topbar { display: none !important; }
@@ -495,8 +501,12 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
   .d-stats dd { margin: 1mm 0 0; font-size: 18pt; font-weight: 700; }
   .d-cover h2 { border: none; text-align: left; width: 120mm; margin: 0 auto 2mm; }
   .d-toc { text-align: left; width: 120mm; margin: 0 auto; line-height: 1.8; }
-  .d-foot { margin-top: 20mm; font-size: 8pt; color: #666; }
-  .synoptic-svg { width: 100%; height: auto; max-height: 235mm; display: block; }
+  .d-maker { margin-top: 18mm; font-size: 10pt; color: #333; }
+  .d-foot { margin-top: 3mm; font-size: 8pt; color: #666; }
+  .synoptic-svg { display: block; margin: 0 auto; max-width: 100%; }
+  /* Wide drawings turn a quarter on the portrait sheet, like a plan: same result in every browser. */
+  .dossier .d-wide { height: 262mm; overflow: hidden; }
+  .dossier .d-wide > .d-turn { width: 262mm; height: 186mm; transform-origin: top left; transform: translateY(262mm) rotate(-90deg); }
   .d-legend { display: flex; flex-wrap: wrap; gap: 4mm; font-size: 8pt; margin-top: 3mm; }
   .d-legend i { display: inline-block; width: 6mm; height: 1mm; margin-right: 1.5mm; vertical-align: middle; }
   .d-rack { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }

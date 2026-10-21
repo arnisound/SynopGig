@@ -104,8 +104,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         const [id, sx, sy, sp, tx, ty, tp] = r.split(',')
         return { id, sx: +sx, sy: +sy, sp: sp as CableEnds['sp'], tx: +tx, ty: +ty, tp: tp as CableEnds['tp'] }
       })
-    return allocateLanes(ends)
-  }, [endsKey])
+    return allocateLanes(ends, view.laneGap)
+  }, [endsKey, view.laneGap])
 
   const cables = useMemo(() => resolveCables(nodes, edges), [nodes, edges])
   const cableByEdge = useMemo(() => new Map(cables.map((c) => [c.edge.id, c])), [cables])
@@ -429,6 +429,12 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
               </select>
             </label>
             <label className="toggle"><input type="checkbox" checked={view.lanes} onChange={(e) => setView({ lanes: e.target.checked })} /> Séparer les tracés (aucun segment commun)</label>
+            {view.lanes && (
+              <label className="field">
+                <span>Écart entre les câbles : {view.laneGap} px</span>
+                <input type="range" min={6} max={40} step={2} value={view.laneGap} onChange={(e) => setView({ laneGap: Number(e.target.value) })} />
+              </label>
+            )}
             <label className="toggle"><input type="checkbox" checked={view.endTags} onChange={(e) => setView({ endTags: e.target.checked })} /> Repère aux deux extrémités</label>
             <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler la sélection (appareil ou câble)</label>
             <label className="toggle"><input type="checkbox" checked={view.flow} onChange={(e) => setView({ flow: e.target.checked })} /> Animer le sens du signal</label>

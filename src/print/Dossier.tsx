@@ -9,7 +9,7 @@ import { bannerSize, caseHeightMm } from '../cases/geometry'
 import { viewOf, visibleParts } from '../synoptic/view'
 import type { DeviceNode, Project } from '../types'
 import { SECTIONS, type SectionId } from './sections'
-import SynopticSvg from './SynopticSvg'
+import SynopticPages, { type SynopticMode } from './SynopticPages'
 
 const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux' }
 
@@ -31,10 +31,13 @@ function Table({ block }: { block: Pick<TableBlock, 'head' | 'rows'> }) {
   )
 }
 
+/** Text safe inside a CSS string. */
+const cssString = (t: string) => t.replace(/[\\"\n\r<>]/g, ' ')
+
 const deviceName = (n: DeviceNode) => (n.data.brand ? `${n.data.brand} ${n.data.model}` : n.data.model)
 
 /** The complete printed file of a project; the sections are chosen by the user. */
-export default function Dossier({ project, sections, printedOn }: { project: Project; sections: Set<SectionId>; printedOn: string }) {
+export default function Dossier({ project, sections, printedOn, synopticMode }: { project: Project; sections: Set<SectionId>; printedOn: string; synopticMode: SynopticMode }) {
   const has = (id: SectionId) => sections.has(id)
   const { nodes, edges, cases } = project
   const tables = new Map(buildTables(project).map((t) => [t.file, t]))
@@ -72,6 +75,8 @@ export default function Dossier({ project, sections, printedOn }: { project: Pro
 
   return (
     <div className="dossier">
+      {/* Page footer of the file: project on the left, the app, its maker and the page number on the right. */}
+      <style>{`@page { size: A4; @bottom-left { content: "${cssString(project.name)}${project.venue ? ` — ${cssString(project.venue)}` : ''} · dossier technique"; font: 7pt Arial, sans-serif; color: #777; } @bottom-right { content: "SynopGig · Arnisound tools · arnisoundtools.com · page " counter(page) " / " counter(pages); font: 7pt Arial, sans-serif; color: #777; } }`}</style>
       {has('cover') && (
         <section className="d-page d-cover">
           <img src={`${import.meta.env.BASE_URL}icon.png`} alt="" width={90} height={90} />
@@ -89,28 +94,35 @@ export default function Dossier({ project, sections, printedOn }: { project: Pro
           <ol className="d-toc">
             {toc.map((s) => <li key={s.id}>{s.label}</li>)}
           </ol>
-          <p className="d-foot">Édité le {printedOn} avec SynopGig. Connectique indicative : vérifiez les fiches constructeur.</p>
+          <p className="d-maker">SynopGig, une application <b>Arnisound tools</b> — arnisoundtools.com</p>
+          <p className="d-foot">Édité le {printedOn}. Connectique indicative : vérifiez les fiches constructeur.</p>
         </section>
       )}
 
       {has('synoptic') && (
-        <section className="d-page">
-          <h2>Synoptique</h2>
-          <SynopticSvg project={project} usedOnly={view.compact} nodeIds={parts.nodeIds} edgeIds={parts.edgeIds} colorByCable={view.colorMode === 'cable'} endTags={view.endTags} />
-          <div className="d-legend">
-            {Object.values(SIGNALS).map((s) => <span key={s.label}><i style={{ background: s.color }} />{s.label}</span>)}
-          </div>
-        </section>
+        <SynopticPages
+          project={project}
+          title="Synoptique"
+          filter={{ usedOnly: view.compact, nodeIds: parts.nodeIds, edgeIds: parts.edgeIds }}
+          mode={synopticMode}
+          colorByCable={view.colorMode === 'cable'}
+          endTags={view.endTags}
+        />
       )}
 
       {has('departments') &&
         departments.map((d) => {
           const p = visibleParts(project, { ...view, department: d })
           return (
-            <section key={d} className="d-page">
-              <h2>Synoptique — {d}</h2>
-              <SynopticSvg project={project} usedOnly nodeIds={p.nodeIds} edgeIds={p.edgeIds} colorByCable={view.colorMode === 'cable'} endTags={view.endTags} />
-            </section>
+            <SynopticPages
+              key={d}
+              project={project}
+              title={`Synoptique — ${d}`}
+              filter={{ usedOnly: true, nodeIds: p.nodeIds, edgeIds: p.edgeIds }}
+              mode={synopticMode}
+              colorByCable={view.colorMode === 'cable'}
+              endTags={view.endTags}
+            />
           )
         })}
 

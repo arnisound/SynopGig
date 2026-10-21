@@ -206,6 +206,8 @@ export interface SynopticView {
   compact: boolean
   /** Right-angle cables each get their own route, never a shared segment. */
   lanes: boolean
+  /** Space between two separated cables, px. */
+  laneGap: number
   /** Cable tag repeated next to both ports. */
   endTags: boolean
   /** Colour by signal, or one colour per cable. */
