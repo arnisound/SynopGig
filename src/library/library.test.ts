@@ -73,6 +73,52 @@ describe('parseDatasheet', () => {
   })
 })
 
+describe('parseDatasheet on a busy mixer sheet', () => {
+  const r = parseDatasheet(
+    `Yamaha MG10XU 10-channel mixing console
+     Mic inputs: 4 x XLR/TRS combo
+     Gain range: 0 to 98 dB
+     Mic input EIN: -128 dBu
+     Input impedance: 3 kΩ
+     Inputs 1-4: phantom power +48 V
+     Dynamic range: 98 dB, frequency response 20 Hz – 20 kHz
+     Stereo inputs: 3 x 1/4" TRS (L/R)
+     Main outputs: 2 x XLR, 2 x RCA
+     Monitor out: 1 x 1/4" TRS
+     Phones: 1/4" stereo jack
+     USB-C audio interface
+     MIDI in/out (DIN)
+     Power: DC 12 V adaptor
+     Weight 2.1 kg`,
+    BRANDS,
+  )
+  const find = (connector: string, dir: string) => r.groups.find((g) => g.connector === connector && g.dir === dir)
+
+  it('never turns measurements into ports', () => {
+    expect(r.groups.every((g) => g.count < 20)).toBe(true)
+  })
+
+  it('reads combo, RCA, USB-C and MIDI', () => {
+    expect(find('xlr-combo', 'in')?.count).toBe(4)
+    expect(find('xlr3', 'out')?.count).toBe(2)
+    expect(find('rca', 'out')?.count).toBe(2)
+    expect(find('jack', 'in')?.count).toBe(3)
+    expect(find('usb-c', 'io')?.count).toBe(1)
+    expect(find('midi', 'in')).toBeDefined()
+    expect(find('midi', 'out')).toBeDefined()
+  })
+
+  it('reads the headphone jack as an output and counts no extra XLR', () => {
+    expect(find('jack', 'out')?.count).toBe(1)
+    expect(find('xlr3', 'in')).toBeUndefined()
+  })
+
+  it('flags counts it had to guess', () => {
+    expect(find('xlr-combo', 'in')?.guessed).toBe(false)
+    expect(find('usb-c', 'io')?.guessed).toBe(true)
+  })
+})
+
 describe('port groups', () => {
   it('expands and regroups', () => {
     const groups = [

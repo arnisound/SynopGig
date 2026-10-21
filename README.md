@@ -39,6 +39,10 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   - **Réseau** : switchs **PoE et fibre** (Luminex GigaCore, Netgear M4250, Yamaha SWR/SWP1,
     Cisco, Ubiquiti), **Agora Ghost G2**, convertisseurs fibre, injecteur PoE, touret fibre.
   - Lumière (grandMA3, ChamSys, Avolites, ETC, Robe, Martin, Claypaky…) et énergie.
+- Connectique : XLR 3/4/5, combo XLR/jack, mini-XLR, jack, mini-jack, RCA, Toslink/ADAT,
+  MIDI, Speakon NL4/NL8, bornes HP, bornier Euroblock, etherCON/RJ45, opticalCON, fibre LC
+  et SMPTE, BNC, SDI, HDMI, DisplayPort, DVI, VGA, USB/USB-C, Sub-D 9/25, RMP 54, powerCON,
+  IEC, P17, Socapex… Un combo accepte une fiche XLR ou jack sans alerte d’adaptateur.
 - Signal **HF (antenne)** avec connecteurs BNC / N : la chaîne antenne → distributeur →
   récepteur est vérifiée comme les autres liaisons.
 - La connectique est indicative : vérifiez la fiche constructeur. Tout équipement
@@ -50,7 +54,10 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - **Analyse de fiche technique**, gratuite et hors ligne : un PDF est lu dans le navigateur
   (pdf.js), ou bien on colle le texte des caractéristiques. L’outil repère la marque, le
   modèle, les connecteurs (nombre et sens), la hauteur en U et le poids, et pré-remplit la
-  fiche ; chaque ligne détectée affiche le passage lu pour vérification.
+  fiche ; chaque ligne détectée affiche le passage lu pour vérification. Les quantités ne
+  sont lues que si elles sont explicites (« 4 x XLR », « 16 inputs », « Inputs 1-4 ») :
+  les mesures (gain, impédance, réponse…) ne deviennent jamais des ports. Une ligne dont la
+  quantité est devinée ou contradictoire est marquée « à vérifier ».
 - **Partir d’un modèle existant** pour le copier et le modifier.
 - Les modèles perso apparaissent dans la palette (« Mes modèles »), restent d’un projet à
   l’autre, et s’exportent / s’importent en JSON.

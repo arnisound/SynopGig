@@ -9,6 +9,7 @@ export type SignalType =
   | 'video'
   | 'power'
   | 'rf'
+  | 'control'
 
 export type ConnectorType =
   | 'xlr3'
@@ -35,6 +36,22 @@ export type ConnectorType =
   | 'dc'
   | 'minijack'
   | 'rmp54'
+  | 'xlr-combo'
+  | 'xlr4'
+  | 'mini-xlr'
+  | 'rca'
+  | 'toslink'
+  | 'midi'
+  | 'euroblock'
+  | 'binding-post'
+  | 'db9'
+  | 'db25'
+  | 'displayport'
+  | 'dvi'
+  | 'vga'
+  | 'usb-c'
+  | 'lc-fiber'
+  | 'smpte-fiber'
 
 export type PortDirection = 'in' | 'out' | 'io'
 

@@ -12,7 +12,10 @@ const BRANDS = [...new Set(LIBRARY.map((t) => t.brand).filter((b): b is string =
 
 interface Row extends PortGroup {
   key: string
-  evidence?: string
+  /** From the data sheet analysis: lines read, and why the row needs a look. */
+  evidence?: string[]
+  guessed?: boolean
+  conflicting?: number[]
 }
 
 interface Draft {
@@ -27,7 +30,7 @@ interface Draft {
   source?: string
 }
 
-const row = (g: PortGroup & { evidence?: string }): Row => ({ ...g, key: uid() })
+const row = (g: PortGroup & Partial<Pick<Row, 'evidence' | 'guessed' | 'conflicting'>>): Row => ({ ...g, key: uid() })
 
 const blank = (): Draft => ({
   brand: '',
@@ -80,9 +83,10 @@ export default function LibraryPage({ project, setProject }: Props) {
       rows: r.groups.map(row),
       source: label,
     })
+    const doubtful = r.groups.filter((g) => g.guessed || g.conflicting.length || g.count > 32).length
     setStatus(
       r.groups.length
-        ? `${r.groups.length} groupe(s) de ports détecté(s) dans ${label}. Vérifiez et corrigez avant d’enregistrer.`
+        ? `${r.groups.length} groupe(s) de ports détecté(s) dans ${label}${doubtful ? `, dont ${doubtful} à vérifier (marqués en orange)` : ''}. Relisez avant d’enregistrer.`
         : `Aucun connecteur reconnu dans ${label}. Complétez à la main, ou collez le tableau des caractéristiques.`,
     )
   }
@@ -269,7 +273,7 @@ export default function LibraryPage({ project, setProject }: Props) {
                   <tr key={r.key}>
                     <td>
                       <input value={r.prefix} onChange={(e) => setRow(r.key, { prefix: e.target.value })} />
-                      {r.evidence && <small className="evidence" title={r.evidence}>lu : « {r.evidence} »</small>}
+                      <RowNotes r={r} />
                     </td>
                     <td><input type="number" min={1} max={256} value={r.count} onChange={(e) => setRow(r.key, { count: Number(e.target.value) })} /></td>
                     <td>
@@ -308,5 +312,24 @@ export default function LibraryPage({ project, setProject }: Props) {
         )}
       </div>
     </div>
+  )
+}
+
+/** What the analysis read for a row, and why it may be wrong. */
+function RowNotes({ r }: { r: Row }) {
+  const warnings = [
+    r.guessed && 'quantité non trouvée, 1 par défaut',
+    r.conflicting?.length && `autres valeurs lues : ${r.conflicting.join(', ')}`,
+    r.count > 32 && 'nombre élevé',
+  ].filter(Boolean)
+  if (!r.evidence?.length && !warnings.length) return null
+  return (
+    <details className="evidence">
+      <summary>
+        {warnings.length ? <span className="doubt">à vérifier</span> : <span className="sure">lu dans la fiche</span>}
+        {warnings.length > 0 && ` · ${warnings.join(' · ')}`}
+      </summary>
+      {r.evidence?.map((l) => <div key={l}>« {l} »</div>)}
+    </details>
   )
 }

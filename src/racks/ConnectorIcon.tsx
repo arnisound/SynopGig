@@ -60,6 +60,46 @@ export default function ConnectorIcon({ connector, signal, size = 24, wired, tit
     case 'rmp54':
       face = <>{pins(8, 6)}{pins(5, 3)}<circle cx={12} cy={12} r={1.2} fill="#c9ccd1" /></>
       break
+    case 'xlr-combo':
+      face = <>{pins(3, 5.5)}<circle cx={12} cy={12} r={2.2} fill="#111" stroke="#c9ccd1" strokeWidth={1.2} /></>
+      break
+    case 'xlr4':
+      face = <>{pins(4, 4.5)}</>
+      break
+    case 'mini-xlr':
+      face = <><circle cx={12} cy={12} r={4} fill="none" stroke="#c9ccd1" strokeWidth={1} />{pins(3, 2.2)}</>
+      break
+    case 'midi':
+      face = <path d="M7 14 a5 5 0 0 1 10 0" stroke="#c9ccd1" strokeWidth={2} fill="none" strokeDasharray="1.5 2" />
+      break
+    case 'rca':
+      face = <><circle cx={12} cy={12} r={4.5} fill="#c9ccd1" /><circle cx={12} cy={12} r={1.5} fill="#111" /></>
+      break
+    case 'toslink':
+      face = <path d="M8 8 h8 v6 l-2 2 h-4 l-2 -2 z" fill="#ffc53d" />
+      break
+    case 'euroblock':
+      face = <><rect x={5} y={9} width={14} height={6} rx={1} fill="#2f8f3f" />{[8, 12, 16].map((x) => <circle key={x} cx={x} cy={12} r={1.3} fill="#c9ccd1" />)}</>
+      break
+    case 'binding-post':
+      face = <>{[9, 15].map((x) => <circle key={x} cx={x} cy={12} r={2.6} fill={x === 9 ? '#e5484d' : '#111'} stroke="#c9ccd1" />)}</>
+      break
+    case 'db9':
+    case 'db25':
+    case 'vga':
+    case 'dvi':
+      face = <path d="M5 9 h14 l-2 6 h-10 z" fill="none" stroke="#c9ccd1" strokeWidth={1.8} />
+      break
+    case 'displayport':
+      face = <path d="M6 9 h12 v6 h-10 l-2 -2 z" fill="#c9ccd1" />
+      break
+    case 'usb-c':
+      face = <rect x={7} y={10} width={10} height={4} rx={2} fill="#c9ccd1" />
+      break
+    case 'lc-fiber':
+    case 'smpte-fiber':
+      face = <>{[9, 15].map((x) => <rect key={x} x={x - 2} y={10} width={4} height={4} fill="#ffc53d" />)}</>
+      break
     case 'jack':
     case 'minijack':
       face = <circle cx={12} cy={12} r={3} fill="#111" stroke="#c9ccd1" strokeWidth={1.5} />

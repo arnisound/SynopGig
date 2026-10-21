@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { checkLink } from './data/connectors'
 import { LIBRARY } from './data/library'
 import { emptyPanel, fillHoles, HOLE_TYPES, panelPorts } from './data/panels'
 import {
@@ -154,5 +155,17 @@ describe('wireless and multipin chains', () => {
     expect(has('Axiom Pro Audio', 'AX2010A')).toBe(true)
     expect(has('Agora', 'Ghost G2')).toBe(true)
     expect(has('Shure', 'UA844')).toBe(true)
+  })
+})
+
+describe('combo inputs', () => {
+  it('take an XLR or a jack plug without adapter warning', () => {
+    const combo = { id: 'in', label: 'In', connector: 'xlr-combo' as const, signal: 'audio-analog' as const, dir: 'in' as const }
+    const xlr = { id: 'out', label: 'Out', connector: 'xlr3' as const, signal: 'audio-analog' as const, dir: 'out' as const }
+    const jack = { ...xlr, connector: 'jack' as const }
+    const rca = { ...xlr, connector: 'rca' as const }
+    expect(checkLink(xlr, combo)).toEqual([])
+    expect(checkLink(jack, combo)).toEqual([])
+    expect(checkLink(rca, combo).map((i) => i.message)).toEqual(['Adaptateur nécessaire : RCA (cinch) → Combo XLR / jack'])
   })
 })

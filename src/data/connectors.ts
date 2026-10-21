@@ -9,6 +9,7 @@ export const SIGNALS: Record<SignalType, { label: string; color: string }> = {
   video: { label: 'Vidéo', color: '#8e4ec6' },
   power: { label: 'Énergie', color: '#8b8d98' },
   rf: { label: 'HF (antenne)', color: '#12a594' },
+  control: { label: 'Contrôle (MIDI, GPIO, série)', color: '#d6409f' },
 }
 
 export const CONNECTORS: Record<ConnectorType, string> = {
@@ -36,12 +37,31 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   dc: 'Alim DC (bloc)',
   minijack: 'Mini-jack 3,5',
   rmp54: 'RMP 54 pts (multipaire 16 voies)',
+  'xlr-combo': 'Combo XLR / jack',
+  xlr4: 'XLR 4 pts',
+  'mini-xlr': 'Mini-XLR (TA3 / TA4 / TA5)',
+  rca: 'RCA (cinch)',
+  toslink: 'Optique Toslink / ADAT',
+  midi: 'DIN 5 (MIDI)',
+  euroblock: 'Bornier Euroblock / Phoenix',
+  'binding-post': 'Bornes HP (banane / à vis)',
+  db9: 'Sub-D 9 (RS-232 / RS-422)',
+  db25: 'Sub-D 25 (DB25, 8 voies)',
+  displayport: 'DisplayPort',
+  dvi: 'DVI',
+  vga: 'VGA (HD-15)',
+  'usb-c': 'USB-C',
+  'lc-fiber': 'Fibre LC duplex',
+  'smpte-fiber': 'Fibre SMPTE 311 (caméra)',
 }
 
 /** Connectors that physically mate together without an adapter. */
 const MATING: ConnectorType[][] = [
   ['rj45', 'ethercon'],
   ['powercon-true1'],
+  // A combo socket takes either an XLR or a jack plug.
+  ['xlr-combo', 'xlr3'],
+  ['xlr-combo', 'jack'],
 ]
 
 function mates(a: ConnectorType, b: ConnectorType) {

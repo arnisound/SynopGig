@@ -25,6 +25,11 @@ export const HOLE_TYPES: HoleType[] = [
   { connector: 'rmp54', signal: 'audio-analog', label: 'RMP 54 pts (16 voies)' },
   { connector: 'hdmi', signal: 'video', label: 'HDMI' },
   { connector: 'jack', signal: 'audio-analog', label: 'Jack 6.35' },
+  { connector: 'xlr-combo', signal: 'audio-analog', label: 'Combo XLR / jack' },
+  { connector: 'rca', signal: 'audio-analog', label: 'RCA (cinch)' },
+  { connector: 'toslink', signal: 'audio-digital', label: 'Toslink / ADAT' },
+  { connector: 'usb-c', signal: 'network', label: 'USB-C' },
+  { connector: 'displayport', signal: 'video', label: 'DisplayPort' },
   { connector: 'usb', signal: 'network', label: 'USB' },
 ]
 

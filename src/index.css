@@ -408,5 +408,9 @@ table.wiring select { width: 100%; }
 table.groups td { padding: 4px; vertical-align: top; }
 table.groups input, table.groups select { width: 100%; }
 table.groups td:nth-child(2) { width: 70px; }
-.evidence { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.evidence { color: var(--muted); font-size: 11px; margin-top: 3px; max-width: 320px; }
+.evidence summary { cursor: pointer; }
+.evidence div { padding: 2px 0 0 10px; overflow-wrap: anywhere; }
+.evidence .doubt { color: #fff; background: var(--accent); padding: 0 6px; border-radius: 8px; font-weight: 600; }
+.evidence .sure { color: var(--ok); font-weight: 600; }
 @media (max-width: 1000px) { .page.library { grid-template-columns: 1fr; } }
