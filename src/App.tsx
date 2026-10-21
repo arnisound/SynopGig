@@ -96,7 +96,7 @@ export default function App() {
     <div className="app">
       <header className="topbar no-print">
         <div className="brand">
-          <span className="logo">◆</span> SynopGig
+          <img className="logo" src={`${import.meta.env.BASE_URL}logo.png`} alt="" width={28} height={28} /> SynopGig
         </div>
         <input className="project-name" value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} aria-label="Nom du projet" />
         <input className="project-meta" placeholder="Lieu" value={project.venue} onChange={(e) => setProject((p) => ({ ...p, venue: e.target.value }))} aria-label="Lieu" />
