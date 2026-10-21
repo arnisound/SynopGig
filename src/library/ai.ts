@@ -19,8 +19,12 @@ import type { PortGroup } from './portGroups'
 /** Fast and generous free tier; thinking is turned off in the request. */
 export const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash-lite'
 
-/** Relay URL, set at build time from the AI_PROXY_URL repository variable. */
-export const AI_PROXY_URL: string = import.meta.env.VITE_AI_PROXY_URL ?? ''
+/** The SynopGig relay (worker/relay.js), wherever the app is hosted. */
+export const DEFAULT_AI_PROXY_URL = 'https://synopgig-ia.arnisound-tools.workers.dev'
+
+/** VITE_AI_PROXY_URL overrides the relay at build time; "off" disables it. */
+const proxyFromEnv = import.meta.env.VITE_AI_PROXY_URL
+export const AI_PROXY_URL: string = proxyFromEnv === 'off' ? '' : proxyFromEnv || DEFAULT_AI_PROXY_URL
 
 export type Engine = 'personal' | 'relay' | 'chrome'
 

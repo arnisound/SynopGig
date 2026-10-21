@@ -20,10 +20,18 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
    puis *Deploy*.
 4. Dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type **Secret** :
    `GROQ_API_KEY` = votre clé Groq (et/ou `GEMINI_API_KEY` = votre clé Gemini).
-5. Notez l’adresse du Worker, du type `https://synopgig-ia.votre-nom.workers.dev`.
-6. Sur GitHub, dans le dépôt : *Settings* → *Secrets and variables* → *Actions* → onglet
-   **Variables** → *New repository variable* : nom `AI_PROXY_URL`, valeur : l’adresse du Worker.
-7. Onglet *Actions* → « Deploy to GitHub Pages » → *Run workflow*. C’est en ligne.
+5. L’adresse du Worker est écrite dans l’application (`DEFAULT_AI_PROXY_URL` dans
+   `src/library/ai.ts`) : actuellement `https://synopgig-ia.arnisound-tools.workers.dev`.
+   Si vous changez de Worker, modifiez cette ligne (ou définissez `VITE_AI_PROXY_URL` au
+   moment du build).
+
+## Changer d’hébergement
+
+Le relais n’accepte que les sites listés. Quand l’application quitte GitHub Pages, ajoutez
+sa nouvelle adresse dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type
+**Text**, nom `ALLOWED_ORIGINS`, valeur par exemple
+`https://synopgig.fr,https://arnisound.github.io,http://localhost:5173` (adresses séparées par
+des virgules, sans `/` final).
 
 ## Comment il choisit
 

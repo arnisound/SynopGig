@@ -27,7 +27,7 @@ jobs:
       - run: npm test
       - run: npm run build
         env:
-          # Free AI relay, see worker/README.md (empty: Chrome AI or quick analysis).
+          # Optional override of the AI relay built into the app (see worker/README.md).
           VITE_AI_PROXY_URL: ${{ vars.AI_PROXY_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

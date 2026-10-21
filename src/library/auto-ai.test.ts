@@ -12,11 +12,19 @@ function chromeAi(status: string, reply = JSON.stringify(answer)) {
   return prompt
 }
 
-async function load(relay = '') {
+async function load(relay = 'off') {
   vi.resetModules()
   vi.stubEnv('VITE_AI_PROXY_URL', relay)
   return import('./ai')
 }
+
+it('uses the SynopGig relay by default', async () => {
+  vi.resetModules()
+  vi.stubEnv('VITE_AI_PROXY_URL', '')
+  const ai = await import('./ai')
+  expect(ai.AI_PROXY_URL).toBe('https://synopgig-ia.arnisound-tools.workers.dev')
+  expect(await ai.availableEngines()).toEqual(['relay'])
+})
 
 afterEach(() => {
   vi.unstubAllGlobals()

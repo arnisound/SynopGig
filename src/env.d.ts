@@ -1,4 +1,4 @@
 interface ImportMetaEnv {
-  /** URL of the free AI relay (worker/), set from the AI_PROXY_URL repository variable. */
+  /** Overrides the AI relay URL (worker/); "off" disables it. Default: the SynopGig relay. */
   readonly VITE_AI_PROXY_URL?: string
 }
