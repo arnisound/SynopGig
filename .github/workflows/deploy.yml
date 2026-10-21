@@ -26,6 +26,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # Free AI relay, see worker/README.md (empty: Chrome AI or quick analysis).
+          VITE_AI_PROXY_URL: ${{ vars.AI_PROXY_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

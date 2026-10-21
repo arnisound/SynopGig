@@ -1,5 +1,0 @@
-import { WebWorkerMLCEngineHandler } from '@mlc-ai/web-llm'
-
-// Runs the local model off the main thread so the page stays responsive.
-const handler = new WebWorkerMLCEngineHandler()
-self.onmessage = (msg: MessageEvent) => handler.onmessage(msg)

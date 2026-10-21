@@ -51,17 +51,18 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 ### Bibliothèque (onglet Bibliothèque)
 - **Ajout manuel** : marque, modèle, département, famille, U, poids et connectique saisie
   par groupes (« 16 × XLR entrées »), ou copie d’un modèle existant.
-- **Analyse de fiche technique** (PDF ou texte collé), trois modes au choix :
-  - **Analyse rapide** (règles, instantanée) : ne garde que les quantités écrites
-    (« 4 x XLR », « 16 inputs », « Inputs 1-4 ») ; les connecteurs cités sans quantité
-    sont proposés en suggestions à ajouter d’un clic.
-  - **IA locale gratuite** : un modèle Qwen 2.5 (0,5 / 1,5 / 3 B) tourne dans le
-    navigateur via WebLLM (WebGPU : Chrome ou Edge sur ordinateur). Téléchargé une fois,
-    privé, sans compte.
-  - **IA Gemini** avec une clé gratuite (aistudio.google.com/apikey), gardée dans le
-    navigateur : lit le PDF directement, meilleur résultat.
-  Les réponses de l’IA sont revérifiées (codes connus, quantités plafonnées) et restent
-  à relire avant d’enregistrer.
+- **Analyse de fiche technique** (PDF ou texte collé) : un seul bouton « Analyser », rien à
+  configurer pour l’utilisateur. L’application choisit seule, dans l’ordre :
+  1. le **relais IA SynopGig** (Worker Cloudflare gratuit qui garde la clé Gemini du
+     propriétaire du site, voir [`worker/README.md`](worker/README.md)) : marche partout et
+     lit même les PDF scannés ;
+  2. l’**IA intégrée à Chrome** (Gemini Nano, Chrome récent sur ordinateur) : gratuite et
+     hors ligne ;
+  3. sinon l’**analyse rapide** sans IA, qui ne garde que les quantités écrites dans la fiche
+     et propose les autres connecteurs en suggestions.
+  Si l’IA ne répond pas (quota atteint…), l’analyse rapide prend le relais. Les réponses de
+  l’IA sont revérifiées (codes connus, quantités plafonnées) et restent à relire. Une clé
+  Gemini personnelle reste possible dans les options avancées.
 - **Ma bibliothèque** : modèles perso dans la palette (« Mes modèles »), gardés d’un projet
   à l’autre, export / import JSON.
 - **Bibliothèque USER** (partagée) : « Partager dans la bibliothèque USER » ouvre une issue

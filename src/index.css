@@ -420,3 +420,5 @@ table.groups td:nth-child(2) { width: 70px; }
 .suggestions button { font-size: 12px; padding: 3px 8px; border-style: dashed; }
 .evidence .ai { color: #fff; background: #8e4ec6; padding: 0 6px; border-radius: 8px; font-weight: 600; }
 .card a { color: var(--accent); }
+.advanced { margin-top: 10px; }
+.advanced summary { cursor: pointer; }

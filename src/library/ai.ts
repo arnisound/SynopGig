@@ -4,21 +4,27 @@ import type { Category, ConnectorType, PortDirection, SignalType } from '../type
 import type { PortGroup } from './portGroups'
 
 /*
- * Data sheet reading with a language model, two free options:
- * - a small model running in the browser (WebLLM, WebGPU): no account, private;
- * - Google Gemini with the user's own free API key: better, reads the PDF itself.
- * Both answer with the same JSON, checked again here before use.
+ * Data sheet reading with a language model, free and with nothing to set up
+ * for the public. The app picks the first engine available:
+ * 1. the user's own Gemini key, if they chose to add one (advanced option);
+ * 2. the SynopGig relay: a small free Cloudflare Worker holding the site
+ *    owner's Gemini key (configured once at build time, see worker/README.md);
+ * 3. the AI built into Chrome desktop (Gemini Nano, Prompt API): offline, free.
+ * Every answer is checked again here before use.
  */
 
-export type AiMode = 'rules' | 'local' | 'gemini'
-
-export const LOCAL_MODELS = [
-  { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', label: 'Qwen 2.5 · 1,5 B (≈ 1 Go, recommandé)' },
-  { id: 'Qwen2.5-3B-Instruct-q4f16_1-MLC', label: 'Qwen 2.5 · 3 B (≈ 2 Go, plus précis, PC costaud)' },
-  { id: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', label: 'Qwen 2.5 · 0,5 B (≈ 400 Mo, petit PC, moins fiable)' },
-]
-
 export const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
+
+/** Relay URL, set at build time from the AI_PROXY_URL repository variable. */
+export const AI_PROXY_URL: string = import.meta.env.VITE_AI_PROXY_URL ?? ''
+
+export type Engine = 'personal' | 'relay' | 'chrome'
+
+export const ENGINE_LABELS: Record<Engine, string> = {
+  personal: 'votre clé Gemini',
+  relay: 'l’IA SynopGig',
+  chrome: 'l’IA intégrée à Chrome',
+}
 
 export interface AiResult {
   brand?: string
@@ -33,21 +39,21 @@ export interface AiResult {
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
 const DIRS: PortDirection[] = ['in', 'out', 'io']
 
-export const SYSTEM_PROMPT = `Tu es technicien son, lumière et vidéo de spectacle. On te donne la fiche technique d'un appareil.
-Réponds uniquement en JSON avec la connectique PHYSIQUE présente sur l'appareil (faces avant et arrière) et son nombre exact.
-Règles :
-- Un groupe = un type de connecteur dans un sens. Exemple : « 16 entrées micro XLR » = un groupe count 16, connector "xlr3", dir "in".
-- N'invente rien. Ignore les formats compatibles, options, accessoires et toutes les mesures (gain, impédance, réponse, bruit, niveau, fréquence).
-- Si le nombre n'est pas écrit, mets 1.
-- Les ports réseau (Ethernet, Dante, etherCON) et USB sont "io". L'alimentation secteur est une entrée de signal "power".
-- Une entrée combo XLR/jack est "xlr-combo". Une sortie casque est une sortie "jack" ou "minijack".
-- label : nom court en français (ex. "In", "Out", "Sortie HP", "Dante", "Secteur").
-Codes connecteur : ${Object.entries(CONNECTORS).map(([k, v]) => `${k} = ${v}`).join(' ; ')}.
-Codes signal : ${Object.entries(SIGNALS).map(([k, v]) => `${k} = ${v.label}`).join(' ; ')}.
-Départements : ${CATEGORIES.join(', ')}.
-Familles possibles : ${FAMILY_ORDER.join(', ')}.`
+export const SYSTEM_PROMPT = `You are a live sound, lighting and video technician. You receive the data sheet of a device.
+Answer only with JSON describing the PHYSICAL connectors on the device (front and rear panels) and their exact count.
+Rules:
+- One group = one connector type in one direction. Example: "16 XLR mic inputs" = one group with count 16, connector "xlr3", dir "in".
+- Do not invent anything. Ignore compatible formats, options, accessories and every measurement (gain, impedance, frequency response, noise, level).
+- If the count is not written, use 1.
+- Network ports (Ethernet, Dante, etherCON) and USB are "io". Mains power is an input with signal "power".
+- An XLR/jack combo input is "xlr-combo". A headphone output is a "jack" or "minijack" output.
+- label: short French name, e.g. "In", "Out", "Sortie HP", "Dante", "Secteur".
+Connector codes: ${Object.entries(CONNECTORS).map(([k, v]) => `${k} = ${v}`).join('; ')}.
+Signal codes: ${Object.entries(SIGNALS).map(([k, v]) => `${k} = ${v.label}`).join('; ')}.
+Departments (category): ${CATEGORIES.join(', ')}.
+Families (family, pick one if it fits): ${FAMILY_ORDER.join(', ')}.`
 
-/** JSON schema of the answer (WebLLM grammar and Gemini response schema). */
+/** JSON schema of the answer (Gemini response schema, Chrome response constraint). */
 export const RESULT_SCHEMA = {
   type: 'object',
   properties: {
@@ -102,12 +108,13 @@ export function sanitizeAi(raw: unknown): AiResult {
     const n = Number(v)
     return Number.isFinite(n) && n > 0 && n <= max ? n : undefined
   }
+  const rack = num(r.rackU, 48)
   return {
     brand: str(r.brand, 40) || undefined,
     model: str(r.model, 80) || undefined,
     category: CATEGORIES.includes(r.category as Category) ? (r.category as Category) : 'Son',
     family: str(r.family, 60) || undefined,
-    rackU: num(r.rackU, 48) && Math.round(num(r.rackU, 48)!),
+    rackU: rack && Math.round(rack),
     weight: num(r.weight, 2000),
     groups: [...merged.values()],
   }
@@ -128,51 +135,7 @@ export function focusText(text: string, max = 6000) {
   return out
 }
 
-// ---- Local model (WebLLM)
-
-type Engine = Awaited<ReturnType<typeof import('@mlc-ai/web-llm').CreateWebWorkerMLCEngine>>
-let engine: { id: string; promise: Promise<Engine> } | undefined
-
-export async function hasWebGPU() {
-  const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu
-  if (!gpu) return false
-  try {
-    return !!(await gpu.requestAdapter())
-  } catch {
-    return false
-  }
-}
-
-export async function extractLocal(text: string, modelId: string, onProgress: (msg: string) => void): Promise<AiResult> {
-  if (!(await hasWebGPU())) {
-    throw new Error('Ce navigateur n’a pas WebGPU : utilisez Chrome ou Edge récent sur ordinateur, ou l’option Gemini.')
-  }
-  if (!engine || engine.id !== modelId) {
-    const { CreateWebWorkerMLCEngine } = await import('@mlc-ai/web-llm')
-    const worker = new Worker(new URL('./llm.worker.ts', import.meta.url), { type: 'module' })
-    engine = {
-      id: modelId,
-      promise: CreateWebWorkerMLCEngine(worker, modelId, {
-        initProgressCallback: (p) => onProgress(`Préparation de l’IA locale : ${Math.round(p.progress * 100)} % — ${p.text}`),
-      }),
-    }
-    engine.promise.catch(() => (engine = undefined))
-  }
-  const llm = await engine.promise
-  onProgress('L’IA locale lit la fiche…')
-  const reply = await llm.chat.completions.create({
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: `Fiche technique :\n${focusText(text)}` },
-    ],
-    temperature: 0,
-    max_tokens: 1500,
-    response_format: { type: 'json_object', schema: JSON.stringify(RESULT_SCHEMA) },
-  })
-  return sanitizeAi(JSON.parse(reply.choices[0]?.message?.content ?? '{}'))
-}
-
-// ---- Google Gemini (free API key)
+// ---- Gemini request (used by the relay and by a personal key)
 
 /** Gemini wants upper-case OpenAPI types. */
 function geminiSchema(s: unknown): unknown {
@@ -186,8 +149,8 @@ function geminiSchema(s: unknown): unknown {
 export function geminiRequest(input: { text?: string; pdfBase64?: string }) {
   const parts: object[] = []
   if (input.pdfBase64) parts.push({ inline_data: { mime_type: 'application/pdf', data: input.pdfBase64 } })
-  if (input.text) parts.push({ text: `Fiche technique :\n${input.text.slice(0, 60000)}` })
-  parts.push({ text: 'Extrais la connectique de cet appareil.' })
+  if (input.text) parts.push({ text: `Data sheet:\n${input.text.slice(0, 60000)}` })
+  parts.push({ text: 'List the connectors of this device.' })
   return {
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: 'user', parts }],
@@ -202,19 +165,124 @@ async function toBase64(file: File) {
   return btoa(bin)
 }
 
+type GeminiReply = { error?: { message?: string }; candidates?: { content?: { parts?: { text?: string }[] } }[] }
+
+async function readGemini(res: Response) {
+  const data = (await res.json().catch(() => ({}))) as GeminiReply
+  if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
+  const answer = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
+  return sanitizeAi(JSON.parse(answer || '{}'))
+}
+
 export async function extractGemini(input: { text?: string; pdf?: File }, key: string, model = GEMINI_DEFAULT_MODEL): Promise<AiResult> {
-  if (!key.trim()) throw new Error('Ajoutez votre clé Gemini gratuite dans les réglages.')
+  if (!key.trim()) throw new Error('Ajoutez votre clé Gemini dans les options avancées.')
   const body = geminiRequest({ text: input.pdf ? undefined : input.text, pdfBase64: input.pdf ? await toBase64(input.pdf) : undefined })
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key.trim() },
     body: JSON.stringify(body),
   })
-  const data = (await res.json().catch(() => ({}))) as {
-    error?: { message?: string }
-    candidates?: { content?: { parts?: { text?: string }[] } }[]
+  return readGemini(res)
+}
+
+/** The relay forwards to Gemini with the site owner's key, kept secret on the server. */
+export async function extractRelay(input: { text?: string; pdf?: File }, url = AI_PROXY_URL): Promise<AiResult> {
+  const body = geminiRequest({
+    text: input.pdf ? undefined : focusText(input.text ?? '', 30000),
+    pdfBase64: input.pdf && input.pdf.size < 8_000_000 ? await toBase64(input.pdf) : undefined,
+  })
+  if (!input.pdf && !input.text?.trim()) throw new Error('rien à analyser')
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  return readGemini(res)
+}
+
+// ---- AI built into Chrome (Prompt API, Gemini Nano)
+
+interface ChromeSession {
+  prompt(input: string, options?: { responseConstraint?: object; omitResponseConstraintInput?: boolean }): Promise<string>
+  destroy(): void
+}
+interface ChromeLanguageModel {
+  availability(options?: object): Promise<'unavailable' | 'downloadable' | 'downloading' | 'available'>
+  create(options?: object): Promise<ChromeSession>
+}
+
+const languageModel = () => (globalThis as { LanguageModel?: ChromeLanguageModel }).LanguageModel
+const CHROME_IO = { expectedInputs: [{ type: 'text', languages: ['en'] }], expectedOutputs: [{ type: 'text', languages: ['en'] }] }
+
+/** 'missing' when the browser has no built-in AI at all. */
+export async function chromeAiStatus(): Promise<'missing' | 'unavailable' | 'downloadable' | 'downloading' | 'available'> {
+  const lm = languageModel()
+  if (!lm) return 'missing'
+  try {
+    return await lm.availability(CHROME_IO)
+  } catch {
+    return 'unavailable'
   }
-  if (!res.ok) throw new Error(`Gemini : ${data.error?.message ?? `erreur ${res.status}`}`)
-  const answer = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
-  return sanitizeAi(JSON.parse(answer || '{}'))
+}
+
+export async function extractChrome(text: string, onProgress: (msg: string) => void): Promise<AiResult> {
+  const lm = languageModel()
+  if (!lm) throw new Error('IA de Chrome absente')
+  const session = await lm.create({
+    ...CHROME_IO,
+    initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
+    monitor(m: EventTarget) {
+      m.addEventListener('downloadprogress', (e) => {
+        const loaded = (e as Event & { loaded?: number }).loaded ?? 0
+        onProgress(`Chrome prépare son IA intégrée (une seule fois) : ${Math.round(loaded * 100)} %`)
+      })
+    },
+  })
+  try {
+    onProgress('L’IA intégrée à Chrome lit la fiche…')
+    const answer = await session.prompt(`Data sheet:\n${focusText(text, 4000)}`, { responseConstraint: RESULT_SCHEMA, omitResponseConstraintInput: true })
+    return sanitizeAi(JSON.parse(answer))
+  } finally {
+    session.destroy()
+  }
+}
+
+// ---- Automatic choice
+
+export interface AutoOptions {
+  text: string
+  pdf?: File
+  personalKey?: string
+  personalModel?: string
+  onProgress: (msg: string) => void
+}
+
+/** Engines usable right now, best first. */
+export async function availableEngines(personalKey?: string): Promise<Engine[]> {
+  const list: Engine[] = []
+  if (personalKey?.trim()) list.push('personal')
+  if (AI_PROXY_URL) list.push('relay')
+  const chrome = await chromeAiStatus()
+  if (chrome !== 'missing' && chrome !== 'unavailable') list.push('chrome')
+  return list
+}
+
+/** Tries each available engine in turn; throws when none could answer. */
+export async function extractAuto(o: AutoOptions): Promise<{ result: AiResult; engine: Engine }> {
+  const engines = await availableEngines(o.personalKey)
+  if (engines.length === 0) throw new Error('Aucune IA disponible sur cet appareil.')
+  const errors: string[] = []
+  for (const engine of engines) {
+    try {
+      if (engine === 'personal') {
+        o.onProgress('Gemini lit la fiche…')
+        return { result: await extractGemini({ text: o.text, pdf: o.pdf }, o.personalKey!, o.personalModel), engine }
+      }
+      if (engine === 'relay') {
+        o.onProgress('L’IA SynopGig lit la fiche…')
+        return { result: await extractRelay({ text: o.text, pdf: o.pdf }), engine }
+      }
+      if (!o.text.trim()) throw new Error('pas de texte lisible dans ce PDF')
+      return { result: await extractChrome(o.text, o.onProgress), engine }
+    } catch (e) {
+      errors.push(`${ENGINE_LABELS[engine]} : ${(e as Error).message}`)
+    }
+  }
+  throw new Error(errors.join(' · '))
 }

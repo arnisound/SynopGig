@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS, FAMILY_ORDER, LIBRARY } from '../data/library'
 import { download, uid } from '../project'
 import type { Category, ConnectorType, DeviceTemplate, PortDirection, Project, SignalType } from '../types'
-import { GEMINI_DEFAULT_MODEL, LOCAL_MODELS, type AiMode, type AiResult } from './ai'
+import { availableEngines, ENGINE_LABELS, GEMINI_DEFAULT_MODEL, type AiResult, type Engine } from './ai'
 import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared, issueUrl } from './userLibrary'
@@ -11,12 +11,6 @@ import { encodeShared, issueUrl } from './userLibrary'
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
 const DIRS: Record<PortDirection, string> = { in: 'Entrée', out: 'Sortie', io: 'Bidirectionnel' }
 const BRANDS = [...new Set(LIBRARY.map((t) => t.brand).filter((b): b is string => !!b && b !== 'Générique'))]
-
-const MODES: Record<AiMode, { label: string; hint: string }> = {
-  rules: { label: 'Analyse rapide', hint: 'Instantanée, sans IA : ne garde que les quantités écrites noir sur blanc.' },
-  local: { label: 'IA locale (gratuite)', hint: 'Petit modèle téléchargé une fois puis exécuté dans votre navigateur : privé, sans compte. Chrome ou Edge sur ordinateur.' },
-  gemini: { label: 'IA Gemini (clé gratuite)', hint: 'Meilleur résultat, lit le PDF directement. La fiche est envoyée à Google avec votre clé.' },
-}
 
 /** Per-browser settings: never shared, never sent anywhere but where they belong. */
 const store = {
@@ -102,18 +96,20 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
   const [busy, setBusy] = useState(false)
   const [query, setQuery] = useState('')
   const [userQuery, setUserQuery] = useState('')
-  const [mode, setModeState] = useState<AiMode>(() => (store.get('ai.mode', 'rules') as AiMode) || 'rules')
-  const [localModel, setLocalModel] = useState(() => store.get('ai.local', LOCAL_MODELS[0].id))
+  const [engines, setEngines] = useState<Engine[]>()
   const [geminiKey, setGeminiKey] = useState(() => store.get('ai.geminiKey'))
   const [geminiModel, setGeminiModel] = useState(() => store.get('ai.geminiModel', GEMINI_DEFAULT_MODEL))
   const [pseudo, setPseudo] = useState(() => store.get('pseudo'))
   const importRef = useRef<HTMLInputElement>(null)
   const mine = project.customTemplates
 
-  const setMode = (m: AiMode) => {
-    setModeState(m)
-    store.set('ai.mode', m)
-  }
+  useEffect(() => {
+    let alive = true
+    availableEngines(geminiKey).then((e) => alive && setEngines(e))
+    return () => {
+      alive = false
+    }
+  }, [geminiKey])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -147,29 +143,26 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
     setBusy(true)
     try {
       const ai = await import('./ai')
-      let r: AiResult
-      if (mode === 'gemini') {
-        setStatus('Gemini lit la fiche…')
-        r = await ai.extractGemini({ text: source, pdf }, geminiKey, geminiModel)
-      } else {
-        if (!source.trim()) throw new Error('Aucun texte lisible : collez les caractéristiques, ou utilisez Gemini qui lit les PDF scannés.')
-        r = await ai.extractLocal(source, localModel, setStatus)
-      }
-      setDraft(fromResult(r, r.groups.map((g) => row({ ...g, ai: true }))))
+      const { result, engine } = await ai.extractAuto({ text: source, pdf, personalKey: geminiKey, personalModel: geminiModel, onProgress: setStatus })
+      setDraft(fromResult(result, result.groups.map((g) => row({ ...g, ai: true }))))
       setSuggestions([])
-      setStatus(`${r.groups.length} groupe(s) de connectique proposé(s) par l’IA pour ${label}. Relisez avant d’enregistrer : une IA peut se tromper.`)
+      setStatus(`${result.groups.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} pour ${label}. Relisez avant d’enregistrer : une IA peut se tromper.`)
     } catch (e) {
-      setStatus(`L’IA n’a pas pu répondre : ${(e as Error).message}`)
+      // No AI could answer: the quick analysis still gives a starting point.
+      if (source.trim()) runRules(source, label)
+      setStatus((s) => `IA indisponible (${(e as Error).message}). ${source.trim() ? `Analyse rapide utilisée à la place : ${s}` : 'Collez le texte des caractéristiques pour l’analyse rapide.'}`)
     } finally {
       setBusy(false)
     }
   }
 
-  const analyse = async () => {
+  const analyse = async (withAi: boolean) => {
     const label = file ? file.name : 'le texte collé'
-    if (!text.trim() && !(file && mode === 'gemini')) return setStatus('Choisissez un PDF ou collez du texte.')
-    if (mode === 'rules') runRules(text, label)
-    else await runAi(text, label, file && /\.pdf$/i.test(file.name) ? file : undefined)
+    const pdf = file && /\.pdf$/i.test(file.name) ? file : undefined
+    if (!text.trim() && !pdf) return setStatus('Choisissez un PDF ou collez du texte.')
+    if (withAi && engines?.length) await runAi(text, label, pdf)
+    else if (text.trim()) runRules(text, label)
+    else setStatus('Ce PDF ne contient pas de texte lisible et aucune IA n’est disponible : collez les caractéristiques depuis le site du fabricant.')
   }
 
   const onFile = async (f?: File) => {
@@ -185,8 +178,8 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
         t = await f.text()
       }
       setText(t)
-      if (t.trim().length < 20 && mode !== 'gemini') {
-        setStatus('Ce PDF ne contient pas de texte lisible (scan ?). Utilisez l’IA Gemini, ou collez les caractéristiques depuis le site du fabricant.')
+      if (t.trim().length < 20 && !engines?.some((e) => e !== 'chrome')) {
+        setStatus('Ce PDF ne contient pas de texte lisible (scan ?). Collez les caractéristiques depuis le site du fabricant.')
         return
       }
       setStatus(`${f.name} chargé. Cliquez sur « Analyser ».`)
@@ -321,35 +314,14 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
       <div className="lib-main">
         <section className="card">
           <h3>Analyser une fiche technique</h3>
-          <div className="seg modes">
-            {(Object.keys(MODES) as AiMode[]).map((m) => (
-              <button key={m} className={mode === m ? 'active' : ''} onClick={() => setMode(m)}>{MODES[m].label}</button>
-            ))}
-          </div>
-          <p className="muted small">{MODES[mode].hint}</p>
-          {mode === 'local' && (
-            <label className="field">
-              <span>Modèle IA (téléchargé une seule fois, puis gardé par le navigateur)</span>
-              <select value={localModel} onChange={(e) => { setLocalModel(e.target.value); store.set('ai.local', e.target.value) }}>
-                {LOCAL_MODELS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
-              </select>
-            </label>
-          )}
-          {mode === 'gemini' && (
-            <div className="row wrap">
-              <label className="field">
-                <span>
-                  Clé API Gemini (gardée dans ce navigateur) ·{' '}
-                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">obtenir une clé gratuite</a>
-                </span>
-                <input type="password" autoComplete="off" value={geminiKey} placeholder="AIza…" onChange={(e) => { setGeminiKey(e.target.value); store.set('ai.geminiKey', e.target.value) }} />
-              </label>
-              <label className="field narrow wide">
-                <span>Modèle</span>
-                <input value={geminiModel} onChange={(e) => { setGeminiModel(e.target.value); store.set('ai.geminiModel', e.target.value) }} />
-              </label>
-            </div>
-          )}
+          <p className="muted small">
+            Déposez la fiche (PDF) ou collez ses caractéristiques, puis « Analyser ».{' '}
+            {engines === undefined
+              ? 'Recherche d’une IA disponible…'
+              : engines.length
+                ? `IA utilisée : ${ENGINE_LABELS[engines[0]]}, gratuite.`
+                : 'Pas d’IA sur cet appareil : l’analyse rapide (sans IA) sera utilisée. Astuce : Chrome récent sur ordinateur a une IA intégrée.'}
+          </p>
           <div className="row wrap">
             <label className="file-btn">
               Choisir un PDF ou un fichier texte
@@ -359,9 +331,28 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
             <span className="muted small">ou collez le texte des caractéristiques :</span>
           </div>
           <textarea rows={5} placeholder={'Ex. :\nInputs: 16 x XLR mic/line\nOutputs: 8 x XLR\nNetwork: 2 x etherCON (Dante primary / secondary)\n3U, 8 kg'} value={text} onChange={(e) => { setText(e.target.value); setFile(undefined) }} />
-          <div className="row">
-            <button className="primary" disabled={busy} onClick={analyse}>{busy ? 'Analyse en cours…' : 'Analyser'}</button>
+          <div className="row wrap">
+            <button className="primary" disabled={busy} onClick={() => analyse(true)}>{busy ? 'Analyse en cours…' : 'Analyser'}</button>
+            {engines !== undefined && engines.length > 0 && (
+              <button disabled={busy} onClick={() => analyse(false)} title="Sans IA : ne garde que les quantités écrites dans la fiche">Analyse rapide (sans IA)</button>
+            )}
           </div>
+          <details className="advanced">
+            <summary className="muted small">Options avancées</summary>
+            <div className="row wrap">
+              <label className="field">
+                <span>
+                  Clé Gemini personnelle (facultatif, gardée dans ce navigateur) ·{' '}
+                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">obtenir une clé gratuite</a>
+                </span>
+                <input type="password" autoComplete="off" value={geminiKey} placeholder="AIza…" onChange={(e) => { setGeminiKey(e.target.value); store.set('ai.geminiKey', e.target.value) }} />
+              </label>
+              <label className="field narrow wide">
+                <span>Modèle</span>
+                <input value={geminiModel} onChange={(e) => { setGeminiModel(e.target.value); store.set('ai.geminiModel', e.target.value) }} />
+              </label>
+            </div>
+          </details>
           {status && <p className="status">{status}</p>}
         </section>
 
