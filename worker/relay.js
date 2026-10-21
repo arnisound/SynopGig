@@ -7,7 +7,7 @@
  *   GROQ_API_KEY     secret, recommended: very fast (console.groq.com/keys)
  *   GEMINI_API_KEY   secret, alternative or complement: also reads scanned PDFs
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
- *   GROQ_MODEL       optional (default llama-3.3-70b-versatile)
+ *   GROQ_MODEL       optional (default: best model the account can use)
  *   GEMINI_MODEL     optional (default gemini-2.5-flash-lite)
  *
  * Open <worker address>/diagnostic in a browser to check the keys.
@@ -59,6 +59,39 @@ function extractJson(text) {
   }
 }
 
+// Groq renames and retires models: ask the account which ones it can use.
+const GROQ_PREFERRED = [
+  'llama-3.3-70b-versatile',
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b',
+  'meta-llama/llama-4-maverick-17b-128e-instruct',
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'qwen/qwen3-32b',
+  'moonshotai/kimi-k2-instruct',
+  'llama-3.1-8b-instant',
+]
+const NOT_CHAT = /whisper|tts|guard|playai|orpheus|distil|compound|allam/i
+// Remembered per key: a new key gets a fresh list.
+let groqModels
+
+async function groqAvailable(env) {
+  if (groqModels?.key === env.GROQ_API_KEY) return groqModels.list
+  const res = await fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: `Bearer ${env.GROQ_API_KEY}` } })
+  const data = await res.json().catch(() => ({}))
+  const list = Array.isArray(data.data) ? data.data.filter((m) => m && m.active !== false).map((m) => String(m.id)) : []
+  if (list.length) groqModels = { key: env.GROQ_API_KEY, list }
+  return list
+}
+
+/** Up to two models: the configured one if available, else the best known ones. */
+export async function pickGroqModels(env) {
+  const available = await groqAvailable(env).catch(() => [])
+  if (available.length === 0) return [env.GROQ_MODEL || 'openai/gpt-oss-20b', 'llama-3.1-8b-instant']
+  const wanted = [env.GROQ_MODEL, ...GROQ_PREFERRED].filter((m) => m && available.includes(m))
+  const others = available.filter((m) => !NOT_CHAT.test(m))
+  return [...new Set([...wanted, ...others])].slice(0, 2)
+}
+
 async function groqCall(req, env, model, strictJson) {
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -67,6 +100,8 @@ async function groqCall(req, env, model, strictJson) {
       model,
       temperature: 0,
       max_tokens: 2048,
+      // Reasoning models: keep the thinking short, the task is simple.
+      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {}),
       ...(strictJson ? { response_format: { type: 'json_object' } } : {}),
       messages: [
         { role: 'system', content: `${req.system}\nAnswer with a single JSON object following this JSON schema, nothing else:\n${JSON.stringify(req.schema)}` },
@@ -78,18 +113,16 @@ async function groqCall(req, env, model, strictJson) {
   return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error: res.ok ? undefined : reason(data, res.status) }
 }
 
-/** Main model in strict JSON mode, then without it, then a lighter model. */
+/** Best model in strict JSON mode, then without it, then the second model. */
 async function askGroq(req, env) {
-  const main = env.GROQ_MODEL || 'llama-3.3-70b-versatile'
-  const tries = [
-    [main, true],
-    [main, false],
-    ['llama-3.1-8b-instant', false],
-  ]
+  const [main, second] = await pickGroqModels(env)
+  const tries = [[main, true], [main, false], ...(second ? [[second, false]] : [])]
   let last
   for (const [model, strict] of tries) {
     last = await groqCall(req, env, model, strict)
     if (last.status === 200 && last.text) return last
+    // A model that disappeared: list them again next time.
+    if (last.status === 404) groqModels = undefined
     // A refused key will be refused again: no point retrying.
     if (last.status === 401 || last.status === 403) break
   }
@@ -133,8 +166,11 @@ async function diagnostic(env) {
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
   const out = { relais: 'SynopGig, en ligne', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
   if (env.GROQ_API_KEY) {
-    const r = await groqCall(req, env, env.GROQ_MODEL || 'llama-3.3-70b-versatile', true).catch((e) => ({ status: 0, error: String(e) }))
-    out.groq = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+    groqModels = undefined
+    const [model] = await pickGroqModels(env)
+    const r = await groqCall(req, env, model, true).catch((e) => ({ status: 0, error: String(e) }))
+    out.groq = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
+    out.groq_modeles_du_compte = (groqModels?.list ?? []).filter((m) => !NOT_CHAT.test(m))
   }
   if (env.GEMINI_API_KEY) {
     const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))

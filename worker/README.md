@@ -19,7 +19,8 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
 3. Cliquez sur *Edit code*, remplacez tout le contenu par celui de [`relay.js`](relay.js),
    puis *Deploy*.
 4. Dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type **Secret** :
-   `GROQ_API_KEY` = votre clé Groq (et/ou `GEMINI_API_KEY` = votre clé Gemini).
+   `GROQ_API_KEY` = votre clé Groq (et/ou `GEMINI_API_KEY` = votre clé Gemini). Le relais
+   choisit seul le meilleur modèle Groq disponible sur votre compte.
 5. L’adresse du Worker est écrite dans l’application (`DEFAULT_AI_PROXY_URL` dans
    `src/library/ai.ts`) : actuellement `https://synopgig-ia.arnisound-tools.workers.dev`.
    Si vous changez de Worker, modifiez cette ligne (ou définissez `VITE_AI_PROXY_URL` au
@@ -32,6 +33,12 @@ sa nouvelle adresse dans le Worker : *Settings* → *Variables and Secrets* → 
 **Text**, nom `ALLOWED_ORIGINS`, valeur par exemple
 `https://synopgig.fr,https://arnisound.github.io,http://localhost:5173` (adresses séparées par
 des virgules, sans `/` final).
+
+## Vérifier
+
+Ouvrez `https://<adresse du Worker>/diagnostic` : chaque clé est testée et la réponse du
+service s’affiche (`OK (modèle …)`, ou l’erreur exacte), avec la liste des modèles Groq de
+votre compte. Les clés ne sont jamais affichées.
 
 ## Comment il choisit
 

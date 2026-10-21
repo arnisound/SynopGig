@@ -6,6 +6,12 @@ const SITE = 'https://arnisound.github.io'
 const post = (body, origin = SITE) =>
   new Request('https://relay.example/', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
 const groqOk = () => new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"X"}' } }] }))
+const models = (...ids) => new Response(JSON.stringify({ data: ids.map((id) => ({ id, active: true })) }))
+/** Answers the model list, then the given chat replies in order. */
+function groq(list, ...replies) {
+  return vi.fn(async (url) => (String(url).endsWith('/models') ? models(...list) : replies.length > 1 ? replies.shift()() : replies[0]()))
+}
+const chatCalls = (fn) => fn.mock.calls.filter(([url]) => !String(url).endsWith('/models'))
 const geminiOk = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"model":"Y"}' }] } }] }))
 
 afterEach(() => vi.unstubAllGlobals())
@@ -24,24 +30,35 @@ describe('AI relay', () => {
   })
 
   it('uses Groq first for text, with the secret key', async () => {
-    const upstream = vi.fn(async () => groqOk())
+    const upstream = groq(['llama-3.3-70b-versatile'], groqOk)
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
     expect(await res.json()).toEqual({ text: '{"model":"X"}' })
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(SITE)
-    expect(upstream.mock.calls[0][0]).toContain('api.groq.com')
-    expect(upstream.mock.calls[0][1].headers.Authorization).toBe('Bearer G')
+    const [url, init] = chatCalls(upstream)[0]
+    expect(url).toContain('api.groq.com')
+    expect(init.headers.Authorization).toBe('Bearer G')
+  })
+
+  it('picks a model the Groq account really has', async () => {
+    const upstream = groq(['whisper-large-v3', 'openai/gpt-oss-20b', 'qwen/qwen3-32b'], groqOk)
+    vi.stubGlobal('fetch', upstream)
+    await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G2' })
+    const body = JSON.parse(chatCalls(upstream).at(-1)[1].body)
+    expect(body.model).toBe('openai/gpt-oss-20b')
+    expect(body.reasoning_effort).toBe('low')
   })
 
   it('accepts JSON wrapped in text and retries without strict mode', async () => {
-    const upstream = vi
-      .fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: 'json_validate_failed' } }), { status: 400 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: 'Here you go: {"model":"Z"} done' } }] })))
+    const upstream = groq(
+      ['llama-3.3-70b-versatile'],
+      () => new Response(JSON.stringify({ error: { message: 'json_validate_failed' } }), { status: 400 }),
+      () => new Response(JSON.stringify({ choices: [{ message: { content: 'Here you go: {"model":"Z"} done' } }] })),
+    )
     vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G' })
+    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G3' })
     expect(await res.json()).toEqual({ text: '{"model":"Z"}' })
-    expect(JSON.parse(upstream.mock.calls[1][1].body).response_format).toBeUndefined()
+    expect(JSON.parse(chatCalls(upstream).at(-1)[1].body).response_format).toBeUndefined()
   })
 
   it('says exactly why the provider refused', async () => {
@@ -58,6 +75,13 @@ describe('AI relay', () => {
     expect(JSON.parse(text).groq).toBe('ERREUR 401 : Invalid API Key')
     expect(JSON.parse(text).gemini).toContain('pas de clé')
     expect(text).not.toContain('gsk_secret')
+  })
+
+  it('lists the account models in the diagnostic', async () => {
+    vi.stubGlobal('fetch', groq(['openai/gpt-oss-120b', 'whisper-large-v3'], groqOk))
+    const out = await (await relay.fetch(new Request('https://relay.example/diagnostic'), { GROQ_API_KEY: 'G4' })).json()
+    expect(out.groq).toBe('OK (modèle openai/gpt-oss-120b)')
+    expect(out.groq_modeles_du_compte).toEqual(['openai/gpt-oss-120b'])
   })
 
   it('sends scanned PDFs to Gemini, with thinking turned off', async () => {
