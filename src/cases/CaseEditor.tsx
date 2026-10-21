@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { createCase, download, slug, toCsv } from '../project'
 import type { CaseKind, FlightCase, Project } from '../types'
 import RackFace from '../racks/RackFace'
+import CaseImport from './CaseImport'
+import { applySpec, type CaseSpec } from './caseImport'
 import { BannerArt, CaseFront } from './CaseSvg'
 import { bannerSize, caseHeightMm } from './geometry'
 
@@ -54,8 +56,8 @@ export default function CaseEditor({ project, setProject }: Props) {
     setProject((p) => ({ ...p, cases: p.cases.map((c) => (c.id === fc.id ? { ...c, ...patch } : c)) }))
   const setBanner = (patch: Partial<FlightCase['banner']>) => update({ banner: { ...fc.banner, ...patch } })
 
-  const add = () => {
-    const c = createCase(cases)
+  const add = (spec?: CaseSpec) => {
+    const c = spec ? applySpec(createCase(cases), spec) : createCase(cases)
     setProject((p) => ({ ...p, cases: [...p.cases, c] }))
     setSelectedId(c.id)
   }
@@ -136,7 +138,7 @@ export default function CaseEditor({ project, setProject }: Props) {
       <aside className="case-list">
         <div className="section-head">
           <h3>Flight cases</h3>
-          <button onClick={add}>+ Nouveau</button>
+          <button onClick={() => add()}>+ Nouveau</button>
         </div>
         {cases.map((c) => (
           <button key={c.id} className={`case-item ${c.id === fc?.id ? 'active' : ''}`} onClick={() => setSelectedId(c.id)}>
@@ -153,12 +155,13 @@ export default function CaseEditor({ project, setProject }: Props) {
             <button onClick={exportPacking}>Liste de colisage CSV</button>
           </div>
         )}
+        <CaseImport onCreate={add} />
       </aside>
 
       {!fc ? (
         <div className="empty-state">
           <p>Aucun flight case. Créez-en un pour dessiner son bandeau et y ranger le matériel du synoptique.</p>
-          <button onClick={add}>+ Créer un flight case</button>
+          <button onClick={() => add()}>+ Créer un flight case</button>
         </div>
       ) : (
         <>
@@ -190,6 +193,10 @@ export default function CaseEditor({ project, setProject }: Props) {
                 <input type="color" value={fc.shell} onChange={(e) => update({ shell: e.target.value })} />
               </div>
             </Field>
+            <div className="row">
+              <Field label="Poids à vide (kg)"><input type="number" min={0} step={0.1} value={fc.emptyWeight ?? ''} onChange={(e) => update({ emptyWeight: e.target.value ? Number(e.target.value) : undefined })} /></Field>
+              {/^https?:\/\//i.test(fc.source ?? '') && <Field label="Page produit"><a href={fc.source} target="_blank" rel="noreferrer noopener">Ouvrir</a></Field>}
+            </div>
             <div className="row">
               <label className="toggle"><input type="checkbox" checked={fc.wheels} onChange={(e) => update({ wheels: e.target.checked })} /> Roulettes</label>
               <Field label="Poignées"><input type="number" min={0} max={4} value={fc.handles} onChange={(e) => update({ handles: Number(e.target.value) })} /></Field>
@@ -264,6 +271,7 @@ export default function CaseEditor({ project, setProject }: Props) {
               <div><dt>Dimensions ext.</dt><dd>{fc.width} × {Math.round(caseHeightMm(fc) / 10)} × {fc.depth} cm</dd></div>
               <div><dt>Bandeau</dt><dd>{bannerSize(fc).bw / 10} × {bannerSize(fc).bh / 10} cm</dd></div>
               <div><dt>Poids du contenu</dt><dd>{weight.toFixed(1)} kg</dd></div>
+              {fc.emptyWeight ? <div><dt>Poids total</dt><dd>{(weight + fc.emptyWeight).toFixed(1)} kg</dd></div> : null}
               {fc.kind === 'rack' && <div><dt>Occupation</dt><dd className={usedU > fc.rackU ? 'bad' : ''}>{usedU} / {fc.rackU} U</dd></div>}
             </dl>
             {fc.kind === 'rack' && (

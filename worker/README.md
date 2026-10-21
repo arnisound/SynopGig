@@ -45,6 +45,15 @@ Ouvrez `https://<adresse du Worker>/diagnostic` : chaque clé est testée et la 
 service s’affiche (`OK (modèle …)`, ou l’erreur exacte), avec la liste des modèles Groq de
 votre compte. Les clés ne sont jamais affichées.
 
+## Lecture des pages produit (racks et flight cases)
+
+Le relais sait aussi lire une page de site marchand (`POST /page`) pour recréer un rack ou un
+flight case : il télécharge la page, ne garde que le titre, les données produit et les lignes
+qui parlent de cotes, de poids ou de roulettes, puis l’application les fait analyser par l’IA.
+Seules les adresses web publiques sont acceptées (pas de `localhost`, d’adresse IP ou de port
+exotique), dans la même limite de 30 requêtes par heure et par visiteur. Certains sites
+bloquent les robots : l’utilisateur peut alors coller le texte de la page.
+
 ## Comment il choisit
 
 - Fiche avec du texte (cas normal) : **Groq** si sa clé est là, sinon Gemini.

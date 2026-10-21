@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { CATEGORY_COLORS } from '../data/library'
 import { toggleHole } from '../data/panels'
+import CaseImport from '../cases/CaseImport'
+import { applySpec, type CaseSpec } from '../cases/caseImport'
 import { createCase, createDevice, internalRack, rackOfNode, resolveCables, setPanel } from '../project'
 import type { DeviceNode, DeviceTemplate, FlightCase, Project } from '../types'
 import { canPlace, firstFree, mountRack } from './layout'
@@ -54,11 +56,12 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
   const updateRack = (fn: (c: FlightCase, p: Project) => FlightCase) =>
     setProject((p) => ({ ...p, cases: p.cases.map((c) => (c.id === fc.id ? fn(c, p) : c)) }))
 
-  const newRack = () => {
-    const c = createCase(project.cases)
+  const newRack = (spec?: CaseSpec) => {
+    let c = createCase(project.cases)
     c.kind = 'rack'
     c.rackU = 12
     c.name = `Rack ${racks.length + 1}`
+    if (spec) c = applySpec(c, { ...spec, kind: 'rack' })
     c.banner = { ...c.banner, title: 'RACK', subtitle: c.name.toUpperCase() }
     setProject((p) => ({ ...p, cases: [...p.cases, c] }))
     setRackId(c.id)
@@ -155,7 +158,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
       <aside className="case-list">
         <div className="section-head">
           <h3>Racks</h3>
-          <button onClick={newRack}>+ Nouveau</button>
+          <button onClick={() => newRack()}>+ Nouveau</button>
         </div>
         {racks.map((r) => (
           <button key={r.id} className={`case-item ${r.id === fc?.id ? 'active' : ''}`} onClick={() => { setRackId(r.id); setSelected(undefined) }}>
@@ -167,6 +170,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
           </button>
         ))}
         {racks.length === 0 && <p className="muted">Aucun rack. Créez-en un, ou sélectionnez des équipements sur le synoptique puis « Créer un rack ».</p>}
+        <CaseImport rackOnly onCreate={newRack} />
       </aside>
 
       {fc && layout ? (
@@ -222,6 +226,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
             <dl className="specs">
               <div><dt>Occupation</dt><dd className={layout.usedU > fc.rackU ? 'bad' : ''}>{layout.usedU} / {fc.rackU} U</dd></div>
               <div><dt>Poids du matériel</dt><dd>{weight.toFixed(1)} kg</dd></div>
+              {fc.emptyWeight ? <div><dt>Poids total</dt><dd>{(weight + fc.emptyWeight).toFixed(1)} kg</dd></div> : null}
               <div><dt>Câbles internes</dt><dd>{internal.length}</dd></div>
               <div><dt>Alertes internes</dt><dd className={internal.some((c) => c.issues.length) ? 'bad' : ''}>{internal.filter((c) => c.issues.length).length}</dd></div>
             </dl>
@@ -336,7 +341,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
       ) : (
         <div className="empty-state">
           <p>Montez vos racks unité par unité, ajoutez des bandeaux de câblage et câblez l’intérieur.</p>
-          <button onClick={newRack}>+ Créer un rack</button>
+          <button onClick={() => newRack()}>+ Créer un rack</button>
         </div>
       )}
     </div>

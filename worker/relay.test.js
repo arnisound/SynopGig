@@ -111,3 +111,22 @@ describe('AI relay', () => {
     expect((await quota.json()).error.message).toContain('Quota')
   })
 })
+
+describe('shop pages', async () => {
+  const { pageUrl, pageText } = await import('./relay.js')
+  it('only reads public web addresses', () => {
+    expect(pageUrl('https://www.thomann.de/fr/flyht_pro.htm')).not.toBeNull()
+    for (const bad of ['http://localhost/', 'https://127.0.0.1/', 'https://[::1]/', 'file:///etc/passwd', 'https://shop.example:8443/', 'https://router.lan/', 'https://user:pw@shop.example/']) expect(pageUrl(bad)).toBeNull()
+  })
+
+  it('keeps the title, the product data and the lines about sizes', () => {
+    const p = pageText(`<html><head><title>Malle 120 &amp; roulettes</title><script>track()</script>
+      <script type="application/ld+json">{"@type":"Product","name":"Malle 120","weight":"25 kg"}</script></head>
+      <body><nav>Accueil</nav><table><tr><th>Dimensions</th><td>120 x 60 x 60 cm</td></tr></table><p>Livraison offerte</p></body></html>`)
+    expect(p.title).toBe('Malle 120 & roulettes')
+    expect(p.text).toContain('Dimensions | 120 x 60 x 60 cm')
+    expect(p.text).toContain('"weight":"25 kg"')
+    expect(p.text).not.toContain('Livraison')
+    expect(p.text).not.toContain('track()')
+  })
+})

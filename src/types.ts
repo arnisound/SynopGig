@@ -176,6 +176,10 @@ export interface FlightCase {
   rackLayout?: Record<string, number>
   /** Free items (cables, accessories...). */
   extras: string
+  /** Weight of the empty case, kg. */
+  emptyWeight?: number
+  /** Shop page the case was recreated from. */
+  source?: string
 }
 
 export interface GuideProgress {

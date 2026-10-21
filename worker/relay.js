@@ -11,6 +11,7 @@
  *   GEMINI_MODEL     optional (default gemini-2.5-flash-lite)
  *
  * Open <worker address>/diagnostic in a browser to check the keys.
+ * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
  */
 
 const DEFAULT_ORIGINS = 'https://arnisound.github.io,http://localhost:5173'
@@ -161,6 +162,90 @@ async function askGemini(req, env) {
   return { status: res.status, text, error: res.ok && text ? undefined : `Gemini ${res.status} : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
 }
 
+/* ---------- Shop pages (flight cases, racks) ---------- */
+
+const MAX_PAGE = 3_000_000
+const PAGE_LINES = /\d.*(?:cm|mm|kg|\bU\b|\bHE\b|\bRU\b|unit|dimension|abmessung|maße|taille|hauteur|largeur|profondeur|longueur|height|width|depth|length|höhe|breite|tiefe|länge|poids|weight|gewicht|19|rack)|roulette|wheel|castor|rollen|poignée|handle|griff|intérieur|interior|inner|innen|extérieur|exterior|outer|außen/i
+
+/** Public http(s) addresses only: no local names, no IP literals, no odd ports. */
+export function pageUrl(raw) {
+  let u
+  try {
+    u = new URL(String(raw ?? '').trim())
+  } catch {
+    return null
+  }
+  if (!['http:', 'https:'].includes(u.protocol) || u.username || u.password) return null
+  if (u.port && !['80', '443'].includes(u.port)) return null
+  const h = u.hostname.toLowerCase()
+  if (!h.includes('.') || h.includes(':') || /^[\d.]+$/.test(h) || /(?:^|\.)(?:localhost|local|internal|lan|home)$/.test(h)) return null
+  return u
+}
+
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', eacute: 'é', egrave: 'è', agrave: 'à', ccedil: 'ç', uuml: 'ü', ouml: 'ö', auml: 'ä', szlig: 'ß', times: '×' }
+const decode = (t) =>
+  t.replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (m, e) =>
+    e[0] === '#' ? String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (ENTITIES[e.toLowerCase()] ?? m),
+  )
+
+/** Title, product data (JSON-LD) and the lines that talk about size, weight and wheels. */
+export function pageText(html) {
+  const title = decode(html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)?.[1] ?? html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '').trim()
+  const description = decode(html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)?.[1] ?? '').trim()
+  const products = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)]
+    .map((m) => m[1].trim())
+    .filter((j) => /product/i.test(j))
+    .map((j) => j.replace(/\s+/g, ' ').slice(0, 3000))
+  const body = html
+    .replace(/<(script|style|noscript|svg|template|iframe)\b[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<\/?(?:br|p|li|tr|div|h\d|dt|dd|section|article|table|ul|ol)\b[^>]*>/gi, '\n')
+    .replace(/<\/t[dh]>/gi, ' | ')
+    .replace(/<[^>]+>/g, ' ')
+  const seen = new Set()
+  const lines = []
+  for (const raw of decode(body).split('\n')) {
+    const line = raw.replace(/\s+/g, ' ').replace(/(?:\s*\|\s*)+$/, '').trim()
+    if (line.length < 3 || line.length > 300 || seen.has(line) || !PAGE_LINES.test(line)) continue
+    seen.add(line)
+    lines.push(line)
+  }
+  const text = [title && `Titre : ${title}`, description && `Description : ${description}`, ...products.map((p) => `Données produit : ${p}`), ...lines].filter(Boolean).join('\n')
+  return { title, text: text.slice(0, 12000) }
+}
+
+async function readPage(raw) {
+  const url = pageUrl(raw)
+  if (!url) return { status: 400, error: 'Adresse refusée : collez le lien complet de la page produit (https://…).' }
+  let res
+  try {
+    res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SynopGig/1.0; +https://arnisound.github.io/SynopGig/)', Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(10000),
+    })
+  } catch {
+    return { status: 502, error: 'Site injoignable (ou trop lent).' }
+  }
+  if (!res.ok) return { status: 502, error: `Le site a refusé la lecture (${res.status}) : copiez plutôt le texte de la page.` }
+  if (!/html|text/i.test(res.headers.get('Content-Type') ?? '')) return { status: 415, error: 'Ce lien n’est pas une page web.' }
+  const reader = res.body.getReader()
+  const chunks = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.length
+    if (size > MAX_PAGE) {
+      await reader.cancel()
+      break
+    }
+    chunks.push(value)
+  }
+  const page = pageText(new TextDecoder().decode(await new Blob(chunks).arrayBuffer()))
+  if (!page.text.trim()) return { status: 422, error: 'Rien de lisible sur cette page : copiez plutôt son texte.' }
+  return { status: 200, data: page }
+}
+
 /** GET /diagnostic: tries each configured key on a tiny request. */
 async function diagnostic(env) {
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
@@ -200,6 +285,12 @@ export default {
     }
     if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
+    if (path === '/page') {
+      if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de lectures en une heure, réessayez plus tard.', 429)
+      const body = await request.json().catch(() => null)
+      const r = await readPage(body?.url)
+      return r.data ? reply(r.data) : fail(r.error, r.status)
+    }
     if (!env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)
     if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop d’analyses en une heure, réessayez plus tard.', 429)
 

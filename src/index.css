@@ -427,3 +427,10 @@ table.groups td:nth-child(2) { width: 70px; }
 .advanced { margin-top: 10px; }
 .advanced summary { cursor: pointer; }
 .toggle-line { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+.case-import { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.case-import h4 { margin: 0; }
+.case-import p { margin: 0; }
+.case-import input, .case-import textarea { width: 100%; }
+button.link { border: none; background: none; padding: 0; color: var(--accent); text-align: left; font-size: 12px; cursor: pointer; }
+.status-line { margin: 0; color: var(--muted); }

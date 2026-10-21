@@ -91,6 +91,10 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   libres compatibles du rack.
 - Sur le synoptique, chaque rack est encadré : glisser son titre déplace tout le rack.
   Une sélection peut devenir un rack.
+- **Recréer depuis un site** (onglets Racks et Flight cases) : collez le lien d’une page
+  produit (ou son texte) et le rack ou le flight case est créé avec ses unités, ses
+  dimensions extérieures, son poids à vide et ses roulettes. La page est lue par le relais
+  SynopGig, puis par l’IA ; sans IA, une lecture simple des cotes prend le relais.
 - Annulation (bouton ou Ctrl+Z).
 
 ### Guide technicien
