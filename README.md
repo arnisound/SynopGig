@@ -68,8 +68,9 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - **Bibliothèque USER** (partagée) : un clic sur « Partager dans la bibliothèque USER » et
   le matériel est disponible pour tous les utilisateurs (palette : « Bibliothèque USER »,
   avec le pseudo du créateur), sans compte ni validation. Le créateur peut le retirer (×)
-  depuis le navigateur qui l’a partagé. Le stockage est assuré par le relais SynopGig
-  (stockage KV gratuit de Cloudflare, voir [`worker/README.md`](worker/README.md)) ;
+  depuis le navigateur qui l’a partagé. Le stockage est assuré par un petit Worker
+  Cloudflare gratuit, séparé de l’IA (`worker/library.js`, voir
+  [`worker/README.md`](worker/README.md)) ;
   `public/user-library.json` sert de copie de secours hors ligne.
 
 ### Racks et bandeaux de câblage

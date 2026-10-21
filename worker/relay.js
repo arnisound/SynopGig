@@ -10,13 +10,7 @@
  *   GROQ_MODEL       optional (default: best model the account can use)
  *   GEMINI_MODEL     optional (default gemini-2.5-flash-lite)
  *
- * It also hosts the USER library (equipment shared by users, for everyone):
- *   LIBRARY          KV namespace binding (Settings > Bindings > KV namespace)
- *   GET /library       the shared equipment, for every copy of the app
- *   POST /library      share one piece of equipment, with the creator's pseudo
- *   DELETE /library/id remove it again (only with the key given to its creator)
- *
- * Open <worker address>/diagnostic in a browser to check the setup.
+ * Open <worker address>/diagnostic in a browser to check the keys.
  */
 
 const DEFAULT_ORIGINS = 'https://arnisound.github.io,http://localhost:5173'
@@ -167,125 +161,7 @@ async function askGemini(req, env) {
   return { status: res.status, text, error: res.ok && text ? undefined : `Gemini ${res.status} : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
 }
 
-/* ---------- USER library ---------- */
-
-const CATEGORIES = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
-const MAX_ENTRIES = 5000
-const SHARES_PER_HOUR = 20
-const shares = new Map()
-
-// Control characters are stripped on purpose from text coming from outside.
-const clean = (v, max) =>
-  // eslint-disable-next-line no-control-regex
-  typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max) : ''
-const number = (v, min, max, int = false) => {
-  const n = typeof v === 'number' ? v : Number(v)
-  if (v === undefined || v === null || v === '' || !Number.isFinite(n) || n < min || n > max) return undefined
-  return int ? Math.round(n) : Math.round(n * 10) / 10
-}
-export const cleanPseudo = (v) => clean(v, 40).replace(/[^\p{L}\p{N} ._-]/gu, '')
-
-/**
- * Shape and size check of a shared model. Connector and signal codes are
- * checked again by the app, which drops anything it does not know.
- */
-export function cleanShared(raw) {
-  if (!raw || typeof raw !== 'object') return null
-  const model = clean(raw.model, 80)
-  if (!model || !CATEGORIES.includes(raw.category)) return null
-  if (!Array.isArray(raw.groups) || raw.groups.length === 0 || raw.groups.length > 64) return null
-  const groups = []
-  let total = 0
-  for (const g of raw.groups) {
-    if (!Array.isArray(g) || g.length !== 5) return null
-    const [prefix, count, connector, signal, dir] = g
-    const c = number(count, 1, 256, true)
-    const code = /^[a-z0-9-]{1,24}$/
-    if (!c || !code.test(connector) || !code.test(signal) || !['in', 'out', 'io'].includes(dir)) return null
-    total += c
-    groups.push([clean(prefix, 40) || 'Port', c, connector, signal, dir])
-  }
-  if (total > 512) return null
-  const out = { brand: clean(raw.brand, 40), model, category: raw.category, family: clean(raw.family, 60), rackU: number(raw.rackU, 1, 48, true), weight: number(raw.weight, 0.01, 2000), groups }
-  for (const k of Object.keys(out)) if (out[k] === undefined || out[k] === '') delete out[k]
-  return out
-}
-
-const sha256 = async (s) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, '0')).join('')
-
-/** Every entry lives under its own key; "all" is a snapshot rebuilt after each change, so a read costs one KV read. */
-// KV listings can lag a few seconds behind a write: the change just made is applied by hand.
-async function rebuildLibrary(kv, { add, remove } = {}) {
-  const entries = add ? [add] : []
-  let cursor
-  do {
-    const page = await kv.list({ prefix: 'entry:', cursor })
-    const values = await Promise.all(page.keys.map((k) => kv.get(k.name, 'json')))
-    for (const v of values) if (v?.entry && v.entry.id !== add?.id && v.entry.id !== remove) entries.push(v.entry)
-    cursor = page.list_complete ? undefined : page.cursor
-  } while (cursor)
-  entries.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)))
-  await kv.put('all', JSON.stringify(entries))
-  return entries
-}
-
-async function readLibrary(kv) {
-  return (await kv.get('all', 'json')) ?? []
-}
-
-async function shareEntry(kv, body) {
-  const model = cleanShared(body?.model)
-  if (!model) return { status: 400, error: 'Matériel refusé : vérifiez le modèle, le département et les ports.' }
-  const author = cleanPseudo(body?.pseudo)
-  if (!author) return { status: 400, error: 'Indiquez votre pseudo.' }
-  const current = await readLibrary(kv)
-  if (current.length >= MAX_ENTRIES) return { status: 507, error: 'Bibliothèque USER pleine.' }
-  const id = `user-${Date.now()}${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`
-  const token = crypto.randomUUID()
-  const entry = { id, ...model, author, createdAt: new Date().toISOString() }
-  await kv.put(`entry:${id}`, JSON.stringify({ entry, tokenHash: await sha256(token) }))
-  await rebuildLibrary(kv, { add: entry })
-  return { status: 200, data: { entry, token } }
-}
-
-async function removeEntry(kv, id, token) {
-  if (!/^user-\d+$/.test(id) || typeof token !== 'string') return { status: 400, error: 'Requête refusée.' }
-  const stored = await kv.get(`entry:${id}`, 'json')
-  if (!stored) return { status: 404, error: 'Ce matériel n’est plus partagé.' }
-  if (stored.tokenHash !== (await sha256(token))) return { status: 403, error: 'Seul son créateur peut retirer ce matériel.' }
-  await kv.delete(`entry:${id}`)
-  await rebuildLibrary(kv, { remove: id })
-  return { status: 200, data: { ok: true } }
-}
-
-async function library(request, env, path, reply, fail, allowed) {
-  const kv = env.LIBRARY
-  if (request.method === 'GET') return reply({ version: 1, entries: kv ? await readLibrary(kv) : [] })
-  if (!allowed) return fail('Site non autorisé.', 403)
-  if (!kv) return fail('Partage non configuré (stockage LIBRARY manquant sur le relais).', 503)
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
-  const now = Date.now()
-  const recent = (shares.get(ip) ?? []).filter((t) => now - t < 3_600_000)
-  if (recent.length >= SHARES_PER_HOUR) return fail('Trop de partages en une heure, réessayez plus tard.', 429)
-  recent.push(now)
-  shares.set(ip, recent)
-  if (shares.size > 5000) shares.clear()
-  let body
-  try {
-    body = await request.json()
-  } catch {
-    return fail('Requête refusée.', 400)
-  }
-  const r =
-    request.method === 'POST' && path === '/library'
-      ? await shareEntry(kv, body)
-      : request.method === 'DELETE'
-        ? await removeEntry(kv, path.slice('/library/'.length), body?.token)
-        : { status: 405, error: 'Méthode non prise en charge.' }
-  return r.data ? reply(r.data) : fail(r.error, r.status)
-}
-
-/** GET /diagnostic: tries each configured key on a tiny request, and refreshes the USER library list. */
+/** GET /diagnostic: tries each configured key on a tiny request. */
 async function diagnostic(env) {
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
   const out = { relais: 'SynopGig, en ligne', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
@@ -300,9 +176,6 @@ async function diagnostic(env) {
     const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
     out.gemini = r.status === 200 && r.text ? 'OK' : `ERREUR ${r.error}`
   }
-  out.bibliotheque_user = env.LIBRARY
-    ? await rebuildLibrary(env.LIBRARY).then((l) => `OK (${l.length} matériels partagés)`, (e) => `ERREUR ${String(e).slice(0, 100)}`)
-    : 'pas de stockage LIBRARY (partage désactivé)'
   return out
 }
 
@@ -312,7 +185,7 @@ export default {
     const origin = request.headers.get('Origin') || ''
     const cors = {
       'Access-Control-Allow-Origin': origins.includes(origin) ? origin : origins[0],
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       Vary: 'Origin',
     }
@@ -321,9 +194,6 @@ export default {
 
     const path = new URL(request.url).pathname.replace(/\/+$/, '')
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors })
-    if (path === '/library' || path.startsWith('/library/')) {
-      return library(request, env, path, reply, fail, origins.includes(origin)).catch(() => fail('Erreur du stockage, réessayez.', 500))
-    }
     if (request.method === 'GET' && path === '/diagnostic') {
       if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de diagnostics, réessayez plus tard.', 429)
       return new Response(JSON.stringify(await diagnostic(env), null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } })

@@ -1,11 +1,13 @@
-# Relais gratuit de SynopGig (IA et bibliothèque USER)
+# Services gratuits de SynopGig (relais IA et bibliothèque USER)
+
+Deux Workers Cloudflare indépendants : `relay.js` pour l’IA, `library.js` pour la
+bibliothèque USER. L’un peut tomber ou changer sans toucher l’autre.
+
+# 1. Relais IA (`relay.js`)
 
 Ce petit programme (un *Worker* Cloudflare, gratuit) donne l’analyse IA des fiches techniques
 à **tout le monde, sur tous les navigateurs, sans rien configurer** : c’est lui qui garde en
 secret la clé IA gratuite du propriétaire du site. Réponse en 1 à 3 secondes.
-
-Il héberge aussi la **bibliothèque USER** : le matériel que les utilisateurs partagent en un
-clic depuis l’onglet Bibliothèque, visible par tous, avec le pseudo du créateur.
 
 Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantanée).
 
@@ -28,24 +30,6 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
    `src/library/ai.ts`) : actuellement `https://synopgig-ia.arnisound-tools.workers.dev`.
    Si vous changez de Worker, modifiez cette ligne (ou définissez `VITE_AI_PROXY_URL` au
    moment du build).
-
-## Activer la bibliothèque USER (une fois, 2 minutes)
-
-1. Dans Cloudflare : *Storage & Databases* → *KV* (ou *Workers & Pages* → *KV*) →
-   *Create* (ou *Create a namespace*), nom `SYNOPGIG_LIBRARY` → *Add*.
-2. Dans le Worker `synopgig-ia` : *Settings* → *Bindings* → *Add* → *KV namespace*.
-   *Variable name* : `LIBRARY` (exactement), *KV namespace* : `SYNOPGIG_LIBRARY` → *Save*
-   (ou *Deploy*).
-3. Recollez le contenu de [`relay.js`](relay.js) dans *Edit code* → *Deploy*.
-
-`/diagnostic` affiche alors `bibliotheque_user : OK (0 matériels partagés)`. Sans cette
-liaison, l’application fonctionne mais le bouton « Partager » répond « Partage non
-configuré ».
-
-Modération : chaque matériel est une clé `entry:user-…` du stockage KV. Pour en retirer
-un, supprimez sa clé dans *KV* → `SYNOPGIG_LIBRARY`, puis ouvrez `/diagnostic` : la liste
-visible par tous est reconstruite. Le quota gratuit
-(100 000 lectures et 1 000 écritures par jour) suffit largement.
 
 ## Changer d’hébergement
 
@@ -72,8 +56,39 @@ votre compte. Les clés ne sont jamais affichées.
 
 - Quotas gratuits : de l’ordre de 1 000 analyses par jour avec Groq, quelques centaines avec
   Gemini. Largement assez pour démarrer.
-- Le relais n’accepte que les analyses de fiches et les partages de matériel, venant du site
-  (et de `localhost:5173` pour le développement), avec au plus 30 analyses et 20 partages
-  par heure et par visiteur ; la bibliothèque USER est limitée à 5 000 matériels.
+- Le relais n’accepte que les analyses de fiches, venant du site (et de `localhost:5173` pour
+  le développement), avec au plus 30 analyses par heure et par visiteur.
 - Pour un autre domaine, ajoutez une variable `ALLOWED_ORIGINS` (adresses séparées par des
   virgules).
+
+# 2. Bibliothèque USER (`library.js`)
+
+Garde le matériel que les utilisateurs partagent en un clic depuis l’onglet Bibliothèque,
+visible par tous avec le pseudo du créateur. Aucune clé IA, aucun compte pour les utilisateurs.
+
+## Mise en place (une seule fois, environ 5 minutes)
+
+1. **Stockage** : dans Cloudflare, *Storage & Databases* → *KV* → *Create* (ou *Create a
+   namespace*), nom `SYNOPGIG_LIBRARY` → *Add*.
+2. **Worker** : *Workers & Pages* → *Create* → *Create Worker* → nommez-le
+   `synopgig-library` → *Deploy*.
+3. *Edit code* : remplacez tout le contenu par celui de [`library.js`](library.js) → *Deploy*.
+4. Dans ce Worker : *Settings* → *Bindings* → *Add* → *KV namespace*. *Variable name* :
+   `LIBRARY` (exactement, en majuscules), *KV namespace* : `SYNOPGIG_LIBRARY` → *Save*.
+5. Ouvrez `https://synopgig-library.arnisound-tools.workers.dev/diagnostic` : il doit
+   afficher `"bibliotheque_user": "OK (0 matériels partagés)"`.
+
+L’adresse est écrite dans l’application (`DEFAULT_LIBRARY_URL` dans
+`src/library/useUserLibrary.ts`). Si vous nommez le Worker autrement, modifiez cette ligne
+(ou définissez `VITE_LIBRARY_URL` au moment du build). Pour un nouveau domaine, ajoutez la
+variable `ALLOWED_ORIGINS` comme pour le relais IA.
+
+## Modération
+
+Chaque matériel est une clé `entry:user-…` dans *KV* → `SYNOPGIG_LIBRARY`. Pour en retirer
+un, supprimez sa clé, puis ouvrez `/diagnostic` : la liste visible par tous est reconstruite.
+
+## Limites
+
+20 partages par heure et par visiteur, 5 000 matériels au total. Le quota gratuit de KV
+(100 000 lectures et 1 000 écritures par jour) suffit largement.

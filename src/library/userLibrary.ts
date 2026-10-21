@@ -4,8 +4,8 @@ import { expandGroups, type PortGroup } from './portGroups.ts'
 
 /*
  * The USER library: equipment shared by users for everyone. One click sends
- * it to the SynopGig relay (worker/relay.js), which stores it with the
- * creator's pseudo; every copy of the app loads the list at start-up.
+ * it to the SynopGig library Worker (worker/library.js), which stores it with
+ * the creator's pseudo; every copy of the app loads the list at start-up.
  */
 
 export const USER_FAMILY = 'Bibliothèque USER'
