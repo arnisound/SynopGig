@@ -8,6 +8,8 @@ import LibraryPage from './library/LibraryPage'
 import { useUserLibrary } from './library/useUserLibrary'
 import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
+import { cachedShared, fetchShared, saveSharedProgress, sharedIdFromHash, sharedProgress } from './share/share'
+import ShareDialog from './share/ShareDialog'
 import StagePage from './stage/StagePage'
 import { applyTheme, readTheme, THEME_LABELS, type Theme } from './theme'
 import Lists from './lists/Lists'
@@ -29,8 +31,22 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'library', label: 'Bibliothèque' },
 ]
 
+/** Opened from a read-only link (#/p/<id>): the shared project, never the user's own. */
+const SHARED_ID = sharedIdFromHash()
+
+function initialProject(): Project {
+  if (!SHARED_ID) return loadProject()
+  const cached = cachedShared(SHARED_ID)
+  return { ...(cached?.project ?? { ...emptyProject(), name: 'Chargement du projet partagé…' }), progress: sharedProgress(SHARED_ID) }
+}
+
 export default function App() {
-  const [project, setProject] = useState<Project>(loadProject)
+  const [project, setProject] = useState<Project>(initialProject)
+  const [shared, setShared] = useState<{ status: 'loading' | 'ready' | 'error'; updatedAt?: string; error?: string }>(() => ({
+    status: SHARED_ID && cachedShared(SHARED_ID) ? 'ready' : 'loading',
+    updatedAt: SHARED_ID ? cachedShared(SHARED_ID)?.updatedAt : undefined,
+  }))
+  const [sharing, setSharing] = useState(false)
   const [tab, setTab] = useState<Tab>('synoptic')
   const [dossier, setDossier] = useState(false)
   const [menu, setMenu] = useState(false)
@@ -44,9 +60,40 @@ export default function App() {
   const fileInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const t = setTimeout(() => saveProject(project), 300)
+    // A shared project is read-only: only the technician's ticks are kept, in this browser.
+    const t = setTimeout(() => (SHARED_ID ? saveSharedProgress(SHARED_ID, project.progress) : saveProject(project)), 300)
     return () => clearTimeout(t)
   }, [project])
+
+  const loadShared = useCallback(() => {
+    if (!SHARED_ID) return
+    fetchShared(SHARED_ID)
+      .then((r) => {
+        setProject({ ...emptyProject(), ...r.project, progress: sharedProgress(SHARED_ID) })
+        setShared({ status: 'ready', updatedAt: r.updatedAt })
+      })
+      .catch((e) => setShared((s) => ({ ...s, status: s.updatedAt ? 'ready' : 'error', error: e instanceof Error ? e.message : String(e) })))
+  }, [])
+  useEffect(loadShared, [loadShared])
+
+  // Pasting another link in the address bar opens it.
+  useEffect(() => {
+    const onHash = () => sharedIdFromHash() !== SHARED_ID && location.reload()
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  const leaveShared = () => {
+    window.history.replaceState(null, '', location.pathname + location.search)
+    location.reload()
+  }
+  const copyShared = () => {
+    if (!confirm('Copier ce projet dans vos projets ? Il remplace votre projet en cours dans ce navigateur (enregistrez-le d’abord si besoin).')) return
+    const own: Project = { ...project, progress: {} }
+    delete own.share
+    saveProject(own)
+    leaveShared()
+  }
 
   // Undo history: one snapshot per burst of edits, selection changes ignored.
   const history = useRef<Project[]>([])
@@ -125,18 +172,29 @@ export default function App() {
           <input className="project-meta" type="date" value={project.date} onChange={(e) => setProject((p) => ({ ...p, date: e.target.value }))} aria-label="Date" />
         </div>
         <nav className="tabs">
-          {TABS.map((t) => (
+          {TABS.filter((t) => !SHARED_ID || t.id !== 'library').map((t) => (
             <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => { setTab(t.id); setMenu(false) }}>
               {t.label}
             </button>
           ))}
         </nav>
         <div className={`file-actions topbar-more ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).closest('button') && setMenu(false)}>
-          <button onClick={undo} disabled={!canUndo} title="Annuler (Ctrl+Z)">↶ Annuler</button>
-          <button onClick={() => confirm('Créer un projet vide ? Pensez à exporter le projet actuel.') && replace(emptyProject())}>Nouveau</button>
-          <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Démo</button>
-          <button onClick={() => fileInput.current?.click()}>Ouvrir</button>
-          <button onClick={() => download(`${slug(project.name)}.synopgig.json`, JSON.stringify(project, null, 2), 'application/json')}>Enregistrer</button>
+          {SHARED_ID ? (
+            <>
+              <button onClick={loadShared} title="Recharger la dernière version partagée">Actualiser</button>
+              <button onClick={copyShared}>Copier dans mes projets</button>
+              <button onClick={leaveShared}>Quitter</button>
+            </>
+          ) : (
+            <>
+              <button onClick={undo} disabled={!canUndo} title="Annuler (Ctrl+Z)">↶ Annuler</button>
+              <button onClick={() => confirm('Créer un projet vide ? Pensez à exporter le projet actuel.') && replace(emptyProject())}>Nouveau</button>
+              <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Démo</button>
+              <button onClick={() => fileInput.current?.click()}>Ouvrir</button>
+              <button onClick={() => download(`${slug(project.name)}.synopgig.json`, JSON.stringify(project, null, 2), 'application/json')}>Enregistrer</button>
+              <button onClick={() => setSharing(true)} title="Lien en lecture seule pour l’équipe">Partager</button>
+            </>
+          )}
           <button onClick={() => setDossier(true)} title="Dossier technique complet à imprimer ou en PDF">Dossier PDF</button>
           <button onClick={() => setTheme(nextTheme[theme])} title={`Thème : ${THEME_LABELS[theme]} (cliquer pour changer)`}>
             {theme === 'light' ? '☀ Clair' : theme === 'dark' ? '☾ Sombre' : '◐ Auto'}
@@ -145,6 +203,20 @@ export default function App() {
         </div>
       </header>
       {dossier && <DossierDialog project={project} onClose={() => setDossier(false)} />}
+      {sharing && <ShareDialog project={project} setProject={setProject} onClose={() => setSharing(false)} />}
+      {SHARED_ID && (
+        <div className="shared-banner no-print">
+          {shared.status === 'loading' && 'Chargement du projet partagé…'}
+          {shared.status === 'error' && `Projet partagé introuvable : ${shared.error}`}
+          {shared.status === 'ready' && (
+            <>
+              <b>Projet partagé, lecture seule</b>
+              {shared.updatedAt && ` · version du ${new Date(shared.updatedAt).toLocaleDateString('fr-FR')}`}
+              {shared.error && ' · hors ligne (dernière version lue)'} · seules vos cases cochées du guide sont gardées.
+            </>
+          )}
+        </div>
+      )}
       <main>
         {tab === 'synoptic' && (
           <ReactFlowProvider>

@@ -259,4 +259,6 @@ export interface Project {
   view?: Partial<SynopticView>
   patch?: { inputs?: Record<string, PatchEdit>; outputs?: Record<string, PatchEdit> }
   stage?: StagePlot
+  /** Read-only link published from this project (its key stays in the browser). */
+  share?: { id: string; updatedAt?: string }
 }

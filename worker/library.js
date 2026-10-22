@@ -10,6 +10,9 @@
  *   GET /            the shared equipment, for every copy of the app
  *   POST /           share one piece of equipment, with the creator's pseudo
  *   DELETE /<id>     remove it again (only with the key given to its creator)
+ *   POST /projects       publish a read-only copy of a project, returns its link id
+ *   GET /projects/<id>   read it (anyone with the link)
+ *   PUT /projects/<id>   update it, DELETE /projects/<id> remove it (creator's key)
  *   GET /diagnostic  check the storage and refresh the list
  */
 
@@ -104,8 +107,83 @@ async function removeEntry(kv, id, token) {
   return { status: 200, data: { ok: true } }
 }
 
+/* ---------- Shared projects (read-only links) ---------- */
+
+const MAX_PROJECT = 2_000_000
+const PROJECT_TTL = 400 * 24 * 3600 // a little over a year, renewed on each update
+
+function projectId() {
+  const abc = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  return [...crypto.getRandomValues(new Uint8Array(10))].map((b) => abc[b % abc.length]).join('')
+}
+
+/** Only something shaped like a SynopGig project is stored. */
+export function cleanProject(raw) {
+  if (!raw || typeof raw !== 'object' || raw.version !== 1 || !Array.isArray(raw.nodes) || !Array.isArray(raw.edges)) return null
+  return raw
+}
+
+async function projects(request, kv, path, reply, fail, allowed) {
+  const id = path.slice('/projects/'.length)
+  if (request.method === 'GET') {
+    if (!/^[A-Za-z0-9]{10}$/.test(id)) return fail('Lien invalide.', 400)
+    const stored = await kv.get(`project:${id}`, 'json')
+    return stored ? reply({ project: stored.project, updatedAt: stored.updatedAt }) : fail('Ce projet n’est plus partagé.', 404)
+  }
+  if (!allowed) return fail('Site non autorisé.', 403)
+  if (tooManyShares(request)) return fail('Trop de partages en une heure, réessayez plus tard.', 429)
+  const text = await request.text()
+  if (text.length > MAX_PROJECT) return fail('Projet trop lourd pour être partagé (2 Mo maximum ; les logos des bandeaux pèsent lourd).', 413)
+  let body
+  try {
+    body = JSON.parse(text)
+  } catch {
+    return fail('Requête refusée.', 400)
+  }
+  if (request.method === 'POST' && path === '/projects') {
+    const project = cleanProject(body?.project)
+    if (!project) return fail('Projet illisible.', 400)
+    const newId = projectId()
+    const token = crypto.randomUUID()
+    const updatedAt = new Date().toISOString()
+    await kv.put(`project:${newId}`, JSON.stringify({ project, tokenHash: await sha256(token), updatedAt }), { expirationTtl: PROJECT_TTL })
+    return reply({ id: newId, token, updatedAt })
+  }
+  if (!/^[A-Za-z0-9]{10}$/.test(id)) return fail('Lien invalide.', 400)
+  const stored = await kv.get(`project:${id}`, 'json')
+  if (!stored) return fail('Ce projet n’est plus partagé.', 404)
+  if (typeof body?.token !== 'string' || stored.tokenHash !== (await sha256(body.token))) return fail('Seul son créateur peut modifier ce partage.', 403)
+  if (request.method === 'DELETE') {
+    await kv.delete(`project:${id}`)
+    return reply({ ok: true })
+  }
+  if (request.method === 'PUT') {
+    const project = cleanProject(body?.project)
+    if (!project) return fail('Projet illisible.', 400)
+    const updatedAt = new Date().toISOString()
+    await kv.put(`project:${id}`, JSON.stringify({ project, tokenHash: stored.tokenHash, updatedAt }), { expirationTtl: PROJECT_TTL })
+    return reply({ id, updatedAt })
+  }
+  return fail('Méthode non prise en charge.', 405)
+}
+
+function tooManyShares(request) {
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
+  const now = Date.now()
+  const recent = (shares.get(ip) ?? []).filter((t) => now - t < 3_600_000)
+  if (recent.length >= SHARES_PER_HOUR) return true
+  recent.push(now)
+  shares.set(ip, recent)
+  if (shares.size > 5000) shares.clear()
+  return false
+}
+
 async function handle(request, env, path, reply, fail, allowed) {
   const kv = env.LIBRARY
+  if (path === '/projects' || path.startsWith('/projects/')) {
+    if (!kv) return fail('Partage non configuré (stockage LIBRARY manquant).', 503)
+    return projects(request, kv, path, reply, fail, allowed)
+  }
   if (request.method === 'GET' && path === '/diagnostic') {
     // Also rebuilds the list, e.g. after an entry was deleted by hand in the dashboard.
     const state = kv ? await rebuildLibrary(kv).then((l) => `OK (${l.length} matériels partagés)`) : 'pas de stockage LIBRARY : liez le KV namespace (variable LIBRARY)'
@@ -114,13 +192,7 @@ async function handle(request, env, path, reply, fail, allowed) {
   if (request.method === 'GET') return reply({ version: 1, entries: kv ? await readLibrary(kv) : [] })
   if (!allowed) return fail('Site non autorisé.', 403)
   if (!kv) return fail('Partage non configuré (stockage LIBRARY manquant).', 503)
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
-  const now = Date.now()
-  const recent = (shares.get(ip) ?? []).filter((t) => now - t < 3_600_000)
-  if (recent.length >= SHARES_PER_HOUR) return fail('Trop de partages en une heure, réessayez plus tard.', 429)
-  recent.push(now)
-  shares.set(ip, recent)
-  if (shares.size > 5000) shares.clear()
+  if (tooManyShares(request)) return fail('Trop de partages en une heure, réessayez plus tard.', 429)
   let body
   try {
     body = await request.json()
@@ -142,7 +214,7 @@ export default {
     const origin = request.headers.get('Origin') || ''
     const cors = {
       'Access-Control-Allow-Origin': origins.includes(origin) ? origin : origins[0],
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       Vary: 'Origin',
     }

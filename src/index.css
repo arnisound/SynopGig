@@ -652,3 +652,7 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 @media (max-width: 480px) {
   .brand > span { display: none; }
 }
+
+/* ---- Shared projects */
+.shared-banner { padding: 6px 12px; font-size: 13px; background: color-mix(in srgb, var(--accent) 16%, var(--panel)); border-bottom: 1px solid var(--border); }
+.share-link { width: 100%; font-family: ui-monospace, monospace; font-size: 12px; }

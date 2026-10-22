@@ -171,6 +171,13 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Chaque page porte le nom du projet, « SynopGig · Arnisound tools · arnisoundtools.com » et
   son numéro.
 
+### Partage avec l’équipe
+- **« Partager »** crée un lien en lecture seule (`…#/p/<id>`) : les techniciens ouvrent le
+  projet complet (synoptique, patch, plan de scène, racks, guide, listes, cases) sur leur
+  téléphone, sans compte, et cochent le guide de montage de leur côté. « Mettre à jour le
+  lien » publie la nouvelle version ; « Copier dans mes projets » en fait une copie
+  modifiable. Les projets partagés sont gardés par le Worker `library.js`.
+
 ### Téléphone et tablette
 - Barre compacte (menu ☰ pour le lieu, la date et les fichiers), onglets qui défilent.
 - Synoptique en plein écran : la palette s’ouvre en tiroir (« + Matériel »), l’inspecteur

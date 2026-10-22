@@ -93,6 +93,15 @@ L’adresse est écrite dans l’application (`DEFAULT_LIBRARY_URL` dans
 (ou définissez `VITE_LIBRARY_URL` au moment du build). Pour un nouveau domaine, ajoutez la
 variable `ALLOWED_ORIGINS` comme pour le relais IA.
 
+## Liens de partage de projets
+
+Le même Worker garde les **projets partagés en lecture seule** (bouton « Partager » de
+l’application) : `POST /projects` publie une copie et donne un lien `…#/p/<id>`, que
+n’importe qui ouvre sans compte ; seul le navigateur qui l’a créé peut le mettre à jour ou
+l’arrêter (clé gardée dans ce navigateur). 2 Mo maximum par projet, conservé un peu plus
+d’un an après la dernière mise à jour. Aucun réglage en plus : recollez simplement le
+nouveau `library.js` et *Deploy*.
+
 ## Modération
 
 Chaque matériel est une clé `entry:user-…` dans *KV* → `SYNOPGIG_LIBRARY`. Pour en retirer

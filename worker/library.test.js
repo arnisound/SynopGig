@@ -77,3 +77,27 @@ describe('USER library worker', () => {
     expect((await (await send({}, 'GET', '/')).json()).entries).toEqual([])
   })
 })
+
+describe('shared projects (read-only links)', () => {
+  const project = { version: 1, name: 'Concert', nodes: [], edges: [], cases: [], progress: {}, customTemplates: [] }
+
+  it('publishes, reads, updates and removes a project with its key', async () => {
+    const env = { LIBRARY: memoryKv() }
+    const { id, token } = await (await send(env, 'POST', '/projects', { project })).json()
+    expect(id).toMatch(/^[A-Za-z0-9]{10}$/)
+    const read = await (await send(env, 'GET', `/projects/${id}`)).json()
+    expect(read.project.name).toBe('Concert')
+    expect((await send(env, 'PUT', `/projects/${id}`, { project: { ...project, name: 'Concert v2' }, token: 'wrong' })).status).toBe(403)
+    expect((await send(env, 'PUT', `/projects/${id}`, { project: { ...project, name: 'Concert v2' }, token })).status).toBe(200)
+    expect((await (await send(env, 'GET', `/projects/${id}`)).json()).project.name).toBe('Concert v2')
+    expect((await send(env, 'DELETE', `/projects/${id}`, { token })).status).toBe(200)
+    expect((await send(env, 'GET', `/projects/${id}`)).status).toBe(404)
+  })
+
+  it('refuses what is not a project, other sites and bad links', async () => {
+    const env = { LIBRARY: memoryKv() }
+    expect((await send(env, 'POST', '/projects', { project: { hello: 1 } })).status).toBe(400)
+    expect((await send(env, 'POST', '/projects', { project }, 'https://evil.example')).status).toBe(403)
+    expect((await send(env, 'GET', '/projects/abc')).status).toBe(400)
+  })
+})
