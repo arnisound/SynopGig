@@ -63,6 +63,12 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
     (vidéo), serveurs 1U / 2U, NAS, Mac mini en tiroir 1U, console et switch KVM, tour,
     mini PC, portable, écran de contrôle.
   - Lumière (grandMA3, ChamSys, Avolites, ETC, Robe, Martin, Claypaky…) et énergie.
+  - **Accessoires de rack** : tiroirs 1 à 4U (dont verrouillable), tablettes fixes et
+    coulissantes, éclairage de rack et lampes col de cygne, ventilation, plaques pleines et
+    ventilées, passe-câbles, support micros HF, porte-documents ; **onduleurs** (APC, Eaton,
+    générique, extension batteries), **conditionneurs** (Furman), **chargeurs d’accus**
+    (Sennheiser L 6000, Shure SBC850 en rack, piles AA, tiroir de charge HF, V-Mount,
+    talkies).
 - Connectique : XLR 3/4/5, combo XLR/jack, mini-XLR, jack, mini-jack, RCA, Toslink/ADAT,
   MIDI, Speakon NL4/NL8, bornes HP, bornier Euroblock, etherCON/RJ45, opticalCON, fibre LC
   et SMPTE, BNC, SDI, HDMI, DisplayPort, DVI, VGA, USB/USB-C, Sub-D 9/25, RMP 54, powerCON,

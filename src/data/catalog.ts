@@ -668,6 +668,53 @@ const ENERGIE: DeviceTemplate[] = [
     dev('ups-1500', 'APC', 'Smart-UPS 1500 (onduleur)', 'Énergie', { u: 2, kg: 28 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 6, 'iec', PWR, 'out')]),
     dev('apc-smt3000', 'APC', 'Smart-UPS 3000 RM 2U (onduleur)', 'Énergie', { u: 2, kg: 40 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 8, 'iec', PWR, 'out')]),
     dev('apc-smt750', 'APC', 'Smart-UPS 750 RM 1U (onduleur)', 'Énergie', { u: 1, kg: 18 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 4, 'iec', PWR, 'out')]),
+    dev('apc-smt1500rm', 'APC', 'Smart-UPS 1500 RM 2U (onduleur)', 'Énergie', { u: 2, kg: 28 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 6, 'iec', PWR, 'out'), net('Carte réseau (option)', 'rj45')]),
+    dev('eaton-5px1500', 'Eaton', '5PX 1500 RT2U (onduleur)', 'Énergie', { u: 2, kg: 26 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 8, 'iec', PWR, 'out'), net('Carte réseau (option)', 'rj45')]),
+    dev('eaton-9px3000', 'Eaton', '9PX 3000 RT2U (onduleur on-line)', 'Énergie', { u: 2, kg: 31 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 8, 'iec', PWR, 'out'), net('Carte réseau', 'rj45')]),
+    dev('ups-1u-generic', 'Générique', 'Onduleur rack 1U 1000 VA', 'Énergie', { u: 1, kg: 14 }, [port('in', 'Entrée', 'iec', PWR, 'in'), ...series('out', 'Sortie', 4, 'iec', PWR, 'out')]),
+    dev('ups-battery-2u', 'Générique', 'Extension batteries d’onduleur 2U', 'Énergie', { u: 2, kg: 30 }, []),
+  ]),
+  ...family('Conditionneurs secteur', [
+    dev('furman-plplus-c', 'Furman', 'PL-PLUS C E (conditionneur 1U, 2 lampes rétractables)', 'Énergie', { u: 1, kg: 4.5 }, [port('in', 'Cordon secteur', 'schuko', PWR, 'in'), ...series('out', 'Prise', 9, 'schuko', PWR, 'out')]),
+    dev('furman-pl8c', 'Furman', 'PL-8C E (conditionneur 1U, 2 lampes rétractables)', 'Énergie', { u: 1, kg: 4 }, [port('in', 'Cordon secteur', 'schuko', PWR, 'in'), ...series('out', 'Prise', 9, 'schuko', PWR, 'out')]),
+    dev('furman-m8x2', 'Furman', 'M-8x2 E (conditionneur 1U, 9 prises)', 'Énergie', { u: 1, kg: 2.7 }, [port('in', 'Cordon secteur', 'schuko', PWR, 'in'), ...series('out', 'Prise', 9, 'schuko', PWR, 'out')]),
+    dev('furman-p1800ar', 'Furman', 'P-1800 AR E (régulateur de tension 2U)', 'Énergie', { u: 2, kg: 14 }, [port('in', 'Cordon secteur', 'schuko', PWR, 'in'), ...series('out', 'Prise', 9, 'schuko', PWR, 'out')]),
+    dev('rack-strip-8', 'Générique', 'Bandeau 8 prises 1U avec interrupteur', 'Énergie', { u: 1, kg: 1.2 }, [port('in', 'Cordon secteur', 'schuko', PWR, 'in'), ...series('out', 'Prise', 8, 'schuko', PWR, 'out')]),
+  ]),
+  ...family('Chargeurs d’accus', [
+    dev('senn-l6000', 'Sennheiser', 'L 6000 (chargeur rack 1U, 4 modules)', 'Énergie', { u: 1, kg: 4.5 }, [iec(), net('Réseau (Sennheiser Control Cockpit)', 'rj45')]),
+    dev('shure-sbc850-rack', 'Shure', 'SBC850 + kit rack 1U (chargeur 8 accus)', 'Énergie', { u: 1, kg: 2 }, [net('Ethernet', 'rj45'), dc()]),
+    dev('charger-aa-rack', 'Générique', 'Chargeur rack 1U piles AA / AAA (16 accus)', 'Énergie', { u: 1, kg: 2.5 }, [iec()]),
+    dev('charger-hf-rack-2u', 'Générique', 'Tiroir de charge 2U pour émetteurs HF (8 places)', 'Énergie', { u: 2, kg: 5 }, [iec()]),
+    dev('charger-vmount-2', 'Générique', 'Chargeur 2 batteries V-Mount (caméra)', 'Énergie', { kg: 1.5 }, [iec()]),
+    dev('charger-talkie-6', 'Générique', 'Chargeur 6 talkies-walkies', 'Énergie', { kg: 1 }, [dc()]),
+  ]),
+]
+
+/* Rack and case accessories: what goes in the rack without carrying a signal. */
+const ACCESSOIRES: DeviceTemplate[] = [
+  ...family('Accessoires de rack', [
+    dev('rack-drawer-1u', 'Générique', 'Tiroir de rack 1U', 'Autre', { u: 1, kg: 3 }, []),
+    dev('rack-drawer-2u', 'Générique', 'Tiroir de rack 2U', 'Autre', { u: 2, kg: 5 }, []),
+    dev('rack-drawer-3u', 'Générique', 'Tiroir de rack 3U', 'Autre', { u: 3, kg: 6 }, []),
+    dev('rack-drawer-4u', 'Générique', 'Tiroir de rack 4U', 'Autre', { u: 4, kg: 8 }, []),
+    dev('rack-drawer-lock-2u', 'Générique', 'Tiroir de rack 2U verrouillable', 'Autre', { u: 2, kg: 5.5 }, []),
+    dev('rack-shelf-1u', 'Générique', 'Tablette fixe 1U', 'Autre', { u: 1, kg: 2 }, []),
+    dev('rack-shelf-2u', 'Générique', 'Tablette fixe 2U', 'Autre', { u: 2, kg: 3 }, []),
+    dev('rack-shelf-slide-1u', 'Générique', 'Tablette coulissante 1U (clavier, ordinateur portable)', 'Autre', { u: 1, kg: 4 }, []),
+    dev('rack-light-1u', 'Générique', 'Éclairage de rack 1U (2 lampes LED col de cygne)', 'Autre', { u: 1, kg: 1.5 }, [iec()]),
+    dev('rack-light-led-1u', 'Générique', 'Éclairage de rack 1U (barre LED, variateur)', 'Autre', { u: 1, kg: 1 }, [iec()]),
+    dev('lamp-xlr4', 'Générique', 'Lampe col de cygne XLR 4 pts (console)', 'Autre', { kg: 0.2 }, [port('pwr', 'Alim XLR 4', 'xlr4', PWR, 'in')]),
+    dev('lamp-usb', 'Générique', 'Lampe col de cygne USB', 'Autre', { kg: 0.1 }, [port('pwr', 'USB', 'usb', PWR, 'in')]),
+    dev('rack-fan-1u', 'Générique', 'Ventilation de rack 1U (2 ventilateurs, thermostat)', 'Autre', { u: 1, kg: 2 }, [iec()]),
+    dev('rack-blank-1u', 'Générique', 'Plaque pleine 1U', 'Autre', { u: 1, kg: 0.4 }, []),
+    dev('rack-blank-2u', 'Générique', 'Plaque pleine 2U', 'Autre', { u: 2, kg: 0.7 }, []),
+    dev('rack-blank-3u', 'Générique', 'Plaque pleine 3U', 'Autre', { u: 3, kg: 1 }, []),
+    dev('rack-vent-1u', 'Générique', 'Plaque ventilée 1U', 'Autre', { u: 1, kg: 0.3 }, []),
+    dev('rack-brush-1u', 'Générique', 'Passe-câbles à brosse 1U', 'Autre', { u: 1, kg: 0.5 }, []),
+    dev('rack-cable-bar-1u', 'Générique', 'Barre de maintien de câbles 1U (arrière)', 'Autre', { u: 1, kg: 0.5 }, []),
+    dev('rack-mic-holder-2u', 'Générique', 'Support micros HF 2U (8 micros)', 'Autre', { u: 2, kg: 1.5 }, []),
+    dev('rack-docs-1u', 'Générique', 'Porte-documents 1U (feuille de patch)', 'Autre', { u: 1, kg: 0.6 }, []),
   ]),
 ]
 
@@ -681,4 +728,4 @@ function withBrands(base: DeviceTemplate[], brands: DeviceTemplate[]) {
   return all.map((t, i) => ({ t, i })).sort((a, b) => order.indexOf(a.t.family) - order.indexOf(b.t.family) || a.i - b.i).map((x) => x.t)
 }
 
-export const CATALOG: DeviceTemplate[] = [...withBrands(SON, BRANDS), ...LUMIERE, ...VIDEO, ...RESEAU, ...ENERGIE]
+export const CATALOG: DeviceTemplate[] = [...withBrands(SON, BRANDS), ...LUMIERE, ...VIDEO, ...RESEAU, ...ENERGIE, ...ACCESSOIRES]
