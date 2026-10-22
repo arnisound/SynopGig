@@ -6,7 +6,9 @@ import { LIBRARY } from './data/library'
 import TechGuide from './guide/TechGuide'
 import LibraryPage from './library/LibraryPage'
 import { useUserLibrary } from './library/useUserLibrary'
+import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
+import StagePage from './stage/StagePage'
 import { applyTheme, readTheme, THEME_LABELS, type Theme } from './theme'
 import Lists from './lists/Lists'
 import RackBuilder from './racks/RackBuilder'
@@ -14,10 +16,12 @@ import { demoProject, download, emptyProject, loadProject, parseProject, savePro
 import SynopticEditor from './synoptic/SynopticEditor'
 import type { Project } from './types'
 
-type Tab = 'synoptic' | 'racks' | 'guide' | 'lists' | 'cases' | 'library'
+type Tab = 'synoptic' | 'patch' | 'stage' | 'racks' | 'guide' | 'lists' | 'cases' | 'library'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'synoptic', label: 'Synoptique' },
+  { id: 'patch', label: 'Patch' },
+  { id: 'stage', label: 'Plan de scène' },
   { id: 'racks', label: 'Racks' },
   { id: 'guide', label: 'Guide technicien' },
   { id: 'lists', label: 'Listes' },
@@ -147,6 +151,8 @@ export default function App() {
             <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} theme={theme} onTheme={setTheme} />
           </ReactFlowProvider>
         )}
+        {tab === 'patch' && <PatchPage project={project} setProject={setProject} />}
+        {tab === 'stage' && <StagePage project={project} setProject={setProject} />}
         {tab === 'racks' && <RackBuilder project={project} setProject={setProject} templates={templates} />}
         {tab === 'guide' && (
           <TechGuide

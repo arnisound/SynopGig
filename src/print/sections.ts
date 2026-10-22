@@ -6,6 +6,8 @@ export const SECTIONS = [
   { id: 'cover', label: 'Couverture et sommaire' },
   { id: 'synoptic', label: 'Synoptique (vue d’ensemble)' },
   { id: 'departments', label: 'Synoptique par département' },
+  { id: 'patch', label: 'Patch : listes d’entrées et de sorties' },
+  { id: 'stage', label: 'Plan de scène' },
   { id: 'devices', label: 'Équipements par zone' },
   { id: 'ports', label: 'Fiche détaillée de chaque équipement (ports et câbles)' },
   { id: 'cables', label: 'Liste de câbles' },

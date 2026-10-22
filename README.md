@@ -99,6 +99,22 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   [`worker/README.md`](worker/README.md)) ;
   `public/user-library.json` sert de copie de secours hors ligne.
 
+### Patch (onglet Patch)
+- **Liste d’entrées** générée depuis le synoptique : chaque entrée câblée d’une console ou
+  d’une stagebox, avec sa vraie source (micro, DI, récepteur HF) suivie à travers les
+  bandeaux. Voie, nom, pied, 48 V et notes se modifient et restent attachés à la prise.
+- **Liste de sorties** : chaque sortie câblée et ce qu’elle alimente (amplis, retours, ears),
+  avec le nom du mix.
+- Export CSV, impression, et partie « Patch » du dossier PDF.
+
+### Plan de scène (onglet Plan de scène)
+- Scène vue de dessus à l’échelle (ouverture × profondeur, carreaux de 1 m, lointain,
+  jardin, cour, face).
+- On y pose le matériel du synoptique (les micros affichent leur numéro de voie) et des
+  éléments : musicien, praticable, pied de micro, retour, batterie, ampli, clavier, 220 V,
+  texte. Glisser à la souris ou au doigt, rotation, taille, duplication.
+- Imprimé dans le dossier PDF.
+
 ### Racks et bandeaux de câblage
 - Onglet **Racks** : vue avant et arrière, glisser-déposer du matériel unité par unité,
   détection des chevauchements et du manque de place, poids et occupation.

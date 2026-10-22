@@ -214,6 +214,38 @@ export interface SynopticView {
   colorMode: 'signal' | 'cable'
 }
 
+/** What the user changed on a line of the input or output list. */
+export interface PatchEdit {
+  channel?: string
+  name?: string
+  stand?: string
+  phantom?: boolean
+  note?: string
+}
+
+export type StageItemKind = 'device' | 'musician' | 'riser' | 'stand' | 'wedge' | 'drums' | 'amp' | 'keys' | 'power' | 'label'
+
+/** Something on the stage plot; sizes and positions in metres, from upstage left. */
+export interface StageItem {
+  id: string
+  kind: StageItemKind
+  /** Synoptic device shown by this item. */
+  nodeId?: string
+  label: string
+  x: number
+  y: number
+  w: number
+  h: number
+  rot: number
+}
+
+export interface StagePlot {
+  /** Stage size, metres. */
+  width: number
+  depth: number
+  items: StageItem[]
+}
+
 export interface Project {
   version: 1
   name: string
@@ -225,4 +257,6 @@ export interface Project {
   progress: GuideProgress
   customTemplates: DeviceTemplate[]
   view?: Partial<SynopticView>
+  patch?: { inputs?: Record<string, PatchEdit>; outputs?: Record<string, PatchEdit> }
+  stage?: StagePlot
 }

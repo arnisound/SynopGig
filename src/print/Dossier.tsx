@@ -9,6 +9,10 @@ import { bannerSize, caseHeightMm } from '../cases/geometry'
 import type { DeviceNode, Project } from '../types'
 import { departmentsOf, SECTIONS, type SectionId } from './sections'
 import type { Shot } from './SynopticShooter'
+import { buildPatch, channelsBySource, patchLabel } from '../patch/patch'
+import { stageOf } from '../stage/stage'
+import StageSvg from '../stage/StageSvg'
+import Page from './PrintPage'
 import SynopticPages, { type SynopticMode } from './SynopticPages'
 
 const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux' }
@@ -111,6 +115,30 @@ export default function Dossier({
       {has('synoptic') && <SynopticPages title="Synoptique" shot={shots.get('all')} mode={synopticMode} />}
 
       {has('departments') && departmentsOf(project).map((d) => <SynopticPages key={d} title={`Synoptique — ${d}`} shot={shots.get(`dept:${d}`)} mode={synopticMode} />)}
+
+      {has('patch') && (() => {
+        const { inputs, outputs } = buildPatch(project)
+        return (
+          <section className="d-page">
+            <h2>Patch</h2>
+            <h3>Liste d’entrées <small>({inputs.length})</small></h3>
+            <Table block={{ head: ['Voie', 'Nom', 'Source', 'Arrivée', 'Pied', '48 V', 'Notes'], rows: inputs.map((r) => [r.channel, r.name, `${patchLabel(r.far)} · ${r.far?.node.data.model ?? ''}`, patchLabel(r.at), r.stand, r.phantom ? '48 V' : '', r.note]) }} />
+            <h3>Liste de sorties <small>({outputs.length})</small></h3>
+            <Table block={{ head: ['Sortie', 'Mix', 'Départ', 'Destination', 'Notes'], rows: outputs.map((r) => [r.channel, r.name, patchLabel(r.at), `${patchLabel(r.far)} · ${r.far?.node.data.model ?? ''}`, r.note]) }} />
+          </section>
+        )
+      })()}
+
+      {has('stage') && (() => {
+        const st = stageOf(project)
+        const wide = st.width / st.depth > 1.15
+        return (
+          <Page wide={wide}>
+            <h2>Plan de scène <small>{st.width} × {st.depth} m</small></h2>
+            <StageSvg project={project} channels={channelsBySource(project)} className={`stage-print ${wide ? 'wide' : ''}`} />
+          </Page>
+        )
+      })()}
 
       {has('devices') && (
         <section className="d-page">

@@ -536,6 +536,8 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
   .d-toc { text-align: left; width: 120mm; margin: 0 auto; line-height: 1.8; }
   .d-maker { margin-top: 18mm; font-size: 10pt; color: #333; }
   .d-foot { margin-top: 3mm; font-size: 8pt; color: #666; }
+  .stage-print { display: block; margin: 0 auto; width: 186mm; height: auto; max-height: 240mm; }
+  .stage-print.wide { width: auto; height: 165mm; max-width: 262mm; }
   .d-shot { position: relative; overflow: hidden; margin: 0 auto; }
   .d-shot img { position: absolute; max-width: none; }
   .d-tile { position: absolute; box-sizing: border-box; border: 0.5mm dashed #c8892b; color: #c8892b; font-weight: 700; font-size: 14pt; padding: 1mm 2mm; }
@@ -583,6 +585,28 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 /* Labels stay above cables raised on hover or selection. */
 .react-flow__edgelabel-renderer { z-index: 20; }
 
+/* ---- Patch */
+.patch-table { width: 100%; }
+.patch-table .cell { width: 100%; min-width: 60px; padding: 3px 6px; }
+.patch-table td { vertical-align: middle; }
+
+/* ---- Stage plot */
+.page.stage { display: grid; grid-template-columns: 260px minmax(0, 1fr) 260px; gap: 16px; max-width: none; align-items: start; }
+.stage-side { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.stage-side h3 { margin-top: 0; }
+.stage-add { display: flex; flex-wrap: wrap; gap: 4px; }
+.stage-add button { font-size: 12px; padding: 4px 8px; }
+.stage-canvas { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; touch-action: none; user-select: none; }
+.stage-svg { width: 100%; height: auto; display: block; }
+.stage-item { cursor: grab; }
+.stage-item:active { cursor: grabbing; }
+.stage-side .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.stage-side details summary { font-weight: 600; cursor: pointer; padding: 4px 0; }
+@media (max-width: 1200px) {
+  .page.stage { grid-template-columns: 240px minmax(0, 1fr); }
+  .page.stage > aside:last-child { grid-column: 1 / -1; }
+}
+
 /* ---- Phones and tablets */
 .palette-wrap, .inspector-wrap, .topbar-more:not(.file-actions) { display: contents; }
 .sheet-close, .mobile-only, .drawer-backdrop, .icon-btn { display: none; }
@@ -605,7 +629,8 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 
   .page { padding: 12px; }
   .page section, .lists section { overflow-x: auto; }
-  .page.racks, .page.cases, .page.library { grid-template-columns: minmax(0, 1fr); }
+  .page.racks, .page.cases, .page.library, .page.stage { grid-template-columns: minmax(0, 1fr); }
+  .page.stage > .stage-canvas { order: -1; }
 
   .synoptic { display: block; position: relative; height: 100%; }
   .canvas { height: 100%; }

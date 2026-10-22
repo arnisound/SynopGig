@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { SIGNALS } from '../data/connectors'
+import Page from './PrintPage'
 import type { Shot } from './SynopticShooter'
 
 export type SynopticMode = 'fit' | 'tiles'
@@ -16,17 +16,6 @@ const TILE_SCALE = 0.22
 const OVERLAP = 30
 
 const letter = (i: number) => String.fromCharCode(65 + (i % 26))
-
-/** A4 sheet; a wide drawing is turned a quarter on it. */
-function Page({ wide, children }: { wide: boolean; children: ReactNode }) {
-  return wide ? (
-    <section className="d-page d-wide">
-      <div className="d-turn">{children}</div>
-    </section>
-  ) : (
-    <section className="d-page">{children}</section>
-  )
-}
 
 function Legend() {
   return (
