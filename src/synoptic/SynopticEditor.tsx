@@ -20,6 +20,7 @@ import { CATEGORY_COLORS } from '../data/library'
 import { connectPorts, createCase, createDevice, setPanel, slug, uid } from '../project'
 import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
 import CableEdgeView from './CableEdgeView'
+import { THEME_LABELS, type Theme } from '../theme'
 import DeviceNodeView from './DeviceNodeView'
 import { useCanvasModel } from './useCanvasModel'
 import RackFrameView, { type FrameNode } from './RackFrameView'
@@ -42,9 +43,11 @@ interface Props {
   /** Elements to highlight and frame, sent from the technician guide. */
   focus: string[]
   onOpenRacks?: () => void
+  theme: Theme
+  onTheme: (t: Theme) => void
 }
 
-export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks }: Props) {
+export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const { nodes, edges } = project
   const view = viewOf(project)
@@ -258,6 +261,12 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         </div>
         {viewPanel && (
           <div className="view-panel">
+            <label className="field">
+              <span>Thème (fond)</span>
+              <select value={theme} onChange={(e) => onTheme(e.target.value as Theme)}>
+                {(Object.keys(THEME_LABELS) as Theme[]).map((t) => <option key={t} value={t}>{THEME_LABELS[t]}</option>)}
+              </select>
+            </label>
             <label className="field">
               <span>Département</span>
               <select value={view.department} onChange={(e) => setView({ department: e.target.value as Category | 'all' })}>

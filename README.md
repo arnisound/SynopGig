@@ -19,6 +19,8 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Repères câbles automatiques (C001, C002…), longueur, note pour le technicien.
 - Configuration par équipement : zone, IP, univers/adresse DMX, mode/preset, consignes.
 - Ports éditables et sauvegarde d'un équipement comme nouveau modèle.
+- **Thème** : automatique (comme l’appareil), clair (fond blanc) ou sombre, dans « Affichage »
+  ou par le bouton ◐ / ☀ / ☾ de la barre du haut (mémorisé par le navigateur).
 - **Options d’affichage** (bouton « Affichage », enregistrées avec chaque projet) : un seul
   département (son, lumière, vidéo, réseau, énergie, avec en grisé ce qui y est branché),
   tracé des câbles (angles arrondis, angles droits, courbes, lignes droites), étiquettes

@@ -14,8 +14,9 @@
   font-size: 14px;
 }
 
+/* Dark theme: following the device, or chosen in the app ("Thème"). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #111113;
     --panel: #1a1a1d;
     --canvas: #141416;
@@ -24,6 +25,21 @@
     --muted: #9a9aa3;
     --accent: #cc8a28;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #111113;
+  --panel: #1a1a1d;
+  --canvas: #141416;
+  --border: #2e2e33;
+  --text: #ececee;
+  --muted: #9a9aa3;
+  --accent: #cc8a28;
+  color-scheme: dark;
+}
+/* Light theme on demand: white backgrounds, even on a device set to dark. */
+:root[data-theme='light'] {
+  --canvas: #ffffff;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }

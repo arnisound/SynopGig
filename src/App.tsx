@@ -7,6 +7,7 @@ import TechGuide from './guide/TechGuide'
 import LibraryPage from './library/LibraryPage'
 import { useUserLibrary } from './library/useUserLibrary'
 import DossierDialog from './print/DossierDialog'
+import { applyTheme, readTheme, THEME_LABELS, type Theme } from './theme'
 import Lists from './lists/Lists'
 import RackBuilder from './racks/RackBuilder'
 import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
@@ -29,6 +30,12 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('synoptic')
   const [dossier, setDossier] = useState(false)
   const [menu, setMenu] = useState(false)
+  const [theme, setThemeState] = useState<Theme>(readTheme)
+  const setTheme = (t: Theme) => {
+    applyTheme(t)
+    setThemeState(t)
+  }
+  const nextTheme: Record<Theme, Theme> = { auto: 'light', light: 'dark', dark: 'auto' }
   const [focus, setFocus] = useState<string[]>([])
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -127,6 +134,9 @@ export default function App() {
           <button onClick={() => fileInput.current?.click()}>Ouvrir</button>
           <button onClick={() => download(`${slug(project.name)}.synopgig.json`, JSON.stringify(project, null, 2), 'application/json')}>Enregistrer</button>
           <button onClick={() => setDossier(true)} title="Dossier technique complet à imprimer ou en PDF">Dossier PDF</button>
+          <button onClick={() => setTheme(nextTheme[theme])} title={`Thème : ${THEME_LABELS[theme]} (cliquer pour changer)`}>
+            {theme === 'light' ? '☀ Clair' : theme === 'dark' ? '☾ Sombre' : '◐ Auto'}
+          </button>
           <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => { importFile(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </header>
@@ -134,7 +144,7 @@ export default function App() {
       <main>
         {tab === 'synoptic' && (
           <ReactFlowProvider>
-            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} />
+            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} theme={theme} onTheme={setTheme} />
           </ReactFlowProvider>
         )}
         {tab === 'racks' && <RackBuilder project={project} setProject={setProject} templates={templates} />}
