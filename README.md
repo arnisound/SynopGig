@@ -178,6 +178,14 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   lien » publie la nouvelle version ; « Copier dans mes projets » en fait une copie
   modifiable. Les projets partagés sont gardés par le Worker `library.js`.
 
+### Hors ligne et installation
+- Après une première visite, l’application s’ouvre **sans réseau** (salle sans 4G, sous-sol) :
+  une copie complète est gardée par le navigateur et remplacée à chaque nouvelle version.
+- Elle s’**installe** sur l’écran d’accueil (Android : menu → « Installer l’application » ;
+  iPhone : Partager → « Sur l’écran d’accueil ») et s’ouvre en plein écran.
+- Les projets partagés déjà ouverts restent consultables hors ligne. L’IA, le partage et la
+  bibliothèque USER demandent le réseau.
+
 ### Téléphone et tablette
 - Barre compacte (menu ☰ pour le lieu, la date et les fichiers), onglets qui défilent.
 - Synoptique en plein écran : la palette s’ouvre en tiroir (« + Matériel »), l’inspecteur
