@@ -157,6 +157,15 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const selectedNode = nodes.find((n) => n.selected)
   const selectedEdge = edges.find((e) => e.selected)
 
+  // On small screens, touching a device or a cable opens the inspector sheet.
+  const [drawer, setDrawer] = useState<'palette' | 'inspector' | 'legend'>()
+  const selectedId = selectedNode?.id ?? selectedEdge?.id
+  const [lastSelected, setLastSelected] = useState(selectedId)
+  if (selectedId !== lastSelected) {
+    setLastSelected(selectedId)
+    if (selectedId && window.matchMedia('(max-width: 900px)').matches) setDrawer('inspector')
+  }
+
   const exportPng = async () => {
     if (nodes.length === 0) return
     const bounds = getNodesBounds(nodes)
@@ -207,10 +216,24 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const issueCount = cables.filter((c) => c.issues.length > 0).length
 
   return (
-    <div className="synoptic">
-      <Palette templates={templates} onAdd={addCentered} />
+    <div className={`synoptic ${drawer ? `show-${drawer}` : ''}`}>
+      {/* Phones and tablets: the palette slides in from the left, the inspector rises from the bottom. */}
+      {drawer && drawer !== 'legend' && <div className="drawer-backdrop" onClick={() => setDrawer(undefined)} />}
+      <div className="palette-wrap">
+        <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
+        <Palette
+          templates={templates}
+          onAdd={(t) => {
+            addCentered(t)
+            setDrawer(undefined)
+          }}
+        />
+      </div>
       <div className="canvas" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
         <div className="canvas-toolbar">
+          <button className="mobile-only" onClick={() => setDrawer(drawer === 'palette' ? undefined : 'palette')}>+ Matériel</button>
+          <button className="mobile-only" onClick={() => setDrawer(drawer === 'inspector' ? undefined : 'inspector')}>Inspecteur</button>
+          <button className="mobile-only" onClick={() => setDrawer(drawer === 'legend' ? undefined : 'legend')}>Légende</button>
           <label className="toggle">
             <input type="checkbox" checked={compact} onChange={(e) => setView({ compact: e.target.checked })} />
             Masquer les ports libres
@@ -324,6 +347,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           })}
         </div>
       </div>
+      <div className="inspector-wrap">
+      <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
       <Inspector
         node={selectedNode}
         cable={selectedEdge ? cableByEdge.get(selectedEdge.id) : undefined}
@@ -358,6 +383,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         }}
         onDelete={deleteSelection}
       />
+      </div>
     </div>
   )
 }

@@ -113,7 +113,7 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
       <aside className="inspector empty">
         <h3>Inspecteur</h3>
         <p>Sélectionnez un équipement ou un câble pour le modifier.</p>
-        <p>Pour câbler, tirez un trait d’un port à un autre. Les incompatibilités (signal, connecteur, sens) sont signalées en rouge ou orange sans vous bloquer.</p>
+        <p>Pour câbler, tirez un trait d’un port à un autre (sur écran tactile : touchez un port, puis l’autre). Les incompatibilités (signal, connecteur, sens) sont signalées en rouge ou orange sans vous bloquer.</p>
       </aside>
     )
   }

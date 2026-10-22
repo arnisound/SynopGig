@@ -28,6 +28,7 @@ export default function App() {
   const [project, setProject] = useState<Project>(loadProject)
   const [tab, setTab] = useState<Tab>('synoptic')
   const [dossier, setDossier] = useState(false)
+  const [menu, setMenu] = useState(false)
   const [focus, setFocus] = useState<string[]>([])
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -105,16 +106,21 @@ export default function App() {
           </span>
         </div>
         <input className="project-name" value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} aria-label="Nom du projet" />
-        <input className="project-meta" placeholder="Lieu" value={project.venue} onChange={(e) => setProject((p) => ({ ...p, venue: e.target.value }))} aria-label="Lieu" />
-        <input className="project-meta" type="date" value={project.date} onChange={(e) => setProject((p) => ({ ...p, date: e.target.value }))} aria-label="Date" />
+        <button className="icon-btn undo-mobile" onClick={undo} disabled={!canUndo} title="Annuler" aria-label="Annuler">↶</button>
+        <button className="icon-btn menu-btn" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-label="Menu">{menu ? '✕' : '☰'}</button>
+        {/* On phones and tablets these sit in the ☰ menu; on a computer they flow in the bar as before. */}
+        <div className={`topbar-more ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).closest('button') && setMenu(false)}>
+          <input className="project-meta" placeholder="Lieu" value={project.venue} onChange={(e) => setProject((p) => ({ ...p, venue: e.target.value }))} aria-label="Lieu" />
+          <input className="project-meta" type="date" value={project.date} onChange={(e) => setProject((p) => ({ ...p, date: e.target.value }))} aria-label="Date" />
+        </div>
         <nav className="tabs">
           {TABS.map((t) => (
-            <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
+            <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => { setTab(t.id); setMenu(false) }}>
               {t.label}
             </button>
           ))}
         </nav>
-        <div className="file-actions">
+        <div className={`file-actions topbar-more ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).closest('button') && setMenu(false)}>
           <button onClick={undo} disabled={!canUndo} title="Annuler (Ctrl+Z)">↶ Annuler</button>
           <button onClick={() => confirm('Créer un projet vide ? Pensez à exporter le projet actuel.') && replace(emptyProject())}>Nouveau</button>
           <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Démo</button>

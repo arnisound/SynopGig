@@ -566,3 +566,48 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .cable-find { width: 150px; }
 /* Labels stay above cables raised on hover or selection. */
 .react-flow__edgelabel-renderer { z-index: 20; }
+
+/* ---- Phones and tablets */
+.palette-wrap, .inspector-wrap, .topbar-more:not(.file-actions) { display: contents; }
+.sheet-close, .mobile-only, .drawer-backdrop, .icon-btn { display: none; }
+@media (pointer: coarse) {
+  /* Fingers need bigger ports; touching a port then another one makes the cable. */
+  .react-flow__handle { width: 14px; height: 14px; }
+  .react-flow__controls button { width: 32px; height: 32px; }
+}
+@media (max-width: 900px) {
+  .topbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 6px; padding: 6px 8px; }
+  .project-name { width: auto; min-width: 0; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 34px; font-size: 18px; padding: 0 8px; }
+  .topbar-more, .topbar-more:not(.file-actions) { display: none; }
+  .topbar-more.open, .topbar-more.open:not(.file-actions) { display: flex; grid-column: 1 / -1; flex-wrap: wrap; gap: 6px; order: 5; }
+  .topbar-more .project-meta { flex: 1 1 140px; width: auto; }
+  .file-actions.open button { flex: 1 1 auto; }
+  .tabs { grid-column: 1 / -1; order: 10; margin: 0; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { white-space: nowrap; flex: 0 0 auto; }
+
+  .page { padding: 12px; }
+  .page section, .lists section { overflow-x: auto; }
+  .page.racks, .page.cases, .page.library { grid-template-columns: minmax(0, 1fr); }
+
+  .synoptic { display: block; position: relative; height: 100%; }
+  .canvas { height: 100%; }
+  .palette-wrap, .inspector-wrap { display: block; position: fixed; z-index: 40; background: var(--panel); box-shadow: 0 0 24px #0006; transition: transform 0.2s ease; overflow: auto; }
+  .palette-wrap { top: 0; bottom: 0; left: 0; width: min(330px, 88vw); transform: translateX(-105%); }
+  .inspector-wrap { left: 0; right: 0; bottom: 0; max-height: 70vh; border-radius: 14px 14px 0 0; transform: translateY(105%); }
+  .show-palette .palette-wrap, .show-inspector .inspector-wrap { transform: none; }
+  .palette-wrap .palette, .inspector-wrap .inspector { border: none; max-height: none; }
+  .sheet-close { display: block; position: sticky; top: 6px; margin: 6px 6px -40px auto; z-index: 2; width: 38px; height: 34px; }
+  .drawer-backdrop { display: block; position: fixed; inset: 0; z-index: 39; background: #0006; }
+  .mobile-only { display: inline-block; }
+  .canvas-toolbar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .canvas-toolbar > * { flex: 0 0 auto; }
+  .legend { display: none; left: 8px; right: 8px; max-width: none; }
+  .show-legend .legend { display: flex; }
+  .react-flow__minimap { display: none; }
+  .view-panel { width: auto; right: 8px; max-height: calc(100% - 70px); overflow: auto; }
+}
+@media (max-width: 480px) {
+  .brand > span { display: none; }
+}

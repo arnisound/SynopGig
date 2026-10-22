@@ -153,6 +153,13 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Chaque page porte le nom du projet, « SynopGig · Arnisound tools · arnisoundtools.com » et
   son numéro.
 
+### Téléphone et tablette
+- Barre compacte (menu ☰ pour le lieu, la date et les fichiers), onglets qui défilent.
+- Synoptique en plein écran : la palette s’ouvre en tiroir (« + Matériel »), l’inspecteur
+  monte du bas quand on touche un appareil ou un câble, légende repliable.
+- Câblage au doigt : toucher un port, puis l’autre (ports agrandis sur écran tactile).
+- Pages en une colonne, tableaux qui défilent dans leur cadre.
+
 ### Projet
 - Sauvegarde automatique dans le navigateur, enregistrement/ouverture d'un
   fichier `.synopgig.json`, projet de démonstration.
