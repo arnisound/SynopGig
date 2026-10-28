@@ -97,7 +97,7 @@ les limites (voir « Protection ») ; lire les documents et les photos n’en co
 Chaque fiche est lue **deux fois en même temps, par deux IA indépendantes**, et
 l’application compare leurs réponses ligne par ligne :
 
-- **Gemini** (`gemini-2.5-flash`, puis `gemini-2.5-flash-lite`) reçoit le PDF lui-même
+- **Gemini** (le meilleur modèle Flash de votre clé, puis Flash-Lite, choisis seuls) reçoit le PDF lui-même
   quand il fait moins de 4 Mo (il voit les tableaux et les dessins des faces) avec son texte ;
 - **une IA texte** : Groq (`gpt-oss-120b`), sinon Mistral, sinon Z.ai, sinon
   Workers AI s’il est relié — la suivante seulement si la précédente ne répond pas.

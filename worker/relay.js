@@ -12,7 +12,7 @@
  *                    own open models, used last (small free daily allowance)
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
  *   GROQ_MODEL       optional (default: best model the account can use)
- *   GEMINI_MODEL     optional (default gemini-2.5-flash)
+ *   GEMINI_MODEL     optional (default: best Flash model the key can use, then Flash-Lite)
  *   MISTRAL_MODEL    optional (default: best model the account can use, medium first)
  *
  * Protection (nobody can use the keys up for everyone):
@@ -236,12 +236,28 @@ const groqCall = (req, env, model, mode) => openAiCall('https://api.groq.com/ope
  * made by e-mail. One request at a time per account: when busy, the relay
  * moves on. Key at z.ai (API Keys).
  */
+// The same GLM models on Z.ai (international) and BigModel (China): keys of one are refused by the other.
+const ZAI_HOSTS = ['https://api.z.ai/api/paas/v4/chat/completions', 'https://open.bigmodel.cn/api/paas/v4/chat/completions']
+let zaiHost
+
+async function zaiCall(req, env, model) {
+  let last
+  // The platform that last answered first: a new key may belong to the other one.
+  for (const url of zaiHost ? [zaiHost, ...ZAI_HOSTS.filter((h) => h !== zaiHost)] : ZAI_HOSTS) {
+    last = await openAiCall(url, env.ZAI_API_KEY, req, env, model, 'json')
+    if (last.status !== 401) {
+      zaiHost = url
+      return last
+    }
+  }
+  return last
+}
+
 async function askZai(req, env) {
   const models = [...new Set([env.ZAI_MODEL || 'glm-4.7-flash', 'glm-4.5-flash'])]
-  const url = 'https://api.z.ai/api/paas/v4/chat/completions'
   let last
   for (const model of models) {
-    last = await openAiCall(url, env.ZAI_API_KEY, req, env, model, 'json')
+    last = await zaiCall(req, env, model)
     if (last.status === 200 && last.text) return last
     if (last.status === 401 || last.status === 403) break
   }
@@ -381,6 +397,11 @@ async function askMistral(req, env) {
   for (const [model, strict] of tries) {
     if (busy.has(model)) continue
     last = await mistralCall(req, env, model, strict)
+    // Free plan: one request a second. Busy for a moment: wait and ask again, once.
+    if (last.status === 429 && !/quota|month|capacity/i.test(last.error ?? '')) {
+      await sleep(1.5)
+      last = await mistralCall(req, env, model, strict)
+    }
     if (last.status === 200 && last.text) return last
     if (last.status === 401 || last.status === 403) break
     // Out of quota: no use asking the same model without the schema; the small one has its own quota.
@@ -413,8 +434,8 @@ async function geminiCall(req, env, model) {
         maxOutputTokens: 6000,
         responseMimeType: 'application/json',
         responseSchema: geminiSchema(req.schema),
-        // A short thinking pass: counts per channel, duplicates, options.
-        thinkingConfig: { thinkingBudget: 1024 },
+        // A short thinking pass: counts per channel, duplicates, options (Gemini 3 sets it by level).
+        thinkingConfig: /gemini-2\./.test(model) ? { thinkingBudget: 1024 } : { thinkingLevel: 'low' },
       },
     }),
     signal: AbortSignal.timeout(60000),
@@ -424,12 +445,39 @@ async function geminiCall(req, env, model) {
   return { status: res.status, text, error: res.ok && text ? undefined : res.ok ? 'réponse illisible' : reason(data, res.status) }
 }
 
-/** Gemini 2.5 Flash, then Flash-Lite (its own, larger free quota). */
+// Google retires models for new accounts: ask the key which ones it has.
+let geminiModels
+
+/** Version of a model name: gemini-3.5-flash → 3.5; the "latest" aliases rank first. */
+const geminiVersion = (m) => (/latest/.test(m) ? 99 : Number(/gemini-(\d+(?:\.\d+)?)/.exec(m)?.[1] ?? 0))
+
+/** Best Flash model, then best Flash-Lite (its own, larger free quota); stable ones before previews. */
+export async function pickGeminiModels(env) {
+  if (geminiModels?.key !== env.GEMINI_API_KEY) {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': env.GEMINI_API_KEY } }).catch(() => null)
+    const data = res?.ok ? await res.json().catch(() => ({})) : {}
+    const list = (Array.isArray(data.models) ? data.models : [])
+      .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
+      .map((m) => String(m.name).replace(/^models\//, ''))
+      .filter((m) => /^gemini-.*flash/.test(m) && !/tts|image|audio|live|thinking|exp|embed|8b/.test(m))
+    if (list.length) geminiModels = { key: env.GEMINI_API_KEY, list }
+  }
+  const list = geminiModels?.list ?? []
+  if (list.length === 0) return [env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-flash-lite-latest']
+  const best = (lite) =>
+    list
+      .filter((m) => /lite/.test(m) === lite)
+      .sort((a, b) => Number(/preview/.test(a)) - Number(/preview/.test(b)) || geminiVersion(b) - geminiVersion(a))[0]
+  return [...new Set([env.GEMINI_MODEL, best(false), best(true)].filter(Boolean))]
+}
+
 async function askGemini(req, env) {
   let last
-  for (const model of [...new Set([env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.5-flash-lite'])]) {
+  for (const model of await pickGeminiModels(env)) {
     last = await geminiCall(req, env, model)
     if (last.status === 200 && last.text) return last
+    // A model retired since the list was read: read it again next time.
+    if (last.status === 404) geminiModels = undefined
     if (last.status === 401 || last.status === 403) break
   }
   return { ...last, error: `Gemini ${last.status} : ${last.error}` }
@@ -633,7 +681,7 @@ async function searchGroq(q, env) {
 
 /** Gemini grounded on Google Search: the sources it read are the results. */
 async function searchGemini(q, env) {
-  const model = env.GEMINI_SEARCH_MODEL || 'gemini-2.5-flash'
+  const model = env.GEMINI_SEARCH_MODEL || (await pickGeminiModels(env))[0]
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
@@ -643,8 +691,8 @@ async function searchGemini(q, env) {
     }),
     signal: AbortSignal.timeout(20000),
   })
-  if (!res.ok) return []
   const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(`Gemini : ${model} : ${reason(data, res.status)}`)
   const cand = data.candidates?.[0] ?? {}
   const chunks = (cand.groundingMetadata?.groundingChunks ?? []).map((c) => c.web).filter(Boolean)
   // Google hands redirect links: follow each one to the real address.
@@ -754,13 +802,14 @@ async function diagnostic(env) {
   if (env.MISTRAL_API_KEY) {
     mistralModels = undefined
     const [model] = await pickMistralModels(env)
-    const r = model ? await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) })) : { status: 404, error: 'aucun modèle' }
+    const r = model ? await askMistral(req, env).catch((e) => ({ status: 0, error: String(e) })) : { status: 404, error: 'aucun modèle' }
     out.mistral = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
     out.mistral_modeles_du_compte = mistralModels?.list ?? []
   }
   if (env.ZAI_API_KEY) {
-    const r = await openAiCall('https://api.z.ai/api/paas/v4/chat/completions', env.ZAI_API_KEY, req, env, env.ZAI_MODEL || 'glm-4.7-flash', 'json').catch((e) => ({ status: 0, error: String(e) }))
-    out.zai = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+    zaiHost = undefined
+    const r = await zaiCall(req, env, env.ZAI_MODEL || 'glm-4.7-flash').catch((e) => ({ status: 0, error: String(e) }))
+    out.zai = r.status === 200 ? `OK (${new URL(zaiHost).host})` : `ERREUR ${r.status} : ${r.error}${r.status === 401 ? ' (clé refusée par z.ai et bigmodel.cn : recréez-la)' : ''}`
   }
   if (env.AI) {
     const r = await askWorkersAi(req, env).catch((e) => ({ status: 0, error: String(e) }))
@@ -781,8 +830,9 @@ async function diagnostic(env) {
     out.groq_modeles_du_compte = (groqModels?.list ?? []).filter((m) => !NOT_CHAT.test(m))
   }
   if (env.GEMINI_API_KEY) {
+    geminiModels = undefined
     const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
-    out.gemini = r.status === 200 && r.text ? 'OK' : `ERREUR ${r.error}`
+    out.gemini = r.status === 200 && r.text ? `OK (modèles ${(await pickGeminiModels(env)).join(', ')})` : `ERREUR ${r.error}`
   }
   // Documentation search: which sources answer from this Worker.
   const probe = async (fn) => {
