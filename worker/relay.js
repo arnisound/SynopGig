@@ -463,7 +463,7 @@ async function modelsOf(service, env) {
   const own = env[`${service.name.toUpperCase()}_MODEL`]
   if (!service.models) return [...new Set([own, ...service.preferred].filter(Boolean))]
   if (known.get(service.name)?.key !== key) {
-    const res = await fetch(service.models, { headers: { Authorization: `Bearer ${key}` } }).catch(() => null)
+    const res = await fetch(service.models, { headers: { Authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(10000) }).catch(() => null)
     const data = res?.ok ? await res.json().catch(() => ({})) : {}
     const list = Array.isArray(data.data) ? data.data.map((m) => String(m.id)) : []
     if (list.length) known.set(service.name, { key, list })
@@ -548,7 +548,7 @@ function geminiSchema(s) {
 /** Best stable Flash model the key has, then the best Flash-Lite (Google retires models often). */
 export async function geminiModels(env) {
   if (known.get('gemini')?.key !== env.GEMINI_API_KEY) {
-    const res = await fetch(`${GEMINI}?pageSize=200`, { headers: { 'x-goog-api-key': env.GEMINI_API_KEY } }).catch(() => null)
+    const res = await fetch(`${GEMINI}?pageSize=200`, { headers: { 'x-goog-api-key': env.GEMINI_API_KEY }, signal: AbortSignal.timeout(10000) }).catch(() => null)
     const data = res?.ok ? await res.json().catch(() => ({})) : {}
     const list = (data.models ?? [])
       .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
@@ -581,16 +581,16 @@ async function askGemini(req, env) {
           maxOutputTokens: 8000,
           responseMimeType: 'application/json',
           responseSchema: geminiSchema(req.schema),
-          // Gemini 2.5 needs a thinking budget; later models think by default.
           // A short thinking pass: enough for counts per channel, and quick.
           thinkingConfig: /gemini-2\./.test(model) ? { thinkingBudget: 2048 } : { thinkingLevel: 'low' },
         },
       }),
-      signal: AbortSignal.timeout(90000),
-    }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: String(e.message) } }) }))
+      // A model that hangs: the next one (Flash-Lite answers faster).
+      signal: AbortSignal.timeout(45000),
+    }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? `${model} : pas de réponse en 45 s` : String(e.message) } }) }))
     const data = await res.json().catch(() => ({}))
     const text = extractJson(data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join(''))
-    if (res.ok && text) return { status: 200, text, engine: 'gemini' }
+    if (res.ok && text) return { status: 200, text, engine: 'gemini', model }
     last = { status: res.status, error: `gemini : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
     if (res.status === 401 || res.status === 403) break
     if (res.status === 404) known.delete('gemini')
@@ -662,10 +662,13 @@ async function diagnostic(env) {
   }
   if (env.GEMINI_API_KEY) {
     checks.push(
-      check('gemini', 40, async () => {
+      check('gemini', 100, async () => {
         known.delete('gemini')
+        const t = Date.now()
+        const models = await geminiModels(env)
         const r = await askGemini(req, env)
-        return r.status === 200 ? `OK (modèles ${(await geminiModels(env)).join(', ')})` : `ERREUR ${r.status} : ${r.error}`
+        const took = `${Math.round((Date.now() - t) / 1000)} s`
+        return r.status === 200 ? `OK (modèle ${r.model}, ${took})` : `ERREUR ${r.status} : ${r.error} (modèles essayés : ${models.join(', ')}, ${took})`
       }),
     )
   } else out.gemini = 'pas de clé GEMINI_API_KEY'

@@ -46,13 +46,18 @@ export async function readUrl(url: string, model = ''): Promise<{ page: Page } |
   return /json/i.test(type) ? { page: (await res.json()) as Page } : { file: await res.blob(), type }
 }
 
+// The relay's OCR refused once (not in the plan, or out of quota): not asked again this visit.
+let ocrRefused = false
+
 /** The text of a PDF: the relay's OCR keeps the tables; pdf.js here otherwise. */
 export async function pdfText(url: string): Promise<{ text: string; pdf?: File; how: 'ocr' | 'pdf.js' }> {
-  try {
-    const { text } = (await (await relay('/ocr', { url })).json()) as { text: string }
-    if (text.replace(/\s/g, '').length > 200) return { text, how: 'ocr' }
-  } catch {
-    // No OCR on this relay (or busy): read it here.
+  if (!ocrRefused) {
+    try {
+      const { text } = (await (await relay('/ocr', { url })).json()) as { text: string }
+      if (text.replace(/\s/g, '').length > 200) return { text, how: 'ocr' }
+    } catch (e) {
+      if (/indisponible|rate|quota|limit/i.test(String((e as Error).message))) ocrRefused = true
+    }
   }
   const got = await readUrl(url)
   if (!('file' in got) || !/pdf/i.test(got.type)) throw new Error('ce lien ne mène pas à un PDF')
