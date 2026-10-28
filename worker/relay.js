@@ -6,7 +6,6 @@
  * Settings (Cloudflare > Worker > Settings > Variables and Secrets):
  *   GROQ_API_KEY     secret, recommended: very fast (console.groq.com/keys)
  *   MISTRAL_API_KEY  secret, recommended first: generous free tier (console.mistral.ai)
- *   CEREBRAS_API_KEY secret, optional: gpt-oss-120b with its own free quota (cloud.cerebras.ai)
  *   ZAI_API_KEY      secret, optional: free GLM Flash models of Z.ai (z.ai)
  *   GEMINI_API_KEY   secret, alternative or complement: also reads scanned PDFs
  *   AI               binding (Settings > Bindings > Workers AI), no key: Cloudflare's
@@ -196,7 +195,7 @@ const analysisMessages = (req, mode) => [
 ]
 
 /**
- * One analysis on an OpenAI-compatible service (Groq, Cerebras).
+ * One analysis on an OpenAI-compatible service (Groq, Z.ai).
  * mode: 'schema' (strict structured output), 'json' (any JSON object) or 'plain'.
  */
 async function openAiCall(url, key, req, env, model, mode) {
@@ -231,22 +230,6 @@ async function openAiCall(url, key, req, env, model, mode) {
 }
 
 const groqCall = (req, env, model, mode) => openAiCall('https://api.groq.com/openai/v1/chat/completions', env.GROQ_API_KEY, req, env, model, mode)
-
-/*
- * Cerebras: same open models as Groq (gpt-oss-120b), its own free quota
- * (about a million tokens a day). Key at cloud.cerebras.ai.
- */
-async function askCerebras(req, env) {
-  const models = [...new Set([env.CEREBRAS_MODEL || 'gpt-oss-120b', 'llama-3.3-70b'])]
-  const url = 'https://api.cerebras.ai/v1/chat/completions'
-  let last
-  for (const [model, mode] of models.flatMap((m) => [[m, 'schema'], [m, 'json']])) {
-    last = await openAiCall(url, env.CEREBRAS_API_KEY, req, env, model, mode)
-    if (last.status === 200 && last.text) return last
-    if (last.status === 401 || last.status === 403) break
-  }
-  return { ...last, error: `Cerebras ${last.status} : ${last.error ?? 'réponse illisible'}` }
-}
 
 /*
  * Z.ai (Zhipu, China): the GLM "Flash" models are free, with an account
@@ -775,10 +758,6 @@ async function diagnostic(env) {
     out.mistral = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
     out.mistral_modeles_du_compte = mistralModels?.list ?? []
   }
-  if (env.CEREBRAS_API_KEY) {
-    const r = await openAiCall('https://api.cerebras.ai/v1/chat/completions', env.CEREBRAS_API_KEY, req, env, env.CEREBRAS_MODEL || 'gpt-oss-120b', 'json').catch((e) => ({ status: 0, error: String(e) }))
-    out.cerebras = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
-  }
   if (env.ZAI_API_KEY) {
     const r = await openAiCall('https://api.z.ai/api/paas/v4/chat/completions', env.ZAI_API_KEY, req, env, env.ZAI_MODEL || 'glm-4.7-flash', 'json').catch((e) => ({ status: 0, error: String(e) }))
     out.zai = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
@@ -834,7 +813,7 @@ async function firstAnswer(chain, req, env, errors, flags) {
 /**
  * Two independent readings at the same time, the app compares them:
  * Gemini (which also sees the PDF itself: tables, panel drawings), and the
- * first text model that answers (Groq gpt-oss-120b, Mistral, Z.ai...).
+ * first text model that answers (Groq gpt-oss-120b, Mistral, Z.ai).
  * When one side has nothing, the other side's spare services are tried, so
  * an answer comes back whenever any service can give one. With a PDF,
  * Gemini's reading comes first.
@@ -844,7 +823,6 @@ export async function analyse(req, env) {
   if (req.text) {
     if (env.GROQ_API_KEY) text.push(['groq', askGroq])
     if (env.MISTRAL_API_KEY) text.push(['mistral', askMistral])
-    if (env.CEREBRAS_API_KEY) text.push(['cerebras', askCerebras])
     if (env.ZAI_API_KEY) text.push(['zai', askZai])
     // No key at all: Cloudflare's own models, last because their daily allowance is small.
     if (env.AI) text.push(['workers-ai', askWorkersAi])
@@ -898,7 +876,7 @@ export default {
       if (r.image) return new Response(r.image, { headers: { ...cors, 'Content-Type': r.type } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
-    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.CEREBRAS_API_KEY && !env.ZAI_API_KEY && !env.GEMINI_API_KEY && !env.AI) return fail('Relais non configuré (clé manquante).', 500)
+    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.ZAI_API_KEY && !env.GEMINI_API_KEY && !env.AI) return fail('Relais non configuré (clé manquante).', 500)
 
     let req
     try {

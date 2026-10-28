@@ -12,6 +12,7 @@ import { findDocs, loadDoc, type FoundDoc } from './finder'
 import { fetchImage, pageImages, shrink } from './images'
 import DeviceArt from '../ui/DeviceArt'
 import type { UserLibrary } from './useUserLibrary'
+import type { NewProductRequest } from './newProduct'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
 const DIRS: Record<PortDirection, string> = { in: 'Entrée', out: 'Sortie', io: 'Bidirectionnel' }
@@ -100,8 +101,8 @@ interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
   userLibrary: UserLibrary
-  /** Product searched for from the synoptic palette. */
-  findQuery?: string
+  /** New product asked for from the synoptic palette. */
+  request?: NewProductRequest
 }
 
 const sameModel = (a: { brand?: string; model: string }, b: { brand?: string; model: string }) => {
@@ -109,7 +110,7 @@ const sameModel = (a: { brand?: string; model: string }, b: { brand?: string; mo
   return k(a) === k(b)
 }
 
-export default function LibraryPage({ project, setProject, userLibrary, findQuery }: Props) {
+export default function LibraryPage({ project, setProject, userLibrary, request }: Props) {
   const [draft, setDraft] = useState<Draft>()
   const [suggestions, setSuggestions] = useState<Row[]>([])
   const [text, setText] = useState('')
@@ -135,18 +136,35 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
   const [foundKnown, setFoundKnown] = useState<DeviceTemplate[]>([])
   const [finding, setFinding] = useState(false)
   const [findStatus, setFindStatus] = useState('')
-  const [lastQuery, setLastQuery] = useState<string>()
-  if (findQuery !== undefined && findQuery !== lastQuery) {
-    // From the palette: "Shure SM7dB" → brand Shure, model SM7dB when the brand is known.
-    setLastQuery(findQuery)
-    const first = findQuery.trim().split(/\s+/)[0] ?? ''
-    const b = BRANDS.find((x) => x.toLowerCase() === first.toLowerCase())
-    setFBrand(b ?? '')
-    setFModel(b ? findQuery.trim().slice(first.length).trim() : findQuery.trim())
-    setFound(undefined)
-    setFoundKnown([])
-    setFindStatus('Vérifiez la marque et le modèle, puis « Chercher ce produit ».')
+  const [lastRequest, setLastRequest] = useState<number>()
+  const finderRef = useRef<HTMLElement>(null)
+  const sheetRef = useRef<HTMLElement>(null)
+  const editorRef = useRef<HTMLElement>(null)
+  if (request && request.n !== lastRequest) {
+    setLastRequest(request.n)
+    if (request.mode === 'find') {
+      // From the palette: "Shure SM7dB" → brand Shure, model SM7dB when the brand is known.
+      const first = request.query.split(/\s+/)[0] ?? ''
+      const b = BRANDS.find((x) => x.toLowerCase() === first.toLowerCase())
+      setFBrand(b ?? '')
+      setFModel(b ? request.query.slice(first.length).trim() : request.query)
+      setFound(undefined)
+      setFoundKnown([])
+      setFindStatus(request.query ? 'Vérifiez la marque et le modèle, puis « Chercher ce produit ».' : 'Indiquez la marque et le modèle, puis « Chercher ce produit ».')
+    } else if (request.mode === 'manual') {
+      setDraft(blank())
+      setSuggestions([])
+      setStatus('Fiche vide : renseignez le modèle et sa connectique, puis enregistrez.')
+    }
   }
+  // The part of the page the palette asked for, in view; a sheet is read and analysed at once.
+  useEffect(() => {
+    if (!request) return
+    const target = request.mode === 'find' ? finderRef : request.mode === 'doc' ? sheetRef : editorRef
+    target.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (request.mode === 'doc') void onFile(request.file, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per request
+  }, [request])
 
   // Photos found with the documentation, as thumbnails to choose from.
   const [photos, setPhotos] = useState<string[]>([])
@@ -286,7 +304,11 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
     }
   }
 
-  const analyse = async (withAi: boolean, force = false) => {
+  const sourceText = text
+  const sourceFile = file
+  const analyse = async (withAi: boolean, force = false, from?: { text: string; file?: File }) => {
+    const text = from ? from.text : sourceText
+    const file = from ? from.file : sourceFile
     const label = file ? file.name : 'le texte collé'
     const pdf = file && /\.pdf$/i.test(file.name) ? file : undefined
     if (!text.trim() && !pdf) return setStatus('Choisissez un PDF ou collez du texte.')
@@ -302,12 +324,14 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
       )
       return
     }
-    if (withAi && engines?.length) await runAi(text, label, pdf)
+    // Asked from the palette right as the page opens: the engines may not be known yet.
+    const ready = engines ?? (await availableEngines(geminiKey, allowChrome))
+    if (withAi && ready.length) await runAi(text, label, pdf)
     else if (text.trim()) runRules(text, label)
     else setStatus('Ce PDF ne contient pas de texte lisible et aucune IA n’est disponible : collez les caractéristiques depuis le site du fabricant.')
   }
 
-  const onFile = async (f?: File) => {
+  const onFile = async (f?: File, analyseNow = false) => {
     if (!f) return
     setFile(f)
     setStatus(`Lecture de ${f.name}…`)
@@ -320,11 +344,13 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
         t = await f.text()
       }
       setText(t)
-      if (t.trim().length < 20 && !engines?.some((e) => e !== 'chrome')) {
+      const ready = engines ?? (await availableEngines(geminiKey, allowChrome))
+      if (t.trim().length < 20 && !ready.some((e) => e !== 'chrome')) {
         setStatus('Ce PDF ne contient pas de texte lisible (scan ?). Collez les caractéristiques depuis le site du fabricant.')
         return
       }
-      setStatus(`${f.name} chargé. Cliquez sur « Analyser ».`)
+      if (analyseNow) await analyse(true, false, { text: t, file: f })
+      else setStatus(`${f.name} chargé. Cliquez sur « Analyser ».`)
     } catch (e) {
       setStatus(`Lecture impossible : ${(e as Error).message}`)
     }
@@ -480,7 +506,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
       </aside>
 
       <div className="lib-main">
-        <section className="card finder">
+        <section className="card finder" ref={finderRef}>
           <h3>Le chercher pour vous</h3>
           <p className="muted small">
             Donnez la marque et le modèle exacts : SynopGig cherche la documentation officielle du constructeur, vous la vérifiez, puis la fiche et ses ports en sont tirés. Une fois
@@ -529,7 +555,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
           )}
         </section>
 
-        <section className="card">
+        <section className="card" ref={sheetRef}>
           <h3>Analyser une fiche technique</h3>
           <p className="muted small">
             Déposez la fiche (PDF) ou collez ses caractéristiques, puis « Analyser ».{' '}
@@ -589,7 +615,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
         </section>
 
         {draft ? (
-          <section className="card">
+          <section className="card" ref={editorRef}>
             <div className="section-head">
               <h3>{draft.id ? 'Modifier le modèle' : 'Nouveau matériel'}</h3>
               <button className="icon" title="Fermer" onClick={() => setDraft(undefined)}>×</button>

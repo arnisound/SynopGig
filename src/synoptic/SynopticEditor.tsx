@@ -28,6 +28,7 @@ import { DEFAULT_VIEW, viewOf } from './view'
 import { ViewContext } from './viewContext'
 import Inspector from './Inspector'
 import Palette, { DND_TYPE } from './Palette'
+import type { NewProduct } from '../library/newProduct'
 
 const nodeTypes = { device: DeviceNodeView, rackFrame: RackFrameView }
 const edgeTypes = { cable: CableEdgeView }
@@ -45,10 +46,11 @@ interface Props {
   onOpenRacks?: () => void
   theme: Theme
   onTheme: (t: Theme) => void
-  onFindProduct?: (query: string) => void
+  /** Not in the base: find it, read its sheet, or create it by hand (library page). */
+  onNewProduct?: (r: NewProduct) => void
 }
 
-export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme, onFindProduct }: Props) {
+export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme, onNewProduct }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const { nodes, edges } = project
   const view = viewOf(project)
@@ -227,7 +229,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
         <Palette
           templates={templates}
-          onFind={onFindProduct}
+          onNew={onNewProduct}
           onAdd={(t) => {
             addCentered(t)
             setDrawer(undefined)

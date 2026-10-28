@@ -20,9 +20,6 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
      gratuite, Mistral peut se servir des requêtes pour entraîner ses modèles : ce ne sont
      que des fiches techniques publiques. Pour un usage plus large, l’offre payante coûte
      quelques centimes par mois à ce volume ; fixez une limite de dépense dans la console.
-   - **Cerebras** (facultatif, **payant** : l’essai demande une carte ; même modèle
-     `gpt-oss-120b` que Groq) : <https://cloud.cerebras.ai> → *API Keys*.
-     Secret `CEREBRAS_API_KEY`.
    - **Z.ai** (facultatif, gratuit, société chinoise Zhipu) : modèles GLM « Flash » gratuits,
      compte par e-mail sur <https://z.ai> → *API Keys*. Secret `ZAI_API_KEY`. Une seule
      requête à la fois par compte : s’il est occupé, le relais passe au suivant.
@@ -102,7 +99,7 @@ l’application compare leurs réponses ligne par ligne :
 
 - **Gemini** (`gemini-2.5-flash`, puis `gemini-2.5-flash-lite`) reçoit le PDF lui-même
   quand il fait moins de 4 Mo (il voit les tableaux et les dessins des faces) avec son texte ;
-- **une IA texte** : Groq (`gpt-oss-120b`), sinon Mistral, sinon Cerebras, sinon Z.ai, sinon
+- **une IA texte** : Groq (`gpt-oss-120b`), sinon Mistral, sinon Z.ai, sinon
   Workers AI s’il est relié — la suivante seulement si la précédente ne répond pas.
 
 Dans l’application, une ligne est « confirmée » quand les deux IA trouvent le même nombre

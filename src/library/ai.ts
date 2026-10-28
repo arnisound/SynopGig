@@ -395,7 +395,7 @@ export function relayRequest(input: { text?: string; pdfBase64?: string }) {
 /** A PDF small enough to be shown to Gemini as it is (tables, panel drawings). */
 const PDF_FOR_GEMINI = 4_000_000
 
-const ENGINE_NAMES: Record<string, string> = { groq: 'Groq', mistral: 'Mistral', zai: 'Z.ai', gemini: 'Gemini', cerebras: 'Cerebras', 'workers-ai': 'Cloudflare' }
+const ENGINE_NAMES: Record<string, string> = { groq: 'Groq', mistral: 'Mistral', zai: 'Z.ai', gemini: 'Gemini', 'workers-ai': 'Cloudflare' }
 
 /** The relay forwards to Groq or Gemini with the site owner's key, kept secret on the server. */
 export async function extractRelay(input: { text?: string; pdf?: File; device?: string }, url = AI_PROXY_URL): Promise<AiResult> {

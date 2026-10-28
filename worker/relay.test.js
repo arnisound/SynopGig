@@ -117,18 +117,6 @@ describe('AI relay', () => {
     expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral') && !String(u).endsWith('/models'))).toHaveLength(2)
   })
 
-  it('uses Cerebras when Groq is full', async () => {
-    const upstream = vi.fn(async (url) =>
-      String(url).includes('groq') ? (String(url).endsWith('/models') ? models('openai/gpt-oss-120b') : new Response('{}', { status: 429 })) : groqOk(),
-    )
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G7', CEREBRAS_API_KEY: 'C' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"X"}' })
-    const [url, init] = upstream.mock.calls.find(([u]) => String(u).includes('cerebras'))
-    expect(url).toBe('https://api.cerebras.ai/v1/chat/completions')
-    expect(JSON.parse(init.body).model).toBe('gpt-oss-120b')
-  })
-
   it('uses the free GLM models of Z.ai', async () => {
     const upstream = vi.fn(async () => groqOk())
     vi.stubGlobal('fetch', upstream)

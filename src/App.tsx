@@ -17,6 +17,7 @@ import RackBuilder from './racks/RackBuilder'
 import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
 import SynopticEditor from './synoptic/SynopticEditor'
 import type { Project } from './types'
+import type { NewProductRequest } from './library/newProduct'
 
 type Tab = 'synoptic' | 'patch' | 'stage' | 'racks' | 'guide' | 'lists' | 'cases' | 'library'
 
@@ -47,7 +48,7 @@ export default function App() {
     updatedAt: SHARED_ID ? cachedShared(SHARED_ID)?.updatedAt : undefined,
   }))
   const [sharing, setSharing] = useState(false)
-  const [findQuery, setFindQuery] = useState<string>()
+  const [newProduct, setNewProduct] = useState<NewProductRequest>()
   const [tab, setTab] = useState<Tab>('synoptic')
   const [dossier, setDossier] = useState(false)
   const [menu, setMenu] = useState(false)
@@ -221,7 +222,7 @@ export default function App() {
       <main>
         {tab === 'synoptic' && (
           <ReactFlowProvider>
-            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} theme={theme} onTheme={setTheme} onFindProduct={SHARED_ID ? undefined : (q) => { setFindQuery(q); setTab('library') }} />
+            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} theme={theme} onTheme={setTheme} onNewProduct={SHARED_ID ? undefined : (r) => { setNewProduct((p) => ({ ...r, n: (p?.n ?? 0) + 1 })); setTab('library') }} />
           </ReactFlowProvider>
         )}
         {tab === 'patch' && <PatchPage project={project} setProject={setProject} />}
@@ -239,7 +240,7 @@ export default function App() {
         )}
         {tab === 'lists' && <Lists project={project} />}
         {tab === 'cases' && <CaseEditor project={project} setProject={setProject} />}
-        {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} findQuery={findQuery} />}
+        {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} request={newProduct} />}
       </main>
     </div>
   )
