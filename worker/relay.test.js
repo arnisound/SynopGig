@@ -29,15 +29,26 @@ describe('AI relay', () => {
     expect(cleanRequest({ ...req, v: 1 })).toBeNull()
   })
 
-  it('uses Groq first for text, with the secret key', async () => {
-    const upstream = groq(['llama-3.3-70b-versatile'], groqOk)
+  it('reads each sheet twice at once, Groq and Gemini, for the app to compare', async () => {
+    const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
-    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    // Text only: the text model's reading first.
+    expect(await res.json()).toEqual({ text: '{"model":"X"}', engine: 'groq', second: '{"model":"Y"}', secondEngine: 'gemini' })
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(SITE)
-    const [url, init] = chatCalls(upstream)[0]
+    const [url, init] = chatCalls(upstream).find(([u]) => String(u).includes('groq'))
     expect(url).toContain('api.groq.com')
     expect(init.headers.Authorization).toBe('Bearer G')
+  })
+
+  it('shows Gemini the PDF itself, with its text layer, and puts its reading first', async () => {
+    const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR', pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
+    expect(await res.json()).toMatchObject({ engine: 'gemini', secondEngine: 'groq' })
+    const parts = JSON.parse(upstream.mock.calls.find(([u]) => String(u).includes('generativelanguage'))[1].body).contents[0].parts
+    expect(parts[0].inline_data.mime_type).toBe('application/pdf')
+    expect(parts[1].text).toContain('4 x XLR')
   })
 
   it('picks a model the Groq account really has', async () => {
@@ -63,7 +74,7 @@ describe('AI relay', () => {
     )
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G3' })
-    expect(await res.json()).toEqual({ text: '{"model":"Z"}' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"Z"}' })
     expect(JSON.parse(chatCalls(upstream).at(-1)[1].body).response_format).toBeUndefined()
   })
 
@@ -72,7 +83,7 @@ describe('AI relay', () => {
     const upstream = groq(['openai/gpt-oss-120b', 'openai/gpt-oss-20b'], limited(0.01), limited(0.05), groqOk)
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G5' })
-    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"X"}' })
     const used = chatCalls(upstream).map(([, init]) => JSON.parse(init.body).model)
     // Never the same busy model twice in a row; then the first one free again.
     expect(used).toEqual(['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'])
@@ -83,27 +94,25 @@ describe('AI relay', () => {
     expect(shape({ type: 'object', properties: { a: { type: 'integer' }, d: { type: 'string', enum: ['in', 'out'] } }, required: ['d'] })).toBe('{"a":integer?,"d":"in"|"out"}')
   })
 
-  it('asks Mistral first when it has a key, with the strict schema', async () => {
+  it('asks Mistral with the strict schema, on a model the account has', async () => {
     // A free key: no medium or small model on this account.
     const upstream = vi.fn(async (url) =>
       String(url).endsWith('/models') ? models('open-mistral-nemo', 'ministral-8b-latest', 'mistral-embed') : new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] })),
     )
     vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', GROQ_API_KEY: 'G' })
-    expect(await res.json()).toEqual({ text: '{"model":"M"}' })
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"M"}', engine: 'mistral' })
     const [url, init] = chatCalls(upstream)[0]
     expect(url).toBe('https://api.mistral.ai/v1/chat/completions')
     expect(init.headers.Authorization).toBe('Bearer K')
     expect(JSON.parse(init.body)).toMatchObject({ model: 'ministral-8b-latest', response_format: { type: 'json_schema' } })
   })
 
-  it('moves on to Groq when Mistral is out of quota', async () => {
-    const upstream = vi.fn(async (url) =>
-      String(url).includes('mistral') ? new Response(JSON.stringify({ message: 'Requests rate limit exceeded' }), { status: 429 }) : String(url).endsWith('/models') ? models('openai/gpt-oss-120b') : groqOk(),
-    )
+  it('moves on when Mistral is out of quota', async () => {
+    const upstream = vi.fn(async (url) => (String(url).includes('mistral') ? new Response(JSON.stringify({ message: 'Requests rate limit exceeded' }), { status: 429 }) : groqOk()))
     vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', GROQ_API_KEY: 'G6' })
-    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', ZAI_API_KEY: 'Z' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"X"}', engine: 'zai' })
     // Each Mistral model asked once only: a quota is not a schema problem.
     expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral') && !String(u).endsWith('/models'))).toHaveLength(2)
   })
@@ -114,7 +123,7 @@ describe('AI relay', () => {
     )
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G7', CEREBRAS_API_KEY: 'C' })
-    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"X"}' })
     const [url, init] = upstream.mock.calls.find(([u]) => String(u).includes('cerebras'))
     expect(url).toBe('https://api.cerebras.ai/v1/chat/completions')
     expect(JSON.parse(init.body).model).toBe('gpt-oss-120b')
@@ -124,7 +133,7 @@ describe('AI relay', () => {
     const upstream = vi.fn(async () => groqOk())
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { ZAI_API_KEY: 'Z' })
-    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"X"}' })
     const [url, init] = upstream.mock.calls[0]
     expect(url).toBe('https://api.z.ai/api/paas/v4/chat/completions')
     expect(JSON.parse(init.body)).toMatchObject({ model: 'glm-4.7-flash', response_format: { type: 'json_object' } })
@@ -133,7 +142,7 @@ describe('AI relay', () => {
   it('falls back on Cloudflare Workers AI, without any key', async () => {
     const AI = { run: vi.fn(async () => ({ response: 'ok: {"model":"W"}' })) }
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { AI })
-    expect(await res.json()).toEqual({ text: '{"model":"W"}' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"W"}' })
     expect(AI.run.mock.calls[0][0]).toBe('@cf/openai/gpt-oss-120b')
   })
 
@@ -164,7 +173,7 @@ describe('AI relay', () => {
     const upstream = vi.fn(async () => geminiOk())
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
-    expect(await res.json()).toEqual({ text: '{"model":"Y"}' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"Y"}' })
     expect(upstream.mock.calls[0][0]).toContain('gemini-2.5-flash:')
     expect(JSON.parse(upstream.mock.calls[0][1].body).generationConfig.thinkingConfig.thinkingBudget).toBe(1024)
   })

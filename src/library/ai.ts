@@ -47,6 +47,10 @@ export interface AiResult {
   rackU?: number
   weight?: number
   groups: AiGroup[]
+  /** A second, independent reading of the same sheet (relay), to compare with. */
+  second?: AiGroup[]
+  /** Services that answered, e.g. "Gemini + Groq". */
+  by?: string
 }
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
@@ -188,22 +192,47 @@ export interface CheckedGroup extends AiGroup {
   doubts: string[]
 }
 
+/** Same connector, compatible direction. */
+const sameKind = (a: { connector: ConnectorType; dir: PortDirection }, b: { connector: ConnectorType; dir: PortDirection }) =>
+  a.connector === b.connector && (a.dir === b.dir || a.dir === 'io' || b.dir === 'io')
+
 /**
  * Every group of an answer checked against the sheet itself: the passage
- * must be in it and must carry the count, and the rule-based reading
- * (independent of the AI) must not read another number.
+ * must be in it and must carry the count; the rule-based reading (no AI)
+ * must not read another number; and when a second AI read the sheet on its
+ * own, it must have found the same. Two independent models agreeing is the
+ * strongest sign: it outweighs a count not written word for word (counts
+ * per channel are worked out, not written).
  */
-export function checkAnswer(groups: AiGroup[], sheet: string, rules: { connector: ConnectorType; dir: PortDirection; count: number; guessed?: boolean }[] = []): CheckedGroup[] {
+export function checkAnswer(
+  groups: AiGroup[],
+  sheet: string,
+  rules: { connector: ConnectorType; dir: PortDirection; count: number; guessed?: boolean }[] = [],
+  second?: AiGroup[],
+): CheckedGroup[] {
   return groups.map((g) => {
     const doubts: string[] = []
-    if (!g.quote) doubts.push('aucun passage cité')
-    else if (!quoteInSheet(g.quote, sheet)) doubts.push('passage introuvable dans la fiche')
-    else if (!quoteHasCount(g.quote, g.count)) doubts.push(`quantité ${g.count} non écrite dans le passage`)
-    const same = rules.filter((r) => !r.guessed && r.connector === g.connector && (r.dir === g.dir || r.dir === 'io' || g.dir === 'io'))
+    const other = second?.filter((o) => sameKind(o, g)) ?? []
+    const agreed = other.some((o) => o.count === g.count)
+    if (second && !other.length) doubts.push('vu par une seule des deux IA')
+    else if (second && !agreed) doubts.push(`l’autre IA lit ${[...new Set(other.map((o) => o.count))].join(' ou ')}`)
+    if (sheet.trim()) {
+      if (!g.quote) {
+        if (!agreed) doubts.push('aucun passage cité')
+      } else if (!quoteInSheet(g.quote, sheet)) {
+        if (!agreed) doubts.push('passage introuvable dans la fiche')
+      } else if (!quoteHasCount(g.quote, g.count) && !agreed) doubts.push(`quantité ${g.count} non écrite dans le passage`)
+    } else if (!agreed) doubts.push('fiche scannée : rien à comparer')
+    const same = rules.filter((r) => !r.guessed && sameKind(r, g))
     if (same.length && !same.some((r) => r.count === g.count)) doubts.push(`l’analyse rapide lit ${[...new Set(same.map((r) => r.count))].join(' ou ')}`)
-    if (g.count > 32) doubts.push('nombre élevé')
+    if (g.count > 32 && !agreed) doubts.push('nombre élevé')
     return { ...g, doubts }
   })
+}
+
+/** What the second AI found and the first did not: offered to the user, not added. */
+export function missedGroups(groups: AiGroup[], second: AiGroup[] = []) {
+  return second.filter((o) => !groups.some((g) => sameKind(o, g)))
 }
 
 // ---- Choosing what the model reads
@@ -358,10 +387,15 @@ export async function extractGemini(input: { text?: string; pdf?: File; device?:
   return readGemini(res)
 }
 
-/** What the relay accepts: the prompt, the schema and the useful lines (or a scanned PDF). */
+/** What the relay accepts: the prompt, the schema, the useful lines and/or the PDF (for Gemini). */
 export function relayRequest(input: { text?: string; pdfBase64?: string }) {
   return { v: 2, system: SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, pdfBase64: input.pdfBase64 }
 }
+
+/** A PDF small enough to be shown to Gemini as it is (tables, panel drawings). */
+const PDF_FOR_GEMINI = 4_000_000
+
+const ENGINE_NAMES: Record<string, string> = { groq: 'Groq', mistral: 'Mistral', zai: 'Z.ai', gemini: 'Gemini', cerebras: 'Cerebras', 'workers-ai': 'Cloudflare' }
 
 /** The relay forwards to Groq or Gemini with the site owner's key, kept secret on the server. */
 export async function extractRelay(input: { text?: string; pdf?: File; device?: string }, url = AI_PROXY_URL): Promise<AiResult> {
@@ -369,11 +403,26 @@ export async function extractRelay(input: { text?: string; pdf?: File; device?: 
   const scan = !!input.pdf && !isReadable(text)
   if (!scan && !text.trim()) throw new Error('rien à analyser')
   if (scan && input.pdf!.size > 8_000_000) throw new Error('PDF scanné trop lourd : collez le texte des caractéristiques')
-  const body = relayRequest(scan ? { pdfBase64: await toBase64(input.pdf!) } : { text: deviceLine(input.device) + focusText(text, TEXT_BUDGET, input.device) })
+  const withPdf = !!input.pdf && (scan || input.pdf.size <= PDF_FOR_GEMINI)
+  // A scan has no text for the text models (they would guess from the name alone): Gemini only, told the device.
+  const body = relayRequest({
+    text: scan ? undefined : deviceLine(input.device) + focusText(text, TEXT_BUDGET, input.device),
+    pdfBase64: withPdf ? await toBase64(input.pdf!) : undefined,
+  })
+  if (scan && input.device?.trim()) body.system += `\n${deviceLine(input.device).trim()}`
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-  const data = (await res.json().catch(() => ({}))) as { text?: string; error?: { message?: string } }
+  const data = (await res.json().catch(() => ({}))) as { text?: string; engine?: string; second?: string; secondEngine?: string; error?: { message?: string } }
   if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
-  return sanitizeAi(JSON.parse(data.text || '{}'))
+  const main = sanitizeAi(JSON.parse(data.text || '{}'))
+  const name = (e?: string) => (e ? (ENGINE_NAMES[e] ?? e) : '')
+  if (!data.second) return { ...main, by: name(data.engine) || undefined }
+  let second: AiResult | undefined
+  try {
+    second = sanitizeAi(JSON.parse(data.second))
+  } catch {
+    second = undefined
+  }
+  return { ...main, second: second?.groups, by: [name(data.engine), second ? name(data.secondEngine) : ''].filter(Boolean).join(' + ') }
 }
 
 // ---- AI built into Chrome (Prompt API, Gemini Nano)

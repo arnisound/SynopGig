@@ -97,12 +97,19 @@ les limites (voir « Protection ») ; lire les documents et les photos n’en co
 
 ## Comment il choisit
 
-- Fiche avec du texte (cas normal) : **Mistral** (modèle `mistral-medium-latest`, puis
-  `mistral-small-latest`), puis **Groq** (`gpt-oss-120b`, puis le second modèle), puis
-  **Cerebras**, puis **Z.ai**, puis Gemini, puis Workers AI s’il est relié.
-- PDF scanné (une image, sans texte) : **Gemini** uniquement.
-- Si l’un échoue (quota…), il passe au suivant ; si rien ne répond, l’application revient
-  seule à l’analyse rapide.
+Chaque fiche est lue **deux fois en même temps, par deux IA indépendantes**, et
+l’application compare leurs réponses ligne par ligne :
+
+- **Gemini** (`gemini-2.5-flash`, puis `gemini-2.5-flash-lite`) reçoit le PDF lui-même
+  quand il fait moins de 4 Mo (il voit les tableaux et les dessins des faces) avec son texte ;
+- **une IA texte** : Groq (`gpt-oss-120b`), sinon Mistral, sinon Cerebras, sinon Z.ai, sinon
+  Workers AI s’il est relié — la suivante seulement si la précédente ne répond pas.
+
+Dans l’application, une ligne est « confirmée » quand les deux IA trouvent le même nombre
+et que la fiche le dit ; sinon elle est en orange, avec la raison (« l’autre IA lit 8 »,
+« vu par une seule des deux IA »…). Ce qu’une seule IA a vu est proposé, pas ajouté.
+PDF scanné (sans texte) : Gemini seul. Si un côté ne répond pas, l’autre suffit ; si rien
+ne répond, l’application revient seule à l’analyse rapide.
 
 ## Protection
 

@@ -98,7 +98,8 @@ export function cleanRequest(body) {
   if (!schema || typeof schema !== 'object' || JSON.stringify(schema).length > 20000) return null
   const hasText = typeof text === 'string' && text.trim().length > 0 && text.length <= MAX_TEXT
   const hasPdf = typeof pdfBase64 === 'string' && pdfBase64.length > 0 && pdfBase64.length <= MAX_PDF_BASE64
-  if (hasText === hasPdf) return null
+  // The text for every model, the PDF too for Gemini (it reads tables and drawings).
+  if (!hasText && !hasPdf) return null
   return { system, schema, text: hasText ? text : undefined, pdfBase64: hasPdf ? pdfBase64 : undefined }
 }
 
@@ -413,11 +414,11 @@ function geminiSchema(s) {
   return Object.fromEntries(Object.entries(s).map(([k, v]) => [k, k === 'type' && typeof v === 'string' ? v.toUpperCase() : geminiSchema(v)]))
 }
 
-async function askGemini(req, env) {
-  const parts = req.pdfBase64
-    ? [{ inline_data: { mime_type: 'application/pdf', data: req.pdfBase64 } }, { text: 'List the connectors of this device.' }]
-    : [{ text: `Data sheet extracts:\n${req.text}` }]
-  const model = env.GEMINI_MODEL || 'gemini-2.5-flash'
+async function geminiCall(req, env, model) {
+  const parts = []
+  if (req.pdfBase64) parts.push({ inline_data: { mime_type: 'application/pdf', data: req.pdfBase64 } })
+  if (req.text) parts.push({ text: `Data sheet extracts${req.pdfBase64 ? ' (text layer of the PDF above)' : ''}:\n${req.text}` })
+  parts.push({ text: 'List the connectors of this device.' })
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
@@ -433,10 +434,22 @@ async function askGemini(req, env) {
         thinkingConfig: { thinkingBudget: 1024 },
       },
     }),
-  })
+    signal: AbortSignal.timeout(60000),
+  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
   const data = await res.json().catch(() => ({}))
   const text = extractJson(data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join(''))
-  return { status: res.status, text, error: res.ok && text ? undefined : `Gemini ${res.status} : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
+  return { status: res.status, text, error: res.ok && text ? undefined : res.ok ? 'réponse illisible' : reason(data, res.status) }
+}
+
+/** Gemini 2.5 Flash, then Flash-Lite (its own, larger free quota). */
+async function askGemini(req, env) {
+  let last
+  for (const model of [...new Set([env.GEMINI_MODEL || 'gemini-2.5-flash', 'gemini-2.5-flash-lite'])]) {
+    last = await geminiCall(req, env, model)
+    if (last.status === 200 && last.text) return last
+    if (last.status === 401 || last.status === 403) break
+  }
+  return { ...last, error: `Gemini ${last.status} : ${last.error}` }
 }
 
 /* ---------- Shop pages (flight cases, racks) ---------- */
@@ -807,6 +820,43 @@ async function diagnostic(env) {
   return out
 }
 
+/** The first service of a chain that answers; the next ones only when the previous fail. */
+async function firstAnswer(chain, req, env, errors, flags) {
+  for (const [engine, ask] of chain) {
+    const r = await ask(req, env).catch((e) => ({ status: 502, error: `réseau : ${String(e).slice(0, 100)}` }))
+    if (r.status === 200 && r.text) return { engine, text: r.text }
+    if (r.status === 429) flags.quota = true
+    errors.push(r.error ?? `${engine} ${r.status}`)
+  }
+  return undefined
+}
+
+/**
+ * Two independent readings at the same time, the app compares them:
+ * Gemini (which also sees the PDF itself: tables, panel drawings), and the
+ * first text model that answers (Groq gpt-oss-120b, Mistral, Z.ai...).
+ * When one side has nothing, the other side's spare services are tried, so
+ * an answer comes back whenever any service can give one. With a PDF,
+ * Gemini's reading comes first.
+ */
+export async function analyse(req, env) {
+  const text = []
+  if (req.text) {
+    if (env.GROQ_API_KEY) text.push(['groq', askGroq])
+    if (env.MISTRAL_API_KEY) text.push(['mistral', askMistral])
+    if (env.CEREBRAS_API_KEY) text.push(['cerebras', askCerebras])
+    if (env.ZAI_API_KEY) text.push(['zai', askZai])
+    // No key at all: Cloudflare's own models, last because their daily allowance is small.
+    if (env.AI) text.push(['workers-ai', askWorkersAi])
+  }
+  const gemini = env.GEMINI_API_KEY ? [['gemini', askGemini]] : []
+  const errors = []
+  const flags = { quota: false }
+  const [g, t] = await Promise.all([firstAnswer(gemini, req, env, errors, flags), firstAnswer(text, req, env, errors, flags)])
+  const results = (req.pdfBase64 ? [g, t] : [t, g]).filter(Boolean)
+  return { results, errors, quota: flags.quota }
+}
+
 export default {
   async fetch(request, env) {
     const origins = (env.ALLOWED_ORIGINS || DEFAULT_ORIGINS).split(',').map((o) => o.trim())
@@ -861,25 +911,9 @@ export default {
     const refused = await aiRefusal(ip, env)
     if (refused) return fail(refused, 429)
 
-    // Mistral has the largest free quota, Groq is the fastest (both read text only); Gemini also reads scanned PDFs.
-    const order = []
-    if (env.MISTRAL_API_KEY && req.text) order.push(askMistral)
-    if (env.GROQ_API_KEY && req.text) order.push(askGroq)
-    if (env.CEREBRAS_API_KEY && req.text) order.push(askCerebras)
-    if (env.ZAI_API_KEY && req.text) order.push(askZai)
-    if (env.GEMINI_API_KEY) order.push(askGemini)
-    // No key at all: Cloudflare's own models, last because their daily allowance is small.
-    if (env.AI && req.text) order.push(askWorkersAi)
-    if (order.length === 0) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
-
-    const errors = []
-    let quota = false
-    for (const ask of order) {
-      const r = await ask(req, env).catch((e) => ({ status: 502, error: `réseau : ${String(e).slice(0, 100)}` }))
-      if (r.status === 200 && r.text) return reply({ text: r.text })
-      quota ||= r.status === 429
-      errors.push(r.error ?? `HTTP ${r.status}`)
-    }
+    const { results, errors, quota } = await analyse(req, env)
+    if (results.length) return reply({ text: results[0].text, engine: results[0].engine, ...(results[1] ? { second: results[1].text, secondEngine: results[1].engine } : {}) })
+    if (errors.length === 0) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
     return fail(quota ? `Quota gratuit atteint, réessayez plus tard (${errors.join(' · ')})` : errors.join(' · '), quota ? 429 : 502)
   },
 }

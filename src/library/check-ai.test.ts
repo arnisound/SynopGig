@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkAnswer, focusText, quoteHasCount, quoteInSheet, sanitizeAi } from './ai'
+import { checkAnswer, focusText, missedGroups, quoteHasCount, quoteInSheet, sanitizeAi } from './ai'
 import { parseDatasheet } from './parseDatasheet'
 
 /** What pdf.js gives for a typical amplifier manual. */
@@ -89,5 +89,26 @@ describe('checking an AI answer against the sheet', () => {
       ],
     })
     expect(r.groups.map((g) => [g.prefix, g.count])).toEqual([['In', 8], ['Line In', 4]])
+  })
+})
+
+describe('two AI readings of the same sheet', () => {
+  const g = (count: number, connector = 'xlr3', quote?: string) => ({ prefix: 'In', count, connector: connector as never, signal: 'audio-analog' as const, dir: 'in' as const, quote })
+
+  it('trusts what both found, even when the count is worked out', () => {
+    // 4 channels × 2 Speakon: written nowhere as "8", both models agree.
+    const [r] = checkAnswer([g(8, 'speakon', 'Speaker outputs: 2 x Speakon per channel')], 'Speaker outputs: 2 x Speakon per channel\n4 channels', [], [g(8, 'speakon')])
+    expect(r.doubts).toEqual([])
+  })
+
+  it('flags a different count and what only one of them saw', () => {
+    const sheet = 'Inputs: 4 x XLR\nNetwork: RJ45'
+    const [inputs, network] = checkAnswer([g(4, 'xlr3', 'Inputs: 4 x XLR'), g(1, 'rj45', 'Network: RJ45')], sheet, [], [g(8, 'xlr3')])
+    expect(inputs.doubts).toContain('l’autre IA lit 8')
+    expect(network.doubts).toContain('vu par une seule des deux IA')
+  })
+
+  it('offers what the second one found and the first missed', () => {
+    expect(missedGroups([g(4)], [g(4), g(2, 'hdmi')])).toEqual([g(2, 'hdmi')])
   })
 })

@@ -60,7 +60,7 @@ describe('automatic AI choice', () => {
     expect(await ai.availableEngines(undefined, true)).toEqual([])
   })
 
-  it('sends the relay only the useful lines of a text PDF', async () => {
+  it('sends the relay the useful lines of a text PDF, and the small PDF itself for Gemini', async () => {
     const fetchMock = vi.fn(async () => relayOk())
     vi.stubGlobal('fetch', fetchMock)
     const ai = await load('https://relay.example/')
@@ -71,7 +71,7 @@ describe('automatic AI choice', () => {
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
     expect(url).toBe('https://relay.example/')
     const body = JSON.parse(String(init.body))
-    expect(body.pdfBase64).toBeUndefined()
+    expect(body.pdfBase64).toBe('JVBERg==')
     expect(body.text).toContain('4 x XLR/TRS combo')
     expect(body.text.length).toBeLessThan(text.length)
   })

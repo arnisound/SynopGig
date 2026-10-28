@@ -263,15 +263,17 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
       const seconds = Math.max(1, Math.round((clock() - started) / 1000))
       // Each row checked against the sheet and the rule-based reading, which owes nothing to the AI.
       const rules = source.trim() ? parseDatasheet(source, BRANDS).groups : []
-      const checked = source.trim() ? ai.checkAnswer(result.groups, source, rules) : result.groups.map((g) => ({ ...g, doubts: ['texte de la fiche illisible (scan)'] }))
+      const checked = ai.checkAnswer(result.groups, source, rules, result.second)
       const rows = checked.map(({ quote, doubts, ...g }) => row({ ...g, ai: true, doubts, evidence: quote ? [quote] : undefined }))
       setDraft(fromResult(result, rows))
-      // What the rules read with a quantity and the AI left out: offered, not added.
-      setSuggestions(rules.filter((r) => !r.guessed && !checked.some((g) => g.connector === r.connector)).map((g) => row(g)))
+      // What the rules or the second AI read and the first AI left out: offered, not added.
+      const missed = ai.missedGroups(result.groups, result.second).map(({ quote, ...g }) => row({ ...g, evidence: quote ? [quote] : undefined }))
+      const fromRules = rules.filter((r) => !r.guessed && !checked.some((g) => g.connector === r.connector) && !missed.some((m) => m.connector === r.connector)).map((g) => row(g))
+      setSuggestions([...missed, ...fromRules])
       const doubtful = checked.filter((g) => g.doubts.length).length
       setStatus(
-        `${checked.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} en ${seconds} s pour ${label} : ` +
-          `${checked.length - doubtful} confirmé(s) par la fiche${doubtful ? `, ${doubtful} à vérifier (en orange)` : ''}.`,
+        `${checked.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]}${result.by ? ` (${result.by})` : ''} en ${seconds} s pour ${label} : ` +
+          `${checked.length - doubtful} confirmé(s)${result.second ? ' par les deux IA et la fiche' : ' par la fiche'}${doubtful ? `, ${doubtful} à vérifier (en orange)` : ''}.`,
       )
       return doubtful
     } catch (e) {
@@ -677,7 +679,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
             </table>
             {suggestions.length > 0 && (
               <div className="suggestions">
-                <span className="muted small">Aussi mentionné dans la fiche, sans quantité (cliquez pour ajouter) :</span>
+                <span className="muted small">Aussi relevé dans la fiche, à vérifier (cliquez pour ajouter) :</span>
                 {suggestions.map((s) => (
                   <button
                     key={s.key}
@@ -687,7 +689,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
                       setSuggestions(suggestions.filter((x) => x.key !== s.key))
                     }}
                   >
-                    + {CONNECTORS[s.connector]} {DIRS[s.dir].toLowerCase()}
+                    + {s.count > 1 ? `${s.count} × ` : ''}{CONNECTORS[s.connector]} {DIRS[s.dir].toLowerCase()}
                   </button>
                 ))}
               </div>
