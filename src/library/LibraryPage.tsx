@@ -8,6 +8,7 @@ import { findKnownModels } from './findKnown'
 import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared } from './userLibrary'
+import { findDocs, loadDoc, type FoundDoc } from './finder'
 import type { UserLibrary } from './useUserLibrary'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
@@ -50,7 +51,12 @@ interface Draft {
   rackU?: number
   weight?: number
   rows: Row[]
+  /** Built from a document found by "Le chercher pour vous": shared with everyone when saved. */
+  found?: { url: string; share: boolean }
 }
+
+/** Time of an analysis, for the status line. */
+const clock = () => Date.now()
 
 const row = (g: PortGroup & Partial<Omit<Row, keyof PortGroup | 'key'>>): Row => ({ ...g, key: uid() })
 
@@ -87,9 +93,16 @@ interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
   userLibrary: UserLibrary
+  /** Product searched for from the synoptic palette. */
+  findQuery?: string
 }
 
-export default function LibraryPage({ project, setProject, userLibrary }: Props) {
+const sameModel = (a: { brand?: string; model: string }, b: { brand?: string; model: string }) => {
+  const k = (t: { brand?: string; model: string }) => `${t.brand ?? ''} ${t.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  return k(a) === k(b)
+}
+
+export default function LibraryPage({ project, setProject, userLibrary, findQuery }: Props) {
   const [draft, setDraft] = useState<Draft>()
   const [suggestions, setSuggestions] = useState<Row[]>([])
   const [text, setText] = useState('')
@@ -107,6 +120,65 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
   const [sharing, setSharing] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
   const mine = project.customTemplates
+
+  // "Le chercher pour vous"
+  const [fBrand, setFBrand] = useState('')
+  const [fModel, setFModel] = useState('')
+  const [found, setFound] = useState<FoundDoc[]>()
+  const [foundKnown, setFoundKnown] = useState<DeviceTemplate[]>([])
+  const [finding, setFinding] = useState(false)
+  const [findStatus, setFindStatus] = useState('')
+  const [lastQuery, setLastQuery] = useState<string>()
+  if (findQuery !== undefined && findQuery !== lastQuery) {
+    // From the palette: "Shure SM7dB" → brand Shure, model SM7dB when the brand is known.
+    setLastQuery(findQuery)
+    const first = findQuery.trim().split(/\s+/)[0] ?? ''
+    const b = BRANDS.find((x) => x.toLowerCase() === first.toLowerCase())
+    setFBrand(b ?? '')
+    setFModel(b ? findQuery.trim().slice(first.length).trim() : findQuery.trim())
+    setFound(undefined)
+    setFoundKnown([])
+    setFindStatus('Vérifiez la marque et le modèle, puis « Chercher ce produit ».')
+  }
+
+  const findProduct = async (force = false) => {
+    if (!fModel.trim()) return setFindStatus('Indiquez au moins le modèle.')
+    setFound(undefined)
+    // Already in the catalogue or the USER library: no need to search.
+    const hits = force ? [] : findKnownModels(`${fBrand} ${fModel}`, [...userLibrary.templates, ...mine, ...LIBRARY])
+    setFoundKnown(hits)
+    if (hits.length) return setFindStatus('Déjà disponible : utilisez-le directement depuis la palette, ou cherchez quand même sa documentation.')
+    setFinding(true)
+    setFindStatus('Recherche de la documentation officielle…')
+    try {
+      const docs = await findDocs(fBrand.trim(), fModel.trim())
+      setFound(docs)
+      setFindStatus('Est-ce le bon document ? Rien n’est analysé avant votre confirmation.')
+    } catch (e) {
+      setFindStatus(`Recherche impossible : ${(e as Error).message}`)
+    } finally {
+      setFinding(false)
+    }
+  }
+
+  const analyseDoc = async (doc: FoundDoc) => {
+    setFinding(true)
+    setFindStatus(`Lecture de ${doc.host}…`)
+    try {
+      const { text: docText, pdf } = await loadDoc(doc)
+      setText(docText)
+      setFile(pdf)
+      setFindStatus('')
+      // The exact name the user confirmed decides: a neighbouring model would give a wrong sheet.
+      await runAi(`Brand: ${fBrand}\nModel: ${fModel}\n${docText}`, `la documentation de ${doc.host}`, pdf)
+      setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model: fModel.trim(), found: { url: doc.url, share: true } })
+      setFound(undefined)
+    } catch (e) {
+      setFindStatus(`Lecture impossible : ${(e as Error).message} Téléchargez la fiche et déposez-la ci-dessous.`)
+    } finally {
+      setFinding(false)
+    }
+  }
 
   useEffect(() => {
     let alive = true
@@ -148,9 +220,9 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
     setBusy(true)
     try {
       const ai = await import('./ai')
-      const started = Date.now()
+      const started = clock()
       const { result, engine } = await ai.extractAuto({ text: source, pdf, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setStatus })
-      const seconds = Math.max(1, Math.round((Date.now() - started) / 1000))
+      const seconds = Math.max(1, Math.round((clock() - started) / 1000))
       setDraft(fromResult(result, result.groups.map((g) => row({ ...g, ai: true }))))
       setSuggestions([])
       setStatus(`${result.groups.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} en ${seconds} s pour ${label}. Relisez avant d’enregistrer : une IA peut se tromper.`)
@@ -229,6 +301,11 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
     }))
     setDraft({ ...draft, id: t.id })
     setStatus(`« ${t.brand ? `${t.brand} ` : ''}${t.model} » enregistré dans votre bibliothèque (palette : « Mes modèles »). Vous pouvez aussi le partager à tous.`)
+    // Found by the search: added to the USER library for everyone, unless it is already there.
+    if (draft.found?.share) {
+      if (userLibrary.templates.some((u) => sameModel(u, t))) setStatus(`« ${t.model} » enregistré ; il est déjà dans la bibliothèque USER.`)
+      else share()
+    }
   }
 
   const share = () => {
@@ -350,6 +427,55 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
       </aside>
 
       <div className="lib-main">
+        <section className="card finder">
+          <h3>Le chercher pour vous</h3>
+          <p className="muted small">
+            Donnez la marque et le modèle exacts : SynopGig cherche la documentation officielle du constructeur, vous la vérifiez, puis la fiche et ses ports en sont tirés. Une fois
+            enregistré, le produit rejoint la bibliothèque USER pour tout le monde.
+          </p>
+          <div className="row wrap">
+            <label className="field">
+              <span>Marque</span>
+              <input value={fBrand} placeholder="Ex. Fohhn" list="finder-brands" onChange={(e) => setFBrand(e.target.value)} />
+            </label>
+            <label className="field">
+              <span>Modèle</span>
+              <input value={fModel} placeholder="Ex. PS-850" onChange={(e) => setFModel(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && findProduct()} />
+            </label>
+            <datalist id="finder-brands">{BRANDS.map((b) => <option key={b} value={b} />)}</datalist>
+          </div>
+          <button className="primary" disabled={finding || !fModel.trim()} onClick={() => findProduct()}>{finding ? 'Recherche…' : 'Chercher ce produit'}</button>
+          {findStatus && <p className="status">{findStatus}</p>}
+          {foundKnown.length > 0 && (
+            <div className="suggestions">
+              {foundKnown.map((t) => (
+                <button key={t.id} onClick={() => { setDraft(fromTemplate(t, false)); setStatus(`Copie de ${t.brand ?? ''} ${t.model} prête à modifier.`) }}>
+                  {t.brand} {t.model} {t.author ? `(USER, par ${t.author})` : ''}
+                </button>
+              ))}
+              <button onClick={() => findProduct(true)}>Ce n’est pas lui : chercher sa documentation</button>
+            </div>
+          )}
+          {found && (
+            <ul className="found-docs">
+              {found.map((d) => (
+                <li key={d.url}>
+                  <div>
+                    <b>{d.title}</b>
+                    <small className="muted">
+                      {d.host} · {d.kind === 'pdf' ? 'PDF' : 'page web'}
+                      {d.official && <span className="badge-official"> site du fabricant</span>}
+                    </small>
+                  </div>
+                  <a href={d.url} target="_blank" rel="noopener noreferrer" title="Ouvrir pour vérifier">↗</a>
+                  <button className="primary" disabled={finding} onClick={() => analyseDoc(d)}>Analyser ce document</button>
+                </li>
+              ))}
+              <li className="muted small">Aucun ne convient ? Téléchargez la fiche vous-même et déposez-la ci-dessous.</li>
+            </ul>
+          )}
+        </section>
+
         <section className="card">
           <h3>Analyser une fiche technique</h3>
           <p className="muted small">
@@ -502,6 +628,12 @@ export default function LibraryPage({ project, setProject, userLibrary }: Props)
               <button onClick={() => set({ rows: [...draft.rows, row({ prefix: 'Port', count: 1, connector: 'xlr3', signal: 'audio-analog', dir: 'in' })] })}>
                 + Ajouter un groupe de ports
               </button>
+              {draft.found && (
+                <label className="toggle-line">
+                  <input type="checkbox" checked={draft.found.share} onChange={(e) => set({ found: { ...draft.found!, share: e.target.checked } })} />
+                  Ajouter aussi à la bibliothèque USER en enregistrant{pseudo.trim() ? ` (par ${pseudo.trim()})` : ' (indiquez votre pseudo en haut)'}
+                </label>
+              )}
               <button className="primary" disabled={!draft.model.trim()} onClick={save}>
                 {draft.id ? 'Enregistrer les modifications' : 'Enregistrer dans ma bibliothèque'}
               </button>

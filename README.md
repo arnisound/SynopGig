@@ -81,6 +81,12 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   modifié peut être enregistré comme nouveau modèle.
 
 ### Bibliothèque (onglet Bibliothèque)
+- **Le chercher pour vous** : marque + modèle → si le produit est déjà dans la base ou la
+  bibliothèque USER, il est proposé tout de suite ; sinon le relais cherche la documentation
+  officielle (site du fabricant et PDF en tête), **vous confirmez le bon document** (rien n’est
+  analysé avant), l’IA en tire la fiche, et à l’enregistrement le produit est **ajouté
+  automatiquement à la bibliothèque USER** avec votre pseudo (case décochable). Accessible
+  aussi depuis la palette du synoptique : « Le chercher pour vous » sous la recherche.
 - **Ajout manuel** : marque, modèle, département, famille, U, poids et connectique saisie
   par groupes (« 16 × XLR entrées »), ou copie d’un modèle existant.
 - **Analyse de fiche technique** (PDF ou texte collé) : un seul bouton « Analyser », rien à

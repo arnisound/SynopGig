@@ -130,3 +130,42 @@ describe('shop pages', async () => {
     expect(p.text).not.toContain('track()')
   })
 })
+
+describe('finding a product documentation', async () => {
+  const { rankDocs } = await import('./relay.js')
+  const call = (path, body) =>
+    relay.fetch(new Request(`https://relay.example${path}`, { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': `10.9.${Math.random()}` }, body: JSON.stringify(body) }), {})
+
+  it('puts the manufacturer and its data sheets first, shops last', () => {
+    const r = rankDocs(
+      [
+        { url: 'https://www.thomann.de/fr/fohhn_ps850.htm', title: 'Fohhn PS-850' },
+        { url: 'https://fohhn.com/en/products/ps-850', title: 'PS-850 | Fohhn' },
+        { url: 'https://fohhn.com/media/ps-850.pdf', title: 'Datasheet' },
+        { url: 'http://192.168.1.1/x.pdf' },
+      ],
+      'Fohhn',
+      'PS-850',
+    )
+    expect(r.map((x) => x.host)).toEqual(['fohhn.com', 'fohhn.com', 'thomann.de'])
+    expect(r[0]).toMatchObject({ kind: 'pdf', official: true })
+  })
+
+  it('searches without any key and lists what it found', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('<a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Ffohhn.com%2Fen%2Fproducts%2Fps-850&amp;rut=x">PS-850 - Products | Fohhn</a>')),
+    )
+    const res = await call('/find', { brand: 'Fohhn', model: 'PS-850' })
+    expect(res.status).toBe(200)
+    const { results } = await res.json()
+    expect(results[0]).toMatchObject({ url: 'https://fohhn.com/en/products/ps-850', official: true, kind: 'page' })
+  })
+
+  it('hands PDF data sheets over as they are, for the app to read', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31]), { headers: { 'Content-Type': 'application/pdf' } })))
+    const res = await call('/doc', { url: 'https://fohhn.com/media/ps-850.pdf' })
+    expect(res.headers.get('Content-Type')).toBe('application/pdf')
+    expect((await call('/doc', { url: 'file:///etc/passwd' })).status).toBe(400)
+  })
+})

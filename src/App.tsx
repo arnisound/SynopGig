@@ -47,6 +47,7 @@ export default function App() {
     updatedAt: SHARED_ID ? cachedShared(SHARED_ID)?.updatedAt : undefined,
   }))
   const [sharing, setSharing] = useState(false)
+  const [findQuery, setFindQuery] = useState<string>()
   const [tab, setTab] = useState<Tab>('synoptic')
   const [dossier, setDossier] = useState(false)
   const [menu, setMenu] = useState(false)
@@ -220,7 +221,7 @@ export default function App() {
       <main>
         {tab === 'synoptic' && (
           <ReactFlowProvider>
-            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} theme={theme} onTheme={setTheme} />
+            <SynopticEditor project={project} setProject={setProject} templates={templates} focus={focus} onOpenRacks={() => setTab('racks')} theme={theme} onTheme={setTheme} onFindProduct={SHARED_ID ? undefined : (q) => { setFindQuery(q); setTab('library') }} />
           </ReactFlowProvider>
         )}
         {tab === 'patch' && <PatchPage project={project} setProject={setProject} />}
@@ -238,7 +239,7 @@ export default function App() {
         )}
         {tab === 'lists' && <Lists project={project} />}
         {tab === 'cases' && <CaseEditor project={project} setProject={setProject} />}
-        {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} />}
+        {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} findQuery={findQuery} />}
       </main>
     </div>
   )

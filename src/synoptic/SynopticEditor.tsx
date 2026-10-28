@@ -45,9 +45,10 @@ interface Props {
   onOpenRacks?: () => void
   theme: Theme
   onTheme: (t: Theme) => void
+  onFindProduct?: (query: string) => void
 }
 
-export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme }: Props) {
+export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme, onFindProduct }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const { nodes, edges } = project
   const view = viewOf(project)
@@ -226,6 +227,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
         <Palette
           templates={templates}
+          onFind={onFindProduct}
           onAdd={(t) => {
             addCentered(t)
             setDrawer(undefined)

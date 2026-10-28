@@ -12,6 +12,8 @@
  *
  * Open <worker address>/diagnostic in a browser to check the keys.
  * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
+ * POST /find {brand, model} finds a product's documentation; POST /doc {url} reads one.
+ *   GROQ_SEARCH_MODEL / GEMINI_SEARCH_MODEL  optional, models used to search the web
  */
 
 const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
@@ -188,8 +190,12 @@ const decode = (t) =>
     e[0] === '#' ? String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (ENTITIES[e.toLowerCase()] ?? m),
   )
 
-/** Title, product data (JSON-LD) and the lines that talk about size, weight and wheels. */
-export function pageText(html) {
+/**
+ * Title, product data (JSON-LD) and the useful lines of a page: by default
+ * those about size, weight and wheels (cases); `lines: null` keeps every line
+ * (data sheets, where the app picks the connector lines itself).
+ */
+export function pageText(html, { lines: filter = PAGE_LINES, max = 12000 } = {}) {
   const title = decode(html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)?.[1] ?? html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '').trim()
   const description = decode(html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)?.[1] ?? '').trim()
   const products = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)]
@@ -205,29 +211,31 @@ export function pageText(html) {
   const lines = []
   for (const raw of decode(body).split('\n')) {
     const line = raw.replace(/\s+/g, ' ').replace(/(?:\s*\|\s*)+$/, '').trim()
-    if (line.length < 3 || line.length > 300 || seen.has(line) || !PAGE_LINES.test(line)) continue
+    if (line.length < 3 || line.length > 300 || seen.has(line) || (filter && !filter.test(line))) continue
     seen.add(line)
     lines.push(line)
   }
   const text = [title && `Titre : ${title}`, description && `Description : ${description}`, ...products.map((p) => `Données produit : ${p}`), ...lines].filter(Boolean).join('\n')
-  return { title, text: text.slice(0, 12000) }
+  return { title, text: text.slice(0, max) }
 }
 
-async function readPage(raw) {
+const UA = 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound tools; +https://arnisoundtools.com)'
+
+/** Downloads a public page or file, at most `limit` bytes. */
+async function download(raw, limit) {
   const url = pageUrl(raw)
-  if (!url) return { status: 400, error: 'Adresse refusée : collez le lien complet de la page produit (https://…).' }
+  if (!url) return { status: 400, error: 'Adresse refusée : collez le lien complet (https://…).' }
   let res
   try {
     res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound tools; +https://arnisoundtools.com)', Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
+      headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.5', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
       redirect: 'follow',
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(12000),
     })
   } catch {
     return { status: 502, error: 'Site injoignable (ou trop lent).' }
   }
-  if (!res.ok) return { status: 502, error: `Le site a refusé la lecture (${res.status}) : copiez plutôt le texte de la page.` }
-  if (!/html|text/i.test(res.headers.get('Content-Type') ?? '')) return { status: 415, error: 'Ce lien n’est pas une page web.' }
+  if (!res.ok) return { status: 502, error: `Le site a refusé la lecture (${res.status}) : téléchargez le document vous-même et déposez-le.` }
   const reader = res.body.getReader()
   const chunks = []
   let size = 0
@@ -235,14 +243,142 @@ async function readPage(raw) {
     const { done, value } = await reader.read()
     if (done) break
     size += value.length
-    if (size > MAX_PAGE) {
+    if (size > limit) {
       await reader.cancel()
-      break
+      return { status: 413, error: 'Document trop lourd : téléchargez-le vous-même et déposez-le.' }
     }
     chunks.push(value)
   }
-  const page = pageText(new TextDecoder().decode(await new Blob(chunks).arrayBuffer()))
+  const bytes = new Uint8Array(await new Blob(chunks).arrayBuffer())
+  const type = res.headers.get('Content-Type') ?? ''
+  const pdf = /pdf/i.test(type) || (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46)
+  return { status: 200, bytes, pdf, html: !pdf && /html|text/i.test(type) }
+}
+
+async function readPage(raw) {
+  const r = await download(raw, MAX_PAGE)
+  if (r.status !== 200) return r
+  if (!r.html) return { status: 415, error: 'Ce lien n’est pas une page web.' }
+  const page = pageText(new TextDecoder().decode(r.bytes))
   if (!page.text.trim()) return { status: 422, error: 'Rien de lisible sur cette page : copiez plutôt son texte.' }
+  return { status: 200, data: page }
+}
+
+/* ---------- Finding a product's documentation ---------- */
+
+const MAX_DOC = 15_000_000
+const SHOPS = /amazon|ebay|thomann|woodbrass|musicstore|bax-shop|sweetwater|fnac|cdiscount|leboncoin|aliexpress|manualslib|manua\.ls|scribd|pinterest|facebook|youtube|reddit|gearspace|audiofanzine/i
+
+const words = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()
+
+/** Official site first, then data sheets (PDF) and pages that name the exact model; shops and forums last. */
+export function rankDocs(found, brand, model) {
+  const b = words(brand).split(' ').filter((w) => w.length >= 3)
+  const m = words(model).replace(/ /g, '')
+  const seen = new Set()
+  const out = []
+  for (const f of found) {
+    const url = pageUrl(f.url)
+    if (!url) continue
+    const key = url.href.replace(/[#?].*$/, '')
+    if (seen.has(key)) continue
+    seen.add(key)
+    const host = url.hostname.replace(/^www\./, '')
+    const hay = words(`${f.title ?? ''} ${url.pathname}`).replace(/ /g, '')
+    const official = b.some((w) => host.replace(/[^a-z0-9]/g, '').includes(w)) && !SHOPS.test(host)
+    const pdf = /\.pdf($|\?)/i.test(url.pathname) || f.pdf === true
+    const exact = m.length >= 2 && hay.includes(m)
+    const score = (official ? 4 : 0) + (exact ? 3 : 0) + (pdf ? 2 : 0) - (SHOPS.test(host) ? 3 : 0)
+    out.push({ title: String(f.title || host).slice(0, 140), url: url.href, host, kind: pdf ? 'pdf' : 'page', official, score })
+  }
+  return out.sort((x, y) => y.score - x.score).slice(0, 8)
+}
+
+/** DuckDuckGo's HTML results: no key, but it may turn robots away. */
+async function searchDuckDuckGo(q) {
+  const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`, { headers: { 'User-Agent': UA, 'Accept-Language': 'fr,en;q=0.8' }, signal: AbortSignal.timeout(8000) })
+  if (!res.ok) return []
+  const html = await res.text()
+  return [...html.matchAll(/<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].map(([, href, title]) => {
+    const u = decode(href)
+    const real = u.includes('uddg=') ? decodeURIComponent(u.split('uddg=')[1].split('&')[0]) : u.startsWith('//') ? `https:${u}` : u
+    return { url: real, title: decode(title.replace(/<[^>]+>/g, '')).trim() }
+  })
+}
+
+const urlsIn = (text) => [...String(text).matchAll(/https?:\/\/[^\s"'<>\\)\]]+/g)].map((m) => m[0].replace(/[.,;:]+$/, ''))
+
+/** Groq's compound model searches the web by itself. */
+async function searchGroq(q, env) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+    body: JSON.stringify({
+      model: env.GROQ_SEARCH_MODEL || 'groq/compound-mini',
+      messages: [{ role: 'user', content: `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. List the product page and the PDF data sheet or user manual on the manufacturer's website, one URL per line with its title. Only real URLs you found.` }],
+    }),
+    signal: AbortSignal.timeout(20000),
+  })
+  if (!res.ok) return []
+  const data = await res.json().catch(() => ({}))
+  const msg = data.choices?.[0]?.message ?? {}
+  const fromTools = (msg.executed_tools ?? []).flatMap((t) => t.search_results?.results ?? []).map((r) => ({ url: r.url, title: r.title }))
+  return [...fromTools, ...urlsIn(msg.content ?? '').map((url) => ({ url }))]
+}
+
+/** Gemini grounded on Google Search: the sources it read are the results. */
+async function searchGemini(q, env) {
+  const model = env.GEMINI_SEARCH_MODEL || 'gemini-2.5-flash'
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: `Find the official manufacturer documentation (product page and PDF data sheet or manual) of: ${q}. Give the URLs.` }] }],
+      tools: [{ google_search: {} }],
+    }),
+    signal: AbortSignal.timeout(20000),
+  })
+  if (!res.ok) return []
+  const data = await res.json().catch(() => ({}))
+  const cand = data.candidates?.[0] ?? {}
+  const chunks = (cand.groundingMetadata?.groundingChunks ?? []).map((c) => c.web).filter(Boolean)
+  // Google hands redirect links: follow each one to the real address.
+  const real = await Promise.all(
+    chunks.slice(0, 8).map(async (w) => {
+      try {
+        const r = await fetch(w.uri, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(5000) })
+        return { url: r.headers.get('Location') || w.uri, title: w.title }
+      } catch {
+        return { url: w.uri, title: w.title }
+      }
+    }),
+  )
+  const text = (cand.content?.parts ?? []).map((p) => p.text ?? '').join('')
+  return [...real, ...urlsIn(text).map((url) => ({ url }))]
+}
+
+/** POST /find {brand, model}: the documents found, best first. Nothing is read yet. */
+async function findDocs(body, env) {
+  const brand = String(body?.brand ?? '').trim().slice(0, 60)
+  const model = String(body?.model ?? '').trim().slice(0, 80)
+  if (!model) return { status: 400, error: 'Indiquez au moins le modèle.' }
+  const q = `${brand} ${model}`.trim()
+  const searches = [searchDuckDuckGo(`${q} datasheet specifications`), searchDuckDuckGo(`${q} pdf`)]
+  if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
+  if (env.GEMINI_API_KEY) searches.push(searchGemini(q, env))
+  const found = (await Promise.allSettled(searches)).flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  const results = rankDocs(found, brand, model)
+  if (results.length === 0) return { status: 404, error: 'Aucun document trouvé : vérifiez l’orthographe, ou déposez la fiche vous-même.' }
+  return { status: 200, data: { results } }
+}
+
+/** POST /doc {url}: the PDF as is (the app reads it), or the text of a page. */
+async function readDoc(body) {
+  const r = await download(body?.url, MAX_DOC)
+  if (r.status !== 200) return r
+  if (r.pdf) return { status: 200, pdf: r.bytes }
+  if (!r.html) return { status: 415, error: 'Ce document n’est ni un PDF ni une page web.' }
+  const page = pageText(new TextDecoder().decode(r.bytes), { lines: null, max: 20000 })
   return { status: 200, data: page }
 }
 
@@ -261,6 +397,18 @@ async function diagnostic(env) {
     const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
     out.gemini = r.status === 200 && r.text ? 'OK' : `ERREUR ${r.error}`
   }
+  // Documentation search: which sources answer from this Worker.
+  const probe = async (fn) => {
+    try {
+      const r = await fn()
+      return r.length ? `OK (${r.length} résultats)` : 'aucun résultat (source bloquée ?)'
+    } catch (e) {
+      return `ERREUR ${String(e).slice(0, 80)}`
+    }
+  }
+  out.recherche_duckduckgo = await probe(() => searchDuckDuckGo('Shure SM58 datasheet'))
+  if (env.GROQ_API_KEY) out.recherche_groq = await probe(() => searchGroq('Shure SM58', env))
+  if (env.GEMINI_API_KEY) out.recherche_gemini = await probe(() => searchGemini('Shure SM58', env))
   return out
 }
 
@@ -285,10 +433,11 @@ export default {
     }
     if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
-    if (path === '/page') {
-      if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de lectures en une heure, réessayez plus tard.', 429)
+    if (path === '/page' || path === '/find' || path === '/doc') {
+      if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de recherches en une heure, réessayez plus tard.', 429)
       const body = await request.json().catch(() => null)
-      const r = await readPage(body?.url)
+      const r = path === '/page' ? await readPage(body?.url) : path === '/find' ? await findDocs(body, env) : await readDoc(body)
+      if (r.pdf) return new Response(r.pdf, { headers: { ...cors, 'Content-Type': 'application/pdf' } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
     if (!env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)

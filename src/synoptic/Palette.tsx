@@ -11,6 +11,8 @@ const MINE = 'Mes modèles'
 interface Props {
   templates: DeviceTemplate[]
   onAdd: (t: DeviceTemplate) => void
+  /** "Not in the base? Find it": opens the library search with this text. */
+  onFind?: (query: string) => void
 }
 
 const rank = (family: string) => {
@@ -24,7 +26,7 @@ function byBrand(list: DeviceTemplate[]) {
   return [...m.entries()].sort((a, b) => (a[0] === 'Générique' ? -1 : b[0] === 'Générique' ? 1 : a[0].localeCompare(b[0])))
 }
 
-export default function Palette({ templates, onAdd }: Props) {
+export default function Palette({ templates, onAdd, onFind }: Props) {
   const [query, setQuery] = useState('')
   const [brand, setBrand] = useState('')
   const q = query.trim().toLowerCase()
@@ -104,6 +106,12 @@ export default function Palette({ templates, onAdd }: Props) {
           ))}
         </details>
       ))}
+      {onFind && q && (
+        <div className="palette-find">
+          <span className="muted small">{groups.length ? 'Pas le bon modèle ?' : `« ${query.trim()} » n’est pas dans la base.`}</span>
+          <button onClick={() => onFind(query.trim())}>Le chercher pour vous</button>
+        </div>
+      )}
     </aside>
   )
 }

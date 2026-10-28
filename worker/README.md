@@ -55,6 +55,22 @@ Seules les adresses web publiques sont acceptées (pas de `localhost`, d’adres
 exotique), dans la même limite de 30 requêtes par heure et par visiteur. Certains sites
 bloquent les robots : l’utilisateur peut alors coller le texte de la page.
 
+## Recherche de documentation (« Le chercher pour vous »)
+
+Dans l’onglet Bibliothèque, l’utilisateur donne une marque et un modèle : le relais cherche la
+documentation (`POST /find`) avec toutes les sources disponibles et classe les résultats (site
+du fabricant et PDF d’abord, revendeurs et forums en dernier) ; l’utilisateur confirme le bon
+document, que le relais récupère (`POST /doc`, 15 Mo maximum) pour l’analyse habituelle.
+
+- **DuckDuckGo** : sans clé, toujours essayé (il peut parfois refuser les robots).
+- **Groq** (si `GROQ_API_KEY`) : modèle `groq/compound-mini`, qui cherche sur le web
+  (variable facultative `GROQ_SEARCH_MODEL` pour en changer).
+- **Gemini** (si `GEMINI_API_KEY`) : recherche Google intégrée, modèle `gemini-2.5-flash`
+  (variable facultative `GEMINI_SEARCH_MODEL`).
+
+`/diagnostic` indique quelles sources répondent. Même limite que le reste : 30 requêtes par
+heure et par visiteur.
+
 ## Comment il choisit
 
 - Fiche avec du texte (cas normal) : **Groq** si sa clé est là, sinon Gemini.

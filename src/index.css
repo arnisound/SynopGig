@@ -656,3 +656,15 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 /* ---- Shared projects */
 .shared-banner { padding: 6px 12px; font-size: 13px; background: color-mix(in srgb, var(--accent) 16%, var(--panel)); border-bottom: 1px solid var(--border); }
 .share-link { width: 100%; font-family: ui-monospace, monospace; font-size: 12px; }
+
+/* ---- Finding a product */
+.palette-find { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.finder .row .field { flex: 1 1 160px; }
+.finder > .primary { margin-top: 8px; }
+.found-docs { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.found-docs li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+.found-docs li > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.found-docs li > div b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.found-docs li.muted { border: none; background: none; padding: 2px 0; }
+.found-docs a { text-decoration: none; font-size: 16px; padding: 0 4px; }
+.badge-official { color: var(--ok); font-weight: 600; }
