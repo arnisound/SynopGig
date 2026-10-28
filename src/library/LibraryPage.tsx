@@ -49,6 +49,8 @@ interface Row extends PortGroup {
   ai?: boolean
   /** AI rows: why the sheet does not confirm it (empty: confirmed). */
   doubts?: string[]
+  /** What a technician's rule corrected or added. */
+  note?: string
 }
 
 interface Draft {
@@ -806,6 +808,7 @@ function RowNotes({ r }: { r: Row }) {
         <summary>
           <span className="ai">IA</span> {doubts.length ? <span className="doubt">à vérifier</span> : <span className="sure">confirmé par la fiche</span>}
           {doubts.length > 0 && ` · ${doubts.join(' · ')}`}
+          {r.note && <span className="fixed"> · corrigé : {r.note}</span>}
         </summary>
         {r.evidence?.map((l) => <div key={l}>« {l} »</div>)}
       </details>

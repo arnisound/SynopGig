@@ -148,3 +148,41 @@ describe('settling a disagreement', () => {
     expect(r.groups[0].signal).toBe('audio-analog')
   })
 })
+
+describe('what a technician knows', () => {
+  const read = (ports: object[], family = 'Consoles') => sanitizeAi({ model: 'TMD16', category: 'Son', family, ports })
+
+  it('makes a balanced main output of a mixer an XLR pair', () => {
+    const r = read([{ label: 'Main output', count: 1, connector: 'jack', signal: 'audio-analog', dir: 'out', quote: 'Main outputs (balanced)' }])
+    expect(r.groups[0]).toMatchObject({ connector: 'xlr3', count: 2 })
+    expect(r.groups[0].note).toContain('XLR')
+  })
+
+  it('keeps a main output on jacks when the sheet says so', () => {
+    const r = read([{ label: 'Main out', count: 2, connector: 'jack', signal: 'audio-analog', dir: 'out', quote: 'Main outputs: 2 x balanced 1/4" TRS' }])
+    expect(r.groups[0]).toMatchObject({ connector: 'jack', count: 2 })
+    expect(r.groups[0].note).toBeUndefined()
+  })
+
+  it('counts L and R for each stereo input on jacks or RCA, not on a mini-jack', () => {
+    const r = read([
+      { label: 'Stereo line in', count: 2, connector: 'jack', signal: 'audio-analog', dir: 'in', quote: '2 stereo line inputs (1/4")' },
+      { label: 'Stereo RCA in', count: 1, connector: 'rca', signal: 'audio-analog', dir: 'in', quote: '1 x Dual RCA Stereo' },
+      { label: 'Aux in', count: 1, connector: 'minijack', signal: 'audio-analog', dir: 'in', quote: '1 x 1/8" stereo' },
+      { label: 'Main', count: 2, connector: 'xlr3', signal: 'audio-analog', dir: 'out', quote: '2 x XLR (L, R)' },
+    ])
+    expect(r.groups.map((g) => `${g.count} ${g.connector}`)).toEqual(['4 jack', '2 rca', '1 minijack', '2 xlr3'])
+  })
+
+  it('adds the main stereo output a mixer always has, to check', () => {
+    const r = read([{ label: 'Mic in', count: 8, connector: 'xlr-combo', signal: 'audio-analog', dir: 'in', quote: 'Inputs 1-8 combo' }])
+    const main = r.groups.find((g) => g.dir === 'out')
+    expect(main).toMatchObject({ count: 2, connector: 'xlr3' })
+    expect(checkAnswer(r.groups, 'Inputs 1-8 combo', [], r.groups).find((g) => g.dir === 'out')?.doubts).toContain('non lue dans la fiche')
+  })
+
+  it('leaves an amplifier alone', () => {
+    const r = read([{ label: 'Input', count: 1, connector: 'xlr3', signal: 'audio-analog', dir: 'in', quote: 'Input: XLR' }], 'Amplis')
+    expect(r.groups).toHaveLength(1)
+  })
+})

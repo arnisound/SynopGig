@@ -37,6 +37,8 @@ export const ENGINE_LABELS: Record<Engine, string> = {
 export interface AiGroup extends PortGroup {
   /** Passage of the sheet the model read the group from. */
   quote?: string
+  /** What a technician's rule corrected or added, shown with the row. */
+  note?: string
 }
 
 export interface AiResult {
@@ -76,6 +78,7 @@ Counting:
 - Per channel inputs: "Inputs 1-8: XLR / 1/4" TRS combo" is xlr-combo x8. "Inputs 9-12: XLR or dual 1/4" TRS" is xlr3 x4 and jack x8 (each channel has one XLR and two jacks).
 - A footswitch socket is a "jack" input with signal "control". A monitor or control room output pair on jacks is jack x2.
 - Line-level outputs (main, aux, subgroup, monitor, matrix) carry "audio-analog", never "speaker": "speaker" is only for amplifier outputs to loudspeakers.
+- Read like a technician: balanced main outputs are XLR unless a jack is named; the main output of a mixer is stereo (L and R = 2); a mixer with stereo inputs has a stereo main output; every stereo input or output on jacks, RCA or XLR is two sockets (L and R).
 - A sheet may be wrong or mixed with another product (web pages often are): when a section clearly describes another kind of device (e.g. loudspeaker data on a mixer page), ignore it, weight and size included.
 Types:
 - Ethernet, Dante, AES67, AVB and USB ports are "io". etherCON is "ethercon", a plain RJ45 is "rj45". Primary + secondary Dante = 2 ports.
@@ -154,7 +157,7 @@ export function sanitizeAi(raw: unknown): AiResult {
     return Number.isFinite(n) && n > 0 && n <= max ? n : undefined
   }
   const rack = num(r.rackU, 48)
-  return {
+  return technicianRules({
     brand: str(r.brand, 40) || undefined,
     model: str(r.model, 80) || undefined,
     category: CATEGORIES.includes(r.category as Category) ? (r.category as Category) : 'Son',
@@ -162,7 +165,48 @@ export function sanitizeAi(raw: unknown): AiResult {
     rackU: rack && Math.round(rack),
     weight: num(r.weight, 2000),
     groups,
+  })
+}
+
+/*
+ * What any sound technician knows, applied after the AI: it corrects the
+ * beginner's mistakes a model still makes, and says so on the row.
+ */
+const STEREO = /st[ée]r[ée]o|\bdual\b|\bl\s*[/&-]\s*r\b|left\s*(?:\/|and|&)\s*right|gauche\s*(?:\/|et)\s*droite/i
+const MAIN = /\bmain\b|\bmaster\b|\bsum\b|principale?s?|\bl\s*\/\s*r\b/i
+const JACK_WORDS = /\btrs\b|\bjack\b|1\/4|6[.,]35|klinke/i
+
+export function technicianRules(r: AiResult): AiResult {
+  const isMixer = r.category === 'Son' && (/console|m[ée]lang|mix/i.test(r.family ?? '') || r.groups.some((g) => g.dir === 'out' && MAIN.test(`${g.prefix} ${g.quote ?? ''}`)))
+  const groups = r.groups.map((g) => {
+    const said = `${g.prefix} ${g.quote ?? ''}`
+    const notes: string[] = []
+    let { count, connector } = g
+    // Balanced main outputs of a mixer are XLR, unless the sheet names a jack.
+    if (isMixer && g.dir === 'out' && MAIN.test(said) && /balanced|sym[ée]tri/i.test(said) && !JACK_WORDS.test(g.quote ?? '') && connector !== 'xlr3') {
+      connector = 'xlr3'
+      notes.push('sortie principale symétrique : XLR')
+    }
+    // The main output of a mixer is stereo: L and R.
+    if (isMixer && g.dir === 'out' && MAIN.test(said) && !/mono/i.test(said) && count === 1 && connector !== 'minijack') {
+      count = 2
+      notes.push('sortie principale stéréo : L et R')
+    }
+    // A stereo input or output on separate sockets (jack, RCA, XLR) takes two: L and R.
+    if (STEREO.test(said) && !/mono/i.test(said) && (connector === 'jack' || connector === 'rca' || connector === 'xlr3')) {
+      const perStereo = new RegExp(`\\b${count}\\s*(?:x\\s*)?(?:${STEREO.source})`, 'i').test(g.quote ?? '') || count % 2 === 1
+      if (perStereo) {
+        count *= 2
+        notes.push(`stéréo : L et R, ${count} prises`)
+      }
+    }
+    return notes.length ? { ...g, count, connector, note: notes.join(' · ') } : g
+  })
+  // A mixer always has a main stereo output: when the reading has none, it is added, to check.
+  if (isMixer && !groups.some((g) => g.dir === 'out' && MAIN.test(`${g.prefix} ${g.quote ?? ''}`)) && groups.some((g) => g.dir === 'in' && g.signal === 'audio-analog')) {
+    groups.push({ prefix: 'Sortie principale', count: 2, connector: 'xlr3', signal: 'audio-analog', dir: 'out', note: 'déduite : une console a toujours une sortie principale stéréo' })
   }
+  return { ...r, groups }
 }
 
 // ---- Checking an answer against the sheet
@@ -253,11 +297,13 @@ export function checkAnswer(
         if (!agreed) doubts.push('aucun passage cité')
       } else if (!quoteInSheet(g.quote, sheet)) {
         if (!agreed) doubts.push('passage introuvable dans la fiche')
-      } else if (!quoteHasCount(g.quote, g.count) && !agreed) doubts.push(`quantité ${g.count} non écrite dans le passage`)
+      } else if (!quoteHasCount(g.quote, g.count) && !(g.note && g.count % 2 === 0 && quoteHasCount(g.quote, g.count / 2)) && !agreed) doubts.push(`quantité ${g.count} non écrite dans le passage`)
     } else if (!agreed) doubts.push('fiche scannée : rien à comparer')
     const same = rules.filter((r) => !r.guessed && sameKind(r, g))
     if (same.length && !same.some((r) => r.count === g.count)) doubts.push(`l’analyse rapide lit ${[...new Set(same.map((r) => r.count))].join(' ou ')}`)
     if (g.count > 32 && !agreed) doubts.push('nombre élevé')
+    // Added by a technician's rule, not read in the sheet: always to check.
+    if (g.note?.startsWith('déduite')) doubts.push('non lue dans la fiche')
     return { ...g, doubts }
   })
 }
