@@ -506,7 +506,8 @@ async function chat(service, req, env, model, mode) {
 
 /** The best two models of a service, strict schema first; a busy model is skipped, or waited for a few seconds. */
 async function askService(service, req, env) {
-  const models = (await modelsOf(service, env)).slice(0, 2)
+  // Up to three: free plans refuse some models outright (Mistral's medium and small ones, for instance).
+  const models = (await modelsOf(service, env)).slice(0, 3)
   if (!models.length) return { status: 404, error: `${service.name} : aucun modèle de discussion sur ce compte` }
   let last
   for (const model of models) {
@@ -520,10 +521,11 @@ async function askService(service, req, env) {
         await sleep(1.5)
         last = await chat(service, req, env, model, mode)
       }
-      if (last.status === 200 && last.text) return { ...last, engine: service.name }
+      if (last.status === 200 && last.text) return { ...last, engine: service.name, model }
       if (last.status === 401 || last.status === 403) return { ...last, error: `${service.name} : ${last.error}` }
       if (last.status === 429) {
-        busyUntil.set(model, Date.now() + 60_000)
+        // A model that refuses even after a wait is left alone for a while (ten minutes on Mistral's free plan).
+        busyUntil.set(model, Date.now() + (service.name === 'mistral' ? 600_000 : 60_000))
         break
       }
       if (last.status === 404) known.delete(service.name)
@@ -580,7 +582,8 @@ async function askGemini(req, env) {
           responseMimeType: 'application/json',
           responseSchema: geminiSchema(req.schema),
           // Gemini 2.5 needs a thinking budget; later models think by default.
-          ...(/gemini-2\./.test(model) ? { thinkingConfig: { thinkingBudget: 2048 } } : {}),
+          // A short thinking pass: enough for counts per channel, and quick.
+          thinkingConfig: /gemini-2\./.test(model) ? { thinkingBudget: 2048 } : { thinkingLevel: 'low' },
         },
       }),
       signal: AbortSignal.timeout(90000),
@@ -643,11 +646,17 @@ async function diagnostic(env) {
       continue
     }
     checks.push(
-      check(s.name, 40, async () => {
+      check(s.name, 60, async () => {
         known.delete(s.name)
-        const models = await modelsOf(s, env)
+        await modelsOf(s, env)
         const r = await askService(s, req, env)
-        return r.status === 200 ? `OK (modèles ${models.slice(0, 2).join(', ')})` : `ERREUR ${r.status} : ${r.error}`
+        // Mistral takes one request a second: its OCR is tried after its chat, never at the same time.
+        if (s.name === 'mistral') {
+          await sleep(2)
+          const o = await ocr({ url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }, env)
+          out.ocr_mistral = o.status === 200 ? 'OK (les PDF sont lus avec leurs tableaux)' : `ERREUR ${o.error} (les PDF sont alors lus par l’application)`
+        }
+        return r.status === 200 ? `OK (modèle ${r.model})` : `ERREUR ${r.status} : ${r.error}`
       }),
     )
   }
@@ -660,15 +669,6 @@ async function diagnostic(env) {
       }),
     )
   } else out.gemini = 'pas de clé GEMINI_API_KEY'
-  if (env.MISTRAL_API_KEY) {
-    checks.push(
-      check('ocr_mistral', 40, async () => {
-        await sleep(2)
-        const r = await ocr({ url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }, env)
-        return r.status === 200 ? 'OK (les PDF sont lus avec leurs tableaux)' : `ERREUR ${r.error} (les PDF sont alors lus par l’application)`
-      }),
-    )
-  }
   const search = (key, work) => check(key, 35, async () => `OK (${(await work()).length} résultats)`)
   checks.push(search('recherche_bing', () => searchBing('Shure SM58 user guide pdf')), search('recherche_duckduckgo', () => searchDuckDuckGo('Shure SM58 user guide pdf')))
   if (env.GROQ_API_KEY) checks.push(search('recherche_groq', () => searchGroq('Shure SM58', env)))

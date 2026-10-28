@@ -95,6 +95,16 @@ describe('analysis', () => {
     expect(bodies(f, 'mistral.ai/v1/chat')[0].model).toBe('ministral-14b-latest')
   })
 
+  it('gets to the Mistral model a free plan accepts', async () => {
+    const f = upstream([
+      ['mistral.ai/v1/models', models('mistral-medium-latest', 'mistral-small-latest', 'ministral-14b-latest')],
+      ['mistral.ai', (u, i) => (JSON.parse(i.body).model.startsWith('ministral') ? chatOk('{"model":"M"}') : json({ message: 'Rate limit exceeded' }, 429))],
+    ])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K11' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"M"}', engine: 'mistral' })
+  }, 15000)
+
   it('asks Z.ai in JSON mode', async () => {
     const f = upstream([['api.z.ai', chatOk()]])
     vi.stubGlobal('fetch', f)
