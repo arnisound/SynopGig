@@ -84,14 +84,17 @@ describe('AI relay', () => {
   })
 
   it('asks Mistral first when it has a key, with the strict schema', async () => {
-    const upstream = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] })))
+    // A free key: no medium or small model on this account.
+    const upstream = vi.fn(async (url) =>
+      String(url).endsWith('/models') ? models('open-mistral-nemo', 'ministral-8b-latest', 'mistral-embed') : new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] })),
+    )
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', GROQ_API_KEY: 'G' })
     expect(await res.json()).toEqual({ text: '{"model":"M"}' })
-    const [url, init] = upstream.mock.calls[0]
+    const [url, init] = chatCalls(upstream)[0]
     expect(url).toBe('https://api.mistral.ai/v1/chat/completions')
     expect(init.headers.Authorization).toBe('Bearer K')
-    expect(JSON.parse(init.body)).toMatchObject({ model: 'mistral-medium-latest', response_format: { type: 'json_schema' } })
+    expect(JSON.parse(init.body)).toMatchObject({ model: 'ministral-8b-latest', response_format: { type: 'json_schema' } })
   })
 
   it('moves on to Groq when Mistral is out of quota', async () => {
@@ -102,7 +105,7 @@ describe('AI relay', () => {
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', GROQ_API_KEY: 'G6' })
     expect(await res.json()).toEqual({ text: '{"model":"X"}' })
     // Each Mistral model asked once only: a quota is not a schema problem.
-    expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral'))).toHaveLength(2)
+    expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral') && !String(u).endsWith('/models'))).toHaveLength(2)
   })
 
   it('says exactly why the provider refused', async () => {

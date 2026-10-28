@@ -10,7 +10,7 @@
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
  *   GROQ_MODEL       optional (default: best model the account can use)
  *   GEMINI_MODEL     optional (default gemini-2.5-flash)
- *   MISTRAL_MODEL    optional (default mistral-medium-latest, then mistral-small-latest)
+ *   MISTRAL_MODEL    optional (default: best model the account can use, medium first)
  *
  * Protection (nobody can use the keys up for everyone):
  *   LIMITS           optional KV namespace binding: daily counts kept across
@@ -282,8 +282,25 @@ async function mistralCall(req, env, model, strict) {
   return { status: res.status, text: extractJson(text), error: res.ok ? undefined : String(data.message ?? data.detail ?? reason(data, res.status)).slice(0, 200) }
 }
 
+// Free keys do not reach every model: ask the account which ones it has.
+const MISTRAL_PREFERRED = ['mistral-medium-latest', 'mistral-large-latest', 'mistral-small-latest', 'magistral-medium-latest', 'ministral-8b-latest', 'open-mistral-nemo', 'ministral-3b-latest']
+let mistralModels
+
+export async function pickMistralModels(env) {
+  if (mistralModels?.key !== env.MISTRAL_API_KEY) {
+    const res = await fetch('https://api.mistral.ai/v1/models', { headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` } }).catch(() => null)
+    const data = res?.ok ? await res.json().catch(() => ({})) : {}
+    const list = Array.isArray(data.data) ? data.data.filter((m) => m?.capabilities?.completion_chat !== false).map((m) => String(m.id)) : []
+    if (list.length) mistralModels = { key: env.MISTRAL_API_KEY, list }
+  }
+  const available = mistralModels?.list ?? []
+  if (available.length === 0) return [env.MISTRAL_MODEL || 'mistral-medium-latest', 'mistral-small-latest']
+  return [env.MISTRAL_MODEL, ...MISTRAL_PREFERRED].filter((m) => m && available.includes(m)).slice(0, 2)
+}
+
 async function askMistral(req, env) {
-  const models = [...new Set([env.MISTRAL_MODEL || 'mistral-medium-latest', 'mistral-small-latest'])]
+  const models = await pickMistralModels(env)
+  if (models.length === 0) return { status: 404, error: 'Mistral : aucun modèle de discussion sur ce compte' }
   const tries = models.flatMap((m) => [[m, true], [m, false]])
   const busy = new Set()
   let last
@@ -294,6 +311,7 @@ async function askMistral(req, env) {
     if (last.status === 401 || last.status === 403) break
     // Out of quota: no use asking the same model without the schema; the small one has its own quota.
     if (last.status === 429) busy.add(model)
+    if (last.status === 404) mistralModels = undefined
   }
   return { ...last, error: `Mistral ${last.status} : ${last.error ?? 'réponse illisible'}` }
 }
@@ -648,9 +666,11 @@ async function diagnostic(env) {
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
   const out = { relais: 'SynopGig, en ligne', mistral: 'pas de clé MISTRAL_API_KEY', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
   if (env.MISTRAL_API_KEY) {
-    const model = env.MISTRAL_MODEL || 'mistral-medium-latest'
-    const r = await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) }))
+    mistralModels = undefined
+    const [model] = await pickMistralModels(env)
+    const r = model ? await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) })) : { status: 404, error: 'aucun modèle' }
     out.mistral = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
+    out.mistral_modeles_du_compte = mistralModels?.list ?? []
   }
   const day = today()
   const used = env.LIMITS ? Number(await env.LIMITS.get(`d:${day}:all`)) || 0 : undefined
