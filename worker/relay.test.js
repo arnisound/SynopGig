@@ -67,6 +67,22 @@ describe('AI relay', () => {
     expect(JSON.parse(chatCalls(upstream).at(-1)[1].body).response_format).toBeUndefined()
   })
 
+  it('skips a model out of its minute quota, and waits when all of them are', async () => {
+    const limited = (s) => () => new Response(JSON.stringify({ error: { message: `Rate limit reached on tokens per minute (TPM). Please try again in ${s}s.` } }), { status: 429 })
+    const upstream = groq(['openai/gpt-oss-120b', 'openai/gpt-oss-20b'], limited(0.01), limited(0.05), groqOk)
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G5' })
+    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    const used = chatCalls(upstream).map(([, init]) => JSON.parse(init.body).model)
+    // Never the same busy model twice in a row; then the first one free again.
+    expect(used).toEqual(['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'])
+  })
+
+  it('sends the short form of the schema in JSON mode', async () => {
+    const { shape } = await import('./relay.js')
+    expect(shape({ type: 'object', properties: { a: { type: 'integer' }, d: { type: 'string', enum: ['in', 'out'] } }, required: ['d'] })).toBe('{"a":integer?,"d":"in"|"out"}')
+  })
+
   it('says exactly why the provider refused', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
     const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'bad' })

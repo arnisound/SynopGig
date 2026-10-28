@@ -119,6 +119,21 @@ export function strictSchema(s) {
 /** Reasoning models think before answering: worth it, a sheet is full of traps. */
 const thinks = (model) => model.startsWith('openai/gpt-oss') || /qwen3|deepseek/.test(model)
 
+/**
+ * The schema in a few words, for JSON mode: the long code lists are already
+ * in the prompt, and the free tier counts every token per minute.
+ */
+export function shape(s) {
+  if (!s || typeof s !== 'object') return 'any'
+  if (s.enum) return s.enum.length > 8 ? 'code' : s.enum.map((v) => JSON.stringify(v)).join('|')
+  if (s.type === 'array') return `[${shape(s.items)}, ...]`
+  if (s.type === 'object') {
+    const req = new Set(s.required ?? [])
+    return `{${Object.entries(s.properties ?? {}).map(([k, v]) => `"${k}":${shape(v)}${req.has(k) ? '' : '?'}`).join(',')}}`
+  }
+  return String(s.type)
+}
+
 /** mode: 'schema' (strict structured output), 'json' (any JSON object) or 'plain'. */
 async function groqCall(req, env, model, mode) {
   const format =
@@ -127,6 +142,7 @@ async function groqCall(req, env, model, mode) {
       : mode === 'json'
         ? { response_format: { type: 'json_object' } }
         : {}
+  const big = model.includes('120b')
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
@@ -134,39 +150,60 @@ async function groqCall(req, env, model, mode) {
       model,
       temperature: thinks(model) ? 0.2 : 0,
       // The thinking counts in the tokens: room for it and for a long list.
-      max_tokens: thinks(model) ? 8000 : 3000,
-      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: env.GROQ_REASONING || 'medium' } : {}),
+      max_tokens: thinks(model) ? 6000 : 2500,
+      // The best model thinks a little more; the spare one stays quick and cheap.
+      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: env.GROQ_REASONING || (big ? 'medium' : 'low') } : {}),
       ...(/qwen3|deepseek/.test(model) ? { reasoning_format: 'hidden' } : {}),
       ...format,
       messages: [
         // The schema is already enforced in strict mode: spared tokens.
-        { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object following this JSON schema, nothing else:\n${JSON.stringify(req.schema)}` },
+        { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
         { role: 'user', content: `Data sheet extracts:\n${req.text}` },
       ],
     }),
     signal: AbortSignal.timeout(60000),
   }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
   const data = await res.json().catch(() => ({}))
-  return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error: res.ok ? undefined : reason(data, res.status) }
+  const error = res.ok ? undefined : reason(data, res.status)
+  // "Please try again in 7.5s": how long until the minute quota frees up.
+  const wait = error && /try again in (?:(\d+)m)?([\d.]+)s/i.exec(error)
+  return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error, wait: wait ? Number(wait[1] ?? 0) * 60 + Number(wait[2]) : undefined }
 }
+
+const sleep = (s) => new Promise((r) => setTimeout(r, s * 1000))
+const MAX_WAIT = 20
 
 /**
  * Best model with strict structured output, then plain JSON mode (a model or
- * account without structured outputs), then the second model.
+ * account without structured outputs), then the second model. A model out of
+ * its minute quota is not asked again; when all of them are, and the quota
+ * frees up within a few seconds, the relay waits and asks once more.
  */
 async function askGroq(req, env) {
   const [main, second] = await pickGroqModels(env)
   const tries = [[main, 'schema'], [main, 'json'], ...(second ? [[second, 'json'], [second, 'plain']] : [[main, 'plain']])]
+  const busy = new Map()
+  const notes = []
   let last
   for (const [model, mode] of tries) {
+    if (busy.has(model)) continue
     last = await groqCall(req, env, model, mode)
     if (last.status === 200 && last.text) return last
+    notes.push(`${model.replace(/^.*\//, '')} : ${last.status === 200 ? 'réponse illisible' : last.status}`)
+    if (last.status === 429) busy.set(model, last.wait ?? Infinity)
     // A model that disappeared: list them again next time.
     if (last.status === 404) groqModels = undefined
     // A refused key will be refused again: no point retrying.
     if (last.status === 401 || last.status === 403) break
   }
-  return { ...last, error: `Groq ${last.status} : ${last.error ?? 'réponse illisible'}` }
+  const soonest = [...busy.entries()].sort((a, b) => a[1] - b[1])[0]
+  if (soonest && soonest[1] <= MAX_WAIT && busy.size === new Set(tries.map((t) => t[0])).size) {
+    await sleep(soonest[1] + 0.5)
+    const again = await groqCall(req, env, soonest[0], 'json')
+    if (again.status === 200 && again.text) return again
+    last = again
+  }
+  return { ...last, error: `Groq ${last.status} : ${last.error ?? 'réponse illisible'}${notes.length > 1 ? ` [${notes.join(', ')}]` : ''}` }
 }
 
 /** Gemini wants upper-case OpenAPI types. */

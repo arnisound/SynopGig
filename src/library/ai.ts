@@ -317,6 +317,12 @@ export function geminiRequest(input: { text?: string; pdfBase64?: string }) {
   }
 }
 
+/**
+ * Characters of the sheet sent (about 2 000 tokens): the free Groq tier
+ * allows 8 000 tokens a minute per model, prompt and thinking included.
+ */
+const TEXT_BUDGET = 7000
+
 /** Names the device for sheets covering a whole range. */
 const deviceLine = (device?: string) => (device?.trim() ? `Device: ${device.trim()}\n` : '')
 
@@ -343,7 +349,7 @@ export async function extractGemini(input: { text?: string; pdf?: File; device?:
   if (!key.trim()) throw new Error('Ajoutez votre clé Gemini dans les options avancées.')
   const text = input.text ?? ''
   const scan = !!input.pdf && !isReadable(text)
-  const body = geminiRequest({ text: scan ? deviceLine(input.device) : deviceLine(input.device) + focusText(text, 12000, input.device), pdfBase64: scan ? await toBase64(input.pdf!) : undefined })
+  const body = geminiRequest({ text: scan ? deviceLine(input.device) : deviceLine(input.device) + focusText(text, TEXT_BUDGET, input.device), pdfBase64: scan ? await toBase64(input.pdf!) : undefined })
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key.trim() },
@@ -363,7 +369,7 @@ export async function extractRelay(input: { text?: string; pdf?: File; device?: 
   const scan = !!input.pdf && !isReadable(text)
   if (!scan && !text.trim()) throw new Error('rien à analyser')
   if (scan && input.pdf!.size > 8_000_000) throw new Error('PDF scanné trop lourd : collez le texte des caractéristiques')
-  const body = relayRequest(scan ? { pdfBase64: await toBase64(input.pdf!) } : { text: deviceLine(input.device) + focusText(text, 12000, input.device) })
+  const body = relayRequest(scan ? { pdfBase64: await toBase64(input.pdf!) } : { text: deviceLine(input.device) + focusText(text, TEXT_BUDGET, input.device) })
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
   const data = (await res.json().catch(() => ({}))) as { text?: string; error?: { message?: string } }
   if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
