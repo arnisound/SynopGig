@@ -251,6 +251,8 @@ const MAKER_FILES = /inmusicbrands|musictribe|harman|yamaha|steinberg|sennheiser
 export function rankDocs(found, brand, model) {
   const b = words(brand).split(' ').filter((w) => w.length >= 3)
   const m = words(model).replace(/ /g, '')
+  // A letter too many in the name typed ("flown 8" for FLOW 8) still finds the model.
+  const variants = [m, ...(m.length >= 5 ? Array.from({ length: m.length }, (_, i) => m.slice(0, i) + m.slice(i + 1)).filter((v) => /\d/.test(v) && /[a-z]/.test(v)) : [])]
   const out = []
   for (const f of found) {
     const url = pageUrl(f.url)
@@ -260,7 +262,8 @@ export function rankDocs(found, brand, model) {
     const host = url.hostname.replace(/^www\./, '')
     const label = `${f.title ?? ''} ${decodeURIComponent(url.pathname)}`
     const pdf = /\.pdf($|\?)/i.test(url.pathname)
-    const exact = m.length >= 2 && words(label).replace(/ /g, '').includes(m)
+    const hay = words(label).replace(/ /g, '')
+    const exact = m.length >= 2 && variants.some((v) => hay.includes(v))
     const shop = SHOPS.test(host)
     const official = !shop && (b.some((w) => host.replace(/[^a-z0-9]/g, '').includes(w)) || (pdf && exact && MAKER_FILES.test(host)))
     const doc = docKind(label)

@@ -190,6 +190,11 @@ describe('finding the documents of a product', () => {
     expect(r.at(-1).host).toBe('thomann.de')
   })
 
+  it('finds the model despite a letter too many', () => {
+    const r = rankDocs([{ url: 'https://mediadl.musictribe.com/download/software/behringer/FLOW_8/QSG_BE_0816-AAB_FLOW-8_WW.pdf', title: 'FLOW 8 Quick Start Guide' }], 'Behringer', 'flown 8')
+    expect(r[0]).toMatchObject({ exact: true, official: true })
+  })
+
   it('searches Bing and DuckDuckGo without any key', async () => {
     const rss = '<rss><item><title>TMD16 User Guide</title><link>https://cdn.inmusicbrands.com/tmd16-user-guide.pdf</link></item></rss>'
     vi.stubGlobal('fetch', upstream([['bing.com', new Response(rss)], ['duckduckgo', new Response('<html>anomaly</html>')]]))

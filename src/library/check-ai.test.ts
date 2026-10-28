@@ -186,3 +186,16 @@ describe('what a technician knows', () => {
     expect(r.groups).toHaveLength(1)
   })
 })
+
+describe('a Behringer FLOW 8', () => {
+  const read = (ports: object[]) => sanitizeAi({ model: 'FLOW 8', category: 'Son', family: 'Mélangeurs', ports })
+  it('keeps one headphone socket, finds the R jacks of stereo inputs, and the DC power input', () => {
+    const r = read([
+      { label: 'Sortie casque', count: 2, connector: 'jack', signal: 'audio-analog', dir: 'out', quote: 'Phones output (stereo, 1/4")' },
+      { label: 'Entrée ligne 5L/7L', count: 2, connector: 'jack', signal: 'audio-analog', dir: 'in', quote: 'Line inputs 5L (mono) and 7L (mono)' },
+      { label: 'Alimentation', count: 1, connector: 'usb', signal: 'power', dir: 'in', quote: 'DC in, external power supply 12 V' },
+      { label: 'Main', count: 2, connector: 'xlr3', signal: 'audio-analog', dir: 'out', quote: 'Main outputs L/R (balanced XLR)' },
+    ])
+    expect(r.groups.map((g) => `${g.count} ${g.connector}`)).toEqual(['1 jack', '4 jack', '1 dc', '2 xlr3'])
+  })
+})

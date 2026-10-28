@@ -80,7 +80,9 @@ Counting:
 - Per channel inputs: "Inputs 1-8: XLR / 1/4" TRS combo" is xlr-combo x8. "Inputs 9-12: XLR or dual 1/4" TRS" is xlr3 x4 and jack x8 (each channel has one XLR and two jacks).
 - A footswitch socket is a "jack" input with signal "control". A monitor or control room output pair on jacks is jack x2.
 - Line-level outputs (main, aux, subgroup, monitor, matrix) carry "audio-analog", never "speaker": "speaker" is only for amplifier outputs to loudspeakers.
-- Read like a technician: balanced main outputs are XLR unless a jack is named; the main output of a mixer is stereo (L and R = 2); a mixer with stereo inputs has a stereo main output; every stereo input or output on jacks, RCA or XLR is two sockets (L and R).
+- Read like a technician: balanced main outputs are XLR unless a jack is named; the main output of a mixer is stereo (L and R = 2); a mixer with stereo inputs has a stereo main output; a stereo line input or output on jacks, RCA or XLR is two sockets (L and R): "stereo inputs 5/6 and 7/8" are 4 jacks (5L, 6R, 7L, 8R).
+- But one socket carries stereo by itself: a headphone output is ONE stereo TRS jack (or mini-jack) per headphone output; a footswitch, an insert or a mini-jack input is one socket.
+- Power: "DC in", "12 V", an external power supply or adapter is "dc"; a mains inlet (100-240 V, IEC) is "iec"; "USB powered" is the USB port itself, not a separate power input.
 - A sheet may be wrong or mixed with another product (web pages often are): when a section clearly describes another kind of device (e.g. loudspeaker data on a mixer page), ignore it, weight and size included.
 Types:
 - Ethernet, Dante, AES67, AVB and USB ports are "io". etherCON is "ethercon", a plain RJ45 is "rj45". Primary + secondary Dante = 2 ports.
@@ -194,8 +196,23 @@ export function technicianRules(r: AiResult): AiResult {
       count = 2
       notes.push('sortie principale stéréo : L et R')
     }
-    // A stereo input or output on separate sockets (jack, RCA, XLR) takes two: L and R.
-    if (STEREO.test(said) && !/mono/i.test(said) && (connector === 'jack' || connector === 'rca' || connector === 'xlr3')) {
+    // An external power supply is a DC input, not USB (unless the sheet says USB powered).
+    if (g.signal === 'power' && (connector === 'usb' || connector === 'usb-c') && /\bdc\b|adapt|power supply|alimentation externe|netzteil|\b\d+\s*v\b/i.test(g.quote ?? '') && !/usb/i.test(g.quote ?? '')) {
+      connector = 'dc'
+      notes.push('alimentation externe : entrée DC')
+    }
+    // One socket carries stereo by itself: headphones, footswitch, insert.
+    const oneSocket = /phone|casque|kopfh|footswitch|p[ée]dal|insert|send\s*\/\s*return/i.test(said)
+    if (oneSocket && /phone|casque|kopfh/i.test(said) && count === 2 && !quoteHasCount(g.quote ?? '', 2)) {
+      count = 1
+      notes.push('casque : une prise stéréo')
+    }
+    // Stereo line inputs numbered by their L channel ("5L / 7L"): the R ones are there too.
+    if (!oneSocket && g.dir === 'in' && connector === 'jack' && /\b\d+\s*L\b/i.test(said) && !/\b\d+\s*R\b/i.test(said)) {
+      count *= 2
+      notes.push(`entrées stéréo : L et R, ${count} jacks`)
+    } else if (!oneSocket && STEREO.test(said) && !/mono/i.test(said) && (connector === 'jack' || connector === 'rca' || connector === 'xlr3')) {
+      // A stereo input or output on separate sockets (jack, RCA, XLR) takes two: L and R.
       const perStereo = new RegExp(`\\b${count}\\s*(?:x\\s*)?(?:${STEREO.source})`, 'i').test(g.quote ?? '') || count % 2 === 1
       if (perStereo) {
         count *= 2
