@@ -1,9 +1,10 @@
 import { AI_PROXY_URL } from './ai'
 
 /*
- * "Le chercher pour vous": the relay looks for a product's documentation
- * (worker/relay.js, /find), the user picks the right document, then the relay
- * fetches it (/doc) and the usual analysis builds the sheet.
+ * "Le chercher pour vous", done by itself: the relay searches the web for
+ * the product's documents (/find), the best ones are picked (the user guide
+ * of this very model describes every socket of the panels), read (PDF by the
+ * relay's OCR, tables kept, or here with pdf.js), then analysed as usual.
  */
 
 export interface FoundDoc {
@@ -19,75 +20,109 @@ export interface FoundDoc {
   doc?: 'manual' | 'datasheet' | 'quickstart'
 }
 
-async function post(path: string, body: unknown) {
-  if (!AI_PROXY_URL) throw new Error('la recherche n’est pas disponible sur cette version.')
-  return fetch(`${AI_PROXY_URL.replace(/\/+$/, '')}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+interface Page {
+  title: string
+  text: string
+  url: string
+  images: string[]
+  docs: { url: string; title: string; pdf: boolean; doc?: FoundDoc['doc'] }[]
 }
 
-const failure = async (res: Response) => new Error(((await res.json().catch(() => ({}))) as { error?: { message?: string } }).error?.message ?? `erreur ${res.status}`)
+export async function relay(path: string, body: unknown) {
+  if (!AI_PROXY_URL) throw new Error('le relais SynopGig n’est pas disponible sur cette version.')
+  const res = await fetch(`${AI_PROXY_URL.replace(/\/+$/, '')}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: { message?: string } }).error?.message ?? `erreur ${res.status}`)
+  return res
+}
 
 export async function findDocs(brand: string, model: string): Promise<FoundDoc[]> {
-  const res = await post('/find', { brand, model })
-  if (!res.ok) throw await failure(res)
-  return ((await res.json()) as { results: FoundDoc[] }).results
+  return ((await (await relay('/find', { brand, model })).json()) as { results: FoundDoc[] }).results
 }
 
-async function readPdf(res: Response, url: string) {
+/** A web address read by the relay: a page, or a file (PDF, image). */
+export async function readUrl(url: string, model = ''): Promise<{ page: Page } | { file: Blob; type: string }> {
+  const res = await relay('/read', { url, model })
+  const type = res.headers.get('Content-Type') ?? ''
+  return /json/i.test(type) ? { page: (await res.json()) as Page } : { file: await res.blob(), type }
+}
+
+/** The text of a PDF: the relay's OCR keeps the tables; pdf.js here otherwise. */
+export async function pdfText(url: string): Promise<{ text: string; pdf?: File; how: 'ocr' | 'pdf.js' }> {
+  try {
+    const { text } = (await (await relay('/ocr', { url })).json()) as { text: string }
+    if (text.replace(/\s/g, '').length > 200) return { text, how: 'ocr' }
+  } catch {
+    // No OCR on this relay (or busy): read it here.
+  }
+  const got = await readUrl(url)
+  if (!('file' in got) || !/pdf/i.test(got.type)) throw new Error('ce lien ne mène pas à un PDF')
   const name = decodeURIComponent(new URL(url).pathname.split('/').pop() || 'fiche.pdf')
-  const pdf = new File([await res.blob()], /\.pdf$/i.test(name) ? name : `${name}.pdf`, { type: 'application/pdf' })
+  const pdf = new File([got.file], /\.pdf$/i.test(name) ? name : `${name}.pdf`, { type: 'application/pdf' })
   const { pdfToText } = await import('./pdfText')
-  return { pdf, text: await pdfToText(pdf) }
+  return { text: await pdfToText(pdf), pdf, how: 'pdf.js' }
 }
 
-export interface LoadedDoc {
+export interface Research {
+  /** What the analysis reads: the documents one after the other. */
   text: string
+  /** A PDF read here (no OCR), for Gemini to see its drawings. */
   pdf?: File
+  /** Product photos found on the way. */
   images: string[]
-  /** The manual the product page linked to, read with it. */
-  manual?: { url: string; title: string }
+  /** The documents read, for the user to check. */
+  used: { title: string; url: string }[]
 }
+
+const readable = (t: string) => t.replace(/\s/g, '').length > 200
 
 /**
- * The chosen document: a PDF (read here, like a dropped file) or the text of
- * a page. A product page rarely describes the panels; the user guide or data
- * sheet it links to does: it is read too, and the two texts go together.
+ * Reads the best documents among those found, by itself: the user guide of
+ * this exact model, else its data sheet, plus its product page (photos, and
+ * the manuals it links to when the search found none). `docs` can also be
+ * one document the user picked.
  */
-export async function loadDoc(doc: FoundDoc, model = '', onStep?: (msg: string) => void, companions: FoundDoc[] = []): Promise<LoadedDoc> {
-  const res = await post('/doc', { url: doc.url, model })
-  if (!res.ok) throw await failure(res)
-  if (/pdf/i.test(res.headers.get('Content-Type') ?? '')) {
-    const sheet = await readPdf(res, doc.url)
-    // A data sheet or quick start rarely lists every socket: the manual found with it is read too.
-    if (doc.doc !== 'manual') {
-      for (const c of companions.filter((c) => c.kind === 'pdf' && c.url !== doc.url).slice(0, 1)) {
-        try {
-          onStep?.(`Lecture de « ${c.title} » en complément…`)
-          const r = await post('/doc', { url: c.url, model })
-          if (!r.ok || !/pdf/i.test(r.headers.get('Content-Type') ?? '')) continue
-          const more = await readPdf(r, c.url)
-          if (more.text.replace(/\s/g, '').length < 200) continue
-          return { text: `${sheet.text}\n\n${c.title} :\n${more.text}`, pdf: more.pdf, images: [], manual: { url: c.url, title: c.title } }
-        } catch {
-          // The sheet alone, then.
-        }
-      }
-    }
-    return { ...sheet, images: [] }
-  }
-  const page = (await res.json()) as { title: string; text: string; images?: string[]; docs?: { url: string; title: string }[] }
-  // The documents the page links to, then the manuals the search found for this model.
-  const linked = [...(page.docs ?? []).slice(0, 2), ...companions.filter((c) => c.kind === 'pdf' && !(page.docs ?? []).some((d) => d.url === c.url)).slice(0, 1)]
-  for (const d of linked) {
+export async function research(docs: FoundDoc[], model: string, onStep: (msg: string) => void): Promise<Research> {
+  const pdfs = docs.filter((d) => d.kind === 'pdf')
+  const best = (kind?: FoundDoc['doc']) => pdfs.find((d) => d.exact && d.doc === kind)
+  const chosen = [best('manual') ?? best('datasheet'), best('manual') ? best('datasheet') : undefined].filter((d) => d !== undefined)
+  if (!chosen.length && pdfs[0] && docs.length === 1) chosen.push(pdfs[0])
+  const page = docs.find((d) => d.kind === 'page' && d.official && d.exact) ?? docs.find((d) => d.kind === 'page' && (d.official || docs.length === 1))
+
+  const parts: string[] = []
+  const used: Research['used'] = []
+  let pdf: File | undefined
+  let images: string[] = []
+  let linked: Page['docs'] = []
+
+  if (page) {
     try {
-      onStep?.(`Lecture de « ${d.title} » trouvé sur la page…`)
-      const r = await post('/doc', { url: d.url, model })
-      if (!r.ok || !/pdf/i.test(r.headers.get('Content-Type') ?? '')) continue
-      const { pdf, text } = await readPdf(r, d.url)
-      if (text.replace(/\s/g, '').length < 200) continue
-      return { text: `${page.text}\n\n${d.title} :\n${text}`, pdf, images: page.images ?? [], manual: d }
+      onStep(`Lecture de la page ${page.host}…`)
+      const got = await readUrl(page.url, model)
+      if ('page' in got) {
+        parts.push(`${got.page.title || page.title} (page produit) :\n${got.page.text}`)
+        used.push({ title: page.title, url: page.url })
+        images = got.page.images
+        linked = got.page.docs
+      }
     } catch {
-      // That document could not be read: the page alone, or the next one.
+      // The documents alone, then.
     }
   }
-  return { text: page.text, images: page.images ?? [] }
+  // The manual the page links to, when the search found none for this model.
+  const fromPage = !chosen.some((d) => d.doc === 'manual') ? linked.find((d) => d.pdf && d.doc === 'manual') : undefined
+  const toRead = [...chosen.map((d) => ({ url: d.url, title: d.title })), ...(fromPage ? [{ url: fromPage.url, title: fromPage.title }] : [])].slice(0, 2)
+  for (const d of toRead) {
+    try {
+      onStep(`Lecture de « ${d.title} »…`)
+      const r = await pdfText(d.url)
+      if (!readable(r.text)) continue
+      parts.unshift(`${d.title} :\n${r.text}`)
+      used.unshift({ title: d.title, url: d.url })
+      pdf ??= r.pdf
+    } catch {
+      // Unreadable: the next document.
+    }
+  }
+  if (!parts.length) throw new Error('aucun des documents trouvés n’a pu être lu')
+  return { text: parts.join('\n\n'), pdf, images, used }
 }

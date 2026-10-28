@@ -1,53 +1,44 @@
 /*
- * SynopGig AI relay (SynopGig, an Arnisound tools app — arnisoundtools.com): a free Cloudflare Worker that reads data sheets with the
- * site owner's free AI key, so the public has nothing to set up and every
- * browser gets an answer in a couple of seconds. Setup in worker/README.md.
+ * SynopGig relay — an Arnisound tools app (arnisoundtools.com).
  *
- * Settings (Cloudflare > Worker > Settings > Variables and Secrets):
- *   GROQ_API_KEY     secret, recommended: very fast (console.groq.com/keys)
- *   MISTRAL_API_KEY  secret, recommended first: generous free tier (console.mistral.ai)
- *   ZAI_API_KEY      secret, optional: free GLM Flash models of Z.ai (z.ai)
- *   GEMINI_API_KEY   secret, alternative or complement: also reads scanned PDFs
- *   AI               binding (Settings > Bindings > Workers AI), no key: Cloudflare's
- *                    own open models, used last (small free daily allowance)
- *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
- *   GROQ_MODEL       optional (default: best model the account can use)
- *   GEMINI_MODEL     optional (default: best Flash model the key can use, then Flash-Lite)
- *   MISTRAL_MODEL    optional (default: best model the account can use, medium first)
+ * A free Cloudflare Worker that does for the app what a browser cannot: it
+ * keeps the AI keys secret, searches the web, and reads pages and files of
+ * other sites. Setup in worker/README.md.
  *
- * Protection (nobody can use the keys up for everyone):
- *   LIMITS           optional KV namespace binding: daily counts kept across
- *                    every Cloudflare instance (without it, per instance only)
- *   PER_HOUR         analyses and searches per visitor and hour (default 20)
- *   PER_DAY          analyses and searches per visitor and day (default 60)
- *   DAILY_LIMIT      analyses and searches for everyone together per day (default 400)
+ *   POST /          analysis of a data sheet {v: 2, system, schema, text, fullText?, pdfBase64?, single?}
+ *   POST /find      {brand, model} → the product's documents, best first
+ *   POST /read      {url} → a PDF or an image as is; a web page as {title, text, images, docs}
+ *   POST /ocr       {url} → the text of a PDF, tables kept (Mistral OCR)
+ *   GET  /diagnostic
  *
- * Open <worker address>/diagnostic in a browser to check the keys.
- * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
- * POST /find {brand, model} finds a product's documentation; POST /doc {url} reads one;
- * POST /images {url} lists a page's product photos, POST /image {url} fetches one.
- *   GEMINI_SEARCH    "on" to search with Gemini too (its search quota is small: off by default)
- *   GROQ_SEARCH_MODEL / GEMINI_SEARCH_MODEL  optional, models used to search the web
- *     (default: Groq's gpt-oss models with their built-in browser search)
+ * Secrets (any of them): GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY, ZAI_API_KEY.
+ * Optional: LIMITS (KV binding), ALLOWED_ORIGINS, PER_HOUR, PER_DAY, DAILY_LIMIT,
+ * GROQ_MODEL, GEMINI_MODEL, MISTRAL_MODEL, ZAI_MODEL.
  */
 
 const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
 const PROMPT_START = 'You are a live sound, lighting and video technician'
-const MAX_TEXT = 20000
-const MAX_PDF_BASE64 = 11_000_000
+const UA = 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound tools; +https://arnisoundtools.com)'
 
-/*
- * Two kinds of requests: "ia" ones spend the AI quotas (analysis, search),
- * "web" ones only read public pages (documents, photos: many per product).
- * Each visitor gets an hourly allowance per kind, kept by each Cloudflare
- * instance; the daily ones (per visitor and for everyone) are kept in the
- * LIMITS KV namespace when it is bound, so they hold everywhere.
- */
-const HOURLY = { ia: 20, web: 200, diag: 30 }
+const sleep = (s) => new Promise((r) => setTimeout(r, s * 1000))
+const words = (s) =>
+  String(s ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+/** The provider's own error message, short and without anything secret. */
+const reason = (data, status) => String(data?.error?.message ?? data?.message ?? data?.detail ?? data?.error ?? `HTTP ${status}`).slice(0, 200)
+
+/* ---------- Limits: nobody can use the keys up for everyone ---------- */
+
+// Per visitor and hour, per Cloudflare instance. "ai" spends AI quotas, "web" only reads pages.
+const HOURLY = { ai: 60, web: 300, diag: 30 }
 const hits = new Map()
 
 function tooManyThisHour(kind, ip, env) {
-  const max = kind === 'ia' ? Number(env.PER_HOUR) || HOURLY.ia : HOURLY[kind]
+  const max = kind === 'ai' ? Number(env.PER_HOUR) || HOURLY.ai : HOURLY[kind]
   const key = `${kind}|${ip}`
   const now = Date.now()
   const recent = (hits.get(key) ?? []).filter((t) => now - t < 3_600_000)
@@ -57,9 +48,20 @@ function tooManyThisHour(kind, ip, env) {
   return recent.length > max
 }
 
-// Without KV: the same daily counts, for this instance only.
-const dayCounts = new Map()
 const today = () => new Date().toISOString().slice(0, 10)
+const dayCounts = new Map()
+
+/** Daily counts, kept in the LIMITS KV namespace when bound (else per instance). */
+async function count(env, key) {
+  if (!env.LIMITS) {
+    if (dayCounts.size > 5000) dayCounts.clear()
+    dayCounts.set(key, (dayCounts.get(key) ?? 0) + 1)
+    return dayCounts.get(key)
+  }
+  const n = (Number(await env.LIMITS.get(key)) || 0) + 1
+  await env.LIMITS.put(key, String(n), { expirationTtl: 172800 })
+  return n
+}
 
 /** A visitor is known by a hash of their address, never the address itself. */
 async function visitor(ip) {
@@ -67,438 +69,22 @@ async function visitor(ip) {
   return [...new Uint8Array(bytes).slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-async function count(env, key) {
-  if (!env.LIMITS) {
-    if (dayCounts.size > 5000) dayCounts.clear()
-    const n = (dayCounts.get(key) ?? 0) + 1
-    dayCounts.set(key, n)
-    return n
-  }
-  const n = (Number(await env.LIMITS.get(key)) || 0) + 1
-  await env.LIMITS.put(key, String(n), { expirationTtl: 172800 })
-  return n
-}
-
-/** Why this AI request is refused, or undefined when it may go. */
-export async function aiRefusal(ip, env) {
-  if (tooManyThisHour('ia', ip, env)) return 'Trop d’analyses en une heure : réessayez un peu plus tard.'
+/**
+ * Why this AI request is refused, or undefined when it may go. Analyses
+ * also count per day (kept in KV); searches and OCR per hour only.
+ */
+export async function aiRefusal(ip, env, daily = true) {
+  if (tooManyThisHour('ai', ip, env)) return 'Trop de demandes en une heure : réessayez un peu plus tard.'
+  if (!daily) return undefined
   const day = today()
-  const mine = await count(env, `d:${day}:${await visitor(ip)}`)
-  if (mine > (Number(env.PER_DAY) || 60)) return 'Limite d’analyses du jour atteinte pour votre connexion : réessayez demain.'
-  const all = await count(env, `d:${day}:all`)
-  if (all > (Number(env.DAILY_LIMIT) || 400)) return 'Le service a atteint sa limite du jour pour tous les utilisateurs : réessayez demain, ou complétez la fiche à la main.'
+  if ((await count(env, `d:${day}:${await visitor(ip)}`)) > (Number(env.PER_DAY) || 60)) return 'Limite d’analyses du jour atteinte pour votre connexion : réessayez demain.'
+  if ((await count(env, `d:${day}:all`)) > (Number(env.DAILY_LIMIT) || 400)) return 'Le service a atteint sa limite du jour pour tous les utilisateurs : réessayez demain, ou complétez la fiche à la main.'
   return undefined
 }
 
-/** Only the data sheet analysis SynopGig sends goes through: the key cannot be used for anything else. */
-export function cleanRequest(body) {
-  if (!body || typeof body !== 'object' || body.v !== 2) return null
-  const { system, schema, text, pdfBase64 } = body
-  if (typeof system !== 'string' || !system.startsWith(PROMPT_START) || system.length > 20000) return null
-  if (!schema || typeof schema !== 'object' || JSON.stringify(schema).length > 20000) return null
-  const hasText = typeof text === 'string' && text.trim().length > 0 && text.length <= MAX_TEXT
-  const hasPdf = typeof pdfBase64 === 'string' && pdfBase64.length > 0 && pdfBase64.length <= MAX_PDF_BASE64
-  // The text for every model, the PDF too for Gemini (it reads tables and drawings).
-  if (!hasText && !hasPdf) return null
-  return { system, schema, text: hasText ? text : undefined, pdfBase64: hasPdf ? pdfBase64 : undefined, single: body.single === true }
-}
+/* ---------- Reading other sites ---------- */
 
-/** The provider's own error message, short and without anything secret. */
-const reason = (data, status) => String(data?.error?.message ?? data?.error ?? `HTTP ${status}`).slice(0, 200)
-
-/** First JSON object of a reply, for models that wrap it in text. */
-function extractJson(text) {
-  if (!text) return undefined
-  const start = text.indexOf('{')
-  const end = text.lastIndexOf('}')
-  if (start < 0 || end <= start) return undefined
-  try {
-    return JSON.stringify(JSON.parse(text.slice(start, end + 1)))
-  } catch {
-    return undefined
-  }
-}
-
-// Groq renames and retires models: ask the account which ones it can use.
-const GROQ_PREFERRED = [
-  'openai/gpt-oss-120b',
-  'llama-3.3-70b-versatile',
-  'moonshotai/kimi-k2-instruct',
-  'qwen/qwen3-32b',
-  'openai/gpt-oss-20b',
-  'meta-llama/llama-4-maverick-17b-128e-instruct',
-  'meta-llama/llama-4-scout-17b-16e-instruct',
-  'llama-3.1-8b-instant',
-]
-const NOT_CHAT = /whisper|tts|guard|playai|orpheus|distil|compound|allam/i
-// Remembered per key: a new key gets a fresh list.
-let groqModels
-
-async function groqAvailable(env) {
-  if (groqModels?.key === env.GROQ_API_KEY) return groqModels.list
-  const res = await fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: `Bearer ${env.GROQ_API_KEY}` } })
-  const data = await res.json().catch(() => ({}))
-  const list = Array.isArray(data.data) ? data.data.filter((m) => m && m.active !== false).map((m) => String(m.id)) : []
-  if (list.length) groqModels = { key: env.GROQ_API_KEY, list }
-  return list
-}
-
-/** Up to two models: the configured one if available, else the best known ones. */
-export async function pickGroqModels(env) {
-  const available = await groqAvailable(env).catch(() => [])
-  if (available.length === 0) return [env.GROQ_MODEL || 'openai/gpt-oss-20b', 'llama-3.1-8b-instant']
-  const wanted = [env.GROQ_MODEL, ...GROQ_PREFERRED].filter((m) => m && available.includes(m))
-  const others = available.filter((m) => !NOT_CHAT.test(m))
-  return [...new Set([...wanted, ...others])].slice(0, 2)
-}
-
-/**
- * Strict structured output (OpenAI style): every property listed as required,
- * the optional ones nullable, no extra keys.
- */
-export function strictSchema(s) {
-  if (!s || typeof s !== 'object' || Array.isArray(s)) return s
-  if (s.type === 'array') return { ...s, items: strictSchema(s.items) }
-  if (s.type !== 'object') return s
-  const required = new Set(s.required ?? [])
-  const properties = Object.fromEntries(
-    Object.entries(s.properties ?? {}).map(([k, v]) => {
-      const inner = strictSchema(v)
-      if (required.has(k)) return [k, inner]
-      return [k, { ...inner, type: [inner.type, 'null'], ...(inner.enum ? { enum: [...inner.enum, null] } : {}) }]
-    }),
-  )
-  return { type: 'object', properties, required: Object.keys(properties), additionalProperties: false }
-}
-
-/** Reasoning models think before answering: worth it, a sheet is full of traps. */
-const thinks = (model) => /gpt-oss|qwen3|deepseek|glm/.test(model)
-
-/**
- * The schema in a few words, for JSON mode: the long code lists are already
- * in the prompt, and the free tier counts every token per minute.
- */
-export function shape(s) {
-  if (!s || typeof s !== 'object') return 'any'
-  if (s.enum) return s.enum.length > 8 ? 'code' : s.enum.map((v) => JSON.stringify(v)).join('|')
-  if (s.type === 'array') return `[${shape(s.items)}, ...]`
-  if (s.type === 'object') {
-    const req = new Set(s.required ?? [])
-    return `{${Object.entries(s.properties ?? {}).map(([k, v]) => `"${k}":${shape(v)}${req.has(k) ? '' : '?'}`).join(',')}}`
-  }
-  return String(s.type)
-}
-
-/** The messages of an analysis; in strict mode the schema is enforced already: spared tokens. */
-const analysisMessages = (req, mode) => [
-  { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
-  { role: 'user', content: `Data sheet extracts:\n${req.text}` },
-]
-
-/**
- * One analysis on an OpenAI-compatible service (Groq, Z.ai).
- * mode: 'schema' (strict structured output), 'json' (any JSON object) or 'plain'.
- */
-async function openAiCall(url, key, req, env, model, mode) {
-  const format =
-    mode === 'schema'
-      ? { response_format: { type: 'json_schema', json_schema: { name: 'device', strict: true, schema: strictSchema(req.schema) } } }
-      : mode === 'json'
-        ? { response_format: { type: 'json_object' } }
-        : {}
-  const big = model.includes('120b')
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model,
-      temperature: thinks(model) ? 0.2 : 0,
-      // The thinking counts in the tokens: room for it and for a long list.
-      max_tokens: thinks(model) ? 6000 : 2500,
-      // The best model thinks a little more; the spare one stays quick and cheap.
-      ...(/gpt-oss/.test(model) ? { reasoning_effort: env.GROQ_REASONING || (big ? 'medium' : 'low') } : {}),
-      ...(/qwen3|deepseek/.test(model) && url.includes('groq') ? { reasoning_format: 'hidden' } : {}),
-      ...format,
-      messages: analysisMessages(req, mode),
-    }),
-    signal: AbortSignal.timeout(60000),
-  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
-  const data = await res.json().catch(() => ({}))
-  const error = res.ok ? undefined : reason(data, res.status)
-  // "Please try again in 7.5s": how long until the minute quota frees up.
-  const wait = error && /try again in (?:(\d+)m)?([\d.]+)s/i.exec(error)
-  return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error, wait: wait ? Number(wait[1] ?? 0) * 60 + Number(wait[2]) : undefined }
-}
-
-const groqCall = (req, env, model, mode) => openAiCall('https://api.groq.com/openai/v1/chat/completions', env.GROQ_API_KEY, req, env, model, mode)
-
-/*
- * Z.ai (Zhipu, China): the GLM "Flash" models are free, with an account
- * made by e-mail. One request at a time per account: when busy, the relay
- * moves on. Key at z.ai (API Keys).
- */
-// The same GLM models on Z.ai (international) and BigModel (China): keys of one are refused by the other.
-const ZAI_HOSTS = ['https://api.z.ai/api/paas/v4/chat/completions', 'https://open.bigmodel.cn/api/paas/v4/chat/completions']
-let zaiHost
-
-async function zaiCall(req, env, model) {
-  let last
-  // The platform that last answered first: a new key may belong to the other one.
-  for (const url of zaiHost ? [zaiHost, ...ZAI_HOSTS.filter((h) => h !== zaiHost)] : ZAI_HOSTS) {
-    last = await openAiCall(url, env.ZAI_API_KEY, req, env, model, 'json')
-    if (last.status !== 401) {
-      zaiHost = url
-      return last
-    }
-  }
-  return last
-}
-
-async function askZai(req, env) {
-  const models = [...new Set([env.ZAI_MODEL || 'glm-4.7-flash', 'glm-4.5-flash'])]
-  let last
-  for (const model of models) {
-    last = await zaiCall(req, env, model)
-    if (last.status === 200 && last.text) return last
-    if (last.status === 401 || last.status === 403) break
-  }
-  return { ...last, error: `Z.ai ${last.status} : ${last.error ?? 'réponse illisible'}` }
-}
-
-/** Text of a Workers AI answer, whatever its shape (plain, OpenAI chat or Responses). */
-function workersText(out) {
-  if (!out) return ''
-  if (typeof out === 'string') return out
-  if (typeof out.response === 'string') return out.response
-  if (out.response && typeof out.response === 'object') return JSON.stringify(out.response)
-  const chat = out.choices?.[0]?.message?.content
-  if (typeof chat === 'string') return chat
-  if (Array.isArray(out.output)) {
-    return out.output
-      .flatMap((o) => (Array.isArray(o.content) ? o.content : []))
-      .map((c) => c.text ?? '')
-      .join('')
-  }
-  return ''
-}
-
-/*
- * Cloudflare Workers AI: open models run by Cloudflare itself, no key at
- * all, only an "AI" binding on this Worker. Free daily allowance (10 000
- * "neurons" a day, shared by every model): kept for when the others are full.
- */
-async function askWorkersAi(req, env) {
-  const models = [...new Set([env.WORKERS_AI_MODEL || '@cf/openai/gpt-oss-120b', '@cf/meta/llama-3.3-70b-instruct-fp8-fast'])]
-  let last
-  for (const model of models) {
-    try {
-      const out = await env.AI.run(model, {
-        messages: analysisMessages(req, 'json'),
-        max_tokens: 6000,
-        temperature: 0.2,
-        ...(model.includes('gpt-oss') ? { reasoning: { effort: 'medium' } } : {}),
-      })
-      const text = extractJson(workersText(out))
-      if (text) return { status: 200, text }
-      last = { status: 200, error: 'réponse illisible' }
-    } catch (e) {
-      const message = String(e?.message ?? e).slice(0, 200)
-      // 4006: the daily free allowance is used up.
-      last = { status: /4006|neuron|limit|capacity/i.test(message) ? 429 : 502, error: message }
-      if (last.status === 429) break
-    }
-  }
-  return { ...last, error: `Workers AI ${last.status} : ${last.error}` }
-}
-
-const sleep = (s) => new Promise((r) => setTimeout(r, s * 1000))
-const MAX_WAIT = 20
-
-/**
- * Best model with strict structured output, then plain JSON mode (a model or
- * account without structured outputs), then the second model. A model out of
- * its minute quota is not asked again; when all of them are, and the quota
- * frees up within a few seconds, the relay waits and asks once more.
- */
-async function askGroq(req, env) {
-  const [main, second] = await pickGroqModels(env)
-  const tries = [[main, 'schema'], [main, 'json'], ...(second ? [[second, 'json'], [second, 'plain']] : [[main, 'plain']])]
-  const busy = new Map()
-  const notes = []
-  let last
-  for (const [model, mode] of tries) {
-    if (busy.has(model)) continue
-    last = await groqCall(req, env, model, mode)
-    if (last.status === 200 && last.text) return last
-    notes.push(`${model.replace(/^.*\//, '')} : ${last.status === 200 ? 'réponse illisible' : last.status}`)
-    if (last.status === 429) busy.set(model, last.wait ?? Infinity)
-    // A model that disappeared: list them again next time.
-    if (last.status === 404) groqModels = undefined
-    // A refused key will be refused again: no point retrying.
-    if (last.status === 401 || last.status === 403) break
-  }
-  const soonest = [...busy.entries()].sort((a, b) => a[1] - b[1])[0]
-  if (soonest && soonest[1] <= MAX_WAIT && busy.size === new Set(tries.map((t) => t[0])).size) {
-    await sleep(soonest[1] + 0.5)
-    const again = await groqCall(req, env, soonest[0], 'json')
-    if (again.status === 200 && again.text) return again
-    last = again
-  }
-  return { ...last, error: `Groq ${last.status} : ${last.error ?? 'réponse illisible'}${notes.length > 1 ? ` [${notes.join(', ')}]` : ''}` }
-}
-
-/*
- * Mistral (open models, French company): strict schema first, then plain
- * JSON mode, on the medium model then the small one.
- */
-async function mistralCall(req, env, model, strict) {
-  const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
-    body: JSON.stringify({
-      model,
-      temperature: 0,
-      max_tokens: 3000,
-      response_format: strict ? { type: 'json_schema', json_schema: { name: 'device', strict: true, schema: strictSchema(req.schema) } } : { type: 'json_object' },
-      messages: [
-        { role: 'system', content: strict ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
-        { role: 'user', content: `Data sheet extracts:\n${req.text}` },
-      ],
-    }),
-    signal: AbortSignal.timeout(60000),
-  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) }) }))
-  const data = await res.json().catch(() => ({}))
-  const content = data.choices?.[0]?.message?.content
-  const text = typeof content === 'string' ? content : Array.isArray(content) ? content.map((c) => c.text ?? '').join('') : ''
-  return { status: res.status, text: extractJson(text), error: res.ok ? undefined : String(data.message ?? data.detail ?? reason(data, res.status)).slice(0, 200) }
-}
-
-// Free keys do not reach every model: ask the account which ones it has.
-const MISTRAL_PREFERRED = ['mistral-medium-latest', 'mistral-large-latest', 'mistral-small-latest', 'ministral-14b-latest', 'magistral-medium-latest', 'ministral-8b-latest', 'open-mistral-nemo', 'ministral-3b-latest']
-let mistralModels
-
-export async function pickMistralModels(env) {
-  if (mistralModels?.key !== env.MISTRAL_API_KEY) {
-    const res = await fetch('https://api.mistral.ai/v1/models', { headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` } }).catch(() => null)
-    const data = res?.ok ? await res.json().catch(() => ({})) : {}
-    const list = Array.isArray(data.data) ? data.data.filter((m) => m?.capabilities?.completion_chat !== false).map((m) => String(m.id)) : []
-    if (list.length) mistralModels = { key: env.MISTRAL_API_KEY, list }
-  }
-  const available = mistralModels?.list ?? []
-  if (available.length === 0) return [env.MISTRAL_MODEL || 'mistral-medium-latest', 'mistral-small-latest']
-  return [...new Set([env.MISTRAL_MODEL, ...MISTRAL_PREFERRED])].filter((m) => m && available.includes(m)).slice(0, 3)
-}
-
-// Models that just said "rate limit": skipped for a minute instead of costing every analysis a wait.
-const mistralBusy = new Map()
-
-async function askMistral(req, env) {
-  const now = Date.now()
-  const all = await pickMistralModels(env)
-  const free = all.filter((m) => !(mistralBusy.get(m) > now))
-  const models = free.length ? free : all
-  if (models.length === 0) return { status: 404, error: 'Mistral : aucun modèle de discussion sur ce compte' }
-  const tries = models.flatMap((m) => [[m, true], [m, false]])
-  const busy = new Set()
-  let last
-  for (const [model, strict] of tries) {
-    if (busy.has(model)) continue
-    last = await mistralCall(req, env, model, strict)
-    // Free plan: one request a second. Busy for a moment: wait and ask again, once.
-    if (last.status === 429 && !/quota|month|capacity/i.test(last.error ?? '')) {
-      await sleep(1.5)
-      last = await mistralCall(req, env, model, strict)
-    }
-    if (last.status === 200 && last.text) return last
-    if (last.status === 401 || last.status === 403) break
-    // Out of quota: no use asking the same model without the schema; the small one has its own quota.
-    if (last.status === 429) {
-      busy.add(model)
-      mistralBusy.set(model, Date.now() + 60_000)
-    }
-    if (last.status === 404) mistralModels = undefined
-  }
-  return { ...last, error: `Mistral ${last.status} : ${last.error ?? 'réponse illisible'}` }
-}
-
-/** Gemini wants upper-case OpenAPI types. */
-function geminiSchema(s) {
-  if (Array.isArray(s)) return s.map(geminiSchema)
-  if (!s || typeof s !== 'object') return s
-  return Object.fromEntries(Object.entries(s).map(([k, v]) => [k, k === 'type' && typeof v === 'string' ? v.toUpperCase() : geminiSchema(v)]))
-}
-
-async function geminiCall(req, env, model) {
-  const parts = []
-  if (req.pdfBase64) parts.push({ inline_data: { mime_type: 'application/pdf', data: req.pdfBase64 } })
-  if (req.text) parts.push({ text: `Data sheet extracts${req.pdfBase64 ? ' (text layer of the PDF above)' : ''}:\n${req.text}` })
-  parts.push({ text: 'List the connectors of this device.' })
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: req.system }] },
-      contents: [{ role: 'user', parts }],
-      generationConfig: {
-        temperature: 0,
-        maxOutputTokens: 6000,
-        responseMimeType: 'application/json',
-        responseSchema: geminiSchema(req.schema),
-        // A short thinking pass: counts per channel, duplicates, options (Gemini 3 sets it by level).
-        thinkingConfig: /gemini-2\./.test(model) ? { thinkingBudget: 1024 } : { thinkingLevel: 'low' },
-      },
-    }),
-    signal: AbortSignal.timeout(60000),
-  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
-  const data = await res.json().catch(() => ({}))
-  const text = extractJson(data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join(''))
-  return { status: res.status, text, error: res.ok && text ? undefined : res.ok ? 'réponse illisible' : reason(data, res.status) }
-}
-
-// Google retires models for new accounts: ask the key which ones it has.
-let geminiModels
-
-/** Version of a model name: gemini-3.5-flash → 3.5; the "latest" aliases rank first. */
-const geminiVersion = (m) => (/latest/.test(m) ? 99 : Number(/gemini-(\d+(?:\.\d+)?)/.exec(m)?.[1] ?? 0))
-
-/** Best Flash model, then best Flash-Lite (its own, larger free quota); stable ones before previews. */
-export async function pickGeminiModels(env) {
-  if (geminiModels?.key !== env.GEMINI_API_KEY) {
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': env.GEMINI_API_KEY } }).catch(() => null)
-    const data = res?.ok ? await res.json().catch(() => ({})) : {}
-    const list = (Array.isArray(data.models) ? data.models : [])
-      .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
-      .map((m) => String(m.name).replace(/^models\//, ''))
-      .filter((m) => /^gemini-.*flash/.test(m) && !/tts|image|audio|live|thinking|exp|embed|8b/.test(m))
-    if (list.length) geminiModels = { key: env.GEMINI_API_KEY, list }
-  }
-  const list = geminiModels?.list ?? []
-  if (list.length === 0) return [env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-flash-lite-latest']
-  const best = (lite) =>
-    list
-      .filter((m) => /lite/.test(m) === lite)
-      .sort((a, b) => Number(/preview/.test(a)) - Number(/preview/.test(b)) || geminiVersion(b) - geminiVersion(a))[0]
-  return [...new Set([env.GEMINI_MODEL, best(false), best(true)].filter(Boolean))]
-}
-
-async function askGemini(req, env) {
-  let last
-  for (const model of await pickGeminiModels(env)) {
-    last = await geminiCall(req, env, model)
-    if (last.status === 200 && last.text) return last
-    // A model retired since the list was read: read it again next time.
-    if (last.status === 404) geminiModels = undefined
-    if (last.status === 401 || last.status === 403) break
-  }
-  return { ...last, error: `Gemini ${last.status} : ${last.error}` }
-}
-
-/* ---------- Shop pages (flight cases, racks) ---------- */
-
-const MAX_PAGE = 3_000_000
-const PAGE_LINES = /\d.*(?:cm|mm|kg|\bU\b|\bHE\b|\bRU\b|unit|dimension|abmessung|maße|taille|hauteur|largeur|profondeur|longueur|height|width|depth|length|höhe|breite|tiefe|länge|poids|weight|gewicht|19|rack)|roulette|wheel|castor|rollen|poignée|handle|griff|intérieur|interior|inner|innen|extérieur|exterior|outer|außen/i
-
-/** Public http(s) addresses only: no local names, no IP literals, no odd ports. */
+/** Only public web addresses: no local network, IP address or odd port. */
 export function pageUrl(raw) {
   let u
   try {
@@ -513,18 +99,47 @@ export function pageUrl(raw) {
   return u
 }
 
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', eacute: 'é', egrave: 'è', agrave: 'à', ccedil: 'ç', uuml: 'ü', ouml: 'ö', auml: 'ä', szlig: 'ß', times: '×' }
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', deg: '°', copy: '©', eacute: 'é', egrave: 'è', agrave: 'à', ccedil: 'ç', uuml: 'ü', ouml: 'ö', auml: 'ä', szlig: 'ß', times: '×' }
 const decode = (t) =>
   t.replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (m, e) =>
     e[0] === '#' ? String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (ENTITIES[e.toLowerCase()] ?? m),
   )
 
-/**
- * Title, product data (JSON-LD) and the useful lines of a page: by default
- * those about size, weight and wheels (cases); `lines: null` keeps every line
- * (data sheets, where the app picks the connector lines itself).
- */
-export function pageText(html, { lines: filter = PAGE_LINES, max = 12000 } = {}) {
+const MAX_FILE = 15_000_000
+
+/** Downloads a public page or file, at most MAX_FILE bytes. */
+async function download(raw) {
+  const url = pageUrl(raw)
+  if (!url) return { status: 400, error: 'Adresse refusée : collez le lien complet (https://…).' }
+  let res
+  try {
+    res = await fetch(url, {
+      headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml,application/pdf;q=0.9,image/*;q=0.8,*/*;q=0.5', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000),
+    })
+  } catch {
+    return { status: 502, error: 'Site injoignable (ou trop lent).' }
+  }
+  if (!res.ok) return { status: 502, error: `Le site a refusé la lecture (${res.status}) : téléchargez le document vous-même et déposez-le.` }
+  if (Number(res.headers.get('Content-Length')) > MAX_FILE) return { status: 413, error: 'Document trop lourd : téléchargez-le vous-même et déposez-le.' }
+  const bytes = new Uint8Array(await res.arrayBuffer())
+  if (bytes.length > MAX_FILE) return { status: 413, error: 'Document trop lourd : téléchargez-le vous-même et déposez-le.' }
+  return { status: 200, bytes, type: res.headers.get('Content-Type') ?? '', url: res.url || url.href }
+}
+
+/** What a file really is, from its first bytes (servers often say "octet-stream"). */
+function sniff(b) {
+  if (b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46) return 'application/pdf'
+  if (b[0] === 0xff && b[1] === 0xd8) return 'image/jpeg'
+  if (b[0] === 0x89 && b[1] === 0x50) return 'image/png'
+  if (b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return 'image/webp'
+  if (b[0] === 0x47 && b[1] === 0x49) return 'image/gif'
+  return ''
+}
+
+/** Every line of a page worth reading: title, description, product data, then the text. */
+export function pageText(html) {
   const title = decode(html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)?.[1] ?? html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '').trim()
   const description = decode(html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)?.[1] ?? '').trim()
   const products = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)]
@@ -532,7 +147,7 @@ export function pageText(html, { lines: filter = PAGE_LINES, max = 12000 } = {})
     .filter((j) => /product/i.test(j))
     .map((j) => j.replace(/\s+/g, ' ').slice(0, 3000))
   const body = html
-    .replace(/<(script|style|noscript|svg|template|iframe)\b[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<(script|style|noscript|svg|template|iframe|nav|footer|header)\b[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<\/?(?:br|p|li|tr|div|h\d|dt|dd|section|article|table|ul|ol)\b[^>]*>/gi, '\n')
     .replace(/<\/t[dh]>/gi, ' | ')
     .replace(/<[^>]+>/g, ' ')
@@ -540,254 +155,17 @@ export function pageText(html, { lines: filter = PAGE_LINES, max = 12000 } = {})
   const lines = []
   for (const raw of decode(body).split('\n')) {
     const line = raw.replace(/\s+/g, ' ').replace(/(?:\s*\|\s*)+$/, '').trim()
-    if (line.length < 3 || line.length > 300 || seen.has(line) || (filter && !filter.test(line))) continue
+    if (line.length < 3 || line.length > 400 || seen.has(line)) continue
     seen.add(line)
     lines.push(line)
   }
   const text = [title && `Titre : ${title}`, description && `Description : ${description}`, ...products.map((p) => `Données produit : ${p}`), ...lines].filter(Boolean).join('\n')
-  return { title, text: text.slice(0, max) }
-}
-
-const UA = 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound tools; +https://arnisoundtools.com)'
-
-/** Downloads a public page or file, at most `limit` bytes. */
-async function download(raw, limit) {
-  const url = pageUrl(raw)
-  if (!url) return { status: 400, error: 'Adresse refusée : collez le lien complet (https://…).' }
-  let res
-  try {
-    res = await fetch(url, {
-      headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.5', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
-      redirect: 'follow',
-      signal: AbortSignal.timeout(12000),
-    })
-  } catch {
-    return { status: 502, error: 'Site injoignable (ou trop lent).' }
-  }
-  if (!res.ok) return { status: 502, error: `Le site a refusé la lecture (${res.status}) : téléchargez le document vous-même et déposez-le.` }
-  const reader = res.body.getReader()
-  const chunks = []
-  let size = 0
-  for (;;) {
-    const { done, value } = await reader.read()
-    if (done) break
-    size += value.length
-    if (size > limit) {
-      await reader.cancel()
-      return { status: 413, error: 'Document trop lourd : téléchargez-le vous-même et déposez-le.' }
-    }
-    chunks.push(value)
-  }
-  const bytes = new Uint8Array(await new Blob(chunks).arrayBuffer())
-  const type = res.headers.get('Content-Type') ?? ''
-  const pdf = /pdf/i.test(type) || (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46)
-  return { status: 200, bytes, pdf, html: !pdf && /html|text/i.test(type) }
-}
-
-async function readPage(raw) {
-  const r = await download(raw, MAX_PAGE)
-  if (r.status !== 200) return r
-  if (!r.html) return { status: 415, error: 'Ce lien n’est pas une page web.' }
-  const page = pageText(new TextDecoder().decode(r.bytes))
-  if (!page.text.trim()) return { status: 422, error: 'Rien de lisible sur cette page : copiez plutôt son texte.' }
-  return { status: 200, data: page }
-}
-
-/* ---------- Finding a product's documentation ---------- */
-
-const MAX_DOC = 15_000_000
-const SHOPS = /amazon|ebay|thomann|woodbrass|musicstore|bax-shop|sweetwater|fnac|cdiscount|leboncoin|aliexpress|manualslib|manua\.ls|scribd|pinterest|facebook|youtube|reddit|gearspace|audiofanzine/i
-
-const words = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()
-
-// Where brand groups keep the manuals of their brands (Alto, Akai and Numark on inMusic's, Behringer and Midas on Music Tribe's...).
-const MAKER_CDNS = /inmusicbrands|musictribe|harman|yamaha|steinberg|sennheiser|shure|allen-heath|audio-technica|rolandcdn|roland|boss\.info|pioneerdj|alphatheta|adamhall|ldsystems|dbaudio|l-acoustics|nexo-sa|robe|claypaky|martin\.com|chauvet|avid|focusrite|presonus|qsc|electro-voice|bosch|telex|rcf|fbt|kvgroup|kv2audio|digico|soundcraft|crownaudio|akg|dbx|bss/i
-const MANUAL = /user'?s? ?(?:guide|manual)|owner'?s? manual|instruction manual|reference manual|operation manual|bedienungsanleitung|mode d.emploi|manuel|handbuch|\bmanual\b|guide/i
-const SHEET = /data ?sheet|spec(?:ification)?s?(?: sheet)?|fiche technique|datenblatt|technical data/i
-const QUICK = /quick ?start|qsg|getting started/i
-
-/**
- * Official site (or the maker group's file servers) first, then the
- * documents that describe the panels: user guide or manual above data
- * sheet above quick start, PDF above page, the exact model above the
- * range; shops and forums last.
- */
-export function rankDocs(found, brand, model) {
-  const b = words(brand).split(' ').filter((w) => w.length >= 3)
-  const m = words(model).replace(/ /g, '')
-  const seen = new Set()
-  const out = []
-  for (const f of found) {
-    const url = pageUrl(f.url)
-    if (!url) continue
-    const key = url.href.replace(/[#?].*$/, '')
-    if (seen.has(key)) continue
-    seen.add(key)
-    const host = url.hostname.replace(/^www\./, '')
-    const label = `${f.title ?? ''} ${decodeURIComponent(url.pathname)}`
-    const hay = words(label).replace(/ /g, '')
-    const pdf = /\.pdf($|\?)/i.test(url.pathname) || f.pdf === true
-    const exact = m.length >= 2 && hay.includes(m)
-    const shop = SHOPS.test(host)
-    const official = !shop && (b.some((w) => host.replace(/[^a-z0-9]/g, '').includes(w)) || (pdf && exact && MAKER_CDNS.test(host)))
-    const doc = QUICK.test(label) ? 'quickstart' : MANUAL.test(label) ? 'manual' : SHEET.test(label) ? 'datasheet' : undefined
-    const score =
-      (official ? 4 : 0) + (exact ? 3 : 0) + (pdf ? 2 : 0) + (doc === 'manual' ? 3 : doc === 'datasheet' ? 2 : doc === 'quickstart' ? 1 : 0) - (shop ? 3 : 0) - (!exact && pdf ? 2 : 0)
-    out.push({ title: String(f.title || host).slice(0, 140), url: url.href, host, kind: pdf ? 'pdf' : 'page', official, exact, ...(doc ? { doc } : {}), score })
-  }
-  return out.sort((x, y) => y.score - x.score).slice(0, 8)
-}
-
-/** DuckDuckGo's HTML results (two addresses): no key, but it may turn robots away. */
-async function searchDuckDuckGo(q) {
-  const parse = (html) =>
-    [...html.matchAll(/<a[^>]+href="([^"]+)"[^>]*class=['"]?result(?:__a|-link)['"]?[^>]*>([\s\S]*?)<\/a>|<a[^>]+class=['"]?result(?:__a|-link)['"]?[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].map((x) => {
-      const u = decode(x[1] ?? x[3])
-      const real = u.includes('uddg=') ? decodeURIComponent(u.split('uddg=')[1].split('&')[0]) : u.startsWith('//') ? `https:${u}` : u
-      return { url: real, title: decode((x[2] ?? x[4]).replace(/<[^>]+>/g, '')).trim() }
-    })
-  let last = 'aucun résultat'
-  for (const base of ['https://html.duckduckgo.com/html/', 'https://lite.duckduckgo.com/lite/']) {
-    const res = await fetch(base, {
-      method: 'POST',
-      headers: { 'User-Agent': UA, 'Accept-Language': 'fr,en;q=0.8', 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `q=${encodeURIComponent(q)}`,
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!res.ok) {
-      last = `HTTP ${res.status}`
-      continue
-    }
-    const found = parse(await res.text())
-    if (found.length) return found
-    last = 'page sans résultats (anti-robot)'
-  }
-  throw new Error(`DuckDuckGo : ${last}`)
-}
-
-const urlsIn = (text) => [...String(text).matchAll(/https?:\/\/[^\s"'<>\\)\]]+/g)].map((m) => m[0].replace(/[.,;:]+$/, ''))
-
-/**
- * Groq searches the web itself: built-in "browser search" of the gpt-oss
- * models, or the compound models where the account has them.
- */
-async function searchGroq(q, env) {
-  // Only the models this account has (compound ones are not on every account).
-  const available = await groqAvailable(env).catch(() => [])
-  const models = [...new Set([env.GROQ_SEARCH_MODEL, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'])].filter((m) => m && (!available.length || available.includes(m)))
-  const prompt = `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. Give the PDF user guide (owner's manual), the PDF data sheet and the product page on the manufacturer's website or its file server, one URL per line with its title. Only real URLs you found.`
-  const notes = []
-  for (const model of models) {
-    const compound = model.startsWith('groq/compound')
-    const ask = () =>
-      fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: prompt }],
-          ...(compound ? {} : { tools: [{ type: 'browser_search' }], tool_choice: 'required', reasoning_effort: 'low' }),
-        }),
-        signal: AbortSignal.timeout(25000),
-      })
-    let res = await ask()
-    let data = await res.json().catch(() => ({}))
-    // The pages read count in the minute quota: when it frees up soon, wait once.
-    const wait = res.status === 429 && /try again in (?:(\d+)m)?([\d.]+)s/i.exec(reason(data, 429))
-    if (wait && Number(wait[1] ?? 0) * 60 + Number(wait[2]) <= 12) {
-      await sleep(Number(wait[1] ?? 0) * 60 + Number(wait[2]) + 0.5)
-      res = await ask()
-      data = await res.json().catch(() => ({}))
-    }
-    if (!res.ok) {
-      notes.push(`${model.replace(/^.*\//, '')} : ${reason(data, res.status).slice(0, 80)}`)
-      // A missing model or tool: try the next one; a refused key will be refused again.
-      if (res.status === 401 || res.status === 403) break
-      continue
-    }
-    const msg = data.choices?.[0]?.message ?? {}
-    const tools = msg.executed_tools ?? []
-    const fromTools = tools.flatMap((t) => t.search_results?.results ?? []).map((r) => ({ url: r.url, title: r.title }))
-    const found = [...fromTools, ...urlsIn(JSON.stringify(tools)).map((url) => ({ url })), ...urlsIn(msg.content ?? '').map((url) => ({ url }))]
-    if (found.length) return found
-    notes.push(`${model.replace(/^.*\//, '')} : aucune adresse dans la réponse`)
-  }
-  throw new Error(`Groq : ${notes.join(' | ') || 'aucun modèle'}`)
-}
-
-/** Bing's RSS results: no key, and often open when DuckDuckGo turns robots away. */
-async function searchBing(q) {
-  const res = await fetch(`https://www.bing.com/search?format=rss&setlang=fr&q=${encodeURIComponent(q)}`, {
-    headers: { 'User-Agent': UA, 'Accept-Language': 'fr,en;q=0.8' },
-    signal: AbortSignal.timeout(8000),
-  })
-  if (!res.ok) throw new Error(`Bing : HTTP ${res.status}`)
-  const xml = await res.text()
-  const found = [...xml.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)].map((m) => ({
-    url: decode(m[2].replace(/<!\[CDATA\[|\]\]>/g, '').trim()),
-    title: decode(m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim()),
-  }))
-  if (!found.length) throw new Error('Bing : page sans résultats')
-  return found
-}
-
-/** Gemini grounded on Google Search: the sources it read are the results. */
-async function searchGemini(q, env) {
-  const model = env.GEMINI_SEARCH_MODEL || (await pickGeminiModels(env))[0]
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: `Find the official manufacturer documentation (product page and PDF data sheet or manual) of: ${q}. Give the URLs.` }] }],
-      tools: [{ google_search: {} }],
-    }),
-    signal: AbortSignal.timeout(20000),
-  })
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(`Gemini : ${model} : ${reason(data, res.status)}`)
-  const cand = data.candidates?.[0] ?? {}
-  const chunks = (cand.groundingMetadata?.groundingChunks ?? []).map((c) => c.web).filter(Boolean)
-  // Google hands redirect links: follow each one to the real address.
-  const real = await Promise.all(
-    chunks.slice(0, 8).map(async (w) => {
-      try {
-        const r = await fetch(w.uri, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(5000) })
-        return { url: r.headers.get('Location') || w.uri, title: w.title }
-      } catch {
-        return { url: w.uri, title: w.title }
-      }
-    }),
-  )
-  const text = (cand.content?.parts ?? []).map((p) => p.text ?? '').join('')
-  return [...real, ...urlsIn(text).map((url) => ({ url }))]
-}
-
-/** POST /find {brand, model}: the documents found, best first. Nothing is read yet. */
-async function findDocs(body, env) {
-  const brand = String(body?.brand ?? '').trim().slice(0, 60)
-  const model = String(body?.model ?? '').trim().slice(0, 80)
-  if (!model) return { status: 400, error: 'Indiquez au moins le modèle.' }
-  const q = `${brand} ${model}`.trim()
-  // The manual describes every socket of the panels: searched for by name, as the data sheet.
-  const searches = [
-    searchDuckDuckGo(`${q} user guide pdf`),
-    searchDuckDuckGo(`${q} datasheet specifications`),
-    searchBing(`${q} user guide manual pdf`),
-    searchBing(`${q} datasheet pdf`),
-  ]
-  if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
-  // Google's search grounding has its own small free quota: kept for the analysis unless asked for.
-  if (env.GEMINI_API_KEY && env.GEMINI_SEARCH === 'on') searches.push(searchGemini(q, env))
-  const found = (await Promise.allSettled(searches)).flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  const results = rankDocs(found, brand, model)
-  if (results.length === 0) return { status: 404, error: 'Aucun document trouvé : vérifiez l’orthographe, ou déposez la fiche vous-même.' }
-  return { status: 200, data: { results } }
+  return { title, text: text.slice(0, 40000) }
 }
 
 /**
  * Product photos of a page, best first: the share image (og:image), the
  * product data (JSON-LD), then pictures whose name or caption cites the model.
- * Logos, icons and flags are left out.
  */
 export function pageImages(html, base, model = '') {
   const abs = (u) => {
@@ -808,11 +186,9 @@ export function pageImages(html, base, model = '') {
     for (const x of block[1].matchAll(/"image"\s*:\s*(\[[^\]]*\]|\{[^}]*\}|"[^"]+")/g)) for (const u of x[1].matchAll(/"(https?:[^"]+|\/[^"]+)"/g)) found.push(u[1].replace(/\\\//g, '/'))
   }
   for (const x of html.matchAll(/<img\b[^>]*>/gi)) {
-    const tag = x[0]
-    const src = tag.match(/\s(?:data-src|data-lazy-src|src)=["']([^"']+)["']/i)?.[1]
-    const alt = tag.match(/\salt=["']([^"']*)["']/i)?.[1] ?? ''
-    if (!src || src.startsWith('data:')) continue
-    if (m.length >= 2 && words(`${alt} ${src}`).replace(/ /g, '').includes(m)) found.push(src)
+    const src = x[0].match(/\s(?:data-src|data-lazy-src|src)=["']([^"']+)["']/i)?.[1]
+    const alt = x[0].match(/\salt=["']([^"']*)["']/i)?.[1] ?? ''
+    if (src && !src.startsWith('data:') && m.length >= 2 && words(`${alt} ${src}`).replace(/ /g, '').includes(m)) found.push(src)
   }
   const out = []
   for (const u of found) {
@@ -822,18 +198,15 @@ export function pageImages(html, base, model = '') {
   return out.slice(0, 6)
 }
 
-const DOC_GOOD = /user'?s? ?(?:guide|manual)|owner'?s? manual|manual|mode d.emploi|notice|bedienungsanleitung|handbuch|data ?sheet|spec(?:ification)?s? ?sheet|fiche technique|datenblatt|quick ?start|technical (?:data|specifications)/i
-const DOC_BAD = /firmware|driver|software|update|warranty|garantie|declaration|conformity|safety|sicherheit|rohs|weee|recall|catalog|brochure|press|news/i
+const MANUAL = /user'?s? ?(?:guide|manual)|owner'?s? manual|instruction manual|reference manual|operation manual|bedienungsanleitung|mode d.emploi|manuel|handbuch|notice|\bmanual\b|\bguide\b/i
+const SHEET = /data ?sheet|spec(?:ification)?s?(?: sheet)?|fiche technique|datenblatt|technical data/i
+const QUICK = /quick ?start|\bqsg\b|getting started/i
+const NOT_DOC = /firmware|driver|software|update|warranty|garantie|declaration|conformity|safety|sicherheit|rohs|weee|recall|catalog|brochure|press|news/i
+const docKind = (label) => (QUICK.test(label) ? 'quickstart' : MANUAL.test(label) ? 'manual' : SHEET.test(label) ? 'datasheet' : undefined)
 
-/**
- * The documents a product page links to, best first: the user guide or
- * manual (it describes every connector of the panels), then the data
- * sheet, then the quick start guide. Firmware, drivers, warranty and legal
- * papers are left out.
- */
+/** The documents a page links to (user guide, data sheet…); firmware, drivers and legal papers left out. */
 export function pageDocs(html, base) {
   const out = []
-  const seen = new Set()
   for (const m of html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
     const label = decode(m[2].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim()
     let url
@@ -842,190 +215,475 @@ export function pageDocs(html, base) {
     } catch {
       continue
     }
-    if (!/^https?:$/.test(url.protocol) || seen.has(url.href)) continue
+    const both = `${label} ${decodeURIComponent(url.pathname)}`
     const pdf = /\.pdf($|\?)/i.test(url.pathname)
-    const named = DOC_GOOD.test(label) || DOC_GOOD.test(url.pathname)
-    if (!(pdf || named) || DOC_BAD.test(label) || DOC_BAD.test(url.pathname)) continue
-    // A labelled manual link may lead to a viewer page: kept only when it is a PDF or clearly a manual.
-    if (!pdf && !DOC_GOOD.test(label)) continue
-    seen.add(url.href)
-    const kind = /quick ?start/i.test(label + url.pathname) ? 1 : /data ?sheet|spec|fiche|datenblatt|technical/i.test(label + url.pathname) ? 2 : /guide|manual|emploi|notice|anleitung|handbuch/i.test(label + url.pathname) ? 3 : 0
-    out.push({ url: url.href, title: label.slice(0, 120) || url.pathname.split('/').pop(), score: kind * 2 + (pdf ? 1 : 0) })
+    if (!/^https?:$/.test(url.protocol) || out.some((d) => d.url === url.href) || NOT_DOC.test(both)) continue
+    // A manual link that is not a PDF must say so in its label (it may lead to a viewer page).
+    if (!(pdf ? docKind(both) || /\.pdf/i.test(url.pathname) : docKind(label))) continue
+    out.push({ url: url.href, title: label.slice(0, 120) || url.pathname.split('/').pop(), pdf, doc: docKind(both) })
   }
-  return out
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .map(({ url, title }) => ({ url, title }))
+  const rank = (d) => (d.doc === 'manual' ? 6 : d.doc === 'datasheet' ? 4 : d.doc === 'quickstart' ? 2 : 0) + (d.pdf ? 1 : 0)
+  return out.sort((a, b) => rank(b) - rank(a)).slice(0, 5)
 }
 
-/** POST /doc {url, model}: the PDF as is (the app reads it), or the text, photos and linked documents of a page. */
-async function readDoc(body) {
-  const r = await download(body?.url, MAX_DOC)
+/** POST /read {url, model?}: a PDF or an image as it is; a page as its text, photos and documents. */
+async function read(body) {
+  const r = await download(body?.url)
   if (r.status !== 200) return r
-  if (r.pdf) return { status: 200, pdf: r.bytes }
-  if (!r.html) return { status: 415, error: 'Ce document n’est ni un PDF ni une page web.' }
+  const type = sniff(r.bytes) || (/html|text/i.test(r.type) ? 'text/html' : '')
+  if (type === 'application/pdf' || type.startsWith('image/')) return { status: 200, file: r.bytes, type }
+  if (type !== 'text/html') return { status: 415, error: 'Ce lien n’est ni une page web, ni un PDF, ni une image.' }
   const html = new TextDecoder().decode(r.bytes)
-  const page = pageText(html, { lines: null, max: 20000 })
-  return { status: 200, data: { ...page, images: pageImages(html, body.url, body.model), docs: pageDocs(html, body.url) } }
+  return { status: 200, data: { ...pageText(html), url: r.url, images: pageImages(html, r.url, body.model), docs: pageDocs(html, r.url) } }
 }
 
-/** POST /images {url, model}: only the photos of a product page (when the document read was a PDF). */
-async function readImages(body) {
-  const r = await download(body?.url, MAX_PAGE)
-  if (r.status !== 200) return r
-  if (!r.html) return { status: 200, data: { images: [] } }
-  return { status: 200, data: { images: pageImages(new TextDecoder().decode(r.bytes), body.url, body.model) } }
-}
+/* ---------- Finding a product's documents ---------- */
 
-const MAX_IMAGE = 4_000_000
-const IMAGE_TYPES = /^image\/(jpeg|png|webp|gif|avif)/i
-
-/** POST /image {url}: one photo, for the app to shrink into a thumbnail. */
-async function readImage(body) {
-  const r = await download(body?.url, MAX_IMAGE)
-  if (r.status !== 200) return r
-  const b = r.bytes
-  const type = b[0] === 0xff && b[1] === 0xd8 ? 'image/jpeg' : b[0] === 0x89 && b[1] === 0x50 ? 'image/png' : b[8] === 0x57 && b[9] === 0x45 ? 'image/webp' : b[0] === 0x47 && b[1] === 0x49 ? 'image/gif' : ''
-  if (!type || !IMAGE_TYPES.test(type)) return { status: 415, error: 'Ce lien n’est pas une image.' }
-  return { status: 200, image: b, type }
-}
-
-/** GET /diagnostic: tries each configured key on a tiny request. */
-/** A diagnostic check that gives up after a while instead of holding the whole page. */
-const within = (seconds, work) => Promise.race([work, sleep(seconds).then(() => 'ERREUR : pas de réponse en ' + seconds + ' s')])
+const SHOPS = /amazon|ebay|thomann|woodbrass|musicstore|bax-shop|sweetwater|fnac|cdiscount|leboncoin|aliexpress|manualslib|manua\.ls|scribd|pinterest|facebook|youtube|reddit|gearspace|audiofanzine|reverb\.com|newegg/i
+// Where brand groups keep their brands' manuals (Alto and Akai at inMusic, Behringer and Midas at Music Tribe…).
+const MAKER_FILES = /inmusicbrands|musictribe|harman|yamaha|steinberg|sennheiser|shure|allen-heath|audio-technica|roland|pioneerdj|alphatheta|adamhall|dbaudio|l-acoustics|nexo-sa|robe|claypaky|chauvet|focusrite|presonus|qsc|electro-voice|bosch|rcf|digico|soundcraft|akg|bss/i
 
 /**
- * GET /diagnostic: tries each configured key on a tiny request, every
- * service at the same time (Mistral's models one after the other, its free
- * plan takes one request a second), each check limited in time.
+ * Best first: the maker's own site or file server, the exact model, the
+ * user guide (it describes every socket) above the data sheet above the
+ * quick start, PDF above page. Shops, forums and other models last.
  */
+export function rankDocs(found, brand, model) {
+  const b = words(brand).split(' ').filter((w) => w.length >= 3)
+  const m = words(model).replace(/ /g, '')
+  const out = []
+  for (const f of found) {
+    const url = pageUrl(f.url)
+    if (!url) continue
+    const key = url.href.replace(/[#?].*$/, '')
+    if (out.some((o) => o.key === key)) continue
+    const host = url.hostname.replace(/^www\./, '')
+    const label = `${f.title ?? ''} ${decodeURIComponent(url.pathname)}`
+    const pdf = /\.pdf($|\?)/i.test(url.pathname)
+    const exact = m.length >= 2 && words(label).replace(/ /g, '').includes(m)
+    const shop = SHOPS.test(host)
+    const official = !shop && (b.some((w) => host.replace(/[^a-z0-9]/g, '').includes(w)) || (pdf && exact && MAKER_FILES.test(host)))
+    const doc = docKind(label)
+    const score = (official ? 4 : 0) + (exact ? 4 : pdf ? -3 : 0) + (pdf ? 2 : 0) + (doc === 'manual' ? 3 : doc === 'datasheet' ? 2 : doc === 'quickstart' ? 1 : 0) - (shop ? 4 : 0)
+    out.push({ key, title: String(f.title || host).slice(0, 140), url: url.href, host, kind: pdf ? 'pdf' : 'page', official, exact, ...(doc ? { doc } : {}), score })
+  }
+  return out
+    .sort((x, y) => y.score - x.score)
+    .slice(0, 8)
+    .map(({ key: _key, ...d }) => d)
+}
+
+/** Bing's RSS results: no key needed. */
+async function searchBing(q) {
+  const res = await fetch(`https://www.bing.com/search?format=rss&setlang=en&q=${encodeURIComponent(q)}`, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(8000) })
+  if (!res.ok) throw new Error(`Bing : HTTP ${res.status}`)
+  const clean = (t) => decode(t.replace(/<!\[CDATA\[|\]\]>/g, '').trim())
+  const found = [...(await res.text()).matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)].map((m) => ({ url: clean(m[2]), title: clean(m[1]) }))
+  if (!found.length) throw new Error('Bing : aucun résultat')
+  return found
+}
+
+/** DuckDuckGo's HTML results: no key needed, but it may turn robots away. */
+async function searchDuckDuckGo(q) {
+  const res = await fetch('https://html.duckduckgo.com/html/', {
+    method: 'POST',
+    headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `q=${encodeURIComponent(q)}`,
+    signal: AbortSignal.timeout(8000),
+  })
+  if (!res.ok) throw new Error(`DuckDuckGo : HTTP ${res.status}`)
+  const found = [...(await res.text()).matchAll(/<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>|<a[^>]+href="([^"]+)"[^>]+class="result__a"[^>]*>([\s\S]*?)<\/a>/g)].map((x) => {
+    const u = decode(x[1] ?? x[3])
+    return { url: u.includes('uddg=') ? decodeURIComponent(u.split('uddg=')[1].split('&')[0]) : u.startsWith('//') ? `https:${u}` : u, title: decode((x[2] ?? x[4]).replace(/<[^>]+>/g, '')).trim() }
+  })
+  if (!found.length) throw new Error('DuckDuckGo : page sans résultats (anti-robot)')
+  return found
+}
+
+/** Groq's gpt-oss models search the web themselves (built-in browser search). */
+async function searchGroq(q, env) {
+  const model = (await modelsOf(SERVICES.groq, env)).find((m) => m.startsWith('openai/gpt-oss')) ?? 'openai/gpt-oss-120b'
+  const res = await fetch(SERVICES.groq.chat, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+    body: JSON.stringify({
+      model,
+      reasoning_effort: 'low',
+      tools: [{ type: 'browser_search' }],
+      tool_choice: 'required',
+      messages: [
+        {
+          role: 'user',
+          content: `Find the official documents of this product: ${q}. Give the PDF user guide (owner's manual), the PDF data sheet and the product page, on the manufacturer's website or file server. One URL per line with its title. Only URLs you found.`,
+        },
+      ],
+    }),
+    signal: AbortSignal.timeout(30000),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(`Groq : ${reason(data, res.status)}`)
+  const msg = data.choices?.[0]?.message ?? {}
+  const fromTools = (msg.executed_tools ?? []).flatMap((t) => t.search_results?.results ?? []).map((r) => ({ url: r.url, title: r.title }))
+  const inText = [...String(msg.content ?? '').matchAll(/https?:\/\/[^\s"'<>\\)\]]+/g)].map((m) => ({ url: m[0].replace(/[.,;:]+$/, '') }))
+  return [...fromTools, ...inText]
+}
+
+/** POST /find {brand, model}: the documents found, best first. */
+async function find(body, env) {
+  const brand = String(body?.brand ?? '').trim().slice(0, 60)
+  const model = String(body?.model ?? '').trim().slice(0, 80)
+  if (!model) return { status: 400, error: 'Indiquez au moins le modèle.' }
+  const q = `${brand} ${model}`.trim()
+  const searches = [searchBing(`${q} user guide pdf`), searchBing(`${q} specifications`), searchDuckDuckGo(`${q} user guide pdf`)]
+  if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
+  const found = (await Promise.allSettled(searches)).flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  const results = rankDocs(found, brand, model)
+  if (!results.length) return { status: 404, error: 'Aucun document trouvé : vérifiez l’orthographe, ou déposez la fiche vous-même.' }
+  return { status: 200, data: { results } }
+}
+
+/* ---------- Reading a PDF with its tables: Mistral OCR ---------- */
+
+/** POST /ocr {url}: the PDF read by Mistral OCR, as Markdown (tables kept), first 30 pages. */
+async function ocr(body, env) {
+  if (!env.MISTRAL_API_KEY) return { status: 501, error: 'OCR indisponible (pas de clé Mistral).' }
+  const url = pageUrl(body?.url)
+  if (!url) return { status: 400, error: 'Adresse refusée.' }
+  const ask = () =>
+    fetch('https://api.mistral.ai/v1/ocr', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
+      body: JSON.stringify({ model: 'mistral-ocr-latest', document: { type: 'document_url', document_url: url.href }, pages: Array.from({ length: 30 }, (_, i) => i) }),
+      signal: AbortSignal.timeout(90000),
+    })
+  let res = await ask()
+  // One request a second on the free plan.
+  if (res.status === 429) {
+    await sleep(2)
+    res = await ask()
+  }
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) return { status: res.status === 429 ? 429 : 502, error: `OCR : ${reason(data, res.status)}` }
+  const text = (data.pages ?? []).map((p) => p.markdown ?? '').join('\n\n').slice(0, 150000)
+  return text.trim() ? { status: 200, data: { text, pages: (data.pages ?? []).length } } : { status: 422, error: 'OCR : document vide.' }
+}
+
+/* ---------- Data sheet analysis ---------- */
+
+/** Only the data sheet analyses SynopGig builds go through: the keys cannot be used for anything else. */
+export function cleanRequest(body) {
+  if (!body || typeof body !== 'object' || body.v !== 2) return null
+  const { system, schema, text, fullText, pdfBase64 } = body
+  if (typeof system !== 'string' || !system.startsWith(PROMPT_START) || system.length > 20000) return null
+  if (!schema || typeof schema !== 'object' || JSON.stringify(schema).length > 20000) return null
+  const hasText = typeof text === 'string' && text.trim().length > 0 && text.length <= 24000
+  const hasPdf = typeof pdfBase64 === 'string' && pdfBase64.length > 0 && pdfBase64.length <= 11_000_000
+  if (!hasText && !hasPdf) return null
+  // Gemini reads far more per minute than the others: it may get a longer extract.
+  const long = typeof fullText === 'string' && fullText.length <= 150_000 ? fullText : undefined
+  return { system, schema, text: hasText ? text : undefined, fullText: long, pdfBase64: hasPdf ? pdfBase64 : undefined, single: body.single === true }
+}
+
+/** First JSON object of a reply, for models that wrap it in text. */
+function extractJson(text) {
+  if (typeof text !== 'string') return undefined
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start < 0 || end <= start) return undefined
+  try {
+    return JSON.stringify(JSON.parse(text.slice(start, end + 1)))
+  } catch {
+    return undefined
+  }
+}
+
+/** Strict structured output: every property required, the optional ones nullable, no extra key. */
+export function strictSchema(s) {
+  if (!s || typeof s !== 'object' || Array.isArray(s)) return s
+  if (s.type === 'array') return { ...s, items: strictSchema(s.items) }
+  if (s.type !== 'object') return s
+  const required = new Set(s.required ?? [])
+  const properties = Object.fromEntries(
+    Object.entries(s.properties ?? {}).map(([k, v]) => {
+      const inner = strictSchema(v)
+      return [k, required.has(k) ? inner : { ...inner, type: [inner.type, 'null'], ...(inner.enum ? { enum: [...inner.enum, null] } : {}) }]
+    }),
+  )
+  return { type: 'object', properties, required: Object.keys(properties), additionalProperties: false }
+}
+
+/** The schema in a few words, for plain JSON mode (the code lists are already in the prompt). */
+export function shape(s) {
+  if (!s || typeof s !== 'object') return 'any'
+  if (s.enum) return s.enum.length > 8 ? 'code' : s.enum.map((v) => JSON.stringify(v)).join('|')
+  if (s.type === 'array') return `[${shape(s.items)}, ...]`
+  if (s.type === 'object') {
+    const req = new Set(s.required ?? [])
+    return `{${Object.entries(s.properties ?? {}).map(([k, v]) => `"${k}":${shape(v)}${req.has(k) ? '' : '?'}`).join(',')}}`
+  }
+  return String(s.type)
+}
+
+/*
+ * The text services, all OpenAI-compatible. Each account lists its own
+ * models (free plans do not reach all of them): the best available ones are
+ * used, in the order below.
+ */
+export const SERVICES = {
+  groq: {
+    name: 'groq',
+    key: 'GROQ_API_KEY',
+    chat: 'https://api.groq.com/openai/v1/chat/completions',
+    models: 'https://api.groq.com/openai/v1/models',
+    preferred: ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'moonshotai/kimi-k2-instruct', 'qwen/qwen3-32b', 'openai/gpt-oss-20b'],
+    strict: true,
+  },
+  mistral: {
+    name: 'mistral',
+    key: 'MISTRAL_API_KEY',
+    chat: 'https://api.mistral.ai/v1/chat/completions',
+    models: 'https://api.mistral.ai/v1/models',
+    preferred: ['mistral-medium-latest', 'mistral-large-latest', 'mistral-small-latest', 'ministral-14b-latest', 'ministral-8b-latest'],
+    strict: true,
+  },
+  zai: {
+    name: 'zai',
+    key: 'ZAI_API_KEY',
+    chat: 'https://api.z.ai/api/paas/v4/chat/completions',
+    preferred: ['glm-4.7-flash', 'glm-4.5-flash'],
+    strict: false,
+  },
+}
+
+const known = new Map()
+
+/** The models an account can use, best first (asked once per key). */
+async function modelsOf(service, env) {
+  const key = env[service.key]
+  const own = env[`${service.name.toUpperCase()}_MODEL`]
+  if (!service.models) return [...new Set([own, ...service.preferred].filter(Boolean))]
+  if (known.get(service.name)?.key !== key) {
+    const res = await fetch(service.models, { headers: { Authorization: `Bearer ${key}` } }).catch(() => null)
+    const data = res?.ok ? await res.json().catch(() => ({})) : {}
+    const list = Array.isArray(data.data) ? data.data.map((m) => String(m.id)) : []
+    if (list.length) known.set(service.name, { key, list })
+  }
+  const list = known.get(service.name)?.key === key ? known.get(service.name).list : undefined
+  if (!list) return [...new Set([own, ...service.preferred].filter(Boolean))].slice(0, 2)
+  return [...new Set([own, ...service.preferred])].filter((m) => m && list.includes(m))
+}
+
+// Models that just said "rate limit": skipped for a minute.
+const busyUntil = new Map()
+
+/** One answer on one model: mode 'schema' (strict structured output) or 'json'. */
+async function chat(service, req, env, model, mode) {
+  const thinks = /gpt-oss|qwen3|glm/.test(model)
+  const res = await fetch(service.chat, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env[service.key]}` },
+    body: JSON.stringify({
+      model,
+      temperature: thinks ? 0.2 : 0,
+      // The thinking counts in the tokens: room for it and for a long list.
+      max_tokens: thinks ? 7000 : 3000,
+      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: model.includes('120b') ? 'medium' : 'low' } : {}),
+      ...(service.name === 'groq' && /qwen3/.test(model) ? { reasoning_format: 'hidden' } : {}),
+      response_format: mode === 'schema' ? { type: 'json_schema', json_schema: { name: 'device', strict: true, schema: strictSchema(req.schema) } } : { type: 'json_object' },
+      messages: [
+        { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
+        { role: 'user', content: `Data sheet extracts:\n${req.text}` },
+      ],
+    }),
+    signal: AbortSignal.timeout(90000),
+  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
+  const data = await res.json().catch(() => ({}))
+  const error = res.ok ? undefined : reason(data, res.status)
+  // Groq: "Please try again in 7.5s".
+  const wait = error && /try again in (?:(\d+)m)?([\d.]+)s/i.exec(error)
+  return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error, wait: wait ? Number(wait[1] ?? 0) * 60 + Number(wait[2]) : undefined }
+}
+
+/** The best two models of a service, strict schema first; a busy model is skipped, or waited for a few seconds. */
+async function askService(service, req, env) {
+  const models = (await modelsOf(service, env)).slice(0, 2)
+  if (!models.length) return { status: 404, error: `${service.name} : aucun modèle de discussion sur ce compte` }
+  let last
+  for (const model of models) {
+    if (busyUntil.get(model) > Date.now()) continue
+    for (const mode of service.strict ? ['schema', 'json'] : ['json']) {
+      last = await chat(service, req, env, model, mode)
+      if (last.status === 429 && last.wait !== undefined && last.wait <= 10) {
+        await sleep(last.wait + 0.5)
+        last = await chat(service, req, env, model, mode)
+      } else if (last.status === 429 && service.name === 'mistral') {
+        await sleep(1.5)
+        last = await chat(service, req, env, model, mode)
+      }
+      if (last.status === 200 && last.text) return { ...last, engine: service.name }
+      if (last.status === 401 || last.status === 403) return { ...last, error: `${service.name} : ${last.error}` }
+      if (last.status === 429) {
+        busyUntil.set(model, Date.now() + 60_000)
+        break
+      }
+      if (last.status === 404) known.delete(service.name)
+    }
+  }
+  return { ...(last ?? { status: 429 }), error: `${service.name} : ${last?.error ?? 'modèles occupés'}` }
+}
+
+/* Gemini: reads the PDF itself (tables, panel drawings). */
+
+const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/models'
+
+/** Gemini wants upper-case OpenAPI types. */
+function geminiSchema(s) {
+  if (Array.isArray(s)) return s.map(geminiSchema)
+  if (!s || typeof s !== 'object') return s
+  return Object.fromEntries(Object.entries(s).map(([k, v]) => [k, k === 'type' && typeof v === 'string' ? v.toUpperCase() : geminiSchema(v)]))
+}
+
+/** Best stable Flash model the key has, then the best Flash-Lite (Google retires models often). */
+export async function geminiModels(env) {
+  if (known.get('gemini')?.key !== env.GEMINI_API_KEY) {
+    const res = await fetch(`${GEMINI}?pageSize=200`, { headers: { 'x-goog-api-key': env.GEMINI_API_KEY } }).catch(() => null)
+    const data = res?.ok ? await res.json().catch(() => ({})) : {}
+    const list = (data.models ?? [])
+      .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
+      .map((m) => String(m.name).replace(/^models\//, ''))
+      .filter((m) => /^gemini-.*flash/.test(m) && !/tts|image|audio|live|thinking|exp|embed|8b/.test(m))
+    if (list.length) known.set('gemini', { key: env.GEMINI_API_KEY, list })
+  }
+  const list = known.get('gemini')?.key === env.GEMINI_API_KEY ? known.get('gemini').list : []
+  if (!list.length) return [env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-flash-lite-latest']
+  const version = (m) => (/latest/.test(m) ? 99 : Number(/gemini-(\d+(?:\.\d+)?)/.exec(m)?.[1] ?? 0))
+  const best = (lite) => list.filter((m) => /lite/.test(m) === lite).sort((a, b) => Number(/preview/.test(a)) - Number(/preview/.test(b)) || version(b) - version(a))[0]
+  return [...new Set([env.GEMINI_MODEL, best(false), best(true)].filter(Boolean))]
+}
+
+async function askGemini(req, env) {
+  const parts = []
+  if (req.pdfBase64) parts.push({ inline_data: { mime_type: 'application/pdf', data: req.pdfBase64 } })
+  if (req.fullText ?? req.text) parts.push({ text: `Data sheet extracts:\n${req.fullText ?? req.text}` })
+  parts.push({ text: 'List the connectors of this device.' })
+  let last
+  for (const model of await geminiModels(env)) {
+    const res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: req.system }] },
+        contents: [{ role: 'user', parts }],
+        generationConfig: {
+          temperature: 0,
+          maxOutputTokens: 8000,
+          responseMimeType: 'application/json',
+          responseSchema: geminiSchema(req.schema),
+          // Gemini 2.5 needs a thinking budget; later models think by default.
+          ...(/gemini-2\./.test(model) ? { thinkingConfig: { thinkingBudget: 2048 } } : {}),
+        },
+      }),
+      signal: AbortSignal.timeout(90000),
+    }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: String(e.message) } }) }))
+    const data = await res.json().catch(() => ({}))
+    const text = extractJson(data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join(''))
+    if (res.ok && text) return { status: 200, text, engine: 'gemini' }
+    last = { status: res.status, error: `gemini : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
+    if (res.status === 401 || res.status === 403) break
+    if (res.status === 404) known.delete('gemini')
+  }
+  return last
+}
+
+/**
+ * Two independent readings at once, for the app to compare: Gemini, and the
+ * first text service that answers (Groq, then Mistral, then Z.ai). With
+ * `single`, one reading only (settling a disagreement). Gemini's comes
+ * first when it saw the PDF itself.
+ */
+export async function analyse(req, env) {
+  const text = req.text ? Object.values(SERVICES).filter((s) => env[s.key]) : []
+  const gemini = !!env.GEMINI_API_KEY
+  const errors = []
+  const first = async (asks) => {
+    for (const ask of asks) {
+      const r = await ask().catch((e) => ({ status: 502, error: String(e?.message ?? e).slice(0, 120) }))
+      if (r.status === 200 && r.text) return r
+      errors.push(r.error ?? `HTTP ${r.status}`)
+    }
+    return undefined
+  }
+  const textAsks = text.map((s) => () => askService(s, req, env))
+  const geminiAsks = gemini ? [() => askGemini(req, env)] : []
+  const results = req.single
+    ? [await first([...textAsks, ...geminiAsks])]
+    : await Promise.all(req.pdfBase64 ? [first(geminiAsks), first(textAsks)] : [first(textAsks), first(geminiAsks)])
+  return { results: results.filter(Boolean), errors }
+}
+
+/* ---------- Diagnostic ---------- */
+
+/** A check that gives up after a while instead of holding the whole page. */
+const within = (seconds, work) => Promise.race([work, sleep(seconds).then(() => `ERREUR : pas de réponse en ${seconds} s`)])
+
+/** GET /diagnostic: every key tried on a tiny request, every search source, all at once. */
 async function diagnostic(env) {
   const started = Date.now()
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
-  const out = { relais: 'SynopGig, en ligne', mistral: 'pas de clé MISTRAL_API_KEY', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
+  const out = { relais: 'SynopGig, en ligne' }
+  const check = (key, seconds, work) =>
+    within(
+      seconds,
+      work().catch((e) => `ERREUR ${String(e?.message ?? e).slice(0, 160)}`),
+    ).then((r) => (out[key] = r))
   const checks = []
-
+  for (const s of Object.values(SERVICES)) {
+    if (!env[s.key]) {
+      out[s.name] = `pas de clé ${s.key}`
+      continue
+    }
+    checks.push(
+      check(s.name, 40, async () => {
+        known.delete(s.name)
+        const models = await modelsOf(s, env)
+        const r = await askService(s, req, env)
+        return r.status === 200 ? `OK (modèles ${models.slice(0, 2).join(', ')})` : `ERREUR ${r.status} : ${r.error}`
+      }),
+    )
+  }
+  if (env.GEMINI_API_KEY) {
+    checks.push(
+      check('gemini', 40, async () => {
+        known.delete('gemini')
+        const r = await askGemini(req, env)
+        return r.status === 200 ? `OK (modèles ${(await geminiModels(env)).join(', ')})` : `ERREUR ${r.status} : ${r.error}`
+      }),
+    )
+  } else out.gemini = 'pas de clé GEMINI_API_KEY'
   if (env.MISTRAL_API_KEY) {
     checks.push(
-      within(40, (async () => {
-        mistralModels = undefined
-        const models = await pickMistralModels(env)
-        const tested = {}
-        for (const model of models) {
-          await sleep(1.5)
-          const r = await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) }))
-          tested[model] = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
-          if (r.status === 200) break
-        }
-        const ok = Object.keys(tested).find((m) => tested[m] === 'OK')
-        out.mistral = ok ? `OK (modèle ${ok})` : models.length ? 'ERREUR : aucun modèle ne répond' : 'ERREUR : aucun modèle de discussion'
-        out.mistral_essais = tested
-        out.mistral_modeles_du_compte = mistralModels?.list ?? []
-      })()).then((r) => typeof r === 'string' && (out.mistral = r)),
+      check('ocr_mistral', 40, async () => {
+        await sleep(2)
+        const r = await ocr({ url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }, env)
+        return r.status === 200 ? 'OK (les PDF sont lus avec leurs tableaux)' : `ERREUR ${r.error} (les PDF sont alors lus par l’application)`
+      }),
     )
   }
-  if (env.GROQ_API_KEY) {
-    checks.push(
-      within(30, (async () => {
-        groqModels = undefined
-        const [model] = await pickGroqModels(env)
-        const r = await groqCall(req, env, model, 'json').catch((e) => ({ status: 0, error: String(e) }))
-        out.groq = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
-        out.groq_modeles_du_compte = (groqModels?.list ?? []).filter((m) => !NOT_CHAT.test(m))
-      })()).then((r) => typeof r === 'string' && (out.groq = r)),
-    )
-  }
-  if (env.GEMINI_API_KEY) {
-    checks.push(
-      within(30, (async () => {
-        geminiModels = undefined
-        const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
-        out.gemini = r.status === 200 && r.text ? `OK (modèles ${(await pickGeminiModels(env)).join(', ')})` : `ERREUR ${r.error}`
-      })()).then((r) => typeof r === 'string' && (out.gemini = r)),
-    )
-  }
-  if (env.ZAI_API_KEY) {
-    checks.push(
-      within(30, (async () => {
-        zaiHost = undefined
-        const r = await zaiCall(req, env, env.ZAI_MODEL || 'glm-4.7-flash').catch((e) => ({ status: 0, error: String(e) }))
-        out.zai = r.status === 200 && zaiHost ? `OK (${new URL(zaiHost).host})` : `ERREUR ${r.status} : ${r.error}${r.status === 401 ? ' (clé refusée par z.ai et bigmodel.cn : recréez-la)' : ''}`
-      })()).then((r) => typeof r === 'string' && (out.zai = r)),
-    )
-  }
-  if (env.AI) {
-    checks.push(
-      within(30, (async () => {
-        const r = await askWorkersAi(req, env).catch((e) => ({ status: 0, error: String(e) }))
-        out.workers_ai = r.status === 200 && r.text ? 'OK (sans clé)' : `ERREUR ${r.error}`
-      })()).then((r) => typeof r === 'string' && (out.workers_ai = r)),
-    )
-  } else out.workers_ai = 'pas de liaison AI (Settings > Bindings > Workers AI)'
-
-  // Documentation search: which sources answer from this Worker.
-  const probe = (key, fn) =>
-    checks.push(
-      within(30, fn().then((r) => (r.length ? `OK (${r.length} résultats)` : 'aucun résultat'), (e) => `ERREUR ${String(e?.message ?? e).slice(0, 160)}`)).then((r) => (out[key] = r)),
-    )
-  probe('recherche_duckduckgo', () => searchDuckDuckGo('Shure SM58 datasheet'))
-  probe('recherche_bing', () => searchBing('Shure SM58 datasheet pdf'))
-  if (env.GROQ_API_KEY) probe('recherche_groq', () => searchGroq('Shure SM58', env))
-  if (env.GEMINI_API_KEY) {
-    if (env.GEMINI_SEARCH === 'on') probe('recherche_gemini', () => searchGemini('Shure SM58', env))
-    else out.recherche_gemini = 'désactivée (quota Gemini gardé pour l’analyse ; GEMINI_SEARCH = on pour l’activer)'
-  }
-
-  await Promise.all(checks.map((c) => c.catch(() => {})))
+  const search = (key, work) => check(key, 35, async () => `OK (${(await work()).length} résultats)`)
+  checks.push(search('recherche_bing', () => searchBing('Shure SM58 user guide pdf')), search('recherche_duckduckgo', () => searchDuckDuckGo('Shure SM58 user guide pdf')))
+  if (env.GROQ_API_KEY) checks.push(search('recherche_groq', () => searchGroq('Shure SM58', env)))
+  await Promise.all(checks)
   const used = env.LIMITS ? Number(await env.LIMITS.get(`d:${today()}:all`).catch(() => 0)) || 0 : undefined
   out.protection = {
-    par_visiteur: `${Number(env.PER_HOUR) || HOURLY.ia} par heure, ${Number(env.PER_DAY) || 60} par jour`,
+    par_visiteur: `${Number(env.PER_HOUR) || HOURLY.ai} par heure, ${Number(env.PER_DAY) || 60} par jour`,
     pour_tous: `${Number(env.DAILY_LIMIT) || 400} par jour`,
-    compteurs: env.LIMITS ? `KV LIMITS relié (${used} analyses et recherches aujourd’hui)` : 'sans KV LIMITS : comptés par instance seulement (moins fiable)',
+    compteurs: env.LIMITS ? `KV LIMITS relié (${used} aujourd’hui)` : 'sans KV LIMITS : comptés par instance seulement',
   }
   out.duree = `${Math.round((Date.now() - started) / 1000)} s`
   return out
 }
 
-/** The first service of a chain that answers; the next ones only when the previous fail. */
-async function firstAnswer(chain, req, env, errors, flags) {
-  for (const [engine, ask] of chain) {
-    const r = await ask(req, env).catch((e) => ({ status: 502, error: `réseau : ${String(e).slice(0, 100)}` }))
-    if (r.status === 200 && r.text) return { engine, text: r.text }
-    if (r.status === 429) flags.quota = true
-    errors.push(r.error ?? `${engine} ${r.status}`)
-  }
-  return undefined
-}
-
-/**
- * Two independent readings at the same time, the app compares them:
- * Gemini (which also sees the PDF itself: tables, panel drawings), and the
- * first text model that answers (Groq gpt-oss-120b, Mistral, Z.ai).
- * When one side has nothing, the other side's spare services are tried, so
- * an answer comes back whenever any service can give one. With a PDF,
- * Gemini's reading comes first.
- */
-export async function analyse(req, env) {
-  const text = []
-  if (req.text) {
-    if (env.GROQ_API_KEY) text.push(['groq', askGroq])
-    if (env.MISTRAL_API_KEY) text.push(['mistral', askMistral])
-    if (env.ZAI_API_KEY) text.push(['zai', askZai])
-    // No key at all: Cloudflare's own models, last because their daily allowance is small.
-    if (env.AI) text.push(['workers-ai', askWorkersAi])
-  }
-  const gemini = env.GEMINI_API_KEY ? [['gemini', askGemini]] : []
-  const errors = []
-  // Settling a disagreement: one reading only, by the first text model (Gemini when none answers).
-  if (req.single) {
-    const one = await firstAnswer([...text, ...gemini], req, env, errors, { quota: false })
-    return { results: one ? [one] : [], errors, quota: errors.some((e) => /429|quota/i.test(e)) }
-  }
-  const flags = { quota: false }
-  const [g, t] = await Promise.all([firstAnswer(gemini, req, env, errors, flags), firstAnswer(text, req, env, errors, flags)])
-  const results = (req.pdfBase64 ? [g, t] : [t, g]).filter(Boolean)
-  return { results, errors, quota: flags.quota }
-}
+/* ---------- Routes ---------- */
 
 export default {
   async fetch(request, env) {
@@ -1039,52 +697,42 @@ export default {
     }
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
     const fail = (message, status) => reply({ error: { message } }, status)
-
     const path = new URL(request.url).pathname.replace(/\/+$/, '')
-    if (request.method === 'OPTIONS') return new Response(null, { headers: cors })
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
+
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors })
     if (request.method === 'GET' && path === '/diagnostic') {
       if (tooManyThisHour('diag', ip, env)) return fail('Trop de diagnostics, réessayez plus tard.', 429)
       const report = await diagnostic(env).catch((e) => ({ relais: 'SynopGig, en ligne', erreur_diagnostic: String(e?.stack ?? e).slice(0, 400) }))
       return new Response(JSON.stringify(report, null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })
     }
-    if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
+    if (request.method !== 'POST') return fail('Relais SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
-    if (['/page', '/find', '/doc', '/images', '/image'].includes(path)) {
-      // Searching spends the AI quota; reading pages and photos does not.
-      const refused = path === '/find' ? await aiRefusal(ip, env) : tooManyThisHour('web', ip, env) ? 'Trop de lectures en une heure, réessayez plus tard.' : undefined
-      if (refused) return fail(refused, 429)
-      const body = await request.json().catch(() => null)
-      const r =
-        path === '/page'
-          ? await readPage(body?.url)
-          : path === '/find'
-            ? await findDocs(body, env)
-            : path === '/doc'
-              ? await readDoc(body)
-              : path === '/images'
-                ? await readImages(body)
-                : await readImage(body)
-      if (r.pdf) return new Response(r.pdf, { headers: { ...cors, 'Content-Type': 'application/pdf' } })
-      if (r.image) return new Response(r.image, { headers: { ...cors, 'Content-Type': r.type } })
+    const body = await request.json().catch(() => null)
+
+    if (path === '/read') {
+      if (tooManyThisHour('web', ip, env)) return fail('Trop de lectures en une heure, réessayez plus tard.', 429)
+      const r = await read(body)
+      if (r.file) return new Response(r.file, { headers: { ...cors, 'Content-Type': r.type } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
-    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.ZAI_API_KEY && !env.GEMINI_API_KEY && !env.AI) return fail('Relais non configuré (clé manquante).', 500)
-
-    let req
-    try {
-      req = cleanRequest(await request.json())
-    } catch {
-      req = null
+    if (path === '/find' || path === '/ocr') {
+      const refused = await aiRefusal(ip, env, false)
+      if (refused) return fail(refused, 429)
+      const r = path === '/find' ? await find(body, env) : await ocr(body, env)
+      return r.data ? reply(r.data) : fail(r.error, r.status)
     }
+    if (path !== '') return fail('Adresse inconnue.', 404)
+
+    if (!Object.values(SERVICES).some((s) => env[s.key]) && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)
+    const req = cleanRequest(body)
     if (!req) return fail('Requête refusée.', 400)
-    // Counted only once the request is a real analysis.
     const refused = await aiRefusal(ip, env)
     if (refused) return fail(refused, 429)
-
-    const { results, errors, quota } = await analyse(req, env)
+    const { results, errors } = await analyse(req, env)
     if (results.length) return reply({ text: results[0].text, engine: results[0].engine, ...(results[1] ? { second: results[1].text, secondEngine: results[1].engine } : {}) })
-    if (errors.length === 0) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
+    if (!errors.length) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
+    const quota = errors.some((e) => /429|rate|quota|occupé/i.test(e))
     return fail(quota ? `Quota gratuit atteint, réessayez plus tard (${errors.join(' · ')})` : errors.join(' · '), quota ? 429 : 502)
   },
 }

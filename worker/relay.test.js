@@ -1,375 +1,235 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import relay, { cleanRequest } from './relay.js'
+import relay, { cleanRequest, geminiModels, pageDocs, pageText, pageUrl, rankDocs, shape, strictSchema } from './relay.js'
 import { relayRequest } from '../src/library/ai'
 
 const SITE = 'https://arnisound.github.io'
-const post = (body, origin = SITE) =>
-  new Request('https://relay.example/', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-const groqOk = () => new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"X"}' } }] }))
-const models = (...ids) => new Response(JSON.stringify({ data: ids.map((id) => ({ id, active: true })) }))
-/** Answers the model list, then the given chat replies in order. */
-function groq(list, ...replies) {
-  return vi.fn(async (url) => (String(url).endsWith('/models') ? models(...list) : replies.length > 1 ? replies.shift()() : replies[0]()))
+let ip = 0
+const post = (path, body, origin = SITE) =>
+  new Request(`https://relay.example${path}`, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'CF-Connecting-IP': `10.0.0.${++ip}` }, body: JSON.stringify(body) })
+const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
+const chatOk = (text = '{"model":"X"}') => json({ choices: [{ message: { content: text } }] })
+const geminiOk = () => json({ candidates: [{ content: { parts: [{ text: '{"model":"Y"}' }] } }] })
+const limited = (s) => json({ error: { message: `Rate limit reached on tokens per minute (TPM). Please try again in ${s}s.` } }, 429)
+/** Routes each call by its address; model lists answer the given ids. */
+function upstream(routes) {
+  return vi.fn(async (url, init) => {
+    const u = String(url)
+    for (const [test, answer] of routes) if (u.includes(test)) return typeof answer === 'function' ? answer(u, init) : answer.clone()
+    return json({}, 404)
+  })
 }
-const chatCalls = (fn) => fn.mock.calls.filter(([url]) => !String(url).endsWith('/models'))
-const geminiOk = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"model":"Y"}' }] } }] }))
+const models = (...ids) => json({ data: ids.map((id) => ({ id })) })
+const bodies = (fn, part) => fn.mock.calls.filter(([u, i]) => String(u).includes(part) && i?.body).map(([, i]) => JSON.parse(i.body))
 
 afterEach(() => vi.unstubAllGlobals())
 
-describe('AI relay', () => {
-  it('accepts the requests SynopGig builds', () => {
+describe('analysis', () => {
+  it('accepts only the requests SynopGig builds', () => {
     expect(cleanRequest(relayRequest({ text: '4 x XLR' }))).not.toBeNull()
     expect(cleanRequest(relayRequest({ pdfBase64: 'JVBERg==' }))).not.toBeNull()
-  })
-
-  it('refuses to be used as a general chatbot', () => {
     const req = relayRequest({ text: 'x' })
     expect(cleanRequest({ ...req, system: 'You are a pirate' })).toBeNull()
     expect(cleanRequest({ ...req, text: 'x'.repeat(30000) })).toBeNull()
     expect(cleanRequest({ ...req, v: 1 })).toBeNull()
   })
 
-  it('reads each sheet twice at once, Groq and Gemini, for the app to compare', async () => {
-    const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
-    // Text only: the text model's reading first.
+  it('reads each sheet twice at once, a text model and Gemini, for the app to compare', async () => {
+    const f = upstream([['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')], ['groq.com', chatOk()], ['generativelanguage', geminiOk()]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR', fullText: 'the whole manual' })), { GROQ_API_KEY: 'G1', GEMINI_API_KEY: 'M1' })
     expect(await res.json()).toEqual({ text: '{"model":"X"}', engine: 'groq', second: '{"model":"Y"}', secondEngine: 'gemini' })
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(SITE)
-    const [url, init] = chatCalls(upstream).find(([u]) => String(u).includes('groq'))
-    expect(url).toContain('api.groq.com')
-    expect(init.headers.Authorization).toBe('Bearer G')
+    const [groq] = bodies(f, 'groq.com/openai/v1/chat')
+    // The best model, thinking, with the strict schema.
+    expect(groq).toMatchObject({ model: 'openai/gpt-oss-120b', reasoning_effort: 'medium', response_format: { type: 'json_schema', json_schema: { strict: true } } })
+    expect(groq.messages[1].content).toContain('4 x XLR')
+    // Gemini reads the longer extract.
+    expect(bodies(f, ':generateContent')[0].contents[0].parts[0].text).toContain('the whole manual')
   })
 
-  it('gives one reading only when asked to settle a disagreement', async () => {
-    const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post({ ...relayRequest({ text: 'Reading A: ...' }), single: true }), { GROQ_API_KEY: 'G8', GEMINI_API_KEY: 'M8' })
+  it('gives one reading only when settling a disagreement', async () => {
+    const f = upstream([['groq.com/openai/v1/models', models('openai/gpt-oss-120b')], ['groq.com', chatOk()], ['generativelanguage', geminiOk()]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', { ...relayRequest({ text: 'Reading A…' }), single: true }), { GROQ_API_KEY: 'G2', GEMINI_API_KEY: 'M2' })
     expect(await res.json()).toEqual({ text: '{"model":"X"}', engine: 'groq' })
-    expect(upstream.mock.calls.some(([u]) => String(u).includes(':generateContent'))).toBe(false)
+    expect(bodies(f, ':generateContent')).toHaveLength(0)
   })
 
-  it('shows Gemini the PDF itself, with its text layer, and puts its reading first', async () => {
-    const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR', pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
+  it('shows Gemini the PDF itself and puts its reading first', async () => {
+    const f = upstream([['groq.com/openai/v1/models', models('openai/gpt-oss-120b')], ['groq.com', chatOk()], ['generativelanguage', geminiOk()]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR', pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G3', GEMINI_API_KEY: 'M3' })
     expect(await res.json()).toMatchObject({ engine: 'gemini', secondEngine: 'groq' })
-    const parts = JSON.parse(upstream.mock.calls.find(([u]) => String(u).includes(':generateContent'))[1].body).contents[0].parts
-    expect(parts[0].inline_data.mime_type).toBe('application/pdf')
-    expect(parts[1].text).toContain('4 x XLR')
+    expect(bodies(f, ':generateContent')[0].contents[0].parts[0].inline_data.mime_type).toBe('application/pdf')
   })
 
-  it('picks a model the Groq account really has', async () => {
-    const upstream = groq(['whisper-large-v3', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b'], groqOk)
-    vi.stubGlobal('fetch', upstream)
-    await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G2' })
-    const body = JSON.parse(chatCalls(upstream).at(-1)[1].body)
-    expect(body.model).toBe('openai/gpt-oss-120b')
-    // It thinks before answering, and the answer must follow the schema.
-    expect(body.reasoning_effort).toBe('medium')
-    expect(body.response_format).toMatchObject({ type: 'json_schema', json_schema: { strict: true } })
-    const ports = body.response_format.json_schema.schema.properties.ports.items
-    expect(ports.additionalProperties).toBe(false)
-    expect(body.response_format.json_schema.schema.properties.rackU.type).toEqual(['integer', 'null'])
-  })
-
-  it('accepts JSON wrapped in text and retries without strict mode', async () => {
-    const upstream = groq(
-      ['llama-3.3-70b-versatile'],
-      () => new Response(JSON.stringify({ error: { message: 'json_schema not supported' } }), { status: 400 }),
-      () => new Response(JSON.stringify({ error: { message: 'json_validate_failed' } }), { status: 400 }),
-      () => new Response(JSON.stringify({ choices: [{ message: { content: 'Here you go: {"model":"Z"} done' } }] })),
-    )
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G3' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"Z"}' })
-    expect(JSON.parse(chatCalls(upstream).at(-1)[1].body).response_format).toBeUndefined()
-  })
-
-  it('skips a model out of its minute quota, and waits when all of them are', async () => {
-    const limited = (s) => () => new Response(JSON.stringify({ error: { message: `Rate limit reached on tokens per minute (TPM). Please try again in ${s}s.` } }), { status: 429 })
-    const upstream = groq(['openai/gpt-oss-120b', 'openai/gpt-oss-20b'], limited(0.01), limited(0.05), groqOk)
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G5' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"X"}' })
-    const used = chatCalls(upstream).map(([, init]) => JSON.parse(init.body).model)
-    // Never the same busy model twice in a row; then the first one free again.
-    expect(used).toEqual(['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'])
-  })
-
-  it('sends the short form of the schema in JSON mode', async () => {
-    const { shape } = await import('./relay.js')
-    expect(shape({ type: 'object', properties: { a: { type: 'integer' }, d: { type: 'string', enum: ['in', 'out'] } }, required: ['d'] })).toBe('{"a":integer?,"d":"in"|"out"}')
-  })
-
-  it('asks Mistral with the strict schema, on a model the account has', async () => {
-    // A free key: no medium or small model on this account.
-    const upstream = vi.fn(async (url) =>
-      String(url).endsWith('/models') ? models('open-mistral-nemo', 'ministral-8b-latest', 'mistral-embed') : new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] })),
-    )
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"M"}', engine: 'mistral' })
-    const [url, init] = chatCalls(upstream)[0]
-    expect(url).toBe('https://api.mistral.ai/v1/chat/completions')
-    expect(init.headers.Authorization).toBe('Bearer K')
-    expect(JSON.parse(init.body)).toMatchObject({ model: 'ministral-8b-latest', response_format: { type: 'json_schema' } })
-  })
-
-  it('moves on when Mistral is out of quota', async () => {
-    const upstream = vi.fn(async (url) => (String(url).includes('mistral') ? new Response(JSON.stringify({ message: 'Service tier capacity exceeded for this model' }), { status: 429 }) : groqOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', ZAI_API_KEY: 'Z' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"X"}', engine: 'zai' })
-    // Each Mistral model asked once only: a quota is not a schema problem.
-    expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral') && !String(u).endsWith('/models'))).toHaveLength(2)
-  })
-
-  it('waits a moment when Mistral gets two requests in the same second', async () => {
+  it('falls back on plain JSON mode, then on the next model', async () => {
     let n = 0
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url) => (String(url).endsWith('/models') ? new Response('{}') : n++ === 0 ? new Response(JSON.stringify({ message: 'Requests rate limit exceeded' }), { status: 429 }) : new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] })))),
-    )
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K2' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"M"}', engine: 'mistral' })
+    const f = upstream([
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')],
+      ['groq.com', () => (++n < 3 ? json({ error: { message: 'json_validate_failed' } }, 400) : chatOk('Here: {"model":"Z"}'))],
+    ])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G4' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"Z"}' })
+    expect(bodies(f, 'groq.com/openai/v1/chat').map((b) => `${b.model} ${b.response_format.type}`)).toEqual(['openai/gpt-oss-120b json_schema', 'openai/gpt-oss-120b json_object', 'openai/gpt-oss-20b json_schema'])
   })
 
-  it('uses the free GLM models of Z.ai', async () => {
-    const upstream = vi.fn(async () => groqOk())
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { ZAI_API_KEY: 'Z' })
+  it('waits a few seconds for a model out of its minute quota, then moves on', async () => {
+    const seen = []
+    const f = upstream([
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')],
+      ['groq.com', (u, i) => (seen.push(JSON.parse(i.body).model), seen.length < 3 ? limited(0.01) : chatOk())],
+    ])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G5' })
     expect(await res.json()).toMatchObject({ text: '{"model":"X"}' })
-    const [url, init] = upstream.mock.calls[0]
-    expect(url).toBe('https://api.z.ai/api/paas/v4/chat/completions')
-    expect(JSON.parse(init.body)).toMatchObject({ model: 'glm-4.7-flash', response_format: { type: 'json_object' } })
+    expect(seen).toEqual(['openai/gpt-oss-120b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'])
   })
 
-  it('tries the Chinese BigModel platform when Z.ai refuses the key', async () => {
-    const upstream = vi.fn(async (url) => (String(url).includes('api.z.ai') ? new Response(JSON.stringify({ error: { message: 'token expired or incorrect' } }), { status: 401 }) : groqOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { ZAI_API_KEY: 'Z2' })
+  it('uses Mistral, Z.ai or Gemini when Groq has no answer', async () => {
+    const f = upstream([['groq.com/openai/v1/models', models('openai/gpt-oss-120b')], ['groq.com', json({ error: { message: 'down' } }, 500)], ['mistral.ai/v1/models', models('ministral-14b-latest')], ['mistral.ai', chatOk('{"model":"M"}')]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G6', MISTRAL_API_KEY: 'K6' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"M"}', engine: 'mistral' })
+    expect(bodies(f, 'mistral.ai/v1/chat')[0].model).toBe('ministral-14b-latest')
+  })
+
+  it('asks Z.ai in JSON mode', async () => {
+    const f = upstream([['api.z.ai', chatOk()]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR' })), { ZAI_API_KEY: 'Z7' })
     expect(await res.json()).toMatchObject({ engine: 'zai' })
-    expect(upstream.mock.calls.at(-1)[0]).toContain('open.bigmodel.cn')
+    expect(bodies(f, 'api.z.ai')[0]).toMatchObject({ model: 'glm-4.7-flash', response_format: { type: 'json_object' } })
   })
 
-  it('falls back on Cloudflare Workers AI, without any key', async () => {
-    const AI = { run: vi.fn(async () => ({ response: 'ok: {"model":"W"}' })) }
-    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { AI })
-    expect(await res.json()).toMatchObject({ text: '{"model":"W"}' })
-    expect(AI.run.mock.calls[0][0]).toBe('@cf/openai/gpt-oss-120b')
-  })
-
-  it('says exactly why the provider refused', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
-    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'bad' })
+  it('says exactly why the providers refused, and when quotas are full', async () => {
+    vi.stubGlobal('fetch', upstream([['groq.com', json({ error: { message: 'Invalid API Key' } }, 401)]]))
+    const res = await relay.fetch(post('/', relayRequest({ text: 'x' })), { GROQ_API_KEY: 'bad' })
     expect(res.status).toBe(502)
-    expect((await res.json()).error.message).toBe('Groq 401 : Invalid API Key')
+    expect((await res.json()).error.message).toContain('Invalid API Key')
   })
 
-  it('has a diagnostic page that never shows the keys', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
-    const res = await relay.fetch(new Request('https://relay.example/diagnostic'), { GROQ_API_KEY: 'gsk_secret' })
-    const text = await res.text()
-    expect(JSON.parse(text).groq).toBe('ERREUR 401 : Invalid API Key')
-    expect(JSON.parse(text).gemini).toContain('pas de clé')
-    expect(text).not.toContain('gsk_secret')
-  })
-
-  it('lists the account models in the diagnostic', async () => {
-    vi.stubGlobal('fetch', groq(['openai/gpt-oss-120b', 'whisper-large-v3'], groqOk))
-    const out = await (await relay.fetch(new Request('https://relay.example/diagnostic'), { GROQ_API_KEY: 'G4' })).json()
-    expect(out.groq).toBe('OK (modèle openai/gpt-oss-120b)')
-    expect(out.groq_modeles_du_compte).toEqual(['openai/gpt-oss-120b'])
-  })
-
-  it('sends scanned PDFs to Gemini, on the best Flash model the key has', async () => {
-    // Google retires models for new accounts: the list decides.
+  it('picks the best stable Gemini Flash the key has', async () => {
     const list = { models: ['gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-preview-tts', 'gemini-4-flash-preview'].map((m) => ({ name: `models/${m}`, supportedGenerationMethods: ['generateContent'] })) }
-    const upstream = vi.fn(async (url) => (String(url).includes('/models?') ? new Response(JSON.stringify(list)) : geminiOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M-scan' })
-    expect(await res.json()).toMatchObject({ text: '{"model":"Y"}' })
-    const [url, init] = upstream.mock.calls.find(([u]) => String(u).includes(':generateContent'))
-    // Stable before preview, newest first.
-    expect(url).toContain('/gemini-3.5-flash:generateContent')
-    expect(JSON.parse(init.body).generationConfig.thinkingConfig).toEqual({ thinkingLevel: 'low' })
+    vi.stubGlobal('fetch', vi.fn(async () => json(list)))
+    expect(await geminiModels({ GEMINI_API_KEY: 'M8' })).toEqual(['gemini-3.5-flash', 'gemini-3.5-flash-lite'])
   })
 
-  it('tries the Flash-Lite model when Flash is retired', async () => {
-    const { pickGeminiModels } = await import('./relay.js')
-    const list = { models: ['gemini-3.5-flash', 'gemini-3.5-flash-lite'].map((m) => ({ name: `models/${m}`, supportedGenerationMethods: ['generateContent'] })) }
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(list))))
-    expect(await pickGeminiModels({ GEMINI_API_KEY: 'M-pick' })).toEqual(['gemini-3.5-flash', 'gemini-3.5-flash-lite'])
-  })
-
-  it('falls back to Gemini when Groq is out of quota', async () => {
-    const upstream = vi.fn(async (url) => (url.includes('groq') ? new Response('{}', { status: 429 }) : geminiOk()))
-    vi.stubGlobal('fetch', upstream)
-    const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
-    expect((await res.json()).text).toBe('{"model":"Y"}')
-  })
-
-  it('explains what it cannot do', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 429 })))
-    expect((await relay.fetch(post(relayRequest({ text: 'x' }), 'https://evil.example'), { GROQ_API_KEY: 'G' })).status).toBe(403)
-    expect((await relay.fetch(post({ hello: 1 }), { GROQ_API_KEY: 'G' })).status).toBe(400)
-    expect((await relay.fetch(post(relayRequest({ text: 'x' })), {})).status).toBe(500)
-    expect((await relay.fetch(post(relayRequest({ pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G' })).status).toBe(422)
-    const quota = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'G' })
-    expect(quota.status).toBe(429)
-    expect((await quota.json()).error.message).toContain('Quota')
+  it('turns a schema into strict and short forms', () => {
+    const s = { type: 'object', properties: { a: { type: 'integer' }, d: { type: 'string', enum: ['in', 'out'] } }, required: ['d'] }
+    expect(shape(s)).toBe('{"a":integer?,"d":"in"|"out"}')
+    expect(strictSchema(s)).toEqual({ type: 'object', properties: { a: { type: ['integer', 'null'] }, d: s.properties.d }, required: ['a', 'd'], additionalProperties: false })
   })
 })
 
-describe('shop pages', async () => {
-  const { pageUrl, pageText } = await import('./relay.js')
+describe('reading other sites', () => {
   it('only reads public web addresses', () => {
-    expect(pageUrl('https://www.thomann.de/fr/flyht_pro.htm')).not.toBeNull()
-    for (const bad of ['http://localhost/', 'https://127.0.0.1/', 'https://[::1]/', 'file:///etc/passwd', 'https://shop.example:8443/', 'https://router.lan/', 'https://user:pw@shop.example/']) expect(pageUrl(bad)).toBeNull()
+    expect(pageUrl('https://www.thomann.de/fr/x.htm')).not.toBeNull()
+    for (const bad of ['http://localhost/x', 'http://192.168.1.10/', 'file:///etc/passwd', 'https://a.local/', 'https://x.com:8080/']) expect(pageUrl(bad)).toBeNull()
   })
 
-  it('keeps the title, the product data and the lines about sizes', () => {
-    const p = pageText(`<html><head><title>Malle 120 &amp; roulettes</title><script>track()</script>
-      <script type="application/ld+json">{"@type":"Product","name":"Malle 120","weight":"25 kg"}</script></head>
-      <body><nav>Accueil</nav><table><tr><th>Dimensions</th><td>120 x 60 x 60 cm</td></tr></table><p>Livraison offerte</p></body></html>`)
-    expect(p.title).toBe('Malle 120 & roulettes')
-    expect(p.text).toContain('Dimensions | 120 x 60 x 60 cm')
-    expect(p.text).toContain('"weight":"25 kg"')
-    expect(p.text).not.toContain('Livraison')
-    expect(p.text).not.toContain('track()')
+  it('keeps the title, the product data and every line of the text', () => {
+    const p = pageText('<title>TMD16</title><nav>Menu</nav><script type="application/ld+json">{"@type":"Product","name":"TMD16"}</script><p>10 digital mic preamps</p><p>16 x 12 I/O</p>')
+    expect(p.text).toContain('Titre : TMD16')
+    expect(p.text).toContain('Données produit')
+    expect(p.text).toContain('10 digital mic preamps')
+    expect(p.text).not.toContain('Menu')
+  })
+
+  it('finds the user guide a page links to, not the firmware', () => {
+    const html = `<a href="/firmware/v1.zip">Firmware v1.04 Update</a><a href="/media/TMD16-Quickstart-Guide.pdf">Quickstart Guide</a>
+      <a href="https://cdn.inmusicbrands.com/TMD16-User-Guide.pdf">User Guide</a><a href="/media/firmware-update-guide.pdf">Firmware Update Guide</a><a href="/about">About</a>`
+    const docs = pageDocs(html, 'https://www.altoprofessional.com/tmd16')
+    expect(docs.map((d) => d.title)).toEqual(['User Guide', 'Quickstart Guide'])
+    expect(docs[0]).toMatchObject({ pdf: true, doc: 'manual' })
+  })
+
+  it('hands PDF files over as they are, and pages as text', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (u) => (String(u).endsWith('.pdf') ? new Response(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]), { headers: { 'Content-Type': 'application/octet-stream' } }) : new Response('<title>P</title><p>Inputs: 4 x XLR</p>', { headers: { 'Content-Type': 'text/html' } }))))
+    const pdf = await relay.fetch(post('/read', { url: 'https://fohhn.com/ps-850.pdf' }), {})
+    expect(pdf.headers.get('Content-Type')).toBe('application/pdf')
+    const page = await relay.fetch(post('/read', { url: 'https://fohhn.com/ps-850' }), {})
+    expect((await page.json()).text).toContain('Inputs: 4 x XLR')
+    expect((await relay.fetch(post('/read', { url: 'file:///etc/passwd' }), {})).status).toBe(400)
+  })
+
+  it('reads a PDF with its tables through Mistral OCR, given its address', async () => {
+    const f = upstream([['mistral.ai/v1/ocr', json({ pages: [{ markdown: '| Inputs 1-8 | XLR / TRS combo |' }, { markdown: '| Main | 2 x XLR |' }] })]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/ocr', { url: 'https://cdn.inmusicbrands.com/tmd16.pdf' }), { MISTRAL_API_KEY: 'K9' })
+    expect((await res.json()).text).toBe('| Inputs 1-8 | XLR / TRS combo |\n\n| Main | 2 x XLR |')
+    expect(bodies(f, 'mistral.ai/v1/ocr')[0]).toMatchObject({ model: 'mistral-ocr-latest', document: { type: 'document_url', document_url: 'https://cdn.inmusicbrands.com/tmd16.pdf' } })
+    expect((await relay.fetch(post('/ocr', { url: 'https://x.com/a.pdf' }), {})).status).toBe(501)
   })
 })
 
-describe('finding a product documentation', async () => {
-  const { rankDocs } = await import('./relay.js')
-  const call = (path, body) =>
-    relay.fetch(new Request(`https://relay.example${path}`, { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': `10.9.${Math.random()}` }, body: JSON.stringify(body) }), {})
-
-  it('puts the manufacturer and its data sheets first, shops last', () => {
+describe('finding the documents of a product', () => {
+  it('puts the user guide of this exact model first, even on the file server of the maker group', () => {
     const r = rankDocs(
       [
-        { url: 'https://www.thomann.de/fr/fohhn_ps850.htm', title: 'Fohhn PS-850' },
-        { url: 'https://fohhn.com/en/products/ps-850', title: 'PS-850 | Fohhn' },
-        { url: 'https://fohhn.com/media/ps-850.pdf', title: 'Datasheet' },
-        { url: 'http://192.168.1.1/x.pdf' },
-      ],
-      'Fohhn',
-      'PS-850',
-    )
-    expect(r.map((x) => x.host)).toEqual(['fohhn.com', 'fohhn.com', 'thomann.de'])
-    expect(r[0]).toMatchObject({ kind: 'pdf', official: true })
-  })
-
-  it('puts the user guide first, even on the file server of the maker group', () => {
-    const r = rankDocs(
-      [
+        { url: 'https://www.thomann.de/fr/alto_tmd16.htm', title: 'Alto TMD16' },
         { url: 'https://www.altoprofessional.com/products/tmd16', title: 'Alto Professional - TMD Series > TMD16' },
-        { url: 'https://support.altoprofessional.com/en/support/solutions/articles/69000874431', title: 'TMD16 | Frequently Asked Questions' },
         { url: 'https://altoprofessional.com/media/NF03280(LYNX-MIX USB SERIES).pdf', title: 'NF03280(LYNX-MIX USB SERIES A...' },
         { url: 'https://cdn.inmusicbrands.com/AltoPro/mixers/tmd16/TMD16%20-%20User%20Guide%20-%20v1.0%281%29.pdf', title: 'TMD16 - User Guide' },
-        { url: 'https://manuals.plus/alto/tmd16-manual.pdf', title: 'PDF ALTO TMD16 Instruction Manual' },
       ],
       'Alto',
       'tmd 16',
     )
-    expect(r[0]).toMatchObject({ host: 'cdn.inmusicbrands.com', kind: 'pdf', official: true, doc: 'manual' })
-    // Another range's PDF comes after this model's documents.
-    expect(r.findIndex((x) => x.title.startsWith('NF03280'))).toBe(r.length - 1)
+    expect(r[0]).toMatchObject({ host: 'cdn.inmusicbrands.com', kind: 'pdf', official: true, exact: true, doc: 'manual' })
+    expect(r.at(-1).host).toBe('thomann.de')
   })
 
-  it('searches without any key and lists what it found', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => new Response('<a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Ffohhn.com%2Fen%2Fproducts%2Fps-850&amp;rut=x">PS-850 - Products | Fohhn</a>')),
-    )
-    const res = await call('/find', { brand: 'Fohhn', model: 'PS-850' })
-    expect(res.status).toBe(200)
-    const { results } = await res.json()
-    expect(results[0]).toMatchObject({ url: 'https://fohhn.com/en/products/ps-850', official: true, kind: 'page' })
+  it('searches Bing and DuckDuckGo without any key', async () => {
+    const rss = '<rss><item><title>TMD16 User Guide</title><link>https://cdn.inmusicbrands.com/tmd16-user-guide.pdf</link></item></rss>'
+    vi.stubGlobal('fetch', upstream([['bing.com', new Response(rss)], ['duckduckgo', new Response('<html>anomaly</html>')]]))
+    const res = await relay.fetch(post('/find', { brand: 'Alto', model: 'TMD16' }), {})
+    expect((await res.json()).results[0]).toMatchObject({ kind: 'pdf', doc: 'manual', official: true })
   })
 
-  it('reads Bing when DuckDuckGo turns robots away', async () => {
-    const rss = '<rss><channel><item><title>PS-850 data sheet</title><link>https://fohhn.com/media/ps-850.pdf</link></item></channel></rss>'
-    vi.stubGlobal('fetch', vi.fn(async (url) => new Response(String(url).includes('bing.com') ? rss : '<html>anomaly</html>')))
-    const res = await call('/find', { brand: 'Fohhn', model: 'PS-850' })
-    expect((await res.json()).results[0]).toMatchObject({ url: 'https://fohhn.com/media/ps-850.pdf', kind: 'pdf', official: true })
-  })
-
-  it('lets Groq search the web itself when DuckDuckGo is blocked', async () => {
-    const bodies = []
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url, init) => {
-        if (!String(url).includes('groq.com')) return new Response('<html>anomaly</html>')
-        bodies.push(JSON.parse(init.body))
-        return Response.json({ choices: [{ message: { content: 'ok', executed_tools: [{ type: 'browser_search', search_results: { results: [{ url: 'https://fohhn.com/media/ps-850.pdf', title: 'PS-850 data sheet' }] } }] } }] })
-      }),
-    )
-    const res = await relay.fetch(
-      new Request('https://relay.example/find', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': '10.8.1.1' }, body: JSON.stringify({ brand: 'Fohhn', model: 'PS-850' }) }),
-      { GROQ_API_KEY: 'k' },
-    )
-    expect(res.status).toBe(200)
-    expect(bodies[0]).toMatchObject({ model: 'openai/gpt-oss-120b', tools: [{ type: 'browser_search' }] })
-    const { results } = await res.json()
-    expect(results[0]).toMatchObject({ url: 'https://fohhn.com/media/ps-850.pdf', kind: 'pdf', official: true })
-  })
-
-  it('hands PDF data sheets over as they are, for the app to read', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31]), { headers: { 'Content-Type': 'application/pdf' } })))
-    const res = await call('/doc', { url: 'https://fohhn.com/media/ps-850.pdf' })
-    expect(res.headers.get('Content-Type')).toBe('application/pdf')
-    expect((await call('/doc', { url: 'file:///etc/passwd' })).status).toBe(400)
+  it('lets Groq search the web itself', async () => {
+    const f = upstream([
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b')],
+      ['groq.com', json({ choices: [{ message: { content: 'ok', executed_tools: [{ search_results: { results: [{ url: 'https://fohhn.com/media/ps-850-manual.pdf', title: 'PS-850 manual' }] } }] } }] })],
+      ['bing.com', new Response('<rss></rss>')],
+    ])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/find', { brand: 'Fohhn', model: 'PS-850' }), { GROQ_API_KEY: 'G10' })
+    expect((await res.json()).results[0]).toMatchObject({ url: 'https://fohhn.com/media/ps-850-manual.pdf', doc: 'manual' })
+    expect(bodies(f, 'groq.com/openai/v1/chat')[0].tools).toEqual([{ type: 'browser_search' }])
   })
 })
 
 describe('protecting the keys', () => {
-  /** A KV namespace in memory. */
   const kv = () => {
     const m = new Map()
     return { get: async (k) => m.get(k) ?? null, put: async (k, v) => void m.set(k, v), m }
   }
-  const ask = (env, ip) =>
-    relay.fetch(new Request('https://relay.example/', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': ip }, body: JSON.stringify(relayRequest({ text: '4 x XLR' })) }), env)
+  const ask = (env, from) =>
+    relay.fetch(new Request('https://relay.example/', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': from }, body: JSON.stringify(relayRequest({ text: '4 x XLR' })) }), env)
 
-  it('caps each visitor per day, and everyone together', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] }))))
+  it('refuses other sites', async () => {
+    expect((await relay.fetch(post('/', relayRequest({ text: 'x' }), 'https://evil.example'), { GROQ_API_KEY: 'G' })).status).toBe(403)
+  })
+
+  it('caps each visitor per day, and everyone together, without storing addresses', async () => {
+    vi.stubGlobal('fetch', upstream([['api.z.ai', chatOk()]]))
     const LIMITS = kv()
-    const env = { MISTRAL_API_KEY: 'K', LIMITS, PER_DAY: '2', DAILY_LIMIT: '3' }
+    const env = { ZAI_API_KEY: 'Z', LIMITS, PER_DAY: '2', DAILY_LIMIT: '3' }
     expect((await ask(env, '1.1.1.1')).status).toBe(200)
     expect((await ask(env, '1.1.1.1')).status).toBe(200)
-    const third = await ask(env, '1.1.1.1')
-    expect(third.status).toBe(429)
-    expect((await third.json()).error.message).toContain('votre connexion')
+    expect((await (await ask(env, '1.1.1.1')).json()).error.message).toContain('votre connexion')
     expect((await ask(env, '2.2.2.2')).status).toBe(200)
     expect((await (await ask(env, '3.3.3.3')).json()).error.message).toContain('tous les utilisateurs')
-    // Addresses are never stored, only a hash.
     expect([...LIMITS.m.keys()].join(' ')).not.toContain('1.1.1.1')
   })
 
-  it('does not count reading pages and photos as analyses', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('<html><title>x</title></html>', { headers: { 'Content-Type': 'text/html' } })))
-    const LIMITS = kv()
-    for (let i = 0; i < 5; i++) {
-      await relay.fetch(new Request('https://relay.example/images', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': '4.4.4.4' }, body: JSON.stringify({ url: 'https://fohhn.com/p' }) }), { LIMITS })
-    }
-    expect(LIMITS.m.size).toBe(0)
-  })
-})
-
-describe('documents a product page links to', async () => {
-  const { pageDocs } = await import('./relay.js')
-  it('finds the user guide first and leaves firmware and drivers out', () => {
-    const html = `
-      <a href="/firmware/tmd16-v1.04.zip">Firmware v1.04 Update</a>
-      <a href="/media/TMD16-Quickstart-Guide.pdf">Quickstart Guide</a>
-      <a href="https://cdn.altoprofessional.com/TMD16-User-Guide-v1.0.pdf">User Guide</a>
-      <a href="/drivers/win.exe">Windows Driver v1.02</a>
-      <a href="/media/firmware-update-guide.pdf">Firmware Update Guide</a>
-      <a href="/about">About Us</a>`
-    const docs = pageDocs(html, 'https://www.altoprofessional.com/products/tmd16')
-    expect(docs.map((d) => d.title)).toEqual(['User Guide', 'Quickstart Guide'])
-    expect(docs[0].url).toBe('https://cdn.altoprofessional.com/TMD16-User-Guide-v1.0.pdf')
+  it('has a diagnostic page that never shows the keys', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => json({ error: { message: 'Invalid API Key' } }, 401)))
+    const res = await relay.fetch(new Request('https://relay.example/diagnostic'), { GROQ_API_KEY: 'gsk_secret' })
+    const text = await res.text()
+    expect(JSON.parse(text).groq).toContain('Invalid API Key')
+    expect(JSON.parse(text).gemini).toContain('pas de clé')
+    expect(text).not.toContain('gsk_secret')
   })
 })

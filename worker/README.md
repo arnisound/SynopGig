@@ -5,142 +5,65 @@ bibliothèque USER. L’un peut tomber ou changer sans toucher l’autre.
 
 # 1. Relais IA (`relay.js`)
 
-Ce petit programme (un *Worker* Cloudflare, gratuit) donne l’analyse IA des fiches techniques
-à **tout le monde, sur tous les navigateurs, sans rien configurer** : c’est lui qui garde en
-secret la clé IA gratuite du propriétaire du site. Réponse en 1 à 3 secondes.
+Un *Worker* Cloudflare gratuit qui fait pour l’application ce qu’un navigateur ne peut pas
+faire : garder secrètes les clés IA, chercher sur le web, lire les pages et fichiers des
+autres sites. Sans lui, l’application utilise l’analyse rapide (sans IA).
 
-Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantanée).
+| Route | Rôle |
+| --- | --- |
+| `POST /` | analyse d’une fiche (deux lectures en parallèle, ou une seule pour trancher) |
+| `POST /find` | `{brand, model}` → documents du produit, le meilleur d’abord |
+| `POST /read` | `{url}` → PDF ou image tels quels, ou page web (texte, photos, documents liés) |
+| `POST /ocr` | `{url}` → texte d’un PDF avec ses tableaux (Mistral OCR) |
+| `GET /diagnostic` | état de chaque clé et de chaque source de recherche |
 
-## Mise en place (une seule fois, environ 10 minutes)
+## Mise en place (une seule fois)
 
-1. **Clé IA gratuite** — une ou plusieurs (le relais passe de l’une à l’autre quand un quota est atteint) :
-   - **Mistral (recommandé en premier, quota gratuit le plus large)** : créez un compte sur
-     <https://console.mistral.ai>, choisissez l’offre gratuite *Experiment* (numéro de
-     téléphone demandé, pas de carte), puis *API Keys* → *Create new key*. Dans l’offre
-     gratuite, Mistral peut se servir des requêtes pour entraîner ses modèles : ce ne sont
-     que des fiches techniques publiques. Pour un usage plus large, l’offre payante coûte
-     quelques centimes par mois à ce volume ; fixez une limite de dépense dans la console.
-   - **Z.ai** (facultatif, gratuit, société chinoise Zhipu) : modèles GLM « Flash » gratuits,
-     compte par e-mail sur <https://z.ai> → *API Keys*. Secret `ZAI_API_KEY`. Une seule
-     requête à la fois par compte : s’il est occupé, le relais passe au suivant.
-   - **Cloudflare Workers AI** (facultatif, sans clé) : *Settings* → *Bindings* → *Add* →
-     *Workers AI*, nom `AI`. Utilisé en tout dernier recours : son allocation gratuite est
-     petite, et elle s’ajoute à ce que Cloudflare fait déjà tourner pour SynopGig.
-   - **Groq (le plus rapide)** : créez un compte sur <https://console.groq.com>
-     (connexion Google ou GitHub possible), puis *API Keys* → *Create API Key*. Copiez la clé
-     (`gsk_…`).
-   - **Gemini** (sait aussi lire les PDF scannés) : <https://aistudio.google.com/apikey> →
-     *Create API key*. Copiez la clé (`AIza…`).
-2. **Worker Cloudflare** : créez un compte gratuit sur <https://dash.cloudflare.com>, puis
-   *Workers & Pages* → *Create* → *Create Worker* → nommez-le `synopgig-ia` → *Deploy*.
-3. Cliquez sur *Edit code*, remplacez tout le contenu par celui de [`relay.js`](relay.js),
-   puis *Deploy*.
-4. Dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type **Secret** :
-   `MISTRAL_API_KEY`, `GROQ_API_KEY` et/ou `GEMINI_API_KEY`. Le relais choisit seul le
-   meilleur modèle disponible sur chaque compte.
-5. **Protection (recommandé dès qu’il y a plusieurs utilisateurs)** : *Storage & Databases* →
-   *KV* → *Create* → nommez-le `synopgig-limits`. Puis dans le Worker `synopgig-ia` :
-   *Settings* → *Bindings* → *Add* → *KV namespace*, nom de variable **`LIMITS`**, espace
-   `synopgig-limits` → *Deploy*. Voir « Protection » plus bas.
-6. L’adresse du Worker est écrite dans l’application (`DEFAULT_AI_PROXY_URL` dans
-   `src/library/ai.ts`) : actuellement `https://synopgig-ia.arnisound-tools.workers.dev`.
-   Si vous changez de Worker, modifiez cette ligne (ou définissez `VITE_AI_PROXY_URL` au
-   moment du build).
+1. **Worker** : <https://dash.cloudflare.com> → *Workers & Pages* → *Create* → *Create Worker*
+   → nom `synopgig-ia` → *Deploy* → *Edit code* : collez [`relay.js`](relay.js) → *Deploy*.
+2. **Clés** (*Settings* → *Variables and Secrets* → *Add* → type **Secret**), au moins une :
+   - `GROQ_API_KEY` — <https://console.groq.com> → *API Keys* (le plus rapide, et il cherche sur le web) ;
+   - `GEMINI_API_KEY` — <https://aistudio.google.com/apikey> (lit de longs documents et les PDF) ;
+   - `MISTRAL_API_KEY` — <https://console.mistral.ai>, offre *Experiment* (lit les PDF avec
+     leurs tableaux grâce à l’OCR, si votre offre y a accès) ;
+   - `ZAI_API_KEY` — <https://z.ai> → *API Keys* (modèles GLM Flash gratuits).
+3. **Compteurs (conseillé)** : *Storage & Databases* → *KV* → *Create* `synopgig-limits`, puis
+   dans le Worker *Settings* → *Bindings* → *Add* → *KV namespace*, variable **`LIMITS`**.
+4. L’adresse du Worker est dans l’application (`DEFAULT_AI_PROXY_URL`, `src/library/ai.ts`) :
+   `https://synopgig-ia.arnisound-tools.workers.dev`.
 
-## Changer d’hébergement
+Le relais demande à chaque compte la liste de ses modèles et prend les meilleurs disponibles
+(variables facultatives `GROQ_MODEL`, `GEMINI_MODEL`, `MISTRAL_MODEL`, `ZAI_MODEL`).
+Sites autorisés : `arnisoundtools.com`, GitHub Pages et `localhost:5173` (variable
+`ALLOWED_ORIGINS` pour en changer).
 
-Le relais n’accepte que les sites listés. Par défaut : `https://arnisoundtools.com`,
-`https://www.arnisoundtools.com`, GitHub Pages et `localhost:5173`. Pour une autre adresse
-(par exemple un sous-domaine), ajoutez-la dans le Worker : *Settings* → *Variables and Secrets* → *Add* → type
-**Text**, nom `ALLOWED_ORIGINS`, valeur par exemple
-`https://synopgig.fr,https://arnisound.github.io,http://localhost:5173` (adresses séparées par
-des virgules, sans `/` final).
+## « Le chercher pour vous »
 
-## Vérifier
-
-Ouvrez `https://<adresse du Worker>/diagnostic` : chaque clé est testée et la réponse du
-service s’affiche (`OK (modèle …)`, ou l’erreur exacte), avec la liste des modèles Groq de
-votre compte. Les clés ne sont jamais affichées.
-
-## Lecture des pages produit (racks et flight cases)
-
-Le relais sait aussi lire une page de site marchand (`POST /page`) pour recréer un rack ou un
-flight case : il télécharge la page, ne garde que le titre, les données produit et les lignes
-qui parlent de cotes, de poids ou de roulettes, puis l’application les fait analyser par l’IA.
-Seules les adresses web publiques sont acceptées (pas de `localhost`, d’adresse IP ou de port
-exotique), dans la limite des lectures de pages (200 par heure et par visiteur). Certains sites
-bloquent les robots : l’utilisateur peut alors coller le texte de la page.
-
-## Recherche de documentation (« Le chercher pour vous »)
-
-Dans l’onglet Bibliothèque, l’utilisateur donne une marque et un modèle : le relais cherche la
-documentation (`POST /find`) avec toutes les sources disponibles et classe les résultats (site
-du fabricant et PDF d’abord, revendeurs et forums en dernier) ; l’utilisateur confirme le bon
-document, que le relais récupère (`POST /doc`, 15 Mo maximum) pour l’analyse habituelle.
-
-- **DuckDuckGo** : sans clé, toujours essayé (il peut parfois refuser les robots).
-- **Bing** (flux RSS) : sans clé, toujours essayé, souvent ouvert quand DuckDuckGo refuse.
-- **Groq** (si `GROQ_API_KEY`) : modèles `gpt-oss` avec leur recherche web intégrée
-  (variable facultative `GROQ_SEARCH_MODEL` pour en changer).
-- **Gemini** : recherche Google intégrée, **désactivée par défaut** (son quota gratuit de
-  recherche est très petit et le quota Gemini sert à l’analyse). Variable *Text*
-  `GEMINI_SEARCH` = `on` pour l’activer.
-
-Le relais récupère aussi les **photos du produit** de la page trouvée (`/doc`, ou `/images`
-pour une fiche PDF) et les transmet à l’application (`/image`, 4 Mo maximum), qui en fait
-une petite vignette. Les photos des produits partagés sont gardées par le Worker
-`library.js` (`GET /img/<id>`).
-
-`/diagnostic` indique quelles sources répondent. Une recherche compte comme une analyse dans
-les limites (voir « Protection ») ; lire les documents et les photos n’en consomme pas.
-
-## Comment il choisit
-
-Chaque fiche est lue **deux fois en même temps, par deux IA indépendantes**, et
-l’application compare leurs réponses ligne par ligne :
-
-- **Gemini** (le meilleur modèle Flash de votre clé, puis Flash-Lite, choisis seuls) reçoit le PDF lui-même
-  quand il fait moins de 4 Mo (il voit les tableaux et les dessins des faces) avec son texte ;
-- **une IA texte** : Groq (`gpt-oss-120b`), sinon Mistral, sinon Z.ai, sinon
-  Workers AI s’il est relié — la suivante seulement si la précédente ne répond pas.
-
-Dans l’application, une ligne est « confirmée » quand les deux IA trouvent le même nombre
-et que la fiche le dit ; sinon elle est en orange, avec la raison (« l’autre IA lit 8 »,
-« vu par une seule des deux IA »…). Ce qu’une seule IA a vu est proposé, pas ajouté.
-PDF scanné (sans texte) : Gemini seul. Si un côté ne répond pas, l’autre suffit ; si rien
-ne répond, l’application revient seule à l’analyse rapide.
+1. `/find` cherche sur Bing, DuckDuckGo et avec la recherche web de Groq, puis classe : site du
+   fabricant (ou serveur de fichiers de son groupe : inMusic, Music Tribe, Harman…), modèle
+   exact, **mode d’emploi** avant fiche technique avant guide rapide, PDF avant page ;
+   revendeurs et forums en dernier.
+2. L’application prend seule le mode d’emploi du modèle (sinon sa fiche technique) et sa page
+   produit (photos, documents liés), les lit — PDF par `/ocr`, sinon dans le navigateur — et
+   lance l’analyse. L’utilisateur peut en choisir un autre dans la liste.
+3. L’analyse lit deux fois en même temps (Gemini sur un long extrait, et Groq, sinon Mistral,
+   sinon Z.ai) ; si les deux lectures divergent, une troisième tranche. Chaque ligne est
+   vérifiée contre le texte, ce qui reste douteux est en orange.
 
 ## Protection
 
-Les clés restent secrètes dans le Worker et ne servent qu’à l’analyse de fiches : le relais
-refuse toute autre demande (on ne peut pas s’en servir comme assistant général). Pour
-qu’un seul visiteur ne puisse pas épuiser les quotas de tout le monde :
+Les clés ne servent qu’aux analyses de fiches demandées par le site.
 
-| Limite | Par défaut | Variable (type *Text*) |
+| Limite | Par défaut | Variable (*Text*) |
 | --- | --- | --- |
-| Analyses et recherches par visiteur et par heure | 20 | `PER_HOUR` |
-| Analyses et recherches par visiteur et par jour | 60 | `PER_DAY` |
-| Analyses et recherches pour tous, par jour | 400 | `DAILY_LIMIT` |
-| Lectures de pages et de photos par visiteur et par heure | 200 | — |
+| Demandes IA (analyses, recherches, OCR) par visiteur et par heure | 60 | `PER_HOUR` |
+| Analyses par visiteur et par jour | 60 | `PER_DAY` |
+| Analyses pour tous, par jour | 400 | `DAILY_LIMIT` |
+| Lectures de pages et fichiers par visiteur et par heure | 300 | — |
 
-Les limites du jour ne tiennent vraiment que si le KV `LIMITS` est relié (étape 5) : sans
-lui, chaque serveur Cloudflare compte de son côté. Les visiteurs sont reconnus par une
-empreinte de leur adresse, jamais par l’adresse elle-même, et les compteurs s’effacent
-seuls après deux jours. Chaque analyse écrit deux compteurs : le KV gratuit (1 000 écritures
-par jour) suffit jusqu’à environ 450 analyses par jour. `/diagnostic` affiche les limites et
-le nombre d’analyses du jour.
-
-Les produits déjà présents dans la base ou la bibliothèque USER sont reconnus sans IA : plus
-la bibliothèque USER grandit, moins le relais est sollicité.
-
-## Limites
-
-- Quotas gratuits : Groq limite chaque modèle à 8 000 tokens par minute (environ deux
-  analyses par minute) ; Mistral et Gemini sont plus larges. Plusieurs clés se relaient.
-- Le relais n’accepte que les analyses de fiches venant du site (et de `localhost:5173` pour
-  le développement), dans les limites ci-dessus.
-- Pour un autre domaine, ajoutez une variable `ALLOWED_ORIGINS` (adresses séparées par des
-  virgules).
+Les limites du jour ne tiennent partout que si le KV `LIMITS` est relié (deux écritures par
+analyse ; le KV gratuit en permet 1 000 par jour). Les visiteurs sont reconnus par une
+empreinte de leur adresse, jamais par l’adresse elle-même.
 
 # 2. Bibliothèque USER (`library.js`)
 

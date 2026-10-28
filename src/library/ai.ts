@@ -420,9 +420,12 @@ export async function extractGemini(input: { text?: string; pdf?: File; device?:
 }
 
 /** What the relay accepts: the prompt, the schema, the useful lines and/or the PDF (for Gemini). */
-export function relayRequest(input: { text?: string; pdfBase64?: string; single?: boolean; system?: string }) {
-  return { v: 2, system: input.system ?? SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, pdfBase64: input.pdfBase64, ...(input.single ? { single: true } : {}) }
+export function relayRequest(input: { text?: string; fullText?: string; pdfBase64?: string; single?: boolean; system?: string }) {
+  return { v: 2, system: input.system ?? SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, fullText: input.fullText, pdfBase64: input.pdfBase64, ...(input.single ? { single: true } : {}) }
 }
+
+/** What Gemini reads (its free quota allows far more than the others'): most of the sheet. */
+const GEMINI_BUDGET = 60000
 
 /** A PDF small enough to be shown to Gemini as it is (tables, panel drawings). */
 const PDF_FOR_GEMINI = 4_000_000
@@ -439,6 +442,7 @@ export async function extractRelay(input: { text?: string; pdf?: File; device?: 
   // A scan has no text for the text models (they would guess from the name alone): Gemini only, told the device.
   const body = relayRequest({
     text: scan ? undefined : deviceLine(input.device) + focusText(text, TEXT_BUDGET, input.device),
+    fullText: scan || text.length <= TEXT_BUDGET ? undefined : deviceLine(input.device) + focusText(text, GEMINI_BUDGET, input.device),
     pdfBase64: withPdf ? await toBase64(input.pdf!) : undefined,
   })
   if (scan && input.device?.trim()) body.system += `\n${deviceLine(input.device).trim()}`

@@ -1,4 +1,4 @@
-import { AI_PROXY_URL } from './ai'
+import { readUrl } from './finder'
 
 /*
  * Product photos: shrunk to a small thumbnail kept in the project (a few kB
@@ -29,16 +29,17 @@ export async function shrink(blob: Blob, max = MAX): Promise<string> {
 
 /** A photo from another site, through the relay (browsers cannot read other sites' images). */
 export async function fetchImage(url: string): Promise<string> {
-  if (!AI_PROXY_URL) throw new Error('relais indisponible')
-  const res = await fetch(`${AI_PROXY_URL.replace(/\/+$/, '')}/image`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) })
-  if (!res.ok) throw new Error(`image indisponible (${res.status})`)
-  return shrink(await res.blob())
+  const got = await readUrl(url)
+  if (!('file' in got) || !got.type.startsWith('image/')) throw new Error('ce lien n’est pas une image')
+  return shrink(got.file)
 }
 
 /** The product photos of a page, through the relay. */
 export async function pageImages(url: string, model: string): Promise<string[]> {
-  if (!AI_PROXY_URL) return []
-  const res = await fetch(`${AI_PROXY_URL.replace(/\/+$/, '')}/images`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, model }) })
-  if (!res.ok) return []
-  return ((await res.json()) as { images?: string[] }).images ?? []
+  try {
+    const got = await readUrl(url, model)
+    return 'page' in got ? got.page.images : []
+  } catch {
+    return []
+  }
 }

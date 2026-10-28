@@ -1,4 +1,5 @@
 import { AI_PROXY_URL } from '../library/ai'
+import { readUrl } from '../library/finder'
 import type { CaseKind, FlightCase } from '../types'
 
 /*
@@ -163,10 +164,16 @@ async function post(path: string, body: unknown, base = AI_PROXY_URL) {
   return data
 }
 
-/** The relay downloads the page and keeps its title and the lines about size and weight. */
+/** Lines of a shop page about a case: sizes, weight, wheels, handles, inside and outside. */
+const CASE_LINES =
+  /\d.*(?:cm|mm|kg|\bU\b|\bHE\b|\bRU\b|unit|dimension|abmessung|maße|taille|hauteur|largeur|profondeur|longueur|height|width|depth|length|höhe|breite|tiefe|länge|poids|weight|gewicht|19|rack)|roulette|wheel|castor|rollen|poignée|handle|griff|intérieur|interior|inner|innen|extérieur|exterior|outer|außen/i
+
+/** The relay downloads the page; the title, the product data and the lines about size and weight are kept. */
 export async function fetchPage(url: string): Promise<{ title: string; text: string }> {
-  const data = await post('/page', { url })
-  return { title: String(data.title ?? ''), text: String(data.text ?? '') }
+  const got = await readUrl(url)
+  if (!('page' in got)) throw new Error('ce lien n’est pas une page web')
+  const lines = got.page.text.split('\n').filter((l) => /^(?:Titre|Description|Données produit) : /.test(l) || CASE_LINES.test(l))
+  return { title: got.page.title, text: lines.join('\n').slice(0, 12000) }
 }
 
 export async function extractCaseAi(text: string): Promise<CaseSpec> {

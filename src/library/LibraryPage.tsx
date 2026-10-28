@@ -8,7 +8,7 @@ import { findKnownModels } from './findKnown'
 import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared } from './userLibrary'
-import { findDocs, loadDoc, type FoundDoc } from './finder'
+import { findDocs, research, type FoundDoc } from './finder'
 import { fetchImage, pageImages, shrink } from './images'
 import DeviceArt from '../ui/DeviceArt'
 import type { UserLibrary } from './useUserLibrary'
@@ -139,6 +139,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
   const [fBrand, setFBrand] = useState('')
   const [fModel, setFModel] = useState('')
   const [found, setFound] = useState<FoundDoc[]>()
+  const [used, setUsed] = useState<{ title: string; url: string }[]>([])
   const [foundKnown, setFoundKnown] = useState<DeviceTemplate[]>([])
   const [finding, setFinding] = useState(false)
   const [findStatus, setFindStatus] = useState('')
@@ -195,9 +196,11 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     }
   }
 
+  /** Search, pick and read the best documents, then analyse: all by itself. */
   const findProduct = async (force = false) => {
     if (!fModel.trim()) return setFindStatus('Indiquez au moins le modèle.')
     setFound(undefined)
+    setUsed([])
     // Already in the catalogue or the USER library: no need to search.
     const hits = force ? [] : findKnownModels(`${fBrand} ${fModel}`, [...userLibrary.templates, ...mine, ...LIBRARY])
     setFoundKnown(hits)
@@ -207,7 +210,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     try {
       const docs = await findDocs(fBrand.trim(), fModel.trim())
       setFound(docs)
-      setFindStatus('Est-ce le bon document ? Rien n’est analysé avant votre confirmation.')
+      await analyseDocs(docs)
     } catch (e) {
       setFindStatus(`Recherche impossible : ${(e as Error).message}`)
     } finally {
@@ -215,29 +218,27 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     }
   }
 
-  const analyseDoc = async (doc: FoundDoc) => {
+  /** The best of these documents read and analysed (or the one the user picked). */
+  const analyseDocs = async (docs: FoundDoc[]) => {
     setFinding(true)
-    setFindStatus(`Lecture de ${doc.host}…`)
     try {
-      // The manual (or data sheet) of this very model the search found, read with the chosen document.
-      const companions = (found ?? []).filter((d) => d !== doc && d.kind === 'pdf' && d.exact && (d.doc === 'manual' || d.doc === 'datasheet')).sort((a, b) => Number(b.doc === 'manual') - Number(a.doc === 'manual'))
-      const { text: docText, pdf, images, manual } = await loadDoc(doc, fModel.trim(), setFindStatus, companions)
+      const model = fModel.trim()
+      const r = await research(docs, model, setFindStatus)
+      setUsed(r.used)
       setPhotos([])
       setPhotoStatus('')
-      // A PDF has no photo to offer: take them from the product page found with it.
-      const page = images.length ? undefined : (found ?? []).find((d) => d.kind === 'page' && d.official) ?? (found ?? []).find((d) => d.kind === 'page')
-      setText(docText)
-      setFile(pdf)
+      setText(r.text)
+      setFile(r.pdf)
       setFindStatus('')
-      // The exact name the user confirmed decides: a neighbouring model would give a wrong sheet.
-      const doubtful = await runAi(docText, manual ? `la page de ${doc.host} et « ${manual.title} »` : `la documentation de ${doc.host}`, pdf, `${fBrand.trim()} ${fModel.trim()}`.trim())
+      // The exact name the user gave decides: a neighbouring model would give a wrong sheet.
+      const doubtful = await runAi(r.text, r.used.map((u) => `« ${u.title} »`).join(' et '), r.pdf, `${fBrand.trim()} ${model}`.trim())
       // Only a sheet that confirms every row is shared with everyone without a second look.
-      setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model: fModel.trim(), found: { url: doc.url, share: doubtful === 0 } })
+      setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model, found: { url: r.used[0].url, share: doubtful === 0 } })
       if (doubtful > 0) setStatus((s) => `${s} Le partage USER attend votre relecture : cochez-le une fois les lignes en orange vérifiées.`)
-      setFound(undefined)
-      void (images.length ? Promise.resolve(images) : page ? pageImages(page.url, fModel.trim()) : Promise.resolve([])).then(loadPhotos)
+      const page = docs.find((d) => d.kind === 'page' && d.official)
+      void (r.images.length ? Promise.resolve(r.images) : page ? pageImages(page.url, model) : Promise.resolve([])).then(loadPhotos)
     } catch (e) {
-      setFindStatus(`Lecture impossible : ${(e as Error).message} Téléchargez la fiche et déposez-la ci-dessous.`)
+      setFindStatus(`Lecture impossible : ${(e as Error).message}. Choisissez un autre document ci-dessous, ou déposez la fiche vous-même.`)
     } finally {
       setFinding(false)
     }
@@ -543,8 +544,8 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
         <section className="card finder" ref={finderRef}>
           <h3>Le chercher pour vous</h3>
           <p className="muted small">
-            Donnez la marque et le modèle exacts : SynopGig cherche la documentation officielle du constructeur, vous la vérifiez, puis la fiche et ses ports en sont tirés. Une fois
-            enregistré, le produit rejoint la bibliothèque USER pour tout le monde.
+            Donnez la marque et le modèle exacts : SynopGig trouve lui-même la documentation officielle (le mode d’emploi d’abord), la lit et en tire la fiche et ses ports. Vous
+            relisez, puis enregistrez : le produit rejoint la bibliothèque USER pour tout le monde.
           </p>
           <div className="row wrap">
             <label className="field">
@@ -569,24 +570,37 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
               <button onClick={() => findProduct(true)}>Ce n’est pas lui : chercher sa documentation</button>
             </div>
           )}
-          {found && (
-            <ul className="found-docs">
-              {found.map((d) => (
-                <li key={d.url}>
-                  <div>
-                    <b>{d.title}</b>
-                    <small className="muted">
-                      {d.host} · {d.doc === 'manual' ? 'mode d’emploi' : d.doc === 'datasheet' ? 'fiche technique' : d.doc === 'quickstart' ? 'guide rapide' : d.kind === 'pdf' ? 'PDF' : 'page web'}
-                      {d.kind === 'pdf' && d.doc ? ' (PDF)' : ''}
-                      {d.official && <span className="badge-official"> site du fabricant</span>}
-                    </small>
-                  </div>
-                  <a href={d.url} target="_blank" rel="noopener noreferrer" title="Ouvrir pour vérifier">↗</a>
-                  <button className="primary" disabled={finding} onClick={() => analyseDoc(d)}>Analyser ce document</button>
-                </li>
+          {used.length > 0 && (
+            <p className="muted small">
+              Documents lus :{' '}
+              {used.map((u, i) => (
+                <span key={u.url}>
+                  {i > 0 && ' · '}
+                  <a href={u.url} target="_blank" rel="noopener noreferrer">{u.title}</a>
+                </span>
               ))}
-              <li className="muted small">Aucun ne convient ? Téléchargez la fiche vous-même et déposez-la ci-dessous.</li>
-            </ul>
+            </p>
+          )}
+          {found && found.length > 0 && (
+            <details className="found-more">
+              <summary className="muted small">Documents trouvés ({found.length}) : en analyser un autre</summary>
+              <ul className="found-docs">
+                {found.map((d) => (
+                  <li key={d.url}>
+                    <div>
+                      <b>{d.title}</b>
+                      <small className="muted">
+                        {d.host} · {d.doc === 'manual' ? 'mode d’emploi' : d.doc === 'datasheet' ? 'fiche technique' : d.doc === 'quickstart' ? 'guide rapide' : d.kind === 'pdf' ? 'PDF' : 'page web'}
+                        {d.kind === 'pdf' && d.doc ? ' (PDF)' : ''}
+                        {d.official && <span className="badge-official"> site du fabricant</span>}
+                      </small>
+                    </div>
+                    <a href={d.url} target="_blank" rel="noopener noreferrer" title="Ouvrir pour vérifier">↗</a>
+                    <button disabled={finding} onClick={() => analyseDocs([d])}>Analyser celui-ci</button>
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
         </section>
 
