@@ -28,7 +28,9 @@ import { DEFAULT_VIEW, viewOf } from './view'
 import { ViewContext } from './viewContext'
 import Inspector from './Inspector'
 import Palette, { DND_TYPE } from './Palette'
-import type { NewProduct } from '../library/newProduct'
+import LibraryPage from '../library/LibraryPage'
+import type { NewProductRequest } from '../library/newProduct'
+import type { UserLibrary } from '../library/useUserLibrary'
 
 const nodeTypes = { device: DeviceNodeView, rackFrame: RackFrameView }
 const edgeTypes = { cable: CableEdgeView }
@@ -46,14 +48,18 @@ interface Props {
   onOpenRacks?: () => void
   theme: Theme
   onTheme: (t: Theme) => void
-  /** Not in the base: find it, read its sheet, or create it by hand (library page). */
-  onNewProduct?: (r: NewProduct) => void
+  /** For creating a product not in the base, without leaving the synoptic (absent on a shared, read-only project). */
+  userLibrary?: UserLibrary
 }
 
-export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme, onNewProduct }: Props) {
+export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme, userLibrary }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const { nodes, edges } = project
   const view = viewOf(project)
+  // "Ajouter un nouveau produit": made in a window over the synoptic; the newest ones head the palette.
+  const [newProduct, setNewProduct] = useState<NewProductRequest>()
+  const [creating, setCreating] = useState(false)
+  const recent = useMemo(() => [...project.customTemplates].reverse().slice(0, 5).map((t) => t.id), [project.customTemplates])
   // The legend lists the signals of this project only: there are many kinds of network signals.
   const usedSignals = useMemo(() => new Set<SignalType>(project.nodes.flatMap((n) => n.data.ports.map((p) => p.signal))), [project.nodes])
   const { compact } = view
@@ -231,7 +237,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
         <Palette
           templates={templates}
-          onNew={onNewProduct}
+          onNew={userLibrary ? (query) => { setNewProduct((p) => ({ mode: 'find', query, n: (p?.n ?? 0) + 1 })); setCreating(true) } : undefined}
+          recent={recent}
           onAdd={(t) => {
             addCentered(t)
             setDrawer(undefined)
@@ -403,6 +410,23 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         onDelete={deleteSelection}
       />
       </div>
+      {creating && userLibrary && (
+        <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && setCreating(false)}>
+          <div className="modal new-product" role="dialog" aria-label="Ajouter un nouveau produit">
+            <div className="section-head">
+              <h3>Ajouter un nouveau produit</h3>
+              <button className="icon" onClick={() => setCreating(false)} aria-label="Fermer">✕</button>
+            </div>
+            <LibraryPage
+              project={project}
+              setProject={setProject}
+              userLibrary={userLibrary}
+              request={newProduct}
+              embedded={{ onSaved: () => setCreating(false) }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

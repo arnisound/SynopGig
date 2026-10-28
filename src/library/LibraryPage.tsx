@@ -107,6 +107,8 @@ interface Props {
   userLibrary: UserLibrary
   /** New product asked for from the synoptic palette. */
   request?: NewProductRequest
+  /** Shown in a window over the synoptic: only the ways to create a product, closed once saved. */
+  embedded?: { onSaved: (t: DeviceTemplate) => void }
 }
 
 const sameModel = (a: { brand?: string; model: string }, b: { brand?: string; model: string }) => {
@@ -114,7 +116,7 @@ const sameModel = (a: { brand?: string; model: string }, b: { brand?: string; mo
   return k(a) === k(b)
 }
 
-export default function LibraryPage({ project, setProject, userLibrary, request }: Props) {
+export default function LibraryPage({ project, setProject, userLibrary, request, embedded }: Props) {
   const [draft, setDraft] = useState<Draft>()
   const [suggestions, setSuggestions] = useState<Row[]>([])
   const [text, setText] = useState('')
@@ -388,6 +390,8 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
       if (userLibrary.templates.some((u) => sameModel(u, t))) setStatus(`« ${t.model} » enregistré ; il est déjà dans la bibliothèque USER.`)
       else share()
     }
+    // In the window over the synoptic: done, the product now heads the palette (unless the share still needs a pseudo).
+    if (!(draft.found?.share && !pseudo.trim() && !userLibrary.templates.some((u) => sameModel(u, t)))) embedded?.onSaved(t)
   }
 
   const share = () => {
@@ -443,7 +447,8 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
   const portCount = draft ? draft.rows.reduce((s, r) => s + Math.max(0, r.count), 0) : 0
 
   return (
-    <div className="page library">
+    <div className={embedded ? 'library-embedded' : 'page library'}>
+      {!embedded && (
       <aside className="case-list">
         <label className="field">
           <span>Votre pseudo (affiché sur le matériel partagé)</span>
@@ -508,8 +513,18 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
           ))}
         </div>
       </aside>
+      )}
 
       <div className="lib-main">
+        {embedded && (
+          <div className="row wrap embedded-head">
+            <label className="field">
+              <span>Votre pseudo (pour le partage dans USER)</span>
+              <input value={pseudo} maxLength={40} placeholder="Ex. Théo Son" onChange={(e) => { setPseudo(e.target.value); store.set('pseudo', e.target.value) }} />
+            </label>
+            <button onClick={() => { setDraft(blank()); setSuggestions([]); setStatus('Fiche vide : renseignez le modèle et sa connectique, puis enregistrez.') }}>Créer une fiche vide</button>
+          </div>
+        )}
         <section className="card finder" ref={finderRef}>
           <h3>Le chercher pour vous</h3>
           <p className="muted small">
@@ -742,7 +757,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
               </button>
             </div>
           </section>
-        ) : (
+        ) : embedded ? null : (
           <section className="card muted">
             <p>Choisissez « + Nouveau » pour saisir un matériel à la main, analysez une fiche technique, ou partez d’un modèle existant ou de la bibliothèque USER.</p>
           </section>
