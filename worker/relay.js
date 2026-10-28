@@ -26,6 +26,7 @@
  * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
  * POST /find {brand, model} finds a product's documentation; POST /doc {url} reads one;
  * POST /images {url} lists a page's product photos, POST /image {url} fetches one.
+ *   GEMINI_SEARCH    "on" to search with Gemini too (its search quota is small: off by default)
  *   GROQ_SEARCH_MODEL / GEMINI_SEARCH_MODEL  optional, models used to search the web
  *     (default: Groq's gpt-oss models with their built-in browser search)
  */
@@ -373,7 +374,7 @@ async function mistralCall(req, env, model, strict) {
 }
 
 // Free keys do not reach every model: ask the account which ones it has.
-const MISTRAL_PREFERRED = ['mistral-medium-latest', 'mistral-large-latest', 'mistral-small-latest', 'magistral-medium-latest', 'ministral-8b-latest', 'open-mistral-nemo', 'ministral-3b-latest']
+const MISTRAL_PREFERRED = ['mistral-medium-latest', 'mistral-large-latest', 'mistral-small-latest', 'ministral-14b-latest', 'magistral-medium-latest', 'ministral-8b-latest', 'open-mistral-nemo', 'ministral-3b-latest']
 let mistralModels
 
 export async function pickMistralModels(env) {
@@ -385,7 +386,7 @@ export async function pickMistralModels(env) {
   }
   const available = mistralModels?.list ?? []
   if (available.length === 0) return [env.MISTRAL_MODEL || 'mistral-medium-latest', 'mistral-small-latest']
-  return [env.MISTRAL_MODEL, ...MISTRAL_PREFERRED].filter((m) => m && available.includes(m)).slice(0, 2)
+  return [...new Set([env.MISTRAL_MODEL, ...MISTRAL_PREFERRED])].filter((m) => m && available.includes(m)).slice(0, 3)
 }
 
 async function askMistral(req, env) {
@@ -718,7 +719,8 @@ async function findDocs(body, env) {
   const q = `${brand} ${model}`.trim()
   const searches = [searchDuckDuckGo(`${q} datasheet specifications`), searchDuckDuckGo(`${q} pdf`)]
   if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
-  if (env.GEMINI_API_KEY) searches.push(searchGemini(q, env))
+  // Google's search grounding has its own small free quota: kept for the analysis unless asked for.
+  if (env.GEMINI_API_KEY && env.GEMINI_SEARCH === 'on') searches.push(searchGemini(q, env))
   const found = (await Promise.allSettled(searches)).flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
   const results = rankDocs(found, brand, model)
   if (results.length === 0) return { status: 404, error: 'Aucun document trouvé : vérifiez l’orthographe, ou déposez la fiche vous-même.' }
@@ -801,9 +803,17 @@ async function diagnostic(env) {
   const out = { relais: 'SynopGig, en ligne', mistral: 'pas de clé MISTRAL_API_KEY', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
   if (env.MISTRAL_API_KEY) {
     mistralModels = undefined
-    const [model] = await pickMistralModels(env)
-    const r = model ? await askMistral(req, env).catch((e) => ({ status: 0, error: String(e) })) : { status: 404, error: 'aucun modèle' }
-    out.mistral = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
+    const models = await pickMistralModels(env)
+    // Each model on its own, two seconds apart (one request a second on the free plan).
+    const tested = {}
+    for (const model of models) {
+      await sleep(2)
+      const r = await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) }))
+      tested[model] = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+    }
+    const ok = Object.keys(tested).filter((m) => tested[m] === 'OK')
+    out.mistral = ok.length ? `OK (modèle ${ok[0]})` : models.length ? 'ERREUR : aucun modèle ne répond' : 'ERREUR : aucun modèle de discussion'
+    out.mistral_essais = tested
     out.mistral_modeles_du_compte = mistralModels?.list ?? []
   }
   if (env.ZAI_API_KEY) {
@@ -845,7 +855,7 @@ async function diagnostic(env) {
   }
   out.recherche_duckduckgo = await probe(() => searchDuckDuckGo('Shure SM58 datasheet'))
   if (env.GROQ_API_KEY) out.recherche_groq = await probe(() => searchGroq('Shure SM58', env))
-  if (env.GEMINI_API_KEY) out.recherche_gemini = await probe(() => searchGemini('Shure SM58', env))
+  if (env.GEMINI_API_KEY) out.recherche_gemini = env.GEMINI_SEARCH === 'on' ? await probe(() => searchGemini('Shure SM58', env)) : 'désactivée (quota Gemini gardé pour l’analyse ; GEMINI_SEARCH = on pour l’activer)'
   return out
 }
 

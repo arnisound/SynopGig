@@ -81,8 +81,9 @@ document, que le relais récupère (`POST /doc`, 15 Mo maximum) pour l’analyse
 - **DuckDuckGo** : sans clé, toujours essayé (il peut parfois refuser les robots).
 - **Groq** (si `GROQ_API_KEY`) : modèles `gpt-oss` avec leur recherche web intégrée
   (variable facultative `GROQ_SEARCH_MODEL` pour en changer).
-- **Gemini** (si `GEMINI_API_KEY`) : recherche Google intégrée, modèle `gemini-2.5-flash`
-  (variable facultative `GEMINI_SEARCH_MODEL`).
+- **Gemini** : recherche Google intégrée, **désactivée par défaut** (son quota gratuit de
+  recherche est très petit et le quota Gemini sert à l’analyse). Variable *Text*
+  `GEMINI_SEARCH` = `on` pour l’activer.
 
 Le relais récupère aussi les **photos du produit** de la page trouvée (`/doc`, ou `/images`
 pour une fiche PDF) et les transmet à l’application (`/image`, 4 Mo maximum), qui en fait
