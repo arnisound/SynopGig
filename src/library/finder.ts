@@ -3,8 +3,8 @@ import { AI_PROXY_URL } from './ai'
 /*
  * "Le chercher pour vous", done by itself: the relay searches the web for
  * the product's documents (/find), the best ones are picked (the user guide
- * of this very model describes every socket of the panels), read (PDF by the
- * relay's OCR, tables kept, or here with pdf.js), then analysed as usual.
+ * of this very model describes every socket of the panels), read here with
+ * pdf.js, then analysed: their text, and their panel pages as images.
  */
 
 export interface FoundDoc {
@@ -46,39 +46,42 @@ export async function readUrl(url: string, model = ''): Promise<{ page: Page } |
   return /json/i.test(type) ? { page: (await res.json()) as Page } : { file: await res.blob(), type }
 }
 
+const readable = (t: string) => t.replace(/\s/g, '').length > 200
+
 // The relay's OCR refused once (not in the plan, or out of quota): not asked again this visit.
 let ocrRefused = false
 
-/** The text of a PDF: the relay's OCR keeps the tables; pdf.js here otherwise. */
-export async function pdfText(url: string): Promise<{ text: string; pdf?: File; how: 'ocr' | 'pdf.js' }> {
-  if (!ocrRefused) {
-    try {
-      const { text } = (await (await relay('/ocr', { url })).json()) as { text: string }
-      if (text.replace(/\s/g, '').length > 200) return { text, how: 'ocr' }
-    } catch (e) {
-      if (/indisponible|rate|quota|limit/i.test(String((e as Error).message))) ocrRefused = true
-    }
-  }
+/**
+ * A PDF, read here with pdf.js (its panel pages then go to the AI as
+ * images); a scan without text is read by the relay's OCR when it has one.
+ */
+export async function pdfText(url: string): Promise<{ text: string; pdf: File }> {
   const got = await readUrl(url)
   if (!('file' in got) || !/pdf/i.test(got.type)) throw new Error('ce lien ne mène pas à un PDF')
   const name = decodeURIComponent(new URL(url).pathname.split('/').pop() || 'fiche.pdf')
   const pdf = new File([got.file], /\.pdf$/i.test(name) ? name : `${name}.pdf`, { type: 'application/pdf' })
   const { pdfToText } = await import('./pdfText')
-  return { text: await pdfToText(pdf), pdf, how: 'pdf.js' }
+  const text = await pdfToText(pdf)
+  if (readable(text) || ocrRefused) return { text, pdf }
+  try {
+    const ocr = (await (await relay('/ocr', { url })).json()) as { text: string }
+    return { text: ocr.text, pdf }
+  } catch {
+    ocrRefused = true
+    return { text, pdf }
+  }
 }
 
 export interface Research {
   /** What the analysis reads: the documents one after the other. */
   text: string
-  /** A PDF read here (no OCR), for Gemini to see its drawings. */
+  /** The main PDF, whose panel pages the AI sees as images. */
   pdf?: File
   /** Product photos found on the way. */
   images: string[]
   /** The documents read, for the user to check. */
   used: { title: string; url: string }[]
 }
-
-const readable = (t: string) => t.replace(/\s/g, '').length > 200
 
 /**
  * Reads the best documents among those found, by itself: the user guide of
@@ -120,7 +123,6 @@ export async function research(docs: FoundDoc[], model: string, onStep: (msg: st
     try {
       onStep(`Lecture de « ${d.title} »…`)
       const r = await pdfText(d.url)
-      if (!readable(r.text)) continue
       parts.unshift(`${d.title} :\n${r.text}`)
       used.unshift({ title: d.title, url: d.url })
       pdf ??= r.pdf

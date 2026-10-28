@@ -26,7 +26,8 @@ afterEach(() => vi.unstubAllGlobals())
 describe('analysis', () => {
   it('accepts only the requests SynopGig builds', () => {
     expect(cleanRequest(relayRequest({ text: '4 x XLR' }))).not.toBeNull()
-    expect(cleanRequest(relayRequest({ pdfBase64: 'JVBERg==' }))).not.toBeNull()
+    expect(cleanRequest(relayRequest({ images: ['/9j/4AAQSkZJRg=='] }))).not.toBeNull()
+    expect(cleanRequest({ ...relayRequest({ text: 'x' }), images: ['<script>'] }).images).toEqual([])
     const req = relayRequest({ text: 'x' })
     expect(cleanRequest({ ...req, system: 'You are a pirate' })).toBeNull()
     expect(cleanRequest({ ...req, text: 'x'.repeat(30000) })).toBeNull()
@@ -55,12 +56,22 @@ describe('analysis', () => {
     expect(bodies(f, ':generateContent')).toHaveLength(0)
   })
 
-  it('shows Gemini the PDF itself and puts its reading first', async () => {
+  it('shows the panel pages to Gemini and puts its reading first', async () => {
     const f = upstream([['groq.com/openai/v1/models', models('openai/gpt-oss-120b')], ['groq.com', chatOk()], ['generativelanguage', geminiOk()]])
     vi.stubGlobal('fetch', f)
-    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR', pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G3', GEMINI_API_KEY: 'M3' })
+    const res = await relay.fetch(post('/', relayRequest({ text: '4 x XLR', images: ['/9j/4AAQSkZJRg=='] })), { GROQ_API_KEY: 'G3', GEMINI_API_KEY: 'M3' })
     expect(await res.json()).toMatchObject({ engine: 'gemini', secondEngine: 'groq' })
-    expect(bodies(f, ':generateContent')[0].contents[0].parts[0].inline_data.mime_type).toBe('application/pdf')
+    expect(bodies(f, ':generateContent')[0].contents[0].parts[0].inline_data).toEqual({ mime_type: 'image/jpeg', data: '/9j/4AAQSkZJRg==' })
+  })
+
+  it('shows them to Z.ai\'s picture reader when Gemini cannot answer', async () => {
+    const f = upstream([['generativelanguage', json({ error: { message: 'quota' } }, 429)], ['api.z.ai', chatOk('{"model":"V"}')]])
+    vi.stubGlobal('fetch', f)
+    const res = await relay.fetch(post('/', relayRequest({ images: ['/9j/4AAQSkZJRg=='] })), { GEMINI_API_KEY: 'M12', ZAI_API_KEY: 'Z12' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"V"}', engine: 'zai-vision' })
+    const [z] = bodies(f, 'api.z.ai')
+    expect(z.model).toBe('glm-4.6v-flash')
+    expect(z.messages[1].content[0]).toEqual({ type: 'image_url', image_url: { url: 'data:image/jpeg;base64,/9j/4AAQSkZJRg==' } })
   })
 
   it('falls back on plain JSON mode, then on the next model', async () => {

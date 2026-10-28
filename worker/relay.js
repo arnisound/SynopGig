@@ -5,7 +5,7 @@
  * keeps the AI keys secret, searches the web, and reads pages and files of
  * other sites. Setup in worker/README.md.
  *
- *   POST /          analysis of a data sheet {v: 2, system, schema, text, fullText?, pdfBase64?, single?}
+ *   POST /          analysis of a data sheet {v: 2, system, schema, text?, fullText?, images?, single?}
  *   POST /find      {brand, model} → the product's documents, best first
  *   POST /read      {url} → a PDF or an image as is; a web page as {title, text, images, docs}
  *   POST /ocr       {url} → the text of a PDF, tables kept (Mistral OCR)
@@ -13,7 +13,7 @@
  *
  * Secrets (any of them): GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY, ZAI_API_KEY.
  * Optional: LIMITS (KV binding), ALLOWED_ORIGINS, PER_HOUR, PER_DAY, DAILY_LIMIT,
- * GROQ_MODEL, GEMINI_MODEL, MISTRAL_MODEL, ZAI_MODEL.
+ * GROQ_MODEL, GEMINI_MODEL, MISTRAL_MODEL, ZAI_MODEL, ZAI_VISION_MODEL.
  */
 
 const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
@@ -376,15 +376,17 @@ async function ocr(body, env) {
 /** Only the data sheet analyses SynopGig builds go through: the keys cannot be used for anything else. */
 export function cleanRequest(body) {
   if (!body || typeof body !== 'object' || body.v !== 2) return null
-  const { system, schema, text, fullText, pdfBase64 } = body
+  const { system, schema, text, fullText } = body
   if (typeof system !== 'string' || !system.startsWith(PROMPT_START) || system.length > 20000) return null
   if (!schema || typeof schema !== 'object' || JSON.stringify(schema).length > 20000) return null
   const hasText = typeof text === 'string' && text.trim().length > 0 && text.length <= 24000
-  const hasPdf = typeof pdfBase64 === 'string' && pdfBase64.length > 0 && pdfBase64.length <= 11_000_000
-  if (!hasText && !hasPdf) return null
+  // Pictures of the panel pages (JPEG, base64): at most 6, 6 MB in all.
+  const images = Array.isArray(body.images) ? body.images.filter((i) => typeof i === 'string' && /^[A-Za-z0-9+/=]+$/.test(i.slice(0, 200))).slice(0, 6) : []
+  if (images.reduce((n, i) => n + i.length, 0) > 6_000_000) return null
+  if (!hasText && !images.length) return null
   // Gemini reads far more per minute than the others: it may get a longer extract.
   const long = typeof fullText === 'string' && fullText.length <= 150_000 ? fullText : undefined
-  return { system, schema, text: hasText ? text : undefined, fullText: long, pdfBase64: hasPdf ? pdfBase64 : undefined, single: body.single === true }
+  return { system, schema, text: hasText ? text : undefined, fullText: long, images, single: body.single === true }
 }
 
 /** First JSON object of a reply, for models that wrap it in text. */
@@ -567,8 +569,7 @@ export async function geminiModels(env) {
 }
 
 async function askGemini(req, env) {
-  const parts = []
-  if (req.pdfBase64) parts.push({ inline_data: { mime_type: 'application/pdf', data: req.pdfBase64 } })
+  const parts = req.images.map((data) => ({ inline_data: { mime_type: 'image/jpeg', data } }))
   if (req.fullText ?? req.text) parts.push({ text: `Data sheet extracts:\n${req.fullText ?? req.text}` })
   parts.push({ text: 'List the connectors of this device.' })
   let last
@@ -601,11 +602,29 @@ async function askGemini(req, env) {
   return last
 }
 
+/** Z.ai's free picture reader (GLM-4.6V-Flash), when Gemini cannot see the panel pages. */
+async function askZaiVision(req, env) {
+  const content = [
+    ...req.images.map((data) => ({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${data}` } })),
+    { type: 'text', text: `Data sheet extracts:\n${req.fullText ?? req.text ?? '(pictures only)'}\n\nList the connectors of this device. Answer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
+  ]
+  const res = await fetch(SERVICES.zai.chat, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.ZAI_API_KEY}` },
+    body: JSON.stringify({ model: env.ZAI_VISION_MODEL || 'glm-4.6v-flash', temperature: 0.2, max_tokens: 7000, messages: [{ role: 'system', content: req.system }, { role: 'user', content }] }),
+    signal: AbortSignal.timeout(90000),
+  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: String(e.message) } }) }))
+  const data = await res.json().catch(() => ({}))
+  const text = extractJson(data.choices?.[0]?.message?.content)
+  return res.ok && text ? { status: 200, text, engine: 'zai-vision' } : { status: res.status, error: `zai (images) : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
+}
+
 /**
- * Two independent readings at once, for the app to compare: Gemini, and the
- * first text service that answers (Groq, then Mistral, then Z.ai). With
- * `single`, one reading only (settling a disagreement). Gemini's comes
- * first when it saw the PDF itself.
+ * Two independent readings at once, for the app to compare: a reader of
+ * pictures (Gemini, else Z.ai's GLM-4.6V) that sees the panel pages, and
+ * the first text service that answers (Groq, then Mistral, then Z.ai). With
+ * `single`, one reading only (settling a disagreement). The picture
+ * reader's comes first when it saw the panels.
  */
 export async function analyse(req, env) {
   const text = req.text ? Object.values(SERVICES).filter((s) => env[s.key]) : []
@@ -620,10 +639,10 @@ export async function analyse(req, env) {
     return undefined
   }
   const textAsks = text.map((s) => () => askService(s, req, env))
-  const geminiAsks = gemini ? [() => askGemini(req, env)] : []
+  const geminiAsks = [...(gemini ? [() => askGemini(req, env)] : []), ...(req.images.length && env.ZAI_API_KEY ? [() => askZaiVision(req, env)] : [])]
   const results = req.single
     ? [await first([...textAsks, ...geminiAsks])]
-    : await Promise.all(req.pdfBase64 ? [first(geminiAsks), first(textAsks)] : [first(textAsks), first(geminiAsks)])
+    : await Promise.all(req.images.length ? [first(geminiAsks), first(textAsks)] : [first(textAsks), first(geminiAsks)])
   return { results: results.filter(Boolean), errors }
 }
 
@@ -675,6 +694,14 @@ async function diagnostic(env) {
       }),
     )
   } else out.gemini = 'pas de clé GEMINI_API_KEY'
+  if (env.ZAI_API_KEY) {
+    // A small picture with "2 x XLR" written on it: does the picture reader answer?
+    const probe = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCAA8AKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqlbaxY3l7JZwTFpowxIMbKGCttbaxGGw3BwTg9au1g6VDdy65c3l7pk1oI1eG1y0RjWMsCT8rE7nIDHIAAUDqCSAbrEKpY5wBngZNZ3/CQaXtgYXQK3CRvGVRjkSOqJnA4yzAc47+hxm+HNMvNNuL2a4siqyjdbKsikwR7mIg644J3ZHHzYzhRWb/YerWdpPtsRcPeXdtfyJE6AwulykjwgsQCAuSOxIfpuFAHUX+s2WmTRQ3LTGWZHkRIbeSUlUKhj8inAG9evrVqCeK5gjngkWSKVQ6OpyGUjII/Cufv7HVNY1S0uoPtmkeVZXUJkzAzhnaEoMfOMHYx45+XqM87GkQtbaLYwNbC1aK3jQwK2REQoG0HJzjp1PSgC5RRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//2Q=='
+    checks.push(check('zai_images', 60, async () => {
+      const r = await askZaiVision({ ...req, images: [probe] }, env)
+      return r.status === 200 ? 'OK (lit les images des pages)' : `ERREUR ${r.status} : ${r.error}`
+    }))
+  }
   const search = (key, work) => check(key, 35, async () => `OK (${(await work()).length} résultats)`)
   checks.push(search('recherche_bing', () => searchBing('Shure SM58 user guide pdf')), search('recherche_duckduckgo', () => searchDuckDuckGo('Shure SM58 user guide pdf')))
   if (env.GROQ_API_KEY) checks.push(search('recherche_groq', () => searchGroq('Shure SM58', env)))

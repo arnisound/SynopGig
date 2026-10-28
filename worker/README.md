@@ -11,7 +11,7 @@ autres sites. Sans lui, l’application utilise l’analyse rapide (sans IA).
 
 | Route | Rôle |
 | --- | --- |
-| `POST /` | analyse d’une fiche (deux lectures en parallèle, ou une seule pour trancher) |
+| `POST /` | analyse d’une fiche : texte et images des pages des faces (deux lectures en parallèle, ou une seule pour trancher) |
 | `POST /find` | `{brand, model}` → documents du produit, le meilleur d’abord |
 | `POST /read` | `{url}` → PDF ou image tels quels, ou page web (texte, photos, documents liés) |
 | `POST /ocr` | `{url}` → texte d’un PDF avec ses tableaux (Mistral OCR) |
@@ -26,7 +26,7 @@ autres sites. Sans lui, l’application utilise l’analyse rapide (sans IA).
    - `GEMINI_API_KEY` — <https://aistudio.google.com/apikey> (lit de longs documents et les PDF) ;
    - `MISTRAL_API_KEY` — <https://console.mistral.ai>, offre *Experiment* (lit les PDF avec
      leurs tableaux grâce à l’OCR, si votre offre y a accès) ;
-   - `ZAI_API_KEY` — <https://z.ai> → *API Keys* (modèles GLM Flash gratuits).
+   - `ZAI_API_KEY` — <https://z.ai> → *API Keys* (modèles GLM Flash gratuits, dont un qui lit les images).
 3. **Compteurs (conseillé)** : *Storage & Databases* → *KV* → *Create* `synopgig-limits`, puis
    dans le Worker *Settings* → *Bindings* → *Add* → *KV namespace*, variable **`LIMITS`**.
 4. L’adresse du Worker est dans l’application (`DEFAULT_AI_PROXY_URL`, `src/library/ai.ts`) :
@@ -46,9 +46,11 @@ Sites autorisés : `arnisoundtools.com`, GitHub Pages et `localhost:5173` (varia
 2. L’application prend seule le mode d’emploi du modèle (sinon sa fiche technique) et sa page
    produit (photos, documents liés), les lit — PDF par `/ocr`, sinon dans le navigateur — et
    lance l’analyse. L’utilisateur peut en choisir un autre dans la liste.
-3. L’analyse lit deux fois en même temps (Gemini sur un long extrait, et Groq, sinon Mistral,
-   sinon Z.ai) ; si les deux lectures divergent, une troisième tranche. Chaque ligne est
-   vérifiée contre le texte, ce qui reste douteux est en orange.
+3. L’analyse lit deux fois en même temps : un lecteur d’images (Gemini, sinon GLM-4.6V-Flash
+   de Z.ai) voit **les pages des faces avant et arrière** (dessins des prises) et un long
+   extrait ; une IA texte (Groq, sinon Mistral, sinon Z.ai) lit les passages utiles. Si les
+   deux lectures divergent, une troisième tranche. Chaque ligne est vérifiée contre le texte,
+   des règles de technicien corrigent les erreurs évidentes, ce qui reste douteux est en orange.
 
 ## Protection
 

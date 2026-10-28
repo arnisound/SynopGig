@@ -60,7 +60,7 @@ describe('automatic AI choice', () => {
     expect(await ai.availableEngines(undefined, true)).toEqual([])
   })
 
-  it('sends the relay the useful lines of a text PDF, and the small PDF itself for Gemini', async () => {
+  it('sends the relay the useful lines of a text PDF', async () => {
     const fetchMock = vi.fn(async () => relayOk())
     vi.stubGlobal('fetch', fetchMock)
     const ai = await load('https://relay.example/')
@@ -71,19 +71,16 @@ describe('automatic AI choice', () => {
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
     expect(url).toBe('https://relay.example/')
     const body = JSON.parse(String(init.body))
-    expect(body.pdfBase64).toBe('JVBERg==')
+    expect(body.pdfBase64).toBeUndefined()
     expect(body.text).toContain('4 x XLR/TRS combo')
     expect(body.text.length).toBeLessThan(text.length)
   })
 
-  it('sends a scanned PDF itself', async () => {
-    const fetchMock = vi.fn(async () => relayOk())
-    vi.stubGlobal('fetch', fetchMock)
+  it('says when a scan has no page to show (no browser drawing here)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => relayOk()))
     const ai = await load('https://relay.example/')
     const pdf = new File([new Uint8Array([37, 80, 68, 70])], 'scan.pdf', { type: 'application/pdf' })
-    await ai.extractAuto({ text: '', pdf, onProgress: () => {} })
-    const body = JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body))
-    expect(body.pdfBase64).toBe('JVBERg==')
+    await expect(ai.extractRelay({ text: '', pdf })).rejects.toThrow('PDF scanné')
   })
 
   it('falls back to Chrome when the relay fails', async () => {

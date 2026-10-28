@@ -54,7 +54,7 @@ export interface AiResult {
   /** Services that answered, e.g. "Gemini + Groq". */
   by?: string
   /** What was sent and what came back, word for word: the analysis report. */
-  trace?: { sent?: string; geminiChars?: number; pdf?: boolean; answers: { engine?: string; raw?: string }[] }
+  trace?: { sent?: string; geminiChars?: number; images?: number; answers: { engine?: string; raw?: string }[] }
 }
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
@@ -90,6 +90,7 @@ Types:
 - Mains power is an input with signal "power" (IEC, powerCON, powerCON TRUE1...). A mains link output is an output with signal "power".
 - An XLR/jack combo is "xlr-combo". A headphone output is a "jack" or "minijack" output. Speaker outputs (Speakon, binding posts, terminal blocks) use signal "speaker".
 - label: short French name, e.g. "Entrée", "Sortie", "Link", "Sortie HP", "Dante", "Secteur", "Casque".
+When pictures of the panel pages come with the text, read the drawings too: every socket drawn on the front or rear panel is a connector, with its printed label; trust the drawing over a summary.
 Also give brand, model, category, family, rackU (height in rack units, only for 19 inch rack devices) and weight in kg, when written.
 Connector codes: ${Object.entries(CONNECTORS).map(([k, v]) => `${k} = ${v}`).join('; ')}.
 Signal codes: ${Object.entries(SIGNALS).map(([k, v]) => `${k} = ${v.label}`).join('; ')}.
@@ -485,30 +486,28 @@ export async function extractGemini(input: { text?: string; pdf?: File; device?:
 }
 
 /** What the relay accepts: the prompt, the schema, the useful lines and/or the PDF (for Gemini). */
-export function relayRequest(input: { text?: string; fullText?: string; pdfBase64?: string; single?: boolean; system?: string }) {
-  return { v: 2, system: input.system ?? SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, fullText: input.fullText, pdfBase64: input.pdfBase64, ...(input.single ? { single: true } : {}) }
+export function relayRequest(input: { text?: string; fullText?: string; images?: string[]; single?: boolean; system?: string }) {
+  return { v: 2, system: input.system ?? SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, fullText: input.fullText, ...(input.images?.length ? { images: input.images } : {}), ...(input.single ? { single: true } : {}) }
 }
 
 /** What Gemini reads (its free quota allows far more than the others'): most of the sheet. */
 const GEMINI_BUDGET = 60000
 
-/** A PDF small enough to be shown to Gemini as it is (tables, panel drawings). */
-const PDF_FOR_GEMINI = 4_000_000
-
-const ENGINE_NAMES: Record<string, string> = { groq: 'Groq', mistral: 'Mistral', zai: 'Z.ai', gemini: 'Gemini', 'workers-ai': 'Cloudflare' }
+const ENGINE_NAMES: Record<string, string> = { groq: 'Groq', mistral: 'Mistral', zai: 'Z.ai', 'zai-vision': 'Z.ai (images)', gemini: 'Gemini' }
 
 /** The relay forwards to Groq or Gemini with the site owner's key, kept secret on the server. */
 export async function extractRelay(input: { text?: string; pdf?: File; device?: string }, url = AI_PROXY_URL): Promise<AiResult> {
   const text = input.text ?? ''
   const scan = !!input.pdf && !isReadable(text)
   if (!scan && !text.trim()) throw new Error('rien à analyser')
-  if (scan && input.pdf!.size > 8_000_000) throw new Error('PDF scanné trop lourd : collez le texte des caractéristiques')
-  const withPdf = !!input.pdf && (scan || input.pdf.size <= PDF_FOR_GEMINI)
-  // A scan has no text for the text models (they would guess from the name alone): Gemini only, told the device.
+  // The pages showing the panels, as pictures: the drawings say what the scattered labels do not.
+  const images = input.pdf ? await import('./pdfText').then((m) => m.panelPages(input.pdf!)).catch(() => []) : []
+  if (scan && !images.length) throw new Error('PDF scanné illisible : collez le texte des caractéristiques')
+  // A scan has no text for the text models (they would guess from the name alone): the picture reader only, told the device.
   const body = relayRequest({
     text: scan ? undefined : deviceLine(input.device) + focusText(text, TEXT_BUDGET, input.device),
     fullText: scan || text.length <= TEXT_BUDGET ? undefined : deviceLine(input.device) + focusText(text, GEMINI_BUDGET, input.device),
-    pdfBase64: withPdf ? await toBase64(input.pdf!) : undefined,
+    images,
   })
   if (scan && input.device?.trim()) body.system += `\n${deviceLine(input.device).trim()}`
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
@@ -519,7 +518,7 @@ export async function extractRelay(input: { text?: string; pdf?: File; device?: 
   const trace = {
     sent: body.text,
     geminiChars: (body.fullText ?? body.text)?.length,
-    pdf: !!body.pdfBase64,
+    images: images.length,
     answers: [{ engine: data.engine, raw: data.text }, ...(data.second ? [{ engine: data.secondEngine, raw: data.second }] : [])],
   }
   if (!data.second) return { ...main, by: name(data.engine) || undefined, trace }
