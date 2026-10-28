@@ -42,6 +42,8 @@ interface Row extends PortGroup {
   guessed?: boolean
   conflicting?: number[]
   ai?: boolean
+  /** AI rows: why the sheet does not confirm it (empty: confirmed). */
+  doubts?: string[]
 }
 
 interface Draft {
@@ -202,8 +204,10 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
       setFile(pdf)
       setFindStatus('')
       // The exact name the user confirmed decides: a neighbouring model would give a wrong sheet.
-      await runAi(`Brand: ${fBrand}\nModel: ${fModel}\n${docText}`, `la documentation de ${doc.host}`, pdf)
-      setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model: fModel.trim(), found: { url: doc.url, share: true } })
+      const doubtful = await runAi(docText, `la documentation de ${doc.host}`, pdf, `${fBrand.trim()} ${fModel.trim()}`.trim())
+      // Only a sheet that confirms every row is shared with everyone without a second look.
+      setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model: fModel.trim(), found: { url: doc.url, share: doubtful === 0 } })
+      if (doubtful > 0) setStatus((s) => `${s} Le partage USER attend votre relecture : cochez-le une fois les lignes en orange vérifiées.`)
       setFound(undefined)
       void (images.length ? Promise.resolve(images) : page ? pageImages(page.url, fModel.trim()) : Promise.resolve([])).then(loadPhotos)
     } catch (e) {
@@ -249,20 +253,32 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
     )
   }
 
-  const runAi = async (source: string, label: string, pdf?: File) => {
+  /** Returns how many rows the sheet does not confirm (-1: no AI could answer). */
+  const runAi = async (source: string, label: string, pdf?: File, device?: string) => {
     setBusy(true)
     try {
       const ai = await import('./ai')
       const started = clock()
-      const { result, engine } = await ai.extractAuto({ text: source, pdf, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setStatus })
+      const { result, engine } = await ai.extractAuto({ text: source, pdf, device, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setStatus })
       const seconds = Math.max(1, Math.round((clock() - started) / 1000))
-      setDraft(fromResult(result, result.groups.map((g) => row({ ...g, ai: true }))))
-      setSuggestions([])
-      setStatus(`${result.groups.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} en ${seconds} s pour ${label}. Relisez avant d’enregistrer : une IA peut se tromper.`)
+      // Each row checked against the sheet and the rule-based reading, which owes nothing to the AI.
+      const rules = source.trim() ? parseDatasheet(source, BRANDS).groups : []
+      const checked = source.trim() ? ai.checkAnswer(result.groups, source, rules) : result.groups.map((g) => ({ ...g, doubts: ['texte de la fiche illisible (scan)'] }))
+      const rows = checked.map(({ quote, doubts, ...g }) => row({ ...g, ai: true, doubts, evidence: quote ? [quote] : undefined }))
+      setDraft(fromResult(result, rows))
+      // What the rules read with a quantity and the AI left out: offered, not added.
+      setSuggestions(rules.filter((r) => !r.guessed && !checked.some((g) => g.connector === r.connector)).map((g) => row(g)))
+      const doubtful = checked.filter((g) => g.doubts.length).length
+      setStatus(
+        `${checked.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]} en ${seconds} s pour ${label} : ` +
+          `${checked.length - doubtful} confirmé(s) par la fiche${doubtful ? `, ${doubtful} à vérifier (en orange)` : ''}.`,
+      )
+      return doubtful
     } catch (e) {
       // No AI could answer: the quick analysis still gives a starting point.
       if (source.trim()) runRules(source, label)
       setStatus((s) => `IA indisponible (${(e as Error).message}). ${source.trim() ? `Analyse rapide utilisée à la place : ${s}` : 'Collez le texte des caractéristiques pour l’analyse rapide.'}`)
+      return -1
     } finally {
       setBusy(false)
     }
@@ -390,7 +406,8 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
 
   const set = (patch: Partial<Draft>) => draft && setDraft({ ...draft, ...patch })
   const setRow = (key: string, patch: Partial<Row>) =>
-    draft && setDraft({ ...draft, rows: draft.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) })
+    // A count or connector set by hand is the user's check: no more warning on it.
+    draft && setDraft({ ...draft, rows: draft.rows.map((r) => (r.key === key ? { ...r, ...patch, ...('count' in patch || 'connector' in patch ? { doubts: [] } : {}) } : r)) })
   const portCount = draft ? draft.rows.reduce((s, r) => s + Math.max(0, r.count), 0) : 0
 
   return (
@@ -705,7 +722,18 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
 
 /** Where a row comes from, and why it may be wrong. */
 function RowNotes({ r }: { r: Row }) {
-  if (r.ai) return <small className="evidence"><span className="ai">proposé par l’IA</span></small>
+  if (r.ai) {
+    const doubts = r.doubts ?? []
+    return (
+      <details className="evidence">
+        <summary>
+          <span className="ai">IA</span> {doubts.length ? <span className="doubt">à vérifier</span> : <span className="sure">confirmé par la fiche</span>}
+          {doubts.length > 0 && ` · ${doubts.join(' · ')}`}
+        </summary>
+        {r.evidence?.map((l) => <div key={l}>« {l} »</div>)}
+      </details>
+    )
+  }
   const warnings = [r.conflicting?.length && `autres valeurs lues : ${r.conflicting.join(', ')}`, r.count > 32 && 'nombre élevé'].filter(Boolean)
   if (!r.evidence?.length && !warnings.length) return null
   return (

@@ -66,13 +66,13 @@ function extractJson(text) {
 
 // Groq renames and retires models: ask the account which ones it can use.
 const GROQ_PREFERRED = [
-  'llama-3.3-70b-versatile',
   'openai/gpt-oss-120b',
+  'llama-3.3-70b-versatile',
+  'moonshotai/kimi-k2-instruct',
+  'qwen/qwen3-32b',
   'openai/gpt-oss-20b',
   'meta-llama/llama-4-maverick-17b-128e-instruct',
   'meta-llama/llama-4-scout-17b-16e-instruct',
-  'qwen/qwen3-32b',
-  'moonshotai/kimi-k2-instruct',
   'llama-3.1-8b-instant',
 ]
 const NOT_CHAT = /whisper|tts|guard|playai|orpheus|distil|compound|allam/i
@@ -97,34 +97,69 @@ export async function pickGroqModels(env) {
   return [...new Set([...wanted, ...others])].slice(0, 2)
 }
 
-async function groqCall(req, env, model, strictJson) {
+/**
+ * Strict structured output (OpenAI style): every property listed as required,
+ * the optional ones nullable, no extra keys.
+ */
+export function strictSchema(s) {
+  if (!s || typeof s !== 'object' || Array.isArray(s)) return s
+  if (s.type === 'array') return { ...s, items: strictSchema(s.items) }
+  if (s.type !== 'object') return s
+  const required = new Set(s.required ?? [])
+  const properties = Object.fromEntries(
+    Object.entries(s.properties ?? {}).map(([k, v]) => {
+      const inner = strictSchema(v)
+      if (required.has(k)) return [k, inner]
+      return [k, { ...inner, type: [inner.type, 'null'], ...(inner.enum ? { enum: [...inner.enum, null] } : {}) }]
+    }),
+  )
+  return { type: 'object', properties, required: Object.keys(properties), additionalProperties: false }
+}
+
+/** Reasoning models think before answering: worth it, a sheet is full of traps. */
+const thinks = (model) => model.startsWith('openai/gpt-oss') || /qwen3|deepseek/.test(model)
+
+/** mode: 'schema' (strict structured output), 'json' (any JSON object) or 'plain'. */
+async function groqCall(req, env, model, mode) {
+  const format =
+    mode === 'schema'
+      ? { response_format: { type: 'json_schema', json_schema: { name: 'device', strict: true, schema: strictSchema(req.schema) } } }
+      : mode === 'json'
+        ? { response_format: { type: 'json_object' } }
+        : {}
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
     body: JSON.stringify({
       model,
-      temperature: 0,
-      max_tokens: 2048,
-      // Reasoning models: keep the thinking short, the task is simple.
-      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {}),
-      ...(strictJson ? { response_format: { type: 'json_object' } } : {}),
+      temperature: thinks(model) ? 0.2 : 0,
+      // The thinking counts in the tokens: room for it and for a long list.
+      max_tokens: thinks(model) ? 8000 : 3000,
+      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: env.GROQ_REASONING || 'medium' } : {}),
+      ...(/qwen3|deepseek/.test(model) ? { reasoning_format: 'hidden' } : {}),
+      ...format,
       messages: [
-        { role: 'system', content: `${req.system}\nAnswer with a single JSON object following this JSON schema, nothing else:\n${JSON.stringify(req.schema)}` },
-        { role: 'user', content: `Data sheet:\n${req.text}` },
+        // The schema is already enforced in strict mode: spared tokens.
+        { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object following this JSON schema, nothing else:\n${JSON.stringify(req.schema)}` },
+        { role: 'user', content: `Data sheet extracts:\n${req.text}` },
       ],
     }),
-  })
+    signal: AbortSignal.timeout(60000),
+  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
   const data = await res.json().catch(() => ({}))
   return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error: res.ok ? undefined : reason(data, res.status) }
 }
 
-/** Best model in strict JSON mode, then without it, then the second model. */
+/**
+ * Best model with strict structured output, then plain JSON mode (a model or
+ * account without structured outputs), then the second model.
+ */
 async function askGroq(req, env) {
   const [main, second] = await pickGroqModels(env)
-  const tries = [[main, true], [main, false], ...(second ? [[second, false]] : [])]
+  const tries = [[main, 'schema'], [main, 'json'], ...(second ? [[second, 'json'], [second, 'plain']] : [[main, 'plain']])]
   let last
-  for (const [model, strict] of tries) {
-    last = await groqCall(req, env, model, strict)
+  for (const [model, mode] of tries) {
+    last = await groqCall(req, env, model, mode)
     if (last.status === 200 && last.text) return last
     // A model that disappeared: list them again next time.
     if (last.status === 404) groqModels = undefined
@@ -144,8 +179,8 @@ function geminiSchema(s) {
 async function askGemini(req, env) {
   const parts = req.pdfBase64
     ? [{ inline_data: { mime_type: 'application/pdf', data: req.pdfBase64 } }, { text: 'List the connectors of this device.' }]
-    : [{ text: `Data sheet:\n${req.text}` }]
-  const model = env.GEMINI_MODEL || 'gemini-2.5-flash-lite'
+    : [{ text: `Data sheet extracts:\n${req.text}` }]
+  const model = env.GEMINI_MODEL || 'gemini-2.5-flash'
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
@@ -154,10 +189,11 @@ async function askGemini(req, env) {
       contents: [{ role: 'user', parts }],
       generationConfig: {
         temperature: 0,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 6000,
         responseMimeType: 'application/json',
         responseSchema: geminiSchema(req.schema),
-        thinkingConfig: { thinkingBudget: 0 },
+        // A short thinking pass: counts per channel, duplicates, options.
+        thinkingConfig: { thinkingBudget: 1024 },
       },
     }),
   })

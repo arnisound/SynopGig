@@ -41,17 +41,23 @@ describe('AI relay', () => {
   })
 
   it('picks a model the Groq account really has', async () => {
-    const upstream = groq(['whisper-large-v3', 'openai/gpt-oss-20b', 'qwen/qwen3-32b'], groqOk)
+    const upstream = groq(['whisper-large-v3', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b'], groqOk)
     vi.stubGlobal('fetch', upstream)
     await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G2' })
     const body = JSON.parse(chatCalls(upstream).at(-1)[1].body)
-    expect(body.model).toBe('openai/gpt-oss-20b')
-    expect(body.reasoning_effort).toBe('low')
+    expect(body.model).toBe('openai/gpt-oss-120b')
+    // It thinks before answering, and the answer must follow the schema.
+    expect(body.reasoning_effort).toBe('medium')
+    expect(body.response_format).toMatchObject({ type: 'json_schema', json_schema: { strict: true } })
+    const ports = body.response_format.json_schema.schema.properties.ports.items
+    expect(ports.additionalProperties).toBe(false)
+    expect(body.response_format.json_schema.schema.properties.rackU.type).toEqual(['integer', 'null'])
   })
 
   it('accepts JSON wrapped in text and retries without strict mode', async () => {
     const upstream = groq(
       ['llama-3.3-70b-versatile'],
+      () => new Response(JSON.stringify({ error: { message: 'json_schema not supported' } }), { status: 400 }),
       () => new Response(JSON.stringify({ error: { message: 'json_validate_failed' } }), { status: 400 }),
       () => new Response(JSON.stringify({ choices: [{ message: { content: 'Here you go: {"model":"Z"} done' } }] })),
     )
@@ -84,13 +90,13 @@ describe('AI relay', () => {
     expect(out.groq_modeles_du_compte).toEqual(['openai/gpt-oss-120b'])
   })
 
-  it('sends scanned PDFs to Gemini, with thinking turned off', async () => {
+  it('sends scanned PDFs to Gemini, with a short thinking pass', async () => {
     const upstream = vi.fn(async () => geminiOk())
     vi.stubGlobal('fetch', upstream)
     const res = await relay.fetch(post(relayRequest({ pdfBase64: 'JVBERg==' })), { GROQ_API_KEY: 'G', GEMINI_API_KEY: 'M' })
     expect(await res.json()).toEqual({ text: '{"model":"Y"}' })
-    expect(upstream.mock.calls[0][0]).toContain('gemini-2.5-flash-lite')
-    expect(JSON.parse(upstream.mock.calls[0][1].body).generationConfig.thinkingConfig.thinkingBudget).toBe(0)
+    expect(upstream.mock.calls[0][0]).toContain('gemini-2.5-flash:')
+    expect(JSON.parse(upstream.mock.calls[0][1].body).generationConfig.thinkingConfig.thinkingBudget).toBe(1024)
   })
 
   it('falls back to Gemini when Groq is out of quota', async () => {
