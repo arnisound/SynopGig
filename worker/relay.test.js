@@ -108,6 +108,25 @@ describe('AI relay', () => {
     expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral') && !String(u).endsWith('/models'))).toHaveLength(2)
   })
 
+  it('uses Cerebras when Groq is full', async () => {
+    const upstream = vi.fn(async (url) =>
+      String(url).includes('groq') ? (String(url).endsWith('/models') ? models('openai/gpt-oss-120b') : new Response('{}', { status: 429 })) : groqOk(),
+    )
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { GROQ_API_KEY: 'G7', CEREBRAS_API_KEY: 'C' })
+    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    const [url, init] = upstream.mock.calls.find(([u]) => String(u).includes('cerebras'))
+    expect(url).toBe('https://api.cerebras.ai/v1/chat/completions')
+    expect(JSON.parse(init.body).model).toBe('gpt-oss-120b')
+  })
+
+  it('falls back on Cloudflare Workers AI, without any key', async () => {
+    const AI = { run: vi.fn(async () => ({ response: 'ok: {"model":"W"}' })) }
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { AI })
+    expect(await res.json()).toEqual({ text: '{"model":"W"}' })
+    expect(AI.run.mock.calls[0][0]).toBe('@cf/openai/gpt-oss-120b')
+  })
+
   it('says exactly why the provider refused', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
     const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'bad' })

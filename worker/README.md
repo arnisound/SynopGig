@@ -20,6 +20,12 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
      gratuite, Mistral peut se servir des requêtes pour entraîner ses modèles : ce ne sont
      que des fiches techniques publiques. Pour un usage plus large, l’offre payante coûte
      quelques centimes par mois à ce volume ; fixez une limite de dépense dans la console.
+   - **Cerebras** (facultatif, même modèle `gpt-oss-120b` que Groq, quota gratuit à part
+     d’environ un million de tokens par jour) : <https://cloud.cerebras.ai> → *API Keys*.
+     Secret `CEREBRAS_API_KEY`.
+   - **Cloudflare Workers AI** (facultatif, sans clé) : *Settings* → *Bindings* → *Add* →
+     *Workers AI*, nom `AI`. Utilisé en tout dernier recours : son allocation gratuite est
+     petite, et elle s’ajoute à ce que Cloudflare fait déjà tourner pour SynopGig.
    - **Groq (le plus rapide)** : créez un compte sur <https://console.groq.com>
      (connexion Google ou GitHub possible), puis *API Keys* → *Create API Key*. Copiez la clé
      (`gsk_…`).
@@ -89,7 +95,8 @@ les limites (voir « Protection ») ; lire les documents et les photos n’en co
 ## Comment il choisit
 
 - Fiche avec du texte (cas normal) : **Mistral** (modèle `mistral-medium-latest`, puis
-  `mistral-small-latest`), puis **Groq** (`gpt-oss-120b`, puis le second modèle), puis Gemini.
+  `mistral-small-latest`), puis **Groq** (`gpt-oss-120b`, puis le second modèle), puis
+  **Cerebras**, puis Gemini, puis Workers AI s’il est relié.
 - PDF scanné (une image, sans texte) : **Gemini** uniquement.
 - Si l’un échoue (quota…), il passe au suivant ; si rien ne répond, l’application revient
   seule à l’analyse rapide.

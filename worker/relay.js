@@ -6,7 +6,10 @@
  * Settings (Cloudflare > Worker > Settings > Variables and Secrets):
  *   GROQ_API_KEY     secret, recommended: very fast (console.groq.com/keys)
  *   MISTRAL_API_KEY  secret, recommended first: generous free tier (console.mistral.ai)
+ *   CEREBRAS_API_KEY secret, optional: gpt-oss-120b with its own free quota (cloud.cerebras.ai)
  *   GEMINI_API_KEY   secret, alternative or complement: also reads scanned PDFs
+ *   AI               binding (Settings > Bindings > Workers AI), no key: Cloudflare's
+ *                    own open models, used last (small free daily allowance)
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
  *   GROQ_MODEL       optional (default: best model the account can use)
  *   GEMINI_MODEL     optional (default gemini-2.5-flash)
@@ -184,8 +187,17 @@ export function shape(s) {
   return String(s.type)
 }
 
-/** mode: 'schema' (strict structured output), 'json' (any JSON object) or 'plain'. */
-async function groqCall(req, env, model, mode) {
+/** The messages of an analysis; in strict mode the schema is enforced already: spared tokens. */
+const analysisMessages = (req, mode) => [
+  { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
+  { role: 'user', content: `Data sheet extracts:\n${req.text}` },
+]
+
+/**
+ * One analysis on an OpenAI-compatible service (Groq, Cerebras).
+ * mode: 'schema' (strict structured output), 'json' (any JSON object) or 'plain'.
+ */
+async function openAiCall(url, key, req, env, model, mode) {
   const format =
     mode === 'schema'
       ? { response_format: { type: 'json_schema', json_schema: { name: 'device', strict: true, schema: strictSchema(req.schema) } } }
@@ -193,23 +205,19 @@ async function groqCall(req, env, model, mode) {
         ? { response_format: { type: 'json_object' } }
         : {}
   const big = model.includes('120b')
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
     body: JSON.stringify({
       model,
       temperature: thinks(model) ? 0.2 : 0,
       // The thinking counts in the tokens: room for it and for a long list.
       max_tokens: thinks(model) ? 6000 : 2500,
       // The best model thinks a little more; the spare one stays quick and cheap.
-      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: env.GROQ_REASONING || (big ? 'medium' : 'low') } : {}),
-      ...(/qwen3|deepseek/.test(model) ? { reasoning_format: 'hidden' } : {}),
+      ...(/gpt-oss/.test(model) ? { reasoning_effort: env.GROQ_REASONING || (big ? 'medium' : 'low') } : {}),
+      ...(/qwen3|deepseek/.test(model) && url.includes('groq') ? { reasoning_format: 'hidden' } : {}),
       ...format,
-      messages: [
-        // The schema is already enforced in strict mode: spared tokens.
-        { role: 'system', content: mode === 'schema' ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
-        { role: 'user', content: `Data sheet extracts:\n${req.text}` },
-      ],
+      messages: analysisMessages(req, mode),
     }),
     signal: AbortSignal.timeout(60000),
   }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
@@ -218,6 +226,70 @@ async function groqCall(req, env, model, mode) {
   // "Please try again in 7.5s": how long until the minute quota frees up.
   const wait = error && /try again in (?:(\d+)m)?([\d.]+)s/i.exec(error)
   return { status: res.status, text: extractJson(data.choices?.[0]?.message?.content), error, wait: wait ? Number(wait[1] ?? 0) * 60 + Number(wait[2]) : undefined }
+}
+
+const groqCall = (req, env, model, mode) => openAiCall('https://api.groq.com/openai/v1/chat/completions', env.GROQ_API_KEY, req, env, model, mode)
+
+/*
+ * Cerebras: same open models as Groq (gpt-oss-120b), its own free quota
+ * (about a million tokens a day). Key at cloud.cerebras.ai.
+ */
+async function askCerebras(req, env) {
+  const models = [...new Set([env.CEREBRAS_MODEL || 'gpt-oss-120b', 'llama-3.3-70b'])]
+  const url = 'https://api.cerebras.ai/v1/chat/completions'
+  let last
+  for (const [model, mode] of models.flatMap((m) => [[m, 'schema'], [m, 'json']])) {
+    last = await openAiCall(url, env.CEREBRAS_API_KEY, req, env, model, mode)
+    if (last.status === 200 && last.text) return last
+    if (last.status === 401 || last.status === 403) break
+  }
+  return { ...last, error: `Cerebras ${last.status} : ${last.error ?? 'réponse illisible'}` }
+}
+
+/** Text of a Workers AI answer, whatever its shape (plain, OpenAI chat or Responses). */
+function workersText(out) {
+  if (!out) return ''
+  if (typeof out === 'string') return out
+  if (typeof out.response === 'string') return out.response
+  if (out.response && typeof out.response === 'object') return JSON.stringify(out.response)
+  const chat = out.choices?.[0]?.message?.content
+  if (typeof chat === 'string') return chat
+  if (Array.isArray(out.output)) {
+    return out.output
+      .flatMap((o) => (Array.isArray(o.content) ? o.content : []))
+      .map((c) => c.text ?? '')
+      .join('')
+  }
+  return ''
+}
+
+/*
+ * Cloudflare Workers AI: open models run by Cloudflare itself, no key at
+ * all, only an "AI" binding on this Worker. Free daily allowance (10 000
+ * "neurons" a day, shared by every model): kept for when the others are full.
+ */
+async function askWorkersAi(req, env) {
+  const models = [...new Set([env.WORKERS_AI_MODEL || '@cf/openai/gpt-oss-120b', '@cf/meta/llama-3.3-70b-instruct-fp8-fast'])]
+  let last
+  for (const model of models) {
+    try {
+      const out = await env.AI.run(model, {
+        messages: analysisMessages(req, 'json'),
+        max_tokens: 6000,
+        temperature: 0.2,
+        ...(model.includes('gpt-oss') ? { reasoning: { effort: 'medium' } } : {}),
+      })
+      const text = extractJson(workersText(out))
+      if (text) return { status: 200, text }
+      last = { status: 200, error: 'réponse illisible' }
+    } catch (e) {
+      const message = String(e?.message ?? e).slice(0, 200)
+      // 4006: the daily free allowance is used up.
+      last = { status: /4006|neuron|limit|capacity/i.test(message) ? 429 : 502, error: message }
+      if (last.status === 429) break
+    }
+  }
+  return { ...last, error: `Workers AI ${last.status} : ${last.error}` }
 }
 
 const sleep = (s) => new Promise((r) => setTimeout(r, s * 1000))
@@ -672,6 +744,14 @@ async function diagnostic(env) {
     out.mistral = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
     out.mistral_modeles_du_compte = mistralModels?.list ?? []
   }
+  if (env.CEREBRAS_API_KEY) {
+    const r = await openAiCall('https://api.cerebras.ai/v1/chat/completions', env.CEREBRAS_API_KEY, req, env, env.CEREBRAS_MODEL || 'gpt-oss-120b', 'json').catch((e) => ({ status: 0, error: String(e) }))
+    out.cerebras = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+  }
+  if (env.AI) {
+    const r = await askWorkersAi(req, env).catch((e) => ({ status: 0, error: String(e) }))
+    out.workers_ai = r.status === 200 && r.text ? 'OK (sans clé)' : `ERREUR ${r.error}`
+  } else out.workers_ai = 'pas de liaison AI (Settings > Bindings > Workers AI)'
   const day = today()
   const used = env.LIMITS ? Number(await env.LIMITS.get(`d:${day}:all`)) || 0 : undefined
   out.protection = {
@@ -746,7 +826,7 @@ export default {
       if (r.image) return new Response(r.image, { headers: { ...cors, 'Content-Type': r.type } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
-    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)
+    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.CEREBRAS_API_KEY && !env.GEMINI_API_KEY && !env.AI) return fail('Relais non configuré (clé manquante).', 500)
 
     let req
     try {
@@ -763,7 +843,10 @@ export default {
     const order = []
     if (env.MISTRAL_API_KEY && req.text) order.push(askMistral)
     if (env.GROQ_API_KEY && req.text) order.push(askGroq)
+    if (env.CEREBRAS_API_KEY && req.text) order.push(askCerebras)
     if (env.GEMINI_API_KEY) order.push(askGemini)
+    // No key at all: Cloudflare's own models, last because their daily allowance is small.
+    if (env.AI && req.text) order.push(askWorkersAi)
     if (order.length === 0) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
 
     const errors = []
