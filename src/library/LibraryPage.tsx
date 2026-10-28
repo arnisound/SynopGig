@@ -213,7 +213,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
     setFinding(true)
     setFindStatus(`Lecture de ${doc.host}…`)
     try {
-      const { text: docText, pdf, images } = await loadDoc(doc, fModel.trim())
+      const { text: docText, pdf, images, manual } = await loadDoc(doc, fModel.trim(), setFindStatus)
       setPhotos([])
       setPhotoStatus('')
       // A PDF has no photo to offer: take them from the product page found with it.
@@ -222,7 +222,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
       setFile(pdf)
       setFindStatus('')
       // The exact name the user confirmed decides: a neighbouring model would give a wrong sheet.
-      const doubtful = await runAi(docText, `la documentation de ${doc.host}`, pdf, `${fBrand.trim()} ${fModel.trim()}`.trim())
+      const doubtful = await runAi(docText, manual ? `la page de ${doc.host} et « ${manual.title} »` : `la documentation de ${doc.host}`, pdf, `${fBrand.trim()} ${fModel.trim()}`.trim())
       // Only a sheet that confirms every row is shared with everyone without a second look.
       setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model: fModel.trim(), found: { url: doc.url, share: doubtful === 0 } })
       if (doubtful > 0) setStatus((s) => `${s} Le partage USER attend votre relecture : cochez-le une fois les lignes en orange vérifiées.`)

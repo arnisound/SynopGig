@@ -69,6 +69,11 @@ Counting:
 - If the count is really not written, use 1.
 - Never invent. Leave out options and expansion cards that are not fitted, accessories, compatible formats, wireless links, internal buses and network audio channels ("64 Dante channels" on two ports is 2 connectors, not 64).
 - Ignore every measurement (gain, impedance, frequency response, level, noise).
+- Channel counts are not connectors: "16 x 12 I/O", "2 x 2 USB audio interface", "64 x 64 Dante" describe channels; a "2 x 2 USB interface" is 1 USB port.
+- Mixers: mic inputs, line inputs, main outputs, aux / FX / monitor sends, subgroups, matrix, control room, headphones, insert and footswitch jacks are each physical connectors when the sheet gives their count ("4 subgroups" = 4 outputs).
+- Stereo inputs and outputs: L and R on two jacks, two XLR or two RCA count 2 connectors per stereo input; a single TRS or mini-jack stereo socket counts 1. A stereo RCA input is "rca" x2.
+- Bluetooth, Wi-Fi and apps are not connectors.
+- A sheet may be wrong or mixed with another product (web pages often are): when a section clearly describes another kind of device (e.g. loudspeaker data on a mixer page), ignore it, weight and size included.
 Types:
 - Ethernet, Dante, AES67, AVB and USB ports are "io". etherCON is "ethercon", a plain RJ45 is "rj45". Primary + secondary Dante = 2 ports.
 - Mains power is an input with signal "power" (IEC, powerCON, powerCON TRUE1...). A mains link output is an output with signal "power".
@@ -192,9 +197,26 @@ export interface CheckedGroup extends AiGroup {
   doubts: string[]
 }
 
-/** Same connector, compatible direction. */
+/** Connectors two readings may name differently for the same socket. */
+const FAMILY: Partial<Record<ConnectorType, string>> = {
+  xlr3: 'xlr',
+  'xlr-combo': 'xlr',
+  rj45: 'rj45',
+  ethercon: 'rj45',
+  usb: 'usb',
+  'usb-c': 'usb',
+  powercon: 'powercon',
+  'powercon-true1': 'powercon',
+  speakon: 'speakon',
+  speakon8: 'speakon',
+  bnc: 'bnc',
+  sdi: 'bnc',
+}
+const family = (c: ConnectorType) => FAMILY[c] ?? c
+
+/** Same socket (or a close kind of it), compatible direction. */
 const sameKind = (a: { connector: ConnectorType; dir: PortDirection }, b: { connector: ConnectorType; dir: PortDirection }) =>
-  a.connector === b.connector && (a.dir === b.dir || a.dir === 'io' || b.dir === 'io')
+  family(a.connector) === family(b.connector) && (a.dir === b.dir || a.dir === 'io' || b.dir === 'io')
 
 /**
  * Every group of an answer checked against the sheet itself: the passage
@@ -213,7 +235,9 @@ export function checkAnswer(
   return groups.map((g) => {
     const doubts: string[] = []
     const other = second?.filter((o) => sameKind(o, g)) ?? []
-    const agreed = other.some((o) => o.count === g.count)
+    // The other reading may split or merge groups of the same socket: compare each one and their total.
+    const total = other.reduce((n, o) => n + o.count, 0)
+    const agreed = other.some((o) => o.count === g.count) || (other.length > 1 && total === g.count)
     if (second && !other.length) doubts.push('vu par une seule des deux IA')
     else if (second && !agreed) doubts.push(`l’autre IA lit ${[...new Set(other.map((o) => o.count))].join(' ou ')}`)
     if (sheet.trim()) {

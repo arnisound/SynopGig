@@ -801,7 +801,43 @@ export function pageImages(html, base, model = '') {
   return out.slice(0, 6)
 }
 
-/** POST /doc {url, model}: the PDF as is (the app reads it), or the text and photos of a page. */
+const DOC_GOOD = /user'?s? ?(?:guide|manual)|owner'?s? manual|manual|mode d.emploi|notice|bedienungsanleitung|handbuch|data ?sheet|spec(?:ification)?s? ?sheet|fiche technique|datenblatt|quick ?start|technical (?:data|specifications)/i
+const DOC_BAD = /firmware|driver|software|update|warranty|garantie|declaration|conformity|safety|sicherheit|rohs|weee|recall|catalog|brochure|press|news/i
+
+/**
+ * The documents a product page links to, best first: the user guide or
+ * manual (it describes every connector of the panels), then the data
+ * sheet, then the quick start guide. Firmware, drivers, warranty and legal
+ * papers are left out.
+ */
+export function pageDocs(html, base) {
+  const out = []
+  const seen = new Set()
+  for (const m of html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+    const label = decode(m[2].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim()
+    let url
+    try {
+      url = new URL(decode(m[1].trim()), base)
+    } catch {
+      continue
+    }
+    if (!/^https?:$/.test(url.protocol) || seen.has(url.href)) continue
+    const pdf = /\.pdf($|\?)/i.test(url.pathname)
+    const named = DOC_GOOD.test(label) || DOC_GOOD.test(url.pathname)
+    if (!(pdf || named) || DOC_BAD.test(label) || DOC_BAD.test(url.pathname)) continue
+    // A labelled manual link may lead to a viewer page: kept only when it is a PDF or clearly a manual.
+    if (!pdf && !DOC_GOOD.test(label)) continue
+    seen.add(url.href)
+    const kind = /quick ?start/i.test(label + url.pathname) ? 1 : /data ?sheet|spec|fiche|datenblatt|technical/i.test(label + url.pathname) ? 2 : /guide|manual|emploi|notice|anleitung|handbuch/i.test(label + url.pathname) ? 3 : 0
+    out.push({ url: url.href, title: label.slice(0, 120) || url.pathname.split('/').pop(), score: kind * 2 + (pdf ? 1 : 0) })
+  }
+  return out
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(({ url, title }) => ({ url, title }))
+}
+
+/** POST /doc {url, model}: the PDF as is (the app reads it), or the text, photos and linked documents of a page. */
 async function readDoc(body) {
   const r = await download(body?.url, MAX_DOC)
   if (r.status !== 200) return r
@@ -809,7 +845,7 @@ async function readDoc(body) {
   if (!r.html) return { status: 415, error: 'Ce document n’est ni un PDF ni une page web.' }
   const html = new TextDecoder().decode(r.bytes)
   const page = pageText(html, { lines: null, max: 20000 })
-  return { status: 200, data: { ...page, images: pageImages(html, body.url, body.model) } }
+  return { status: 200, data: { ...page, images: pageImages(html, body.url, body.model), docs: pageDocs(html, body.url) } }
 }
 
 /** POST /images {url, model}: only the photos of a product page (when the document read was a PDF). */

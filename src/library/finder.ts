@@ -28,16 +28,42 @@ export async function findDocs(brand: string, model: string): Promise<FoundDoc[]
   return ((await res.json()) as { results: FoundDoc[] }).results
 }
 
-/** The chosen document: a PDF (read here, like a dropped file) or the text of a page. */
-export async function loadDoc(doc: FoundDoc, model = ''): Promise<{ text: string; pdf?: File; images: string[] }> {
+async function readPdf(res: Response, url: string) {
+  const name = decodeURIComponent(new URL(url).pathname.split('/').pop() || 'fiche.pdf')
+  const pdf = new File([await res.blob()], /\.pdf$/i.test(name) ? name : `${name}.pdf`, { type: 'application/pdf' })
+  const { pdfToText } = await import('./pdfText')
+  return { pdf, text: await pdfToText(pdf) }
+}
+
+export interface LoadedDoc {
+  text: string
+  pdf?: File
+  images: string[]
+  /** The manual the product page linked to, read with it. */
+  manual?: { url: string; title: string }
+}
+
+/**
+ * The chosen document: a PDF (read here, like a dropped file) or the text of
+ * a page. A product page rarely describes the panels; the user guide or data
+ * sheet it links to does: it is read too, and the two texts go together.
+ */
+export async function loadDoc(doc: FoundDoc, model = '', onStep?: (msg: string) => void): Promise<LoadedDoc> {
   const res = await post('/doc', { url: doc.url, model })
   if (!res.ok) throw await failure(res)
-  if (/pdf/i.test(res.headers.get('Content-Type') ?? '')) {
-    const name = decodeURIComponent(new URL(doc.url).pathname.split('/').pop() || 'fiche.pdf')
-    const pdf = new File([await res.blob()], /\.pdf$/i.test(name) ? name : `${name}.pdf`, { type: 'application/pdf' })
-    const { pdfToText } = await import('./pdfText')
-    return { text: await pdfToText(pdf), pdf, images: [] }
+  if (/pdf/i.test(res.headers.get('Content-Type') ?? '')) return { ...(await readPdf(res, doc.url)), images: [] }
+  const page = (await res.json()) as { title: string; text: string; images?: string[]; docs?: { url: string; title: string }[] }
+  for (const d of (page.docs ?? []).slice(0, 2)) {
+    try {
+      onStep?.(`Lecture de « ${d.title} » trouvé sur la page…`)
+      const r = await post('/doc', { url: d.url, model })
+      if (!r.ok || !/pdf/i.test(r.headers.get('Content-Type') ?? '')) continue
+      const { pdf, text } = await readPdf(r, d.url)
+      if (text.replace(/\s/g, '').length < 200) continue
+      return { text: `${page.text}\n\n${d.title} :\n${text}`, pdf, images: page.images ?? [], manual: d }
+    } catch {
+      // That document could not be read: the page alone, or the next one.
+    }
   }
-  const page = (await res.json()) as { title: string; text: string; images?: string[] }
   return { text: page.text, images: page.images ?? [] }
 }

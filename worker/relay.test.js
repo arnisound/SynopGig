@@ -332,3 +332,19 @@ describe('protecting the keys', () => {
     expect(LIMITS.m.size).toBe(0)
   })
 })
+
+describe('documents a product page links to', async () => {
+  const { pageDocs } = await import('./relay.js')
+  it('finds the user guide first and leaves firmware and drivers out', () => {
+    const html = `
+      <a href="/firmware/tmd16-v1.04.zip">Firmware v1.04 Update</a>
+      <a href="/media/TMD16-Quickstart-Guide.pdf">Quickstart Guide</a>
+      <a href="https://cdn.altoprofessional.com/TMD16-User-Guide-v1.0.pdf">User Guide</a>
+      <a href="/drivers/win.exe">Windows Driver v1.02</a>
+      <a href="/media/firmware-update-guide.pdf">Firmware Update Guide</a>
+      <a href="/about">About Us</a>`
+    const docs = pageDocs(html, 'https://www.altoprofessional.com/products/tmd16')
+    expect(docs.map((d) => d.title)).toEqual(['User Guide', 'Quickstart Guide'])
+    expect(docs[0].url).toBe('https://cdn.altoprofessional.com/TMD16-User-Guide-v1.0.pdf')
+  })
+})

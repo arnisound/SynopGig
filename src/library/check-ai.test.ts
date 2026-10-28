@@ -108,6 +108,11 @@ describe('two AI readings of the same sheet', () => {
     expect(network.doubts).toContain('vu par une seule des deux IA')
   })
 
+  it('takes an XLR combo and an XLR for the same socket', () => {
+    const [r] = checkAnswer([g(10, 'xlr-combo', 'Mic inputs 1-10')], 'Mic inputs 1-10', [], [g(10, 'xlr3')])
+    expect(r.doubts).toEqual([])
+  })
+
   it('offers what the second one found and the first missed', () => {
     expect(missedGroups([g(4)], [g(4), g(2, 'hdmi')])).toEqual([g(2, 'hdmi')])
   })
