@@ -31,6 +31,8 @@ export interface UserEntry extends Omit<SharedModel, 'v'> {
   id: string
   author: string
   createdAt: string
+  /** A product photo is stored with it (served at <library>/img/<id>). */
+  image?: boolean
 }
 
 export interface UserLibraryFile {
@@ -111,7 +113,7 @@ export function toGroups(tuples: GroupTuple[]): PortGroup[] {
 }
 
 /** A USER entry as a palette template; invalid entries are dropped. */
-export function entryToTemplate(e: UserEntry): DeviceTemplate | undefined {
+export function entryToTemplate(e: UserEntry, imageBase?: string): DeviceTemplate | undefined {
   const v = validateShared({ ...e, v: 1 })
   if (!v.ok || !/^user-\d+$/.test(String(e.id))) return undefined
   return {
@@ -124,5 +126,6 @@ export function entryToTemplate(e: UserEntry): DeviceTemplate | undefined {
     weight: v.value.weight,
     ports: expandGroups(toGroups(v.value.groups)),
     author: cleanPseudo(e.author) || 'anonyme',
+    image: e.image === true && imageBase ? `${imageBase}${String(e.id)}` : undefined,
   }
 }

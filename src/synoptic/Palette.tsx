@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { CATEGORY_COLORS, FAMILY_ORDER } from '../data/library'
 import { USER_FAMILY } from '../library/userLibrary'
+import DeviceArt from '../ui/DeviceArt'
 import type { DeviceTemplate } from '../types'
 
 export const DND_TYPE = 'application/x-synopgig-template'
@@ -91,7 +92,7 @@ export default function Palette({ templates, onAdd, onFind }: Props) {
                       }}
                       onClick={() => onAdd(t)}
                     >
-                      <span className="dot" style={{ background: CATEGORY_COLORS[cat] }} />
+                      <DeviceArt image={t.image} family={t.family} templateId={t.id} model={t.model} category={t.category} size={26} />
                       <span>{t.model}</span>
                       <small>
                         {t.panel ? `${t.panel.holes.filter((h) => h.connector).length} connecteurs` : `${t.ports.length} ports`}

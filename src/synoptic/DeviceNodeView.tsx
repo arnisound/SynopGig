@@ -4,6 +4,7 @@ import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import type { DeviceNode, Port } from '../types'
 import { portSides } from './portLayout'
+import DeviceArt from '../ui/DeviceArt'
 import { ViewContext } from './viewContext'
 
 function PortRow({ port, side, used }: { port: Port; side: 'left' | 'right'; used: boolean }) {
@@ -23,7 +24,7 @@ function PortRow({ port, side, used }: { port: Port; side: 'left' | 'right'; use
 }
 
 function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
-  const { used, compact, highlight } = useContext(ViewContext)
+  const { used, compact, highlight, images } = useContext(ViewContext)
   const usedHere = used.get(id) ?? new Set<string>()
   const visible = compact ? data.ports.filter((p) => usedHere.has(p.id)) : data.ports
   const { left: inputs, right: outputs } = portSides(data.ports, visible)
@@ -38,7 +39,8 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
       className={`device ${selected ? 'selected' : ''} ${highlight.has(id) ? 'highlight' : ''}`}
       style={{ ['--cat' as string]: CATEGORY_COLORS[data.category] }}
     >
-      <div className="device-head">
+      <div className={`device-head ${images ? 'with-art' : ''}`}>
+        {images && <DeviceArt image={data.image} family={data.family} templateId={data.templateId} model={data.model} category={data.category} size={34} />}
         <div className="device-name">{data.name}</div>
         <div className="device-meta">
           {data.brand ? `${data.brand} ${data.model}` : data.model} · {data.zone}

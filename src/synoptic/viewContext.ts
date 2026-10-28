@@ -5,6 +5,8 @@ export interface ViewOptions {
   used: Map<string, Set<string>>
   compact: boolean
   highlight: Set<string>
+  /** Photo or symbol in the device header. */
+  images?: boolean
 }
 
 export const ViewContext = createContext<ViewOptions>({

@@ -68,6 +68,11 @@ document, que le relais récupère (`POST /doc`, 15 Mo maximum) pour l’analyse
 - **Gemini** (si `GEMINI_API_KEY`) : recherche Google intégrée, modèle `gemini-2.5-flash`
   (variable facultative `GEMINI_SEARCH_MODEL`).
 
+Le relais récupère aussi les **photos du produit** de la page trouvée (`/doc`, ou `/images`
+pour une fiche PDF) et les transmet à l’application (`/image`, 4 Mo maximum), qui en fait
+une petite vignette. Les photos des produits partagés sont gardées par le Worker
+`library.js` (`GET /img/<id>`).
+
 `/diagnostic` indique quelles sources répondent. Même limite que le reste : 30 requêtes par
 heure et par visiteur.
 

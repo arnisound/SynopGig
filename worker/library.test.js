@@ -101,3 +101,26 @@ describe('shared projects (read-only links)', () => {
     expect((await send(env, 'GET', '/projects/abc')).status).toBe(400)
   })
 })
+
+describe('product photos of the USER library', () => {
+  const tiny = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+
+  it('keeps the photo apart and serves it to any page', async () => {
+    const env = { LIBRARY: memoryKv() }
+    const { entry, token } = await (await send(env, 'POST', '/', { model, pseudo: 'Théo', image: tiny })).json()
+    expect(entry.image).toBe(true)
+    const list = await (await send(env, 'GET', '/')).json()
+    expect(JSON.stringify(list)).not.toContain('base64')
+    const img = await send(env, 'GET', `/img/${entry.id}`)
+    expect(img.headers.get('Content-Type')).toBe('image/png')
+    expect(img.headers.get('Access-Control-Allow-Origin')).toBe('*')
+    await send(env, 'DELETE', `/${entry.id}`, { token })
+    expect((await send(env, 'GET', `/img/${entry.id}`)).status).toBe(404)
+  })
+
+  it('ignores anything that is not a small image', async () => {
+    const env = { LIBRARY: memoryKv() }
+    const { entry } = await (await send(env, 'POST', '/', { model, pseudo: 'a', image: 'data:text/html;base64,PHNjcmlwdD4=' })).json()
+    expect(entry.image).toBeUndefined()
+  })
+})

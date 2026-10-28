@@ -71,7 +71,7 @@ function Canvas({ project, onDone }: { project: Project; onDone: (shot?: Shot) =
 
   return (
     <div ref={stage} style={{ width: '100%', height: '100%' }}>
-      <ViewContext.Provider value={{ used, compact: view.compact, highlight: NONE }}>
+      <ViewContext.Provider value={{ used, compact: view.compact, highlight: NONE, images: view.images }}>
         <ReactFlow
           nodes={[...frames, ...viewNodes]}
           edges={viewEdges}

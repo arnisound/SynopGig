@@ -9,6 +9,8 @@ import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared } from './userLibrary'
 import { findDocs, loadDoc, type FoundDoc } from './finder'
+import { fetchImage, pageImages, shrink } from './images'
+import DeviceArt from '../ui/DeviceArt'
 import type { UserLibrary } from './useUserLibrary'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
@@ -53,6 +55,8 @@ interface Draft {
   rows: Row[]
   /** Built from a document found by "Le chercher pour vous": shared with everyone when saved. */
   found?: { url: string; share: boolean }
+  /** Product photo (small data URL); the symbol of its kind otherwise. */
+  image?: string
 }
 
 /** Time of an analysis, for the status line. */
@@ -77,6 +81,7 @@ const fromTemplate = (t: DeviceTemplate, keepId: boolean): Draft => ({
   rackU: t.rackU,
   weight: t.weight,
   rows: groupPorts(t.ports).map((g) => row(g)),
+  image: t.image,
 })
 
 const fromResult = (r: AiResult, rows: Row[]): Draft => ({
@@ -141,6 +146,29 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
     setFindStatus('Vérifiez la marque et le modèle, puis « Chercher ce produit ».')
   }
 
+  // Photos found with the documentation, as thumbnails to choose from.
+  const [photos, setPhotos] = useState<string[]>([])
+  const [photoStatus, setPhotoStatus] = useState('')
+  const photoInput = useRef<HTMLInputElement>(null)
+  const loadPhotos = async (urls: string[]) => {
+    if (urls.length === 0) return setPhotoStatus('Aucune photo trouvée : le symbole de son type est utilisé, ou importez une image.')
+    setPhotoStatus('Récupération des photos…')
+    const got = (await Promise.allSettled(urls.slice(0, 4).map(fetchImage))).flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+    setPhotos(got)
+    setPhotoStatus(got.length ? 'Choisissez la photo d’illustration (ou gardez le symbole).' : 'Photos inaccessibles : le symbole de son type est utilisé, ou importez une image.')
+    // The first photo is taken unless the user already chose one.
+    if (got[0]) setDraft((d) => (d && !d.image ? { ...d, image: got[0] } : d))
+  }
+  const importPhoto = async (f?: File) => {
+    if (!f || !draft) return
+    try {
+      const img = await shrink(f)
+      setDraft((d) => d && { ...d, image: img })
+    } catch {
+      setPhotoStatus('Image illisible.')
+    }
+  }
+
   const findProduct = async (force = false) => {
     if (!fModel.trim()) return setFindStatus('Indiquez au moins le modèle.')
     setFound(undefined)
@@ -165,7 +193,11 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
     setFinding(true)
     setFindStatus(`Lecture de ${doc.host}…`)
     try {
-      const { text: docText, pdf } = await loadDoc(doc)
+      const { text: docText, pdf, images } = await loadDoc(doc, fModel.trim())
+      setPhotos([])
+      setPhotoStatus('')
+      // A PDF has no photo to offer: take them from the product page found with it.
+      const page = images.length ? undefined : (found ?? []).find((d) => d.kind === 'page' && d.official) ?? (found ?? []).find((d) => d.kind === 'page')
       setText(docText)
       setFile(pdf)
       setFindStatus('')
@@ -173,6 +205,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
       await runAi(`Brand: ${fBrand}\nModel: ${fModel}\n${docText}`, `la documentation de ${doc.host}`, pdf)
       setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model: fModel.trim(), found: { url: doc.url, share: true } })
       setFound(undefined)
+      void (images.length ? Promise.resolve(images) : page ? pageImages(page.url, fModel.trim()) : Promise.resolve([])).then(loadPhotos)
     } catch (e) {
       setFindStatus(`Lecture impossible : ${(e as Error).message} Téléchargez la fiche et déposez-la ci-dessous.`)
     } finally {
@@ -288,6 +321,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
     rackU: d.rackU || undefined,
     weight: d.weight || undefined,
     ports: expandGroups(d.rows),
+    image: d.image,
   })
 
   const save = () => {
@@ -318,7 +352,7 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
     setSharing(true)
     setStatus('Partage en cours…')
     userLibrary
-      .share(encodeShared(t, draft.rows), pseudo)
+      .share(encodeShared(t, draft.rows), pseudo, draft.image)
       .then((s) => setStatus(`« ${s.brand ? `${s.brand} ` : ''}${s.model} » est partagé : il est disponible pour tous dans la palette (« Bibliothèque USER »), avec votre pseudo.`))
       .catch((e) => setStatus(`Partage impossible : ${e instanceof Error ? e.message : String(e)}`))
       .finally(() => setSharing(false))
@@ -540,6 +574,23 @@ export default function LibraryPage({ project, setProject, userLibrary, findQuer
             <div className="section-head">
               <h3>{draft.id ? 'Modifier le modèle' : 'Nouveau matériel'}</h3>
               <button className="icon" title="Fermer" onClick={() => setDraft(undefined)}>×</button>
+            </div>
+            <div className="illustration">
+              <DeviceArt image={draft.image} family={draft.family} model={draft.model} category={draft.category} size={72} />
+              <div>
+                <span className="small muted">Illustration : {draft.image ? 'photo du produit' : 'symbole de son type'}</span>
+                <div className="photo-picks">
+                  {photos.map((ph) => (
+                    <button key={ph.slice(-24)} className={`photo-pick ${draft.image === ph ? 'active' : ''}`} onClick={() => set({ image: ph })} title="Prendre cette photo">
+                      <img src={ph} alt="" />
+                    </button>
+                  ))}
+                  <button onClick={() => photoInput.current?.click()}>Importer une image</button>
+                  {draft.image && <button onClick={() => set({ image: undefined })}>Utiliser le symbole</button>}
+                  <input ref={photoInput} type="file" accept="image/*" hidden onChange={(e) => { importPhoto(e.target.files?.[0]); e.target.value = '' }} />
+                </div>
+                {photoStatus && <span className="small muted">{photoStatus}</span>}
+              </div>
             </div>
             <div className="row wrap">
               <label className="field">

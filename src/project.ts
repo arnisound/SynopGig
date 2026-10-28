@@ -40,6 +40,8 @@ export function createDevice(
       config: {},
       brand: template.brand,
       panel: template.panel && structuredClone(template.panel),
+      family: template.family,
+      image: template.image,
     },
   }
 }

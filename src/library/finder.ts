@@ -29,15 +29,15 @@ export async function findDocs(brand: string, model: string): Promise<FoundDoc[]
 }
 
 /** The chosen document: a PDF (read here, like a dropped file) or the text of a page. */
-export async function loadDoc(doc: FoundDoc): Promise<{ text: string; pdf?: File }> {
-  const res = await post('/doc', { url: doc.url })
+export async function loadDoc(doc: FoundDoc, model = ''): Promise<{ text: string; pdf?: File; images: string[] }> {
+  const res = await post('/doc', { url: doc.url, model })
   if (!res.ok) throw await failure(res)
   if (/pdf/i.test(res.headers.get('Content-Type') ?? '')) {
     const name = decodeURIComponent(new URL(doc.url).pathname.split('/').pop() || 'fiche.pdf')
     const pdf = new File([await res.blob()], /\.pdf$/i.test(name) ? name : `${name}.pdf`, { type: 'application/pdf' })
     const { pdfToText } = await import('./pdfText')
-    return { text: await pdfToText(pdf), pdf }
+    return { text: await pdfToText(pdf), pdf, images: [] }
   }
-  const page = (await res.json()) as { title: string; text: string }
-  return { text: page.text }
+  const page = (await res.json()) as { title: string; text: string; images?: string[] }
+  return { text: page.text, images: page.images ?? [] }
 }

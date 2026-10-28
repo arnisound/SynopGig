@@ -12,7 +12,8 @@
  *
  * Open <worker address>/diagnostic in a browser to check the keys.
  * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
- * POST /find {brand, model} finds a product's documentation; POST /doc {url} reads one.
+ * POST /find {brand, model} finds a product's documentation; POST /doc {url} reads one;
+ * POST /images {url} lists a page's product photos, POST /image {url} fetches one.
  *   GROQ_SEARCH_MODEL / GEMINI_SEARCH_MODEL  optional, models used to search the web
  */
 
@@ -372,14 +373,74 @@ async function findDocs(body, env) {
   return { status: 200, data: { results } }
 }
 
-/** POST /doc {url}: the PDF as is (the app reads it), or the text of a page. */
+/**
+ * Product photos of a page, best first: the share image (og:image), the
+ * product data (JSON-LD), then pictures whose name or caption cites the model.
+ * Logos, icons and flags are left out.
+ */
+export function pageImages(html, base, model = '') {
+  const abs = (u) => {
+    try {
+      const url = new URL(decode(u.trim()), base)
+      return /^https?:$/.test(url.protocol) ? url.href : null
+    } catch {
+      return null
+    }
+  }
+  const junk = /logo|icon|sprite|flag|badge|favicon|avatar|banner|placeholder|loader|pixel|\.svg($|\?)/i
+  const m = words(model).replace(/ /g, '')
+  const found = []
+  for (const re of [/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)(?::src)?["'][^>]+content=["']([^"']+)/gi, /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image)["']/gi]) {
+    for (const x of html.matchAll(re)) found.push(x[1])
+  }
+  for (const block of html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+    for (const x of block[1].matchAll(/"image"\s*:\s*(\[[^\]]*\]|\{[^}]*\}|"[^"]+")/g)) for (const u of x[1].matchAll(/"(https?:[^"]+|\/[^"]+)"/g)) found.push(u[1].replace(/\\\//g, '/'))
+  }
+  for (const x of html.matchAll(/<img\b[^>]*>/gi)) {
+    const tag = x[0]
+    const src = tag.match(/\s(?:data-src|data-lazy-src|src)=["']([^"']+)["']/i)?.[1]
+    const alt = tag.match(/\salt=["']([^"']*)["']/i)?.[1] ?? ''
+    if (!src || src.startsWith('data:')) continue
+    if (m.length >= 2 && words(`${alt} ${src}`).replace(/ /g, '').includes(m)) found.push(src)
+  }
+  const out = []
+  for (const u of found) {
+    const a = abs(u)
+    if (a && !junk.test(a) && !out.includes(a)) out.push(a)
+  }
+  return out.slice(0, 6)
+}
+
+/** POST /doc {url, model}: the PDF as is (the app reads it), or the text and photos of a page. */
 async function readDoc(body) {
   const r = await download(body?.url, MAX_DOC)
   if (r.status !== 200) return r
   if (r.pdf) return { status: 200, pdf: r.bytes }
   if (!r.html) return { status: 415, error: 'Ce document n’est ni un PDF ni une page web.' }
-  const page = pageText(new TextDecoder().decode(r.bytes), { lines: null, max: 20000 })
-  return { status: 200, data: page }
+  const html = new TextDecoder().decode(r.bytes)
+  const page = pageText(html, { lines: null, max: 20000 })
+  return { status: 200, data: { ...page, images: pageImages(html, body.url, body.model) } }
+}
+
+/** POST /images {url, model}: only the photos of a product page (when the document read was a PDF). */
+async function readImages(body) {
+  const r = await download(body?.url, MAX_PAGE)
+  if (r.status !== 200) return r
+  if (!r.html) return { status: 200, data: { images: [] } }
+  return { status: 200, data: { images: pageImages(new TextDecoder().decode(r.bytes), body.url, body.model) } }
+}
+
+const MAX_IMAGE = 4_000_000
+const IMAGE_TYPES = /^image\/(jpeg|png|webp|gif|avif)/i
+
+/** POST /image {url}: one photo, for the app to shrink into a thumbnail. */
+async function readImage(body) {
+  const r = await download(body?.url, MAX_IMAGE)
+  if (r.status !== 200) return r
+  const b = r.bytes
+  const type = b[0] === 0xff && b[1] === 0xd8 ? 'image/jpeg' : b[0] === 0x89 && b[1] === 0x50 ? 'image/png' : b[8] === 0x57 && b[9] === 0x45 ? 'image/webp' : b[0] === 0x47 && b[1] === 0x49 ? 'image/gif' : ''
+  if (!type || !IMAGE_TYPES.test(type)) return { status: 415, error: 'Ce lien n’est pas une image.' }
+  return { status: 200, image: b, type }
 }
 
 /** GET /diagnostic: tries each configured key on a tiny request. */
@@ -433,11 +494,21 @@ export default {
     }
     if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
-    if (path === '/page' || path === '/find' || path === '/doc') {
+    if (['/page', '/find', '/doc', '/images', '/image'].includes(path)) {
       if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de recherches en une heure, réessayez plus tard.', 429)
       const body = await request.json().catch(() => null)
-      const r = path === '/page' ? await readPage(body?.url) : path === '/find' ? await findDocs(body, env) : await readDoc(body)
+      const r =
+        path === '/page'
+          ? await readPage(body?.url)
+          : path === '/find'
+            ? await findDocs(body, env)
+            : path === '/doc'
+              ? await readDoc(body)
+              : path === '/images'
+                ? await readImages(body)
+                : await readImage(body)
       if (r.pdf) return new Response(r.pdf, { headers: { ...cors, 'Content-Type': 'application/pdf' } })
+      if (r.image) return new Response(r.image, { headers: { ...cors, 'Content-Type': r.type } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
     if (!env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)

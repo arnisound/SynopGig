@@ -14,6 +14,7 @@ export const DEFAULT_VIEW: SynopticView = {
   laneGap: 12,
   endTags: false,
   colorMode: 'signal',
+  images: true,
 }
 
 /** Distinct, readable colours for "one colour per cable". */

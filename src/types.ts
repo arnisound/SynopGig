@@ -112,6 +112,8 @@ export interface DeviceTemplate {
   weight?: number
   ports: Port[]
   panel?: PanelSpec
+  /** Product photo: a small data URL, or the USER library's address for it. */
+  image?: string
 }
 
 export interface DeviceConfig {
@@ -134,6 +136,9 @@ export type DeviceData = {
   config: DeviceConfig
   brand?: string
   panel?: PanelSpec
+  family?: string
+  /** Product photo (data URL, or the USER library's address). */
+  image?: string
 }
 
 export type DeviceNode = Node<DeviceData, 'device'>
@@ -212,6 +217,8 @@ export interface SynopticView {
   endTags: boolean
   /** Colour by signal, or one colour per cable. */
   colorMode: 'signal' | 'cable'
+  /** Product photo or symbol in each device's header. */
+  images: boolean
 }
 
 /** What the user changed on a line of the input or output list. */

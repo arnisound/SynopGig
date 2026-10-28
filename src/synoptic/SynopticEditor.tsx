@@ -311,6 +311,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
                 <input type="range" min={6} max={40} step={2} value={view.laneGap} onChange={(e) => setView({ laneGap: Number(e.target.value) })} />
               </label>
             )}
+            <label className="toggle"><input type="checkbox" checked={view.images} onChange={(e) => setView({ images: e.target.checked })} /> Photo ou symbole des appareils</label>
             <label className="toggle"><input type="checkbox" checked={view.endTags} onChange={(e) => setView({ endTags: e.target.checked })} /> Repère aux deux extrémités</label>
             <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler la sélection (appareil ou câble)</label>
             <label className="toggle"><input type="checkbox" checked={view.flow} onChange={(e) => setView({ flow: e.target.checked })} /> Animer le sens du signal</label>
@@ -318,7 +319,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
             <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser l’affichage</button>
           </div>
         )}
-        <ViewContext.Provider value={{ used, compact, highlight }}>
+        <ViewContext.Provider value={{ used, compact, highlight, images: view.images }}>
           <ReactFlow
             nodes={[...frames, ...viewNodes] as FlowNode[]}
             edges={viewEdges}
@@ -388,6 +389,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
                 ports: structuredClone(n.data.ports),
                 panel: n.data.panel && structuredClone(n.data.panel),
                 brand: n.data.brand,
+                family: n.data.family,
+                image: n.data.image,
               },
             ],
           }))

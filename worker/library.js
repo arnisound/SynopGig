@@ -8,6 +8,7 @@
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
  *
  *   GET /            the shared equipment, for every copy of the app
+ *   GET /img/<id>    the product photo of a shared model
  *   POST /           share one piece of equipment, with the creator's pseudo
  *   DELETE /<id>     remove it again (only with the key given to its creator)
  *   POST /projects       publish a read-only copy of a project, returns its link id
@@ -82,6 +83,14 @@ async function readLibrary(kv) {
   return (await kv.get('all', 'json')) ?? []
 }
 
+const MAX_IMAGE_CHARS = 150_000
+
+/** A small product photo sent as a data URL (the app shrinks it first). */
+export function cleanImage(raw) {
+  const m = typeof raw === 'string' && raw.length <= MAX_IMAGE_CHARS ? raw.match(/^data:(image\/(?:webp|jpeg|png));base64,([A-Za-z0-9+/=]+)$/) : null
+  return m ? { type: m[1], b64: m[2] } : null
+}
+
 async function shareEntry(kv, body) {
   const model = cleanShared(body?.model)
   if (!model) return { status: 400, error: 'Matériel refusé : vérifiez le modèle, le département et les ports.' }
@@ -91,7 +100,10 @@ async function shareEntry(kv, body) {
   if (current.length >= MAX_ENTRIES) return { status: 507, error: 'Bibliothèque USER pleine.' }
   const id = `user-${Date.now()}${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`
   const token = crypto.randomUUID()
-  const entry = { id, ...model, author, createdAt: new Date().toISOString() }
+  const image = cleanImage(body?.image)
+  const entry = { id, ...model, author, createdAt: new Date().toISOString(), ...(image ? { image: true } : {}) }
+  // The photo is kept apart, so the list everyone loads stays light.
+  if (image) await kv.put(`img:${id}`, JSON.stringify(image))
   await kv.put(`entry:${id}`, JSON.stringify({ entry, tokenHash: await sha256(token) }))
   await rebuildLibrary(kv, { add: entry })
   return { status: 200, data: { entry, token } }
@@ -103,6 +115,7 @@ async function removeEntry(kv, id, token) {
   if (!stored) return { status: 404, error: 'Ce matériel n’est plus partagé.' }
   if (stored.tokenHash !== (await sha256(token))) return { status: 403, error: 'Seul son créateur peut retirer ce matériel.' }
   await kv.delete(`entry:${id}`)
+  await kv.delete(`img:${id}`)
   await rebuildLibrary(kv, { remove: id })
   return { status: 200, data: { ok: true } }
 }
@@ -188,6 +201,14 @@ async function handle(request, env, path, reply, fail, allowed) {
     // Also rebuilds the list, e.g. after an entry was deleted by hand in the dashboard.
     const state = kv ? await rebuildLibrary(kv).then((l) => `OK (${l.length} matériels partagés)`) : 'pas de stockage LIBRARY : liez le KV namespace (variable LIBRARY)'
     return new Response(JSON.stringify({ bibliotheque_user: state }, null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+  }
+  if (request.method === 'GET' && path.startsWith('/img/')) {
+    const id = path.slice('/img/'.length)
+    const img = /^user-\d+$/.test(id) && kv ? await kv.get(`img:${id}`, 'json') : null
+    if (!img) return new Response('', { status: 404 })
+    const bytes = Uint8Array.from(atob(img.b64), (c) => c.charCodeAt(0))
+    // Any page may show it (the printed file draws it too): public, cached for a year.
+    return new Response(bytes, { headers: { 'Content-Type': img.type, 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=31536000, immutable' } })
   }
   if (request.method === 'GET') return reply({ version: 1, entries: kv ? await readLibrary(kv) : [] })
   if (!allowed) return fail('Site non autorisé.', 403)

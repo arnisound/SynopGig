@@ -87,6 +87,11 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
   analysé avant), l’IA en tire la fiche, et à l’enregistrement le produit est **ajouté
   automatiquement à la bibliothèque USER** avec votre pseudo (case décochable). Accessible
   aussi depuis la palette du synoptique : « Le chercher pour vous » sous la recherche.
+- **Illustrations** : la recherche récupère les photos du produit sur la page du fabricant
+  (vous choisissez, ou importez la vôtre) ; elles sont réduites en vignette légère gardée dans
+  le projet et partagée avec la bibliothèque USER. Sans photo, chaque produit a le **symbole de
+  son type** (micro, console, enceinte, lyre, caméra, switch…), visible dans la palette, sur le
+  synoptique (option « Photo ou symbole des appareils ») et dans le dossier PDF.
 - **Ajout manuel** : marque, modèle, département, famille, U, poids et connectique saisie
   par groupes (« 16 × XLR entrées »), ou copie d’un modèle existant.
 - **Analyse de fiche technique** (PDF ou texte collé) : un seul bouton « Analyser », rien à

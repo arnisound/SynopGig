@@ -14,6 +14,7 @@ import { stageOf } from '../stage/stage'
 import StageSvg from '../stage/StageSvg'
 import Page from './PrintPage'
 import SynopticPages, { type SynopticMode } from './SynopticPages'
+import DeviceArt from '../ui/DeviceArt'
 
 const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux' }
 
@@ -173,7 +174,9 @@ export default function Dossier({
           <h2>Fiches équipements</h2>
           {nodes.map((n) => (
             <div key={n.id} className="d-block d-device" style={{ borderLeftColor: CATEGORY_COLORS[n.data.category] }}>
-              <h3>{n.data.name} <small>{deviceName(n)} · {n.data.zone}{n.data.rackU ? ` · ${n.data.rackU}U` : ''}{n.data.weight ? ` · ${n.data.weight} kg` : ''}</small></h3>
+              <h3 className="d-device-head">
+                <DeviceArt image={n.data.image} family={n.data.family} templateId={n.data.templateId} model={n.data.model} category={n.data.category} size={36} />
+                {n.data.name} <small>{deviceName(n)} · {n.data.zone}{n.data.rackU ? ` · ${n.data.rackU}U` : ''}{n.data.weight ? ` · ${n.data.weight} kg` : ''}</small></h3>
               {(n.data.config.ip || n.data.config.mode || n.data.config.notes) && (
                 <p className="d-config">{[n.data.config.ip && `IP ${n.data.config.ip}`, n.data.config.mode && `Mode ${n.data.config.mode}`, n.data.config.notes].filter(Boolean).join(' · ')}</p>
               )}

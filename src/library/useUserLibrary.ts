@@ -35,9 +35,9 @@ async function call(url: string, init: RequestInit) {
 }
 
 /** Shares a model with everyone; returns the stored entry and the key to remove it. */
-export async function shareModel(model: SharedModel, pseudo: string, url = LIBRARY_URL): Promise<{ entry: UserEntry; token: string }> {
+export async function shareModel(model: SharedModel, pseudo: string, image?: string, url = LIBRARY_URL): Promise<{ entry: UserEntry; token: string }> {
   if (!url) throw new Error('le partage n’est pas disponible sur cette version.')
-  return call(url, { method: 'POST', body: JSON.stringify({ model, pseudo }) })
+  return call(url, { method: 'POST', body: JSON.stringify({ model, pseudo, image: image?.startsWith('data:') ? image : undefined }) })
 }
 
 export async function unshareModel(id: string, token: string, url = LIBRARY_URL) {
@@ -47,7 +47,8 @@ export async function unshareModel(id: string, token: string, url = LIBRARY_URL)
   })
 }
 
-const toTemplates = (entries: unknown) => (Array.isArray(entries) ? (entries as UserEntry[]) : []).map(entryToTemplate).filter((t) => t !== undefined)
+const toTemplates = (entries: unknown) =>
+  (Array.isArray(entries) ? (entries as UserEntry[]) : []).map((e) => entryToTemplate(e, LIBRARY_URL ? `${LIBRARY_URL}/img/` : undefined)).filter((t) => t !== undefined)
 
 /**
  * Loads the USER library from its Worker (live: what users shared), else the
@@ -78,9 +79,11 @@ export function useUserLibrary() {
     }
   }, [])
 
-  const share = useCallback(async (model: SharedModel, pseudo: string) => {
-    const { entry, token } = await shareModel(model, pseudo)
-    const t = entryToTemplate(entry)
+  const share = useCallback(async (model: SharedModel, pseudo: string, image?: string) => {
+    const { entry, token } = await shareModel(model, pseudo, image)
+    // Shown at once with the local copy of the photo, before the server's address is cached.
+    const t = entryToTemplate(entry, LIBRARY_URL ? `${LIBRARY_URL}/img/` : undefined)
+    if (t && image) t.image = image
     if (!t) throw new Error('réponse illisible du serveur.')
     setTemplates((list) => [...list.filter((x) => x.id !== t.id), t])
     setKeys((k) => {
