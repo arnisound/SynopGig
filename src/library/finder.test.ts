@@ -16,7 +16,7 @@ it('reads the user guide of this model by itself, with its product page', async 
       calls.push(`${path} ${JSON.parse(String(init?.body)).url}`)
       const target = JSON.parse(String(init?.body)).url as string
       if (target.endsWith('.pdf')) return new Response(new Uint8Array([37, 80, 68, 70]), { headers: { 'Content-Type': 'application/pdf' } })
-      return json({ title: 'TMD16', text: 'Titre : TMD16\n10 digital mic preamps', url, images: ['https://x/p.jpg'], docs: [] })
+      return json({ title: 'TMD16', text: `Titre : TMD16\n10 digital mic preamps\n${'16-channel compact digital mixer. '.repeat(10)}`, url, images: ['https://x/p.jpg'], docs: [] })
     }),
   )
   const { research } = await import('./finder')
@@ -30,10 +30,10 @@ it('reads the user guide of this model by itself, with its product page', async 
     'TMD16',
     (m) => steps.push(m),
   )
-  // The manual first, read here; the quick start is left out.
-  expect(r.used.map((u) => u.title)).toEqual(['TMD16 User Guide', 'TMD16'])
+  // The manual first, then the quick start (its drawings), then the page; no OCR needed.
+  expect(r.used.map((u) => u.title)).toEqual(['TMD16 User Guide', 'Quickstart', 'TMD16'])
   expect(r.text.indexOf('XLR / 1/4" TRS combo')).toBeLessThan(r.text.indexOf('10 digital mic preamps'))
-  expect(calls.some((c) => c.includes('qsg') || c.startsWith('/ocr'))).toBe(false)
+  expect(calls.some((c) => c.startsWith('/ocr'))).toBe(false)
   expect(r.images).toEqual(['https://x/p.jpg'])
   expect(r.pdf?.name).toBe('tmd16-user-guide.pdf')
 })
@@ -46,7 +46,7 @@ it('follows the manual a page links to', async () => {
       const target = JSON.parse(String(init?.body)).url as string
       if (path === '/ocr') return new Response(JSON.stringify({ error: { message: 'OCR indisponible' } }), { status: 501 })
       if (target.endsWith('.pdf')) return new Response(new Uint8Array([37, 80, 68, 70]), { headers: { 'Content-Type': 'application/pdf' } })
-      return json({ title: 'TMD16', text: 'Titre : TMD16', url: target, images: [], docs: [{ url: 'https://cdn.example/TMD16-User-Guide.pdf', title: 'User Guide', pdf: true, doc: 'manual' }] })
+      return json({ title: 'TMD16', text: `Titre : TMD16\n${'16-channel compact digital mixer. '.repeat(10)}`, url: target, images: [], docs: [{ url: 'https://cdn.example/TMD16-User-Guide.pdf', title: 'User Guide', pdf: true, doc: 'manual' }] })
     }),
   )
   const { research } = await import('./finder')
@@ -54,4 +54,12 @@ it('follows the manual a page links to', async () => {
   expect(r.used[0].title).toBe('User Guide')
   expect(r.pdf?.name).toBe('TMD16-User-Guide.pdf')
   expect(r.text).toContain('XLR / 1/4" TRS combo')
+})
+
+it('moves on to the next document when one cannot be read, and says why when none can', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Le site a refusé la lecture (403)' } }), { status: 502 })))
+  const { research } = await import('./finder')
+  await expect(research([doc('https://www.behringer.com/product/flow-8', 'FLOW 8', 'page'), doc('https://mediadl.musictribe.com/flow8-qsg.pdf', 'FLOW 8 QSG', 'pdf', { doc: 'quickstart' })], 'FLOW 8', () => {})).rejects.toThrow(
+    /www\.behringer\.com : Le site a refusé la lecture \(403\) ; FLOW 8 QSG : Le site a refusé/,
+  )
 })

@@ -105,7 +105,8 @@ const decode = (t) =>
     e[0] === '#' ? String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (ENTITIES[e.toLowerCase()] ?? m),
   )
 
-const MAX_FILE = 15_000_000
+// Manuals of some makers weigh 20 MB and more.
+const MAX_FILE = 30_000_000
 
 /** Downloads a public page or file, at most MAX_FILE bytes. */
 async function download(raw) {
@@ -116,7 +117,7 @@ async function download(raw) {
     res = await fetch(url, {
       headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml,application/pdf;q=0.9,image/*;q=0.8,*/*;q=0.5', 'Accept-Language': 'fr,en;q=0.8,de;q=0.6' },
       redirect: 'follow',
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(30000),
     })
   } catch {
     return { status: 502, error: 'Site injoignable (ou trop lent).' }

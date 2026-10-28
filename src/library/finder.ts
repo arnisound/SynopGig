@@ -83,53 +83,62 @@ export interface Research {
   used: { title: string; url: string }[]
 }
 
+const DOC_ORDER: Record<string, number> = { manual: 0, datasheet: 1, quickstart: 2 }
+
 /**
- * Reads the best documents among those found, by itself: the user guide of
- * this exact model, else its data sheet, plus its product page (photos, and
- * the manuals it links to when the search found none). `docs` can also be
+ * Reads the best documents among those found, by itself: up to two PDFs of
+ * this exact model (user guide, data sheet, quick start: the drawings of the
+ * panels are often in the quick start) and one product page (photos, and the
+ * manuals it links to). A document that cannot be read makes way for the
+ * next one; when none can, the error says why for each. `docs` can also be
  * one document the user picked.
  */
 export async function research(docs: FoundDoc[], model: string, onStep: (msg: string) => void): Promise<Research> {
-  const pdfs = docs.filter((d) => d.kind === 'pdf')
-  const best = (kind?: FoundDoc['doc']) => pdfs.find((d) => d.exact && d.doc === kind)
-  const chosen = [best('manual') ?? best('datasheet'), best('manual') ? best('datasheet') : undefined].filter((d) => d !== undefined)
-  if (!chosen.length && pdfs[0] && docs.length === 1) chosen.push(pdfs[0])
-  const page = docs.find((d) => d.kind === 'page' && d.official && d.exact) ?? docs.find((d) => d.kind === 'page' && (d.official || docs.length === 1))
+  const single = docs.length === 1
+  const pdfs = docs
+    .filter((d) => d.kind === 'pdf' && (d.exact || single))
+    .sort((a, b) => (DOC_ORDER[a.doc ?? ''] ?? 3) - (DOC_ORDER[b.doc ?? ''] ?? 3))
+  const pages = docs.filter((d) => d.kind === 'page' && (d.exact || single)).sort((a, b) => Number(b.official) - Number(a.official))
 
   const parts: string[] = []
   const used: Research['used'] = []
+  const failed: string[] = []
   let pdf: File | undefined
   let images: string[] = []
   let linked: Page['docs'] = []
 
-  if (page) {
+  // One product page: the maker's first, a shop's when the maker's cannot be read (shops list the specifications).
+  for (const page of pages.slice(0, 3)) {
     try {
       onStep(`Lecture de la page ${page.host}…`)
       const got = await readUrl(page.url, model)
-      if ('page' in got) {
-        parts.push(`${got.page.title || page.title} (page produit) :\n${got.page.text}`)
-        used.push({ title: page.title, url: page.url })
-        images = got.page.images
-        linked = got.page.docs
-      }
-    } catch {
-      // The documents alone, then.
+      if (!('page' in got) || !readable(got.page.text)) throw new Error('page vide')
+      parts.push(`${got.page.title || page.title} (page produit) :\n${got.page.text}`)
+      used.push({ title: page.title, url: page.url })
+      images = got.page.images
+      linked = got.page.docs
+      break
+    } catch (e) {
+      failed.push(`${page.host} : ${(e as Error).message}`)
     }
   }
-  // The manual the page links to, when the search found none for this model.
-  const fromPage = !chosen.some((d) => d.doc === 'manual') ? linked.find((d) => d.pdf && d.doc === 'manual') : undefined
-  const toRead = [...chosen.map((d) => ({ url: d.url, title: d.title })), ...(fromPage ? [{ url: fromPage.url, title: fromPage.title }] : [])].slice(0, 2)
-  for (const d of toRead) {
+  // Up to two PDFs, the manual the page links to included.
+  const fromPage = linked.filter((d) => d.pdf && !pdfs.some((p) => p.url === d.url)).map((d) => ({ url: d.url, title: d.title, doc: d.doc, host: new URL(d.url).hostname }))
+  const candidates = [...pdfs, ...fromPage].sort((a, b) => (DOC_ORDER[a.doc ?? ''] ?? 3) - (DOC_ORDER[b.doc ?? ''] ?? 3))
+  let read = 0
+  for (const d of candidates.slice(0, 5)) {
+    if (read >= 2) break
     try {
       onStep(`Lecture de « ${d.title} »…`)
       const r = await pdfText(d.url)
-      parts.unshift(`${d.title} :\n${r.text}`)
-      used.unshift({ title: d.title, url: d.url })
+      parts.splice(read, 0, `${d.title} :\n${r.text}`)
+      used.splice(read, 0, { title: d.title, url: d.url })
       pdf ??= r.pdf
-    } catch {
-      // Unreadable: the next document.
+      read++
+    } catch (e) {
+      failed.push(`${d.title} : ${(e as Error).message}`)
     }
   }
-  if (!parts.length) throw new Error('aucun des documents trouvés n’a pu être lu')
+  if (!parts.length) throw new Error(failed.length ? `aucun document lisible (${failed.join(' ; ')})` : 'aucun document de ce modèle exact parmi les résultats')
   return { text: parts.join('\n\n'), pdf, images, used }
 }
