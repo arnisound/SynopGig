@@ -83,6 +83,28 @@ describe('AI relay', () => {
     expect(shape({ type: 'object', properties: { a: { type: 'integer' }, d: { type: 'string', enum: ['in', 'out'] } }, required: ['d'] })).toBe('{"a":integer?,"d":"in"|"out"}')
   })
 
+  it('asks Mistral first when it has a key, with the strict schema', async () => {
+    const upstream = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] })))
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', GROQ_API_KEY: 'G' })
+    expect(await res.json()).toEqual({ text: '{"model":"M"}' })
+    const [url, init] = upstream.mock.calls[0]
+    expect(url).toBe('https://api.mistral.ai/v1/chat/completions')
+    expect(init.headers.Authorization).toBe('Bearer K')
+    expect(JSON.parse(init.body)).toMatchObject({ model: 'mistral-medium-latest', response_format: { type: 'json_schema' } })
+  })
+
+  it('moves on to Groq when Mistral is out of quota', async () => {
+    const upstream = vi.fn(async (url) =>
+      String(url).includes('mistral') ? new Response(JSON.stringify({ message: 'Requests rate limit exceeded' }), { status: 429 }) : String(url).endsWith('/models') ? models('openai/gpt-oss-120b') : groqOk(),
+    )
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { MISTRAL_API_KEY: 'K', GROQ_API_KEY: 'G6' })
+    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    // Each Mistral model asked once only: a quota is not a schema problem.
+    expect(upstream.mock.calls.filter(([u]) => String(u).includes('mistral'))).toHaveLength(2)
+  })
+
   it('says exactly why the provider refused', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { message: 'Invalid API Key' } }), { status: 401 })))
     const res = await relay.fetch(post(relayRequest({ text: 'x' })), { GROQ_API_KEY: 'bad' })
@@ -209,5 +231,39 @@ describe('finding a product documentation', async () => {
     const res = await call('/doc', { url: 'https://fohhn.com/media/ps-850.pdf' })
     expect(res.headers.get('Content-Type')).toBe('application/pdf')
     expect((await call('/doc', { url: 'file:///etc/passwd' })).status).toBe(400)
+  })
+})
+
+describe('protecting the keys', () => {
+  /** A KV namespace in memory. */
+  const kv = () => {
+    const m = new Map()
+    return { get: async (k) => m.get(k) ?? null, put: async (k, v) => void m.set(k, v), m }
+  }
+  const ask = (env, ip) =>
+    relay.fetch(new Request('https://relay.example/', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': ip }, body: JSON.stringify(relayRequest({ text: '4 x XLR' })) }), env)
+
+  it('caps each visitor per day, and everyone together', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"model":"M"}' } }] }))))
+    const LIMITS = kv()
+    const env = { MISTRAL_API_KEY: 'K', LIMITS, PER_DAY: '2', DAILY_LIMIT: '3' }
+    expect((await ask(env, '1.1.1.1')).status).toBe(200)
+    expect((await ask(env, '1.1.1.1')).status).toBe(200)
+    const third = await ask(env, '1.1.1.1')
+    expect(third.status).toBe(429)
+    expect((await third.json()).error.message).toContain('votre connexion')
+    expect((await ask(env, '2.2.2.2')).status).toBe(200)
+    expect((await (await ask(env, '3.3.3.3')).json()).error.message).toContain('tous les utilisateurs')
+    // Addresses are never stored, only a hash.
+    expect([...LIMITS.m.keys()].join(' ')).not.toContain('1.1.1.1')
+  })
+
+  it('does not count reading pages and photos as analyses', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('<html><title>x</title></html>', { headers: { 'Content-Type': 'text/html' } })))
+    const LIMITS = kv()
+    for (let i = 0; i < 5; i++) {
+      await relay.fetch(new Request('https://relay.example/images', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': '4.4.4.4' }, body: JSON.stringify({ url: 'https://fohhn.com/p' }) }), { LIMITS })
+    }
+    expect(LIMITS.m.size).toBe(0)
   })
 })

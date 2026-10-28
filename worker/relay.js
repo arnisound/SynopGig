@@ -5,10 +5,19 @@
  *
  * Settings (Cloudflare > Worker > Settings > Variables and Secrets):
  *   GROQ_API_KEY     secret, recommended: very fast (console.groq.com/keys)
+ *   MISTRAL_API_KEY  secret, recommended first: generous free tier (console.mistral.ai)
  *   GEMINI_API_KEY   secret, alternative or complement: also reads scanned PDFs
  *   ALLOWED_ORIGINS  optional, comma separated (default: the GitHub Pages site)
  *   GROQ_MODEL       optional (default: best model the account can use)
- *   GEMINI_MODEL     optional (default gemini-2.5-flash-lite)
+ *   GEMINI_MODEL     optional (default gemini-2.5-flash)
+ *   MISTRAL_MODEL    optional (default mistral-medium-latest, then mistral-small-latest)
+ *
+ * Protection (nobody can use the keys up for everyone):
+ *   LIMITS           optional KV namespace binding: daily counts kept across
+ *                    every Cloudflare instance (without it, per instance only)
+ *   PER_HOUR         analyses and searches per visitor and hour (default 20)
+ *   PER_DAY          analyses and searches per visitor and day (default 60)
+ *   DAILY_LIMIT      analyses and searches for everyone together per day (default 400)
  *
  * Open <worker address>/diagnostic in a browser to check the keys.
  * POST /page {url} reads a shop page (flight case, rack) and returns its useful lines.
@@ -22,18 +31,59 @@ const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.c
 const PROMPT_START = 'You are a live sound, lighting and video technician'
 const MAX_TEXT = 20000
 const MAX_PDF_BASE64 = 11_000_000
-const PER_HOUR = 30
 
-// Best-effort limit per visitor, per Worker instance.
+/*
+ * Two kinds of requests: "ia" ones spend the AI quotas (analysis, search),
+ * "web" ones only read public pages (documents, photos: many per product).
+ * Each visitor gets an hourly allowance per kind, kept by each Cloudflare
+ * instance; the daily ones (per visitor and for everyone) are kept in the
+ * LIMITS KV namespace when it is bound, so they hold everywhere.
+ */
+const HOURLY = { ia: 20, web: 200, diag: 10 }
 const hits = new Map()
 
-function tooMany(ip) {
+function tooManyThisHour(kind, ip, env) {
+  const max = kind === 'ia' ? Number(env.PER_HOUR) || HOURLY.ia : HOURLY[kind]
+  const key = `${kind}|${ip}`
   const now = Date.now()
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < 3_600_000)
+  const recent = (hits.get(key) ?? []).filter((t) => now - t < 3_600_000)
   recent.push(now)
-  hits.set(ip, recent)
+  hits.set(key, recent)
   if (hits.size > 5000) hits.clear()
-  return recent.length > PER_HOUR
+  return recent.length > max
+}
+
+// Without KV: the same daily counts, for this instance only.
+const dayCounts = new Map()
+const today = () => new Date().toISOString().slice(0, 10)
+
+/** A visitor is known by a hash of their address, never the address itself. */
+async function visitor(ip) {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`synopgig|${ip}`))
+  return [...new Uint8Array(bytes).slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function count(env, key) {
+  if (!env.LIMITS) {
+    if (dayCounts.size > 5000) dayCounts.clear()
+    const n = (dayCounts.get(key) ?? 0) + 1
+    dayCounts.set(key, n)
+    return n
+  }
+  const n = (Number(await env.LIMITS.get(key)) || 0) + 1
+  await env.LIMITS.put(key, String(n), { expirationTtl: 172800 })
+  return n
+}
+
+/** Why this AI request is refused, or undefined when it may go. */
+export async function aiRefusal(ip, env) {
+  if (tooManyThisHour('ia', ip, env)) return 'Trop d’analyses en une heure : réessayez un peu plus tard.'
+  const day = today()
+  const mine = await count(env, `d:${day}:${await visitor(ip)}`)
+  if (mine > (Number(env.PER_DAY) || 60)) return 'Limite d’analyses du jour atteinte pour votre connexion : réessayez demain.'
+  const all = await count(env, `d:${day}:all`)
+  if (all > (Number(env.DAILY_LIMIT) || 400)) return 'Le service a atteint sa limite du jour pour tous les utilisateurs : réessayez demain, ou complétez la fiche à la main.'
+  return undefined
 }
 
 /** Only the data sheet analysis SynopGig sends goes through: the key cannot be used for anything else. */
@@ -204,6 +254,48 @@ async function askGroq(req, env) {
     last = again
   }
   return { ...last, error: `Groq ${last.status} : ${last.error ?? 'réponse illisible'}${notes.length > 1 ? ` [${notes.join(', ')}]` : ''}` }
+}
+
+/*
+ * Mistral (open models, French company): strict schema first, then plain
+ * JSON mode, on the medium model then the small one.
+ */
+async function mistralCall(req, env, model, strict) {
+  const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      max_tokens: 3000,
+      response_format: strict ? { type: 'json_schema', json_schema: { name: 'device', strict: true, schema: strictSchema(req.schema) } } : { type: 'json_object' },
+      messages: [
+        { role: 'system', content: strict ? req.system : `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
+        { role: 'user', content: `Data sheet extracts:\n${req.text}` },
+      ],
+    }),
+    signal: AbortSignal.timeout(60000),
+  }).catch((e) => ({ ok: false, status: 504, json: async () => ({ message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) }) }))
+  const data = await res.json().catch(() => ({}))
+  const content = data.choices?.[0]?.message?.content
+  const text = typeof content === 'string' ? content : Array.isArray(content) ? content.map((c) => c.text ?? '').join('') : ''
+  return { status: res.status, text: extractJson(text), error: res.ok ? undefined : String(data.message ?? data.detail ?? reason(data, res.status)).slice(0, 200) }
+}
+
+async function askMistral(req, env) {
+  const models = [...new Set([env.MISTRAL_MODEL || 'mistral-medium-latest', 'mistral-small-latest'])]
+  const tries = models.flatMap((m) => [[m, true], [m, false]])
+  const busy = new Set()
+  let last
+  for (const [model, strict] of tries) {
+    if (busy.has(model)) continue
+    last = await mistralCall(req, env, model, strict)
+    if (last.status === 200 && last.text) return last
+    if (last.status === 401 || last.status === 403) break
+    // Out of quota: no use asking the same model without the schema; the small one has its own quota.
+    if (last.status === 429) busy.add(model)
+  }
+  return { ...last, error: `Mistral ${last.status} : ${last.error ?? 'réponse illisible'}` }
 }
 
 /** Gemini wants upper-case OpenAPI types. */
@@ -554,7 +646,19 @@ async function readImage(body) {
 /** GET /diagnostic: tries each configured key on a tiny request. */
 async function diagnostic(env) {
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
-  const out = { relais: 'SynopGig, en ligne', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
+  const out = { relais: 'SynopGig, en ligne', mistral: 'pas de clé MISTRAL_API_KEY', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
+  if (env.MISTRAL_API_KEY) {
+    const model = env.MISTRAL_MODEL || 'mistral-medium-latest'
+    const r = await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) }))
+    out.mistral = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
+  }
+  const day = today()
+  const used = env.LIMITS ? Number(await env.LIMITS.get(`d:${day}:all`)) || 0 : undefined
+  out.protection = {
+    par_visiteur: `${Number(env.PER_HOUR) || HOURLY.ia} par heure, ${Number(env.PER_DAY) || 60} par jour`,
+    pour_tous: `${Number(env.DAILY_LIMIT) || 400} par jour`,
+    compteurs: env.LIMITS ? `KV LIMITS relié (${used} analyses et recherches aujourd’hui)` : 'sans KV LIMITS : comptés par instance seulement (moins fiable)',
+  }
   if (env.GROQ_API_KEY) {
     groqModels = undefined
     const [model] = await pickGroqModels(env)
@@ -596,14 +700,17 @@ export default {
 
     const path = new URL(request.url).pathname.replace(/\/+$/, '')
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors })
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
     if (request.method === 'GET' && path === '/diagnostic') {
-      if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de diagnostics, réessayez plus tard.', 429)
+      if (tooManyThisHour('diag', ip, env)) return fail('Trop de diagnostics, réessayez plus tard.', 429)
       return new Response(JSON.stringify(await diagnostic(env), null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } })
     }
     if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
     if (['/page', '/find', '/doc', '/images', '/image'].includes(path)) {
-      if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop de recherches en une heure, réessayez plus tard.', 429)
+      // Searching spends the AI quota; reading pages and photos does not.
+      const refused = path === '/find' ? await aiRefusal(ip, env) : tooManyThisHour('web', ip, env) ? 'Trop de lectures en une heure, réessayez plus tard.' : undefined
+      if (refused) return fail(refused, 429)
       const body = await request.json().catch(() => null)
       const r =
         path === '/page'
@@ -619,8 +726,7 @@ export default {
       if (r.image) return new Response(r.image, { headers: { ...cors, 'Content-Type': r.type } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
-    if (!env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)
-    if (tooMany(request.headers.get('CF-Connecting-IP') || 'unknown')) return fail('Trop d’analyses en une heure, réessayez plus tard.', 429)
+    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.GEMINI_API_KEY) return fail('Relais non configuré (clé manquante).', 500)
 
     let req
     try {
@@ -629,9 +735,13 @@ export default {
       req = null
     }
     if (!req) return fail('Requête refusée.', 400)
+    // Counted only once the request is a real analysis.
+    const refused = await aiRefusal(ip, env)
+    if (refused) return fail(refused, 429)
 
-    // Groq is the fastest but only reads text; Gemini also reads scanned PDFs.
+    // Mistral has the largest free quota, Groq is the fastest (both read text only); Gemini also reads scanned PDFs.
     const order = []
+    if (env.MISTRAL_API_KEY && req.text) order.push(askMistral)
     if (env.GROQ_API_KEY && req.text) order.push(askGroq)
     if (env.GEMINI_API_KEY) order.push(askGemini)
     if (order.length === 0) return fail('PDF scanné : collez plutôt le texte des caractéristiques.', 422)
