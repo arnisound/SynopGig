@@ -303,9 +303,14 @@ async function searchDuckDuckGo(q) {
   return found
 }
 
-/** Groq's gpt-oss models search the web themselves (built-in browser search). */
+/**
+ * Groq's gpt-oss models search the web themselves (built-in browser search).
+ * The pages they read cost many tokens: the small model searches, the big
+ * one keeps its daily quota for the analyses.
+ */
 async function searchGroq(q, env) {
-  const model = (await modelsOf(SERVICES.groq, env)).find((m) => m.startsWith('openai/gpt-oss')) ?? 'openai/gpt-oss-120b'
+  const available = await modelsOf(SERVICES.groq, env)
+  const model = available.find((m) => m === 'openai/gpt-oss-20b') ?? available.find((m) => m.startsWith('openai/gpt-oss')) ?? 'openai/gpt-oss-20b'
   const res = await fetch(SERVICES.groq.chat, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
@@ -337,10 +342,14 @@ async function find(body, env) {
   const model = String(body?.model ?? '').trim().slice(0, 80)
   if (!model) return { status: 400, error: 'Indiquez au moins le modèle.' }
   const q = `${brand} ${model}`.trim()
-  const searches = [searchBing(`${q} user guide pdf`), searchBing(`${q} specifications`), searchDuckDuckGo(`${q} user guide pdf`)]
-  if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
-  const found = (await Promise.allSettled(searches)).flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  const results = rankDocs(found, brand, model)
+  const settled = async (searches) => (await Promise.allSettled(searches)).flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  let found = await settled([searchBing(`${q} user guide pdf`), searchBing(`${q} specifications`), searchDuckDuckGo(`${q} user guide pdf`)])
+  let results = rankDocs(found, brand, model)
+  // Groq searches only when no manual or data sheet of this very model was found: it costs much of its quota.
+  if (env.GROQ_API_KEY && !results.some((d) => d.exact && d.kind === 'pdf' && d.doc && d.doc !== 'quickstart')) {
+    found = [...found, ...(await settled([searchGroq(q, env)]))]
+    results = rankDocs(found, brand, model)
+  }
   if (!results.length) return { status: 404, error: 'Aucun document trouvé : vérifiez l’orthographe, ou déposez la fiche vous-même.' }
   return { status: 200, data: { results } }
 }
@@ -529,8 +538,10 @@ async function askService(service, req, env) {
       if (last.status === 200 && last.text) return { ...last, engine: service.name, model }
       if (last.status === 401 || last.status === 403) return { ...last, error: `${service.name} : ${last.error}` }
       if (last.status === 429) {
-        // A model that refuses even after a wait is left alone for a while (ten minutes on Mistral's free plan).
-        busyUntil.set(model, Date.now() + (service.name === 'mistral' ? 600_000 : 60_000))
+        // A model that refuses even after a wait is left alone for a while: hours when its daily quota is spent,
+        // ten minutes on Mistral's free plan, a minute otherwise.
+        const pause = /per day|\bTPD\b|\bRPD\b|daily/i.test(last.error ?? '') ? 3 * 3_600_000 : service.name === 'mistral' ? 600_000 : 60_000
+        busyUntil.set(model, Date.now() + pause)
         break
       }
       if (last.status === 404) known.delete(service.name)
@@ -569,7 +580,7 @@ export async function geminiModels(env) {
 }
 
 async function askGemini(req, env) {
-  const parts = req.images.map((data) => ({ inline_data: { mime_type: 'image/jpeg', data } }))
+  const parts = (req.images ?? []).map((data) => ({ inline_data: { mime_type: 'image/jpeg', data } }))
   if (req.fullText ?? req.text) parts.push({ text: `Data sheet extracts:\n${req.fullText ?? req.text}` })
   parts.push({ text: 'List the connectors of this device.' })
   let last
@@ -605,7 +616,7 @@ async function askGemini(req, env) {
 /** Z.ai's free picture reader (GLM-4.6V-Flash), when Gemini cannot see the panel pages. */
 async function askZaiVision(req, env) {
   const content = [
-    ...req.images.map((data) => ({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${data}` } })),
+    ...(req.images ?? []).map((data) => ({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${data}` } })),
     { type: 'text', text: `Data sheet extracts:\n${req.fullText ?? req.text ?? '(pictures only)'}\n\nList the connectors of this device. Answer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
   ]
   const res = await fetch(SERVICES.zai.chat, {

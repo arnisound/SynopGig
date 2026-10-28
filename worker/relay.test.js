@@ -213,16 +213,25 @@ describe('finding the documents of a product', () => {
     expect((await res.json()).results[0]).toMatchObject({ kind: 'pdf', doc: 'manual', official: true })
   })
 
+  it('spares Groq when the manual of this model is already found', async () => {
+    const rss = '<rss><item><title>TMD16 User Guide</title><link>https://cdn.inmusicbrands.com/tmd16-user-guide.pdf</link></item></rss>'
+    const f = upstream([['bing.com', new Response(rss)], ['duckduckgo', new Response('<html></html>')], ['groq.com', chatOk()]])
+    vi.stubGlobal('fetch', f)
+    await relay.fetch(post('/find', { brand: 'Alto', model: 'TMD16' }), { GROQ_API_KEY: 'G13' })
+    expect(bodies(f, 'groq.com/openai/v1/chat')).toHaveLength(0)
+  })
+
   it('lets Groq search the web itself', async () => {
     const f = upstream([
-      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b')],
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')],
       ['groq.com', json({ choices: [{ message: { content: 'ok', executed_tools: [{ search_results: { results: [{ url: 'https://fohhn.com/media/ps-850-manual.pdf', title: 'PS-850 manual' }] } }] } }] })],
       ['bing.com', new Response('<rss></rss>')],
     ])
     vi.stubGlobal('fetch', f)
     const res = await relay.fetch(post('/find', { brand: 'Fohhn', model: 'PS-850' }), { GROQ_API_KEY: 'G10' })
     expect((await res.json()).results[0]).toMatchObject({ url: 'https://fohhn.com/media/ps-850-manual.pdf', doc: 'manual' })
-    expect(bodies(f, 'groq.com/openai/v1/chat')[0].tools).toEqual([{ type: 'browser_search' }])
+    // The small model searches: the big one keeps its daily quota for the analyses.
+    expect(bodies(f, 'groq.com/openai/v1/chat')[0]).toMatchObject({ model: 'openai/gpt-oss-20b', tools: [{ type: 'browser_search' }] })
   })
 })
 
@@ -257,5 +266,11 @@ describe('protecting the keys', () => {
     expect(JSON.parse(text).groq).toContain('Invalid API Key')
     expect(JSON.parse(text).gemini).toContain('pas de clé')
     expect(text).not.toContain('gsk_secret')
+  })
+
+  it('checks Gemini in the diagnostic', async () => {
+    vi.stubGlobal('fetch', upstream([['generativelanguage', geminiOk()], ['bing.com', new Response('<rss></rss>')]]))
+    const res = await relay.fetch(new Request('https://relay.example/diagnostic'), { GEMINI_API_KEY: 'M14' })
+    expect((await res.json()).gemini).toMatch(/^OK/)
   })
 })
