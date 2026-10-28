@@ -43,7 +43,7 @@ const MAX_PDF_BASE64 = 11_000_000
  * instance; the daily ones (per visitor and for everyone) are kept in the
  * LIMITS KV namespace when it is bound, so they hold everywhere.
  */
-const HOURLY = { ia: 20, web: 200, diag: 10 }
+const HOURLY = { ia: 20, web: 200, diag: 30 }
 const hits = new Map()
 
 function tooManyThisHour(kind, ip, env) {
@@ -798,64 +798,97 @@ async function readImage(body) {
 }
 
 /** GET /diagnostic: tries each configured key on a tiny request. */
+/** A diagnostic check that gives up after a while instead of holding the whole page. */
+const within = (seconds, work) => Promise.race([work, sleep(seconds).then(() => 'ERREUR : pas de réponse en ' + seconds + ' s')])
+
+/**
+ * GET /diagnostic: tries each configured key on a tiny request, every
+ * service at the same time (Mistral's models one after the other, its free
+ * plan takes one request a second), each check limited in time.
+ */
 async function diagnostic(env) {
+  const started = Date.now()
   const req = { system: `${PROMPT_START}.`, schema: { type: 'object', properties: { ok: { type: 'boolean' } } }, text: 'Reply {"ok": true}.' }
   const out = { relais: 'SynopGig, en ligne', mistral: 'pas de clé MISTRAL_API_KEY', groq: 'pas de clé GROQ_API_KEY', gemini: 'pas de clé GEMINI_API_KEY' }
+  const checks = []
+
   if (env.MISTRAL_API_KEY) {
-    mistralModels = undefined
-    const models = await pickMistralModels(env)
-    // Each model on its own, two seconds apart (one request a second on the free plan).
-    const tested = {}
-    for (const model of models) {
-      await sleep(2)
-      const r = await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) }))
-      tested[model] = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
-    }
-    const ok = Object.keys(tested).filter((m) => tested[m] === 'OK')
-    out.mistral = ok.length ? `OK (modèle ${ok[0]})` : models.length ? 'ERREUR : aucun modèle ne répond' : 'ERREUR : aucun modèle de discussion'
-    out.mistral_essais = tested
-    out.mistral_modeles_du_compte = mistralModels?.list ?? []
+    checks.push(
+      within(40, (async () => {
+        mistralModels = undefined
+        const models = await pickMistralModels(env)
+        const tested = {}
+        for (const model of models) {
+          await sleep(1.5)
+          const r = await mistralCall(req, env, model, false).catch((e) => ({ status: 0, error: String(e) }))
+          tested[model] = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+          if (r.status === 200) break
+        }
+        const ok = Object.keys(tested).find((m) => tested[m] === 'OK')
+        out.mistral = ok ? `OK (modèle ${ok})` : models.length ? 'ERREUR : aucun modèle ne répond' : 'ERREUR : aucun modèle de discussion'
+        out.mistral_essais = tested
+        out.mistral_modeles_du_compte = mistralModels?.list ?? []
+      })()).then((r) => typeof r === 'string' && (out.mistral = r)),
+    )
+  }
+  if (env.GROQ_API_KEY) {
+    checks.push(
+      within(30, (async () => {
+        groqModels = undefined
+        const [model] = await pickGroqModels(env)
+        const r = await groqCall(req, env, model, 'json').catch((e) => ({ status: 0, error: String(e) }))
+        out.groq = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
+        out.groq_modeles_du_compte = (groqModels?.list ?? []).filter((m) => !NOT_CHAT.test(m))
+      })()).then((r) => typeof r === 'string' && (out.groq = r)),
+    )
+  }
+  if (env.GEMINI_API_KEY) {
+    checks.push(
+      within(30, (async () => {
+        geminiModels = undefined
+        const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
+        out.gemini = r.status === 200 && r.text ? `OK (modèles ${(await pickGeminiModels(env)).join(', ')})` : `ERREUR ${r.error}`
+      })()).then((r) => typeof r === 'string' && (out.gemini = r)),
+    )
   }
   if (env.ZAI_API_KEY) {
-    zaiHost = undefined
-    const r = await zaiCall(req, env, env.ZAI_MODEL || 'glm-4.7-flash').catch((e) => ({ status: 0, error: String(e) }))
-    out.zai = r.status === 200 ? `OK (${new URL(zaiHost).host})` : `ERREUR ${r.status} : ${r.error}${r.status === 401 ? ' (clé refusée par z.ai et bigmodel.cn : recréez-la)' : ''}`
+    checks.push(
+      within(30, (async () => {
+        zaiHost = undefined
+        const r = await zaiCall(req, env, env.ZAI_MODEL || 'glm-4.7-flash').catch((e) => ({ status: 0, error: String(e) }))
+        out.zai = r.status === 200 && zaiHost ? `OK (${new URL(zaiHost).host})` : `ERREUR ${r.status} : ${r.error}${r.status === 401 ? ' (clé refusée par z.ai et bigmodel.cn : recréez-la)' : ''}`
+      })()).then((r) => typeof r === 'string' && (out.zai = r)),
+    )
   }
   if (env.AI) {
-    const r = await askWorkersAi(req, env).catch((e) => ({ status: 0, error: String(e) }))
-    out.workers_ai = r.status === 200 && r.text ? 'OK (sans clé)' : `ERREUR ${r.error}`
+    checks.push(
+      within(30, (async () => {
+        const r = await askWorkersAi(req, env).catch((e) => ({ status: 0, error: String(e) }))
+        out.workers_ai = r.status === 200 && r.text ? 'OK (sans clé)' : `ERREUR ${r.error}`
+      })()).then((r) => typeof r === 'string' && (out.workers_ai = r)),
+    )
   } else out.workers_ai = 'pas de liaison AI (Settings > Bindings > Workers AI)'
-  const day = today()
-  const used = env.LIMITS ? Number(await env.LIMITS.get(`d:${day}:all`)) || 0 : undefined
+
+  // Documentation search: which sources answer from this Worker.
+  const probe = (key, fn) =>
+    checks.push(
+      within(30, fn().then((r) => (r.length ? `OK (${r.length} résultats)` : 'aucun résultat'), (e) => `ERREUR ${String(e?.message ?? e).slice(0, 160)}`)).then((r) => (out[key] = r)),
+    )
+  probe('recherche_duckduckgo', () => searchDuckDuckGo('Shure SM58 datasheet'))
+  if (env.GROQ_API_KEY) probe('recherche_groq', () => searchGroq('Shure SM58', env))
+  if (env.GEMINI_API_KEY) {
+    if (env.GEMINI_SEARCH === 'on') probe('recherche_gemini', () => searchGemini('Shure SM58', env))
+    else out.recherche_gemini = 'désactivée (quota Gemini gardé pour l’analyse ; GEMINI_SEARCH = on pour l’activer)'
+  }
+
+  await Promise.all(checks.map((c) => c.catch(() => {})))
+  const used = env.LIMITS ? Number(await env.LIMITS.get(`d:${today()}:all`).catch(() => 0)) || 0 : undefined
   out.protection = {
     par_visiteur: `${Number(env.PER_HOUR) || HOURLY.ia} par heure, ${Number(env.PER_DAY) || 60} par jour`,
     pour_tous: `${Number(env.DAILY_LIMIT) || 400} par jour`,
     compteurs: env.LIMITS ? `KV LIMITS relié (${used} analyses et recherches aujourd’hui)` : 'sans KV LIMITS : comptés par instance seulement (moins fiable)',
   }
-  if (env.GROQ_API_KEY) {
-    groqModels = undefined
-    const [model] = await pickGroqModels(env)
-    const r = await groqCall(req, env, model, true).catch((e) => ({ status: 0, error: String(e) }))
-    out.groq = r.status === 200 ? `OK (modèle ${model})` : `ERREUR ${r.status} : ${r.error}`
-    out.groq_modeles_du_compte = (groqModels?.list ?? []).filter((m) => !NOT_CHAT.test(m))
-  }
-  if (env.GEMINI_API_KEY) {
-    geminiModels = undefined
-    const r = await askGemini(req, env).catch((e) => ({ status: 0, error: String(e) }))
-    out.gemini = r.status === 200 && r.text ? `OK (modèles ${(await pickGeminiModels(env)).join(', ')})` : `ERREUR ${r.error}`
-  }
-  // Documentation search: which sources answer from this Worker.
-  const probe = async (fn) => {
-    try {
-      const r = await fn()
-      return r.length ? `OK (${r.length} résultats)` : 'aucun résultat'
-    } catch (e) {
-      return `ERREUR ${String(e?.message ?? e).slice(0, 160)}`
-    }
-  }
-  out.recherche_duckduckgo = await probe(() => searchDuckDuckGo('Shure SM58 datasheet'))
-  if (env.GROQ_API_KEY) out.recherche_groq = await probe(() => searchGroq('Shure SM58', env))
-  if (env.GEMINI_API_KEY) out.recherche_gemini = env.GEMINI_SEARCH === 'on' ? await probe(() => searchGemini('Shure SM58', env)) : 'désactivée (quota Gemini gardé pour l’analyse ; GEMINI_SEARCH = on pour l’activer)'
+  out.duree = `${Math.round((Date.now() - started) / 1000)} s`
   return out
 }
 
@@ -913,7 +946,8 @@ export default {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
     if (request.method === 'GET' && path === '/diagnostic') {
       if (tooManyThisHour('diag', ip, env)) return fail('Trop de diagnostics, réessayez plus tard.', 429)
-      return new Response(JSON.stringify(await diagnostic(env), null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+      const report = await diagnostic(env).catch((e) => ({ relais: 'SynopGig, en ligne', erreur_diagnostic: String(e?.stack ?? e).slice(0, 400) }))
+      return new Response(JSON.stringify(report, null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })
     }
     if (request.method !== 'POST') return fail('Relais IA SynopGig : POST uniquement. Diagnostic : ouvrez /diagnostic.', 405)
     if (!origins.includes(origin)) return fail('Site non autorisé.', 403)
