@@ -120,6 +120,16 @@ describe('AI relay', () => {
     expect(JSON.parse(init.body).model).toBe('gpt-oss-120b')
   })
 
+  it('uses the free GLM models of Z.ai', async () => {
+    const upstream = vi.fn(async () => groqOk())
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { ZAI_API_KEY: 'Z' })
+    expect(await res.json()).toEqual({ text: '{"model":"X"}' })
+    const [url, init] = upstream.mock.calls[0]
+    expect(url).toBe('https://api.z.ai/api/paas/v4/chat/completions')
+    expect(JSON.parse(init.body)).toMatchObject({ model: 'glm-4.7-flash', response_format: { type: 'json_object' } })
+  })
+
   it('falls back on Cloudflare Workers AI, without any key', async () => {
     const AI = { run: vi.fn(async () => ({ response: 'ok: {"model":"W"}' })) }
     const res = await relay.fetch(post(relayRequest({ text: '4 x XLR' })), { AI })

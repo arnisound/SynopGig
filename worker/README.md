@@ -20,9 +20,12 @@ Sans ce relais, l’application utilise l’analyse rapide (sans IA, instantané
      gratuite, Mistral peut se servir des requêtes pour entraîner ses modèles : ce ne sont
      que des fiches techniques publiques. Pour un usage plus large, l’offre payante coûte
      quelques centimes par mois à ce volume ; fixez une limite de dépense dans la console.
-   - **Cerebras** (facultatif, même modèle `gpt-oss-120b` que Groq, quota gratuit à part
-     d’environ un million de tokens par jour) : <https://cloud.cerebras.ai> → *API Keys*.
+   - **Cerebras** (facultatif, **payant** : l’essai demande une carte ; même modèle
+     `gpt-oss-120b` que Groq) : <https://cloud.cerebras.ai> → *API Keys*.
      Secret `CEREBRAS_API_KEY`.
+   - **Z.ai** (facultatif, gratuit, société chinoise Zhipu) : modèles GLM « Flash » gratuits,
+     compte par e-mail sur <https://z.ai> → *API Keys*. Secret `ZAI_API_KEY`. Une seule
+     requête à la fois par compte : s’il est occupé, le relais passe au suivant.
    - **Cloudflare Workers AI** (facultatif, sans clé) : *Settings* → *Bindings* → *Add* →
      *Workers AI*, nom `AI`. Utilisé en tout dernier recours : son allocation gratuite est
      petite, et elle s’ajoute à ce que Cloudflare fait déjà tourner pour SynopGig.
@@ -96,7 +99,7 @@ les limites (voir « Protection ») ; lire les documents et les photos n’en co
 
 - Fiche avec du texte (cas normal) : **Mistral** (modèle `mistral-medium-latest`, puis
   `mistral-small-latest`), puis **Groq** (`gpt-oss-120b`, puis le second modèle), puis
-  **Cerebras**, puis Gemini, puis Workers AI s’il est relié.
+  **Cerebras**, puis **Z.ai**, puis Gemini, puis Workers AI s’il est relié.
 - PDF scanné (une image, sans texte) : **Gemini** uniquement.
 - Si l’un échoue (quota…), il passe au suivant ; si rien ne répond, l’application revient
   seule à l’analyse rapide.

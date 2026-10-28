@@ -7,6 +7,7 @@
  *   GROQ_API_KEY     secret, recommended: very fast (console.groq.com/keys)
  *   MISTRAL_API_KEY  secret, recommended first: generous free tier (console.mistral.ai)
  *   CEREBRAS_API_KEY secret, optional: gpt-oss-120b with its own free quota (cloud.cerebras.ai)
+ *   ZAI_API_KEY      secret, optional: free GLM Flash models of Z.ai (z.ai)
  *   GEMINI_API_KEY   secret, alternative or complement: also reads scanned PDFs
  *   AI               binding (Settings > Bindings > Workers AI), no key: Cloudflare's
  *                    own open models, used last (small free daily allowance)
@@ -170,7 +171,7 @@ export function strictSchema(s) {
 }
 
 /** Reasoning models think before answering: worth it, a sheet is full of traps. */
-const thinks = (model) => model.startsWith('openai/gpt-oss') || /qwen3|deepseek/.test(model)
+const thinks = (model) => /gpt-oss|qwen3|deepseek|glm/.test(model)
 
 /**
  * The schema in a few words, for JSON mode: the long code lists are already
@@ -244,6 +245,23 @@ async function askCerebras(req, env) {
     if (last.status === 401 || last.status === 403) break
   }
   return { ...last, error: `Cerebras ${last.status} : ${last.error ?? 'réponse illisible'}` }
+}
+
+/*
+ * Z.ai (Zhipu, China): the GLM "Flash" models are free, with an account
+ * made by e-mail. One request at a time per account: when busy, the relay
+ * moves on. Key at z.ai (API Keys).
+ */
+async function askZai(req, env) {
+  const models = [...new Set([env.ZAI_MODEL || 'glm-4.7-flash', 'glm-4.5-flash'])]
+  const url = 'https://api.z.ai/api/paas/v4/chat/completions'
+  let last
+  for (const model of models) {
+    last = await openAiCall(url, env.ZAI_API_KEY, req, env, model, 'json')
+    if (last.status === 200 && last.text) return last
+    if (last.status === 401 || last.status === 403) break
+  }
+  return { ...last, error: `Z.ai ${last.status} : ${last.error ?? 'réponse illisible'}` }
 }
 
 /** Text of a Workers AI answer, whatever its shape (plain, OpenAI chat or Responses). */
@@ -748,6 +766,10 @@ async function diagnostic(env) {
     const r = await openAiCall('https://api.cerebras.ai/v1/chat/completions', env.CEREBRAS_API_KEY, req, env, env.CEREBRAS_MODEL || 'gpt-oss-120b', 'json').catch((e) => ({ status: 0, error: String(e) }))
     out.cerebras = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
   }
+  if (env.ZAI_API_KEY) {
+    const r = await openAiCall('https://api.z.ai/api/paas/v4/chat/completions', env.ZAI_API_KEY, req, env, env.ZAI_MODEL || 'glm-4.7-flash', 'json').catch((e) => ({ status: 0, error: String(e) }))
+    out.zai = r.status === 200 ? 'OK' : `ERREUR ${r.status} : ${r.error}`
+  }
   if (env.AI) {
     const r = await askWorkersAi(req, env).catch((e) => ({ status: 0, error: String(e) }))
     out.workers_ai = r.status === 200 && r.text ? 'OK (sans clé)' : `ERREUR ${r.error}`
@@ -826,7 +848,7 @@ export default {
       if (r.image) return new Response(r.image, { headers: { ...cors, 'Content-Type': r.type } })
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
-    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.CEREBRAS_API_KEY && !env.GEMINI_API_KEY && !env.AI) return fail('Relais non configuré (clé manquante).', 500)
+    if (!env.MISTRAL_API_KEY && !env.GROQ_API_KEY && !env.CEREBRAS_API_KEY && !env.ZAI_API_KEY && !env.GEMINI_API_KEY && !env.AI) return fail('Relais non configuré (clé manquante).', 500)
 
     let req
     try {
@@ -844,6 +866,7 @@ export default {
     if (env.MISTRAL_API_KEY && req.text) order.push(askMistral)
     if (env.GROQ_API_KEY && req.text) order.push(askGroq)
     if (env.CEREBRAS_API_KEY && req.text) order.push(askCerebras)
+    if (env.ZAI_API_KEY && req.text) order.push(askZai)
     if (env.GEMINI_API_KEY) order.push(askGemini)
     // No key at all: Cloudflare's own models, last because their daily allowance is small.
     if (env.AI && req.text) order.push(askWorkersAi)
