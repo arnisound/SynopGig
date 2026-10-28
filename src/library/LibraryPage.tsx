@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CONNECTORS, SIGNALS } from '../data/connectors'
+import { CONNECTOR_OPTIONS, CONNECTORS, SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS, FAMILY_ORDER, LIBRARY } from '../data/library'
 import { download, uid } from '../project'
 import type { Category, ConnectorType, DeviceTemplate, PortDirection, Project, SignalType } from '../types'
@@ -16,7 +16,11 @@ import type { NewProductRequest } from './newProduct'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
 const DIRS: Record<PortDirection, string> = { in: 'Entrée', out: 'Sortie', io: 'Bidirectionnel' }
-const BRANDS = [...new Set(LIBRARY.map((t) => t.brand).filter((b): b is string => !!b && b !== 'Générique'))]
+/** Alphabetical, numbers in order (CL5 before CL10). */
+const alpha = (a: string, b: string) => a.localeCompare(b, 'fr', { sensitivity: 'base', numeric: true })
+const byName = (a: { brand?: string; model: string }, b: { brand?: string; model: string }) => alpha(`${a.brand ?? ''} ${a.model}`, `${b.brand ?? ''} ${b.model}`)
+
+const BRANDS = [...new Set(LIBRARY.map((t) => t.brand).filter((b): b is string => !!b && b !== 'Générique'))].sort(alpha)
 
 /** Per-browser settings: never shared, never sent anywhere but where they belong. */
 const store = {
@@ -246,13 +250,13 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return []
-    return LIBRARY.filter((t) => !t.panel && `${t.brand ?? ''} ${t.model}`.toLowerCase().includes(q)).slice(0, 30)
+    return LIBRARY.filter((t) => !t.panel && `${t.brand ?? ''} ${t.model}`.toLowerCase().includes(q)).sort(byName).slice(0, 30)
   }, [query])
 
   const userResults = useMemo(() => {
     const q = userQuery.trim().toLowerCase()
     const list = userLibrary.templates.filter((t) => !q || `${t.brand ?? ''} ${t.model} ${t.author ?? ''}`.toLowerCase().includes(q))
-    return list.slice(-40).reverse()
+    return [...list].sort(byName).slice(0, 100)
   }, [userLibrary.templates, userQuery])
 
   const runRules = (source: string, label: string) => {
@@ -451,7 +455,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
           <button onClick={() => { setDraft(blank()); setSuggestions([]); setStatus('') }}>+ Nouveau</button>
         </div>
         {mine.length === 0 && <p className="muted small">Aucun modèle perso. Créez-en un à la main, depuis une fiche technique, ou copiez un modèle existant.</p>}
-        {mine.map((t) => (
+        {[...mine].sort(byName).map((t) => (
           <div key={t.id} className={`lib-item ${draft?.id === t.id ? 'active' : ''}`}>
             <button className="case-item" onClick={() => { setDraft(fromTemplate(t, true)); setSuggestions([]); setStatus('') }}>
               <span className="dot" style={{ background: CATEGORY_COLORS[t.category] }} />
@@ -685,12 +689,12 @@ export default function LibraryPage({ project, setProject, userLibrary, request 
                     <td><input type="number" min={1} max={256} value={r.count} onChange={(e) => setRow(r.key, { count: Number(e.target.value) })} /></td>
                     <td>
                       <select value={r.connector} onChange={(e) => setRow(r.key, { connector: e.target.value as ConnectorType })}>
-                        {Object.entries(CONNECTORS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        {CONNECTOR_OPTIONS.map((k) => <option key={k} value={k}>{CONNECTORS[k]}</option>)}
                       </select>
                     </td>
                     <td>
                       <select value={r.signal} onChange={(e) => setRow(r.key, { signal: e.target.value as SignalType })}>
-                        {Object.entries(SIGNALS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                        {SIGNAL_OPTIONS.map((k) => <option key={k} value={k}>{SIGNALS[k].label}</option>)}
                       </select>
                     </td>
                     <td>

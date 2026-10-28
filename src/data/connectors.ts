@@ -1,15 +1,56 @@
 import type { ConnectorType, Port, SignalType } from '../types.ts'
 
-export const SIGNALS: Record<SignalType, { label: string; color: string }> = {
+/**
+ * What travels on a port. A network cable carries many things: the IP
+ * signals (ip: true) all go through the same switches and can share a
+ * network, so they are compatible with each other and with plain "Réseau IP".
+ */
+export const SIGNALS: Record<SignalType, { label: string; color: string; ip?: boolean }> = {
   'audio-analog': { label: 'Audio analogique', color: '#e5484d' },
-  'audio-digital': { label: 'Audio numérique (AES/MADI)', color: '#f76b15' },
+  'audio-digital': { label: 'Audio numérique (AES3, MADI, ADAT)', color: '#f76b15' },
+  'audio-link': { label: 'Liaison audio propriétaire (AES50, Optocore, SuperMAC…)', color: '#c2410c' },
   speaker: { label: 'HP (puissance)', color: '#ffc53d' },
   dmx: { label: 'DMX', color: '#46a758' },
-  network: { label: 'Réseau (Dante / Art-Net / sACN)', color: '#0090ff' },
+  network: { label: 'Réseau IP (données)', color: '#0090ff', ip: true },
+  dante: { label: 'Dante / AES67 (audio sur IP)', color: '#3358d4', ip: true },
+  avb: { label: 'AVB / Milan (audio sur IP)', color: '#00a2c7', ip: true },
+  artnet: { label: 'Art-Net / sACN (lumière sur IP)', color: '#29a383', ip: true },
+  ndi: { label: 'Vidéo sur IP (NDI, SMPTE 2110)', color: '#ab4aba', ip: true },
+  'control-ip': { label: 'Contrôle IP (OSC, appli, télécommande)', color: '#e93d82', ip: true },
   video: { label: 'Vidéo', color: '#8e4ec6' },
+  sync: { label: 'Synchro (word clock, timecode, genlock)', color: '#978365' },
+  intercom: { label: 'Intercom', color: '#5eb1ef' },
   power: { label: 'Énergie', color: '#8b8d98' },
   rf: { label: 'HF (antenne)', color: '#12a594' },
   control: { label: 'Contrôle (MIDI, GPIO, série)', color: '#d6409f' },
+}
+
+/** Two signals that can meet on a cable: the same one, or two that both travel over IP. */
+export const sameSignal = (a: SignalType, b: SignalType) => a === b || (!!SIGNALS[a].ip && !!SIGNALS[b].ip)
+
+const byLabel = (a: string, b: string) => a.localeCompare(b, 'fr', { sensitivity: 'base', numeric: true })
+
+/** Alphabetical lists for the menus. */
+export const SIGNAL_OPTIONS = (Object.keys(SIGNALS) as SignalType[]).sort((a, b) => byLabel(SIGNALS[a].label, SIGNALS[b].label))
+
+/**
+ * What a port named "Dante primaire" or "AES50" really carries, for ports
+ * of the catalogue still marked with the general network or digital signal.
+ */
+export function refineSignal(port: Port): SignalType {
+  const l = port.label
+  if (port.signal === 'network') {
+    if (/dante|aes67/i.test(l)) return 'dante'
+    if (/\bavb\b|milan/i.test(l)) return 'avb'
+    if (/art-?net|sacn|dmx/i.test(l)) return 'artnet'
+    if (/\bndi\b|2110|vid[ée]o ip/i.test(l)) return 'ndi'
+    if (/contr[ôo]le|control|osc\b|t[ée]l[ée]commande|remote/i.test(l)) return 'control-ip'
+  }
+  if (port.signal === 'audio-digital') {
+    if (/aes50|optocore|supermac|twinlane|gigaace|dsnake|slink|ultranet|liaison/i.test(l)) return 'audio-link'
+    if (/word ?clock|wclk/i.test(l)) return 'sync'
+  }
+  return port.signal
 }
 
 export const CONNECTORS: Record<ConnectorType, string> = {
@@ -91,7 +132,7 @@ export function checkLink(from: Port | undefined, to: Port | undefined): Issue[]
   if (!from || !to) return [{ severity: 'danger', message: 'Port introuvable' }]
   const issues: Issue[] = []
 
-  if (from.signal !== to.signal) {
+  if (!sameSignal(from.signal, to.signal)) {
     const speakerMix = from.signal === 'speaker' || to.signal === 'speaker'
     const powerMix = from.signal === 'power' || to.signal === 'power'
     issues.push({
@@ -123,3 +164,6 @@ export function checkLink(from: Port | undefined, to: Port | undefined): Issue[]
 
   return issues
 }
+
+/** Connectors in alphabetical order, for the menus. */
+export const CONNECTOR_OPTIONS = (Object.keys(CONNECTORS) as ConnectorType[]).sort((a, b) => byLabel(CONNECTORS[a], CONNECTORS[b]))

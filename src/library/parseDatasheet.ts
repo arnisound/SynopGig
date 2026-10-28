@@ -1,3 +1,4 @@
+import { SIGNALS } from '../data/connectors'
 import type { Category, ConnectorType, PortDirection, SignalType } from '../types'
 import type { PortGroup } from './portGroups'
 
@@ -54,7 +55,7 @@ const RULES: Rule[] = [
   { re: /\b(?:xlr[- ]?4|4[- ]?(?:pin|pôles?|broches?)\s*xlr)\b/gi, connector: 'xlr4', signal: 'power', label: L('Alim XLR 4', 'Sortie XLR 4'), fallback: 'in' },
   { re: /\b(?:mini[- ]?xlr|ta[345]f?)\b/gi, connector: 'mini-xlr', signal: 'audio-analog', label: L('Entrée mini-XLR', 'Sortie mini-XLR') },
   { re: /\bantenn(?:a|e)s?\b/gi, connector: 'bnc', signal: 'rf', label: L('Antenne', 'Sortie antenne') },
-  { re: /\bword\s*clock\b|\bwclk\b/gi, connector: 'bnc', signal: 'audio-digital', label: L('Word clock in', 'Word clock out') },
+  { re: /\bword\s*clock\b|\bwclk\b/gi, connector: 'bnc', signal: 'sync', label: L('Word clock in', 'Word clock out') },
   { re: /\bsmpte\s*(?:311|fib(?:er|re))|\blemo\s*3k93\b/gi, connector: 'smpte-fiber', signal: 'video', label: L('Fibre caméra', 'Fibre caméra'), dir: 'io' },
   { re: /\blemo\b/gi, connector: 'lemo3', signal: 'audio-analog', label: L('Entrée Lemo', 'Sortie Lemo'), fallback: 'in' },
   { re: /\bca-?com\b/gi, connector: 'ca-com', signal: 'speaker', label: L('Entrée CA-COM', 'Sortie CA-COM'), fallback: 'out' },
@@ -62,14 +63,18 @@ const RULES: Rule[] = [
   { re: /\bnl8\b/gi, connector: 'speakon8', signal: 'speaker', label: L('Entrée HP', 'Sortie HP'), fallback: 'out' },
   { re: /\b(?:speakon|nl4|nl2)\b/gi, connector: 'speakon', signal: 'speaker', label: L('Entrée HP', 'Sortie HP'), fallback: 'out' },
   { re: /\bbinding\s*posts?\b|\bbornes?\s*(?:hp|haut-parleurs?|banane|à vis)\b/gi, connector: 'binding-post', signal: 'speaker', label: L('Entrée HP', 'Sortie HP'), fallback: 'out' },
-  { re: /\b(?:aes50|madi|optocore|twinlane|gigaace|slink|ultranet|avb|dsnake)\b/gi, connector: 'ethercon', signal: 'audio-digital', label: L('Liaison numérique', 'Liaison numérique'), dir: 'io' },
+  { re: /\b(?:aes50|optocore|twinlane|gigaace|slink|ultranet|dsnake|supermac|hypermac)\b/gi, connector: 'ethercon', signal: 'audio-link', label: L('Liaison numérique', 'Liaison numérique'), dir: 'io' },
+  { re: /\bmadi\b/gi, connector: 'bnc', signal: 'audio-digital', label: L('MADI in', 'MADI out'), unless: /optic|fib(?:er|re)|sfp/i },
+  { re: /\b(?:avb|milan)\b/gi, connector: 'ethercon', signal: 'avb', label: L('AVB / Milan', 'AVB / Milan'), dir: 'io' },
+  { re: /\b(?:art-?net|sacn)\b/gi, connector: 'ethercon', signal: 'artnet', label: L('Art-Net / sACN', 'Art-Net / sACN'), dir: 'io' },
+  { re: /\bndi\b/gi, connector: 'rj45', signal: 'ndi', label: L('NDI', 'NDI'), dir: 'io' },
   { re: /\bs\/?pdif\b/gi, connector: 'rca', signal: 'audio-digital', label: L('S/PDIF in', 'S/PDIF out'), unless: /optic|toslink/i },
   { re: /\b(?:toslink|adat|optical\s*(?:in|out|s\/?pdif))\b/gi, connector: 'toslink', signal: 'audio-digital', label: L('Optique in', 'Optique out') },
   { re: /\baes(?:3|\/ebu|-ebu)?\b/gi, connector: 'xlr3', signal: 'audio-digital', label: L('AES in', 'AES out'), unless: /analog|aes50/i },
   { re: /\blc[- ]duplex\b|\blc\s+(?:connectors?|fib(?:er|re))\b/gi, connector: 'lc-fiber', signal: 'network', label: L('Fibre LC', 'Fibre LC'), dir: 'io' },
   { re: /\bsfp(?:\+|28|\b)/gi, connector: 'sfp', signal: 'network', label: L('SFP', 'SFP'), dir: 'io' },
   { re: /\bopticalcon\b|\bfib(?:er|re)s?\b/gi, connector: 'opticalcon', signal: 'network', label: L('Fibre', 'Fibre'), dir: 'io' },
-  { re: /\bdante\b/gi, connector: 'ethercon', signal: 'network', label: L('Dante', 'Dante'), dir: 'io' },
+  { re: /\b(?:dante|aes67)\b/gi, connector: 'ethercon', signal: 'dante', label: L('Dante', 'Dante'), dir: 'io' },
   { re: /\bethercon\b/gi, connector: 'ethercon', signal: 'network', label: L('Réseau', 'Réseau'), dir: 'io' },
   { re: /\b(?:rj-?45|ethernet|lan|poe\+*)\b/gi, connector: 'rj45', signal: 'network', label: L('Réseau', 'Réseau'), dir: 'io' },
   { re: /\b(?:12g-|6g-|3g-|hd-)?sdi\b/gi, connector: 'sdi', signal: 'video', label: L('SDI in', 'SDI out') },
@@ -205,12 +210,12 @@ function guessCategory(groups: PortGroup[]): { category: Category; family?: stri
     return { category: 'Vidéo', family: inputs >= 4 ? 'Mélangeurs' : undefined }
   }
   const others = groups.filter((g) => g.signal !== 'power')
-  if (others.length && others.every((g) => g.signal === 'network')) {
+  if (others.length && others.every((g) => SIGNALS[g.signal].ip)) {
     const n = others.reduce((s, g) => s + g.count, 0)
     return { category: 'Réseau', family: n >= 5 ? 'Switchs' : undefined }
   }
   const audioIn = groups.filter((g) => g.signal === 'audio-analog' && g.dir === 'in').reduce((s, g) => s + g.count, 0)
-  if (audioIn >= 8) return { category: 'Son', family: has('network') || has('audio-digital') ? 'Stageboxes & moteurs' : 'Consoles' }
+  if (audioIn >= 8) return { category: 'Son', family: has('network') || has('dante') || has('avb') || has('audio-link') || has('audio-digital') ? 'Stageboxes & moteurs' : 'Consoles' }
   return { category: 'Son' }
 }
 
@@ -266,7 +271,7 @@ export function parseDatasheet(text: string, knownBrands: string[]): ParsedDatas
     })
   }
 
-  const order: SignalType[] = ['audio-analog', 'audio-digital', 'rf', 'speaker', 'dmx', 'video', 'control', 'network', 'power']
+  const order: SignalType[] = ['audio-analog', 'audio-digital', 'audio-link', 'rf', 'speaker', 'dmx', 'artnet', 'video', 'ndi', 'sync', 'intercom', 'control', 'control-ip', 'dante', 'avb', 'network', 'power']
   const groups: Finding[] = [...acc.values()]
     // Generic wording or measurement lines alone never make a port up.
     .filter((a) => a.solid || a.counts.length > 0)
@@ -285,6 +290,14 @@ export function parseDatasheet(text: string, knownBrands: string[]): ParsedDatas
     })
     // A bare "USB" (often a table header) next to a USB-C finding is the same port.
     .filter((g, _, all) => !(g.connector === 'usb' && g.guessed && all.some((o) => o.connector === 'usb-c')))
+    // "Dante primary / secondary (etherCON)": the plain network reading of the same lines is the Dante port.
+    .filter(
+      (g, _, all) =>
+        !(
+          g.signal === 'network' &&
+          all.some((o) => o !== g && o.connector === g.connector && o.signal !== 'network' && SIGNALS[o.signal].ip && g.evidence.every((l) => o.evidence.includes(l)))
+        ),
+    )
     .sort((a, b) => order.indexOf(a.signal) - order.indexOf(b.signal) || (a.dir === 'in' ? -1 : 1) - (b.dir === 'in' ? -1 : 1))
 
   const rack = text.match(/\b(\d)\s*(?:u|ru|he)\b(?!\w)/i) ?? text.match(/rack\s*units?\s*:?\s*(\d)/i)

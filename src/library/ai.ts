@@ -76,6 +76,7 @@ Counting:
 - A sheet may be wrong or mixed with another product (web pages often are): when a section clearly describes another kind of device (e.g. loudspeaker data on a mixer page), ignore it, weight and size included.
 Types:
 - Ethernet, Dante, AES67, AVB and USB ports are "io". etherCON is "ethercon", a plain RJ45 is "rj45". Primary + secondary Dante = 2 ports.
+- Network ports: say what they carry when the sheet does: "dante" (Dante, AES67), "avb" (AVB, Milan), "artnet" (Art-Net, sACN), "ndi" (NDI, SMPTE 2110), "control-ip" (remote control, OSC, app); otherwise "network". AES50, Optocore, SuperMAC, Ultranet and other console-to-stagebox links are "audio-link". Word clock and timecode are "sync".
 - Mains power is an input with signal "power" (IEC, powerCON, powerCON TRUE1...). A mains link output is an output with signal "power".
 - An XLR/jack combo is "xlr-combo". A headphone output is a "jack" or "minijack" output. Speaker outputs (Speakon, binding posts, terminal blocks) use signal "speaker".
 - label: short French name, e.g. "Entrée", "Sortie", "Link", "Sortie HP", "Dante", "Secteur", "Casque".

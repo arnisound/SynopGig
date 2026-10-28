@@ -3,6 +3,7 @@ import { cableOn, connectPorts, otherEnd, unplug } from '../project'
 import type { DeviceNode, Project } from '../types'
 import ConnectorIcon from './ConnectorIcon'
 import { compatible, insidePorts } from './wiring'
+import { sameSignal } from '../data/connectors'
 
 interface Props {
   project: Project
@@ -59,7 +60,7 @@ export default function PortWiring({ project, setProject, node, members }: Props
                   <select value={value} onChange={(ev) => plug(port.id, ev.target.value)}>
                     <option value="">— non câblé —</option>
                     {others.map((o) => {
-                      const candidates = insidePorts(o).filter((q) => q.signal === port.signal)
+                      const candidates = insidePorts(o).filter((q) => sameSignal(q.signal, port.signal))
                       if (candidates.length === 0) return null
                       return (
                         <optgroup key={o.id} label={o.data.name}>

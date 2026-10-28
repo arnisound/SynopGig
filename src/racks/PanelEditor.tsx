@@ -92,7 +92,7 @@ export default function PanelEditor({ spec, selected, onSelect, onChange }: Prop
           <label className="field">
             <span>Connecteur</span>
             <select value={typeKey} onChange={(e) => setTypeKey(e.target.value)}>
-              {HOLE_TYPES.map((t) => <option key={holeTypeKey(t)} value={holeTypeKey(t)}>{t.label}</option>)}
+              {[...HOLE_TYPES].sort((a, b) => a.label.localeCompare(b.label, 'fr', { numeric: true })).map((t) => <option key={holeTypeKey(t)} value={holeTypeKey(t)}>{t.label}</option>)}
             </select>
           </label>
           <label className="field">

@@ -15,7 +15,7 @@ import {
 } from '@xyflow/react'
 import { toPng } from 'html-to-image'
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
-import { SIGNALS } from '../data/connectors'
+import { SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { connectPorts, createCase, createDevice, setPanel, slug, uid } from '../project'
 import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
@@ -54,6 +54,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const { nodes, edges } = project
   const view = viewOf(project)
+  // The legend lists the signals of this project only: there are many kinds of network signals.
+  const usedSignals = useMemo(() => new Set<SignalType>(project.nodes.flatMap((n) => n.data.ports.map((p) => p.signal))), [project.nodes])
   const { compact } = view
   const setView = (patch: Partial<SynopticView>) => setProject((p) => ({ ...p, view: { ...viewOf(p), ...patch } }))
   const [viewPanel, setViewPanel] = useState(false)
@@ -345,7 +347,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           </ReactFlow>
         </ViewContext.Provider>
         <div className="legend">
-          {(Object.entries(SIGNALS) as [SignalType, (typeof SIGNALS)[SignalType]][]).map(([k, s]) => {
+          {SIGNAL_OPTIONS.filter((k) => usedSignals.has(k) || view.hiddenSignals.includes(k)).map((k) => {
+            const s = SIGNALS[k]
             const off = view.hiddenSignals.includes(k)
             return (
               <button

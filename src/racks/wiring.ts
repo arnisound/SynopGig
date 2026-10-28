@@ -1,10 +1,11 @@
 import { cableOn, connectPorts } from '../project'
+import { sameSignal } from '../data/connectors'
 import type { DeviceNode, Port, Project } from '../types'
 
 const complementary = (a: Port, b: Port) =>
   (a.dir === 'out' && b.dir === 'in') || (a.dir === 'in' && b.dir === 'out') || (a.dir === 'io' && b.dir === 'io')
 
-export const compatible = (a: Port, b: Port) => a.signal === b.signal && complementary(a, b)
+export const compatible = (a: Port, b: Port) => sameSignal(a.signal, b.signal) && complementary(a, b)
 
 /** Ports reachable from inside the rack: a patch panel only exposes its inner face. */
 export const insidePorts = (n: DeviceNode) => n.data.ports.filter((p) => p.face !== 'ext')

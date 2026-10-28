@@ -61,7 +61,7 @@ describe('parseDatasheet', () => {
     expect(r.model).toBe('Rio1608-D2')
     expect(r.rackU).toBe(3)
     expect(r.family).toBe('Stageboxes & moteurs')
-    expect(short(r)).toEqual(expect.arrayContaining(['16×xlr3/audio-analog/in', '8×xlr3/audio-analog/out', '2×ethercon/network/io', '1×iec/power/in']))
+    expect(short(r)).toEqual(expect.arrayContaining(['16×xlr3/audio-analog/in', '8×xlr3/audio-analog/out', '2×ethercon/dante/io', '1×iec/power/in']))
   })
 
   it('reads a French wireless receiver sheet', () => {

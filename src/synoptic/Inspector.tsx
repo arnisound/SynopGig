@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { CONNECTORS, SIGNALS } from '../data/connectors'
+import { CONNECTOR_OPTIONS, CONNECTORS, SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { ZONES } from '../data/library'
 import { uid, type ResolvedCable } from '../project'
 import PanelEditor from '../racks/PanelEditor'
@@ -46,13 +46,13 @@ function NewPort({ onAdd }: { onAdd: (p: Port) => void }) {
     <div className="new-port">
       <input placeholder="Nom du port" value={label} onChange={(e) => setLabel(e.target.value)} />
       <select value={connector} onChange={(e) => setConnector(e.target.value as ConnectorType)}>
-        {Object.entries(CONNECTORS).map(([k, v]) => (
-          <option key={k} value={k}>{v}</option>
+        {CONNECTOR_OPTIONS.map((k) => (
+          <option key={k} value={k}>{CONNECTORS[k]}</option>
         ))}
       </select>
       <select value={signal} onChange={(e) => setSignal(e.target.value as SignalType)}>
-        {Object.entries(SIGNALS).map(([k, v]) => (
-          <option key={k} value={k}>{v.label}</option>
+        {SIGNAL_OPTIONS.map((k) => (
+          <option key={k} value={k}>{SIGNALS[k].label}</option>
         ))}
       </select>
       <select value={dir} onChange={(e) => setDir(e.target.value as PortDirection)}>

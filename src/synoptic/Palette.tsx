@@ -7,7 +7,8 @@ import type { DeviceTemplate } from '../types'
 
 export const DND_TYPE = 'application/x-synopgig-template'
 
-const ORDER = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Câblage', 'Autre']
+/** Alphabetical everywhere, numbers in order (CL5 before CL10). */
+const alpha = (a: string, b: string) => a.localeCompare(b, 'fr', { sensitivity: 'base', numeric: true })
 const MINE = 'Mes modèles'
 
 interface Props {
@@ -22,10 +23,15 @@ const rank = (family: string) => {
   return family === MINE ? -2 : family === USER_FAMILY ? -1 : i < 0 ? 999 : i
 }
 
+/** Your own models first, then families in alphabetical order. */
+const byFamily = (a: string, b: string) => rank(a) - rank(b) || alpha(a, b)
+
 function byBrand(list: DeviceTemplate[]) {
   const m = new Map<string, DeviceTemplate[]>()
   for (const t of list) m.set(t.brand ?? 'Générique', [...(m.get(t.brand ?? 'Générique') ?? []), t])
-  return [...m.entries()].sort((a, b) => (a[0] === 'Générique' ? -1 : b[0] === 'Générique' ? 1 : a[0].localeCompare(b[0])))
+  return [...m.entries()]
+    .sort((a, b) => (a[0] === 'Générique' ? -1 : b[0] === 'Générique' ? 1 : alpha(a[0], b[0])))
+    .map(([b, items]) => [b, [...items].sort((x, y) => alpha(x.model, y.model))] as const)
 }
 
 export default function Palette({ templates, onAdd, onNew }: Props) {
@@ -34,7 +40,7 @@ export default function Palette({ templates, onAdd, onNew }: Props) {
   const [brand, setBrand] = useState('')
   const q = query.trim().toLowerCase()
 
-  const brands = useMemo(() => [...new Set(templates.map((t) => t.brand).filter((b) => b !== undefined))].sort((a, b) => a.localeCompare(b)), [templates])
+  const brands = useMemo(() => [...new Set(templates.map((t) => t.brand).filter((b) => b !== undefined))].sort(alpha), [templates])
 
   const groups = useMemo(() => {
     const cats = new Map<string, Map<string, DeviceTemplate[]>>()
@@ -47,9 +53,9 @@ export default function Palette({ templates, onAdd, onNew }: Props) {
       cats.set(t.category, fams)
     }
     return [...cats.entries()]
-      .sort((a, b) => ORDER.indexOf(a[0]) - ORDER.indexOf(b[0]))
+      .sort((a, b) => alpha(a[0], b[0]))
       .map(([cat, fams]) => {
-        const families = [...fams.entries()].sort((a, b) => rank(a[0]) - rank(b[0]))
+        const families = [...fams.entries()].sort((a, b) => byFamily(a[0], b[0]))
         return { cat, families, count: families.reduce((s, [, l]) => s + l.length, 0) }
       })
   }, [templates, q, brand])

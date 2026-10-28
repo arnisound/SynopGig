@@ -48,6 +48,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
     return templates
       .filter((t) => (t.rackU ?? 0) > 0)
       .filter((t) => !q || `${t.brand ?? ''} ${t.model} ${t.category}`.toLowerCase().includes(q))
+      .sort((a, b) => `${a.brand ?? ''} ${a.model}`.localeCompare(`${b.brand ?? ''} ${b.model}`, 'fr', { sensitivity: 'base', numeric: true }))
       .slice(0, 60)
   }, [templates, query])
 

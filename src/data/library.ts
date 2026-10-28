@@ -1,5 +1,6 @@
 import type { DeviceTemplate } from '../types'
 import { CATALOG } from './catalog'
+import { refineSignal } from './connectors'
 import { PANEL_TEMPLATES } from './panels'
 import { port, series } from './ports'
 
@@ -338,12 +339,15 @@ const GENERIC_FAMILY: Record<string, string> = {
   'rack-power-1u': 'Distribution',
 }
 
+/** Ports of the catalogue with what they really carry (Dante, AES50…) rather than "network". */
+const refined = (t: DeviceTemplate): DeviceTemplate => (t.panel ? t : { ...t, ports: t.ports.map((p) => ({ ...p, signal: refineSignal(p) })) })
+
 /** Generic models first, then patch panels and the brand catalogue. */
 export const LIBRARY: DeviceTemplate[] = [
   ...GENERIC.map((t) => ({ ...t, family: GENERIC_FAMILY[t.id] })),
   ...PANEL_TEMPLATES.map((t) => ({ ...t, family: 'Bandeaux de câblage' })),
   ...CATALOG,
-]
+].map(refined)
 
 export const CATEGORY_COLORS: Record<string, string> = {
   Son: '#e5484d',
@@ -357,5 +361,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
 
 export const ZONES = ['Plateau', 'Régie FOH', 'Coulisses', 'Grill', 'Façade', 'Retours']
 
-/** Display order of families, as laid out in the catalogue. */
-export const FAMILY_ORDER = [...new Set(CATALOG.map((t) => t.family).filter((f) => f !== undefined)), 'Bandeaux de câblage']
+/** Families in alphabetical order. */
+export const FAMILY_ORDER = [...new Set([...CATALOG.map((t) => t.family).filter((f) => f !== undefined), 'Bandeaux de câblage'])].sort((a, b) =>
+  a.localeCompare(b, 'fr', { sensitivity: 'base', numeric: true }),
+)
