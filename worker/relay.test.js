@@ -162,6 +162,26 @@ describe('finding a product documentation', async () => {
     expect(results[0]).toMatchObject({ url: 'https://fohhn.com/en/products/ps-850', official: true, kind: 'page' })
   })
 
+  it('lets Groq search the web itself when DuckDuckGo is blocked', async () => {
+    const bodies = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url, init) => {
+        if (!String(url).includes('groq.com')) return new Response('<html>anomaly</html>')
+        bodies.push(JSON.parse(init.body))
+        return Response.json({ choices: [{ message: { content: 'ok', executed_tools: [{ type: 'browser_search', search_results: { results: [{ url: 'https://fohhn.com/media/ps-850.pdf', title: 'PS-850 data sheet' }] } }] } }] })
+      }),
+    )
+    const res = await relay.fetch(
+      new Request('https://relay.example/find', { method: 'POST', headers: { Origin: SITE, 'Content-Type': 'application/json', 'CF-Connecting-IP': '10.8.1.1' }, body: JSON.stringify({ brand: 'Fohhn', model: 'PS-850' }) }),
+      { GROQ_API_KEY: 'k' },
+    )
+    expect(res.status).toBe(200)
+    expect(bodies[0]).toMatchObject({ model: 'openai/gpt-oss-120b', tools: [{ type: 'browser_search' }] })
+    const { results } = await res.json()
+    expect(results[0]).toMatchObject({ url: 'https://fohhn.com/media/ps-850.pdf', kind: 'pdf', official: true })
+  })
+
   it('hands PDF data sheets over as they are, for the app to read', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31]), { headers: { 'Content-Type': 'application/pdf' } })))
     const res = await call('/doc', { url: 'https://fohhn.com/media/ps-850.pdf' })

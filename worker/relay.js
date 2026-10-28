@@ -15,6 +15,7 @@
  * POST /find {brand, model} finds a product's documentation; POST /doc {url} reads one;
  * POST /images {url} lists a page's product photos, POST /image {url} fetches one.
  *   GROQ_SEARCH_MODEL / GEMINI_SEARCH_MODEL  optional, models used to search the web
+ *     (default: Groq's gpt-oss models with their built-in browser search)
  */
 
 const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
@@ -295,36 +296,70 @@ export function rankDocs(found, brand, model) {
   return out.sort((x, y) => y.score - x.score).slice(0, 8)
 }
 
-/** DuckDuckGo's HTML results: no key, but it may turn robots away. */
+/** DuckDuckGo's HTML results (two addresses): no key, but it may turn robots away. */
 async function searchDuckDuckGo(q) {
-  const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`, { headers: { 'User-Agent': UA, 'Accept-Language': 'fr,en;q=0.8' }, signal: AbortSignal.timeout(8000) })
-  if (!res.ok) return []
-  const html = await res.text()
-  return [...html.matchAll(/<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].map(([, href, title]) => {
-    const u = decode(href)
-    const real = u.includes('uddg=') ? decodeURIComponent(u.split('uddg=')[1].split('&')[0]) : u.startsWith('//') ? `https:${u}` : u
-    return { url: real, title: decode(title.replace(/<[^>]+>/g, '')).trim() }
-  })
+  const parse = (html) =>
+    [...html.matchAll(/<a[^>]+href="([^"]+)"[^>]*class=['"]?result(?:__a|-link)['"]?[^>]*>([\s\S]*?)<\/a>|<a[^>]+class=['"]?result(?:__a|-link)['"]?[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].map((x) => {
+      const u = decode(x[1] ?? x[3])
+      const real = u.includes('uddg=') ? decodeURIComponent(u.split('uddg=')[1].split('&')[0]) : u.startsWith('//') ? `https:${u}` : u
+      return { url: real, title: decode((x[2] ?? x[4]).replace(/<[^>]+>/g, '')).trim() }
+    })
+  let last = 'aucun résultat'
+  for (const base of ['https://html.duckduckgo.com/html/', 'https://lite.duckduckgo.com/lite/']) {
+    const res = await fetch(base, {
+      method: 'POST',
+      headers: { 'User-Agent': UA, 'Accept-Language': 'fr,en;q=0.8', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `q=${encodeURIComponent(q)}`,
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!res.ok) {
+      last = `HTTP ${res.status}`
+      continue
+    }
+    const found = parse(await res.text())
+    if (found.length) return found
+    last = 'page sans résultats (anti-robot)'
+  }
+  throw new Error(`DuckDuckGo : ${last}`)
 }
 
 const urlsIn = (text) => [...String(text).matchAll(/https?:\/\/[^\s"'<>\\)\]]+/g)].map((m) => m[0].replace(/[.,;:]+$/, ''))
 
-/** Groq's compound model searches the web by itself. */
+/**
+ * Groq searches the web itself: built-in "browser search" of the gpt-oss
+ * models, or the compound models where the account has them.
+ */
 async function searchGroq(q, env) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
-    body: JSON.stringify({
-      model: env.GROQ_SEARCH_MODEL || 'groq/compound-mini',
-      messages: [{ role: 'user', content: `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. List the product page and the PDF data sheet or user manual on the manufacturer's website, one URL per line with its title. Only real URLs you found.` }],
-    }),
-    signal: AbortSignal.timeout(20000),
-  })
-  if (!res.ok) return []
-  const data = await res.json().catch(() => ({}))
-  const msg = data.choices?.[0]?.message ?? {}
-  const fromTools = (msg.executed_tools ?? []).flatMap((t) => t.search_results?.results ?? []).map((r) => ({ url: r.url, title: r.title }))
-  return [...fromTools, ...urlsIn(msg.content ?? '').map((url) => ({ url }))]
+  const models = [env.GROQ_SEARCH_MODEL, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'].filter(Boolean)
+  const prompt = `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. Give the product page and the PDF data sheet or user manual on the manufacturer's website, one URL per line with its title. Only real URLs you found.`
+  let last = 'aucun modèle'
+  for (const model of [...new Set(models)]) {
+    const compound = model.startsWith('groq/compound')
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        ...(compound ? {} : { tools: [{ type: 'browser_search' }], tool_choice: 'required', reasoning_effort: 'low' }),
+      }),
+      signal: AbortSignal.timeout(25000),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      last = `${model} : ${reason(data, res.status)}`
+      // A missing model or tool: try the next one; a refused key will be refused again.
+      if (res.status === 401 || res.status === 403) break
+      continue
+    }
+    const msg = data.choices?.[0]?.message ?? {}
+    const tools = msg.executed_tools ?? []
+    const fromTools = tools.flatMap((t) => t.search_results?.results ?? []).map((r) => ({ url: r.url, title: r.title }))
+    const found = [...fromTools, ...urlsIn(JSON.stringify(tools)).map((url) => ({ url })), ...urlsIn(msg.content ?? '').map((url) => ({ url }))]
+    if (found.length) return found
+    last = `${model} : aucune adresse dans la réponse`
+  }
+  throw new Error(`Groq : ${last}`)
 }
 
 /** Gemini grounded on Google Search: the sources it read are the results. */
@@ -462,9 +497,9 @@ async function diagnostic(env) {
   const probe = async (fn) => {
     try {
       const r = await fn()
-      return r.length ? `OK (${r.length} résultats)` : 'aucun résultat (source bloquée ?)'
+      return r.length ? `OK (${r.length} résultats)` : 'aucun résultat'
     } catch (e) {
-      return `ERREUR ${String(e).slice(0, 80)}`
+      return `ERREUR ${String(e?.message ?? e).slice(0, 160)}`
     }
   }
   out.recherche_duckduckgo = await probe(() => searchDuckDuckGo('Shure SM58 datasheet'))
