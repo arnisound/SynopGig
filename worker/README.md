@@ -79,6 +79,7 @@ du fabricant et PDF d’abord, revendeurs et forums en dernier) ; l’utilisateu
 document, que le relais récupère (`POST /doc`, 15 Mo maximum) pour l’analyse habituelle.
 
 - **DuckDuckGo** : sans clé, toujours essayé (il peut parfois refuser les robots).
+- **Bing** (flux RSS) : sans clé, toujours essayé, souvent ouvert quand DuckDuckGo refuse.
 - **Groq** (si `GROQ_API_KEY`) : modèles `gpt-oss` avec leur recherche web intégrée
   (variable facultative `GROQ_SEARCH_MODEL` pour en changer).
 - **Gemini** : recherche Google intégrée, **désactivée par défaut** (son quota gratuit de

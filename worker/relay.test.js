@@ -264,6 +264,13 @@ describe('finding a product documentation', async () => {
     expect(results[0]).toMatchObject({ url: 'https://fohhn.com/en/products/ps-850', official: true, kind: 'page' })
   })
 
+  it('reads Bing when DuckDuckGo turns robots away', async () => {
+    const rss = '<rss><channel><item><title>PS-850 data sheet</title><link>https://fohhn.com/media/ps-850.pdf</link></item></channel></rss>'
+    vi.stubGlobal('fetch', vi.fn(async (url) => new Response(String(url).includes('bing.com') ? rss : '<html>anomaly</html>')))
+    const res = await call('/find', { brand: 'Fohhn', model: 'PS-850' })
+    expect((await res.json()).results[0]).toMatchObject({ url: 'https://fohhn.com/media/ps-850.pdf', kind: 'pdf', official: true })
+  })
+
   it('lets Groq search the web itself when DuckDuckGo is blocked', async () => {
     const bodies = []
     vi.stubGlobal(

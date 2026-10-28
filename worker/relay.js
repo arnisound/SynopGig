@@ -389,8 +389,14 @@ export async function pickMistralModels(env) {
   return [...new Set([env.MISTRAL_MODEL, ...MISTRAL_PREFERRED])].filter((m) => m && available.includes(m)).slice(0, 3)
 }
 
+// Models that just said "rate limit": skipped for a minute instead of costing every analysis a wait.
+const mistralBusy = new Map()
+
 async function askMistral(req, env) {
-  const models = await pickMistralModels(env)
+  const now = Date.now()
+  const all = await pickMistralModels(env)
+  const free = all.filter((m) => !(mistralBusy.get(m) > now))
+  const models = free.length ? free : all
   if (models.length === 0) return { status: 404, error: 'Mistral : aucun modèle de discussion sur ce compte' }
   const tries = models.flatMap((m) => [[m, true], [m, false]])
   const busy = new Set()
@@ -406,7 +412,10 @@ async function askMistral(req, env) {
     if (last.status === 200 && last.text) return last
     if (last.status === 401 || last.status === 403) break
     // Out of quota: no use asking the same model without the schema; the small one has its own quota.
-    if (last.status === 429) busy.add(model)
+    if (last.status === 429) {
+      busy.add(model)
+      mistralBusy.set(model, Date.now() + 60_000)
+    }
     if (last.status === 404) mistralModels = undefined
   }
   return { ...last, error: `Mistral ${last.status} : ${last.error ?? 'réponse illisible'}` }
@@ -648,24 +657,35 @@ const urlsIn = (text) => [...String(text).matchAll(/https?:\/\/[^\s"'<>\\)\]]+/g
  * models, or the compound models where the account has them.
  */
 async function searchGroq(q, env) {
-  const models = [env.GROQ_SEARCH_MODEL, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'].filter(Boolean)
+  // Only the models this account has (compound ones are not on every account).
+  const available = await groqAvailable(env).catch(() => [])
+  const models = [...new Set([env.GROQ_SEARCH_MODEL, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'])].filter((m) => m && (!available.length || available.includes(m)))
   const prompt = `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. Give the product page and the PDF data sheet or user manual on the manufacturer's website, one URL per line with its title. Only real URLs you found.`
-  let last = 'aucun modèle'
-  for (const model of [...new Set(models)]) {
+  const notes = []
+  for (const model of models) {
     const compound = model.startsWith('groq/compound')
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'user', content: prompt }],
-        ...(compound ? {} : { tools: [{ type: 'browser_search' }], tool_choice: 'required', reasoning_effort: 'low' }),
-      }),
-      signal: AbortSignal.timeout(25000),
-    })
-    const data = await res.json().catch(() => ({}))
+    const ask = () =>
+      fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          ...(compound ? {} : { tools: [{ type: 'browser_search' }], tool_choice: 'required', reasoning_effort: 'low' }),
+        }),
+        signal: AbortSignal.timeout(25000),
+      })
+    let res = await ask()
+    let data = await res.json().catch(() => ({}))
+    // The pages read count in the minute quota: when it frees up soon, wait once.
+    const wait = res.status === 429 && /try again in (?:(\d+)m)?([\d.]+)s/i.exec(reason(data, 429))
+    if (wait && Number(wait[1] ?? 0) * 60 + Number(wait[2]) <= 12) {
+      await sleep(Number(wait[1] ?? 0) * 60 + Number(wait[2]) + 0.5)
+      res = await ask()
+      data = await res.json().catch(() => ({}))
+    }
     if (!res.ok) {
-      last = `${model} : ${reason(data, res.status)}`
+      notes.push(`${model.replace(/^.*\//, '')} : ${reason(data, res.status).slice(0, 80)}`)
       // A missing model or tool: try the next one; a refused key will be refused again.
       if (res.status === 401 || res.status === 403) break
       continue
@@ -675,9 +695,25 @@ async function searchGroq(q, env) {
     const fromTools = tools.flatMap((t) => t.search_results?.results ?? []).map((r) => ({ url: r.url, title: r.title }))
     const found = [...fromTools, ...urlsIn(JSON.stringify(tools)).map((url) => ({ url })), ...urlsIn(msg.content ?? '').map((url) => ({ url }))]
     if (found.length) return found
-    last = `${model} : aucune adresse dans la réponse`
+    notes.push(`${model.replace(/^.*\//, '')} : aucune adresse dans la réponse`)
   }
-  throw new Error(`Groq : ${last}`)
+  throw new Error(`Groq : ${notes.join(' | ') || 'aucun modèle'}`)
+}
+
+/** Bing's RSS results: no key, and often open when DuckDuckGo turns robots away. */
+async function searchBing(q) {
+  const res = await fetch(`https://www.bing.com/search?format=rss&setlang=fr&q=${encodeURIComponent(q)}`, {
+    headers: { 'User-Agent': UA, 'Accept-Language': 'fr,en;q=0.8' },
+    signal: AbortSignal.timeout(8000),
+  })
+  if (!res.ok) throw new Error(`Bing : HTTP ${res.status}`)
+  const xml = await res.text()
+  const found = [...xml.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>/g)].map((m) => ({
+    url: decode(m[2].replace(/<!\[CDATA\[|\]\]>/g, '').trim()),
+    title: decode(m[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim()),
+  }))
+  if (!found.length) throw new Error('Bing : page sans résultats')
+  return found
 }
 
 /** Gemini grounded on Google Search: the sources it read are the results. */
@@ -717,7 +753,7 @@ async function findDocs(body, env) {
   const model = String(body?.model ?? '').trim().slice(0, 80)
   if (!model) return { status: 400, error: 'Indiquez au moins le modèle.' }
   const q = `${brand} ${model}`.trim()
-  const searches = [searchDuckDuckGo(`${q} datasheet specifications`), searchDuckDuckGo(`${q} pdf`)]
+  const searches = [searchDuckDuckGo(`${q} datasheet specifications`), searchDuckDuckGo(`${q} pdf`), searchBing(`${q} datasheet pdf`)]
   if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
   // Google's search grounding has its own small free quota: kept for the analysis unless asked for.
   if (env.GEMINI_API_KEY && env.GEMINI_SEARCH === 'on') searches.push(searchGemini(q, env))
@@ -875,6 +911,7 @@ async function diagnostic(env) {
       within(30, fn().then((r) => (r.length ? `OK (${r.length} résultats)` : 'aucun résultat'), (e) => `ERREUR ${String(e?.message ?? e).slice(0, 160)}`)).then((r) => (out[key] = r)),
     )
   probe('recherche_duckduckgo', () => searchDuckDuckGo('Shure SM58 datasheet'))
+  probe('recherche_bing', () => searchBing('Shure SM58 datasheet pdf'))
   if (env.GROQ_API_KEY) probe('recherche_groq', () => searchGroq('Shure SM58', env))
   if (env.GEMINI_API_KEY) {
     if (env.GEMINI_SEARCH === 'on') probe('recherche_gemini', () => searchGemini('Shure SM58', env))
