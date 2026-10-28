@@ -11,8 +11,12 @@ export interface FoundDoc {
   url: string
   host: string
   kind: 'pdf' | 'page'
-  /** On the manufacturer's own site. */
+  /** On the manufacturer's own site (or its group's file server). */
   official: boolean
+  /** Names this very model, not only its range. */
+  exact?: boolean
+  /** What kind of document it is, when its name says it. */
+  doc?: 'manual' | 'datasheet' | 'quickstart'
 }
 
 async function post(path: string, body: unknown) {
@@ -48,12 +52,32 @@ export interface LoadedDoc {
  * a page. A product page rarely describes the panels; the user guide or data
  * sheet it links to does: it is read too, and the two texts go together.
  */
-export async function loadDoc(doc: FoundDoc, model = '', onStep?: (msg: string) => void): Promise<LoadedDoc> {
+export async function loadDoc(doc: FoundDoc, model = '', onStep?: (msg: string) => void, companions: FoundDoc[] = []): Promise<LoadedDoc> {
   const res = await post('/doc', { url: doc.url, model })
   if (!res.ok) throw await failure(res)
-  if (/pdf/i.test(res.headers.get('Content-Type') ?? '')) return { ...(await readPdf(res, doc.url)), images: [] }
+  if (/pdf/i.test(res.headers.get('Content-Type') ?? '')) {
+    const sheet = await readPdf(res, doc.url)
+    // A data sheet or quick start rarely lists every socket: the manual found with it is read too.
+    if (doc.doc !== 'manual') {
+      for (const c of companions.filter((c) => c.kind === 'pdf' && c.url !== doc.url).slice(0, 1)) {
+        try {
+          onStep?.(`Lecture de « ${c.title} » en complément…`)
+          const r = await post('/doc', { url: c.url, model })
+          if (!r.ok || !/pdf/i.test(r.headers.get('Content-Type') ?? '')) continue
+          const more = await readPdf(r, c.url)
+          if (more.text.replace(/\s/g, '').length < 200) continue
+          return { text: `${sheet.text}\n\n${c.title} :\n${more.text}`, pdf: more.pdf, images: [], manual: { url: c.url, title: c.title } }
+        } catch {
+          // The sheet alone, then.
+        }
+      }
+    }
+    return { ...sheet, images: [] }
+  }
   const page = (await res.json()) as { title: string; text: string; images?: string[]; docs?: { url: string; title: string }[] }
-  for (const d of (page.docs ?? []).slice(0, 2)) {
+  // The documents the page links to, then the manuals the search found for this model.
+  const linked = [...(page.docs ?? []).slice(0, 2), ...companions.filter((c) => c.kind === 'pdf' && !(page.docs ?? []).some((d) => d.url === c.url)).slice(0, 1)]
+  for (const d of linked) {
     try {
       onStep?.(`Lecture de « ${d.title} » trouvé sur la page…`)
       const r = await post('/doc', { url: d.url, model })

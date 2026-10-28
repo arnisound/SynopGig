@@ -117,3 +117,34 @@ describe('two AI readings of the same sheet', () => {
     expect(missedGroups([g(4)], [g(4), g(2, 'hdmi')])).toEqual([g(2, 'hdmi')])
   })
 })
+
+describe('settling a disagreement', () => {
+  const g = (count: number, connector = 'xlr3', dir: 'in' | 'out' = 'in') => ({ prefix: 'P', count, connector: connector as never, signal: 'audio-analog' as const, dir })
+
+  it('finds what the two readings disagree on', async () => {
+    const { disagreements } = await import('./ai')
+    expect(disagreements([g(12), g(2, 'xlr3', 'out')], [g(10), g(2, 'xlr3', 'out'), g(1, 'usb')]).map((x) => `${x.count}${x.connector}`)).toEqual(['12xlr3', '1usb'])
+    expect(disagreements([g(8)], [g(8)])).toEqual([])
+  })
+
+  it('asks the relay for one more reading, told both, and keeps its list', async () => {
+    const { settle } = await import('./ai')
+    const bodies: { single?: boolean; text: string; system: string }[] = []
+    const fetchMock = async (_u: string, init?: RequestInit) => {
+      bodies.push(JSON.parse(String(init?.body)))
+      return new Response(JSON.stringify({ engine: 'groq', text: JSON.stringify({ model: 'TMD16', category: 'Son', ports: [{ label: 'Entrée', count: 8, connector: 'xlr-combo', signal: 'audio-analog', dir: 'in', quote: 'Inputs 1-8 combo' }] }) }))
+    }
+    const r = await settle({ category: 'Son', groups: [g(12)], second: [g(10)] }, 'Inputs 1-8 combo XLR / 1/4" TRS', 'Alto TMD16', 'https://relay.example/', fetchMock as typeof fetch)
+    expect(bodies[0].single).toBe(true)
+    expect(bodies[0].system.startsWith('You are a live sound')).toBe(true)
+    expect(bodies[0].text).toContain('Reading A:\n- 12 x xlr3')
+    expect(bodies[0].text).toContain('Reading B:\n- 10 x xlr3')
+    expect(r?.groups[0]).toMatchObject({ count: 8, connector: 'xlr-combo' })
+    expect(r?.by).toContain('tranché par Groq')
+  })
+
+  it('never lets a loudspeaker signal sit on an XLR', () => {
+    const r = sanitizeAi({ model: 'X', category: 'Son', ports: [{ label: 'Main', count: 2, connector: 'xlr3', signal: 'speaker', dir: 'out' }] })
+    expect(r.groups[0].signal).toBe('audio-analog')
+  })
+})

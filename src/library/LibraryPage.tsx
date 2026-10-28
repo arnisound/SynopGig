@@ -219,7 +219,9 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     setFinding(true)
     setFindStatus(`Lecture de ${doc.host}…`)
     try {
-      const { text: docText, pdf, images, manual } = await loadDoc(doc, fModel.trim(), setFindStatus)
+      // The manual (or data sheet) of this very model the search found, read with the chosen document.
+      const companions = (found ?? []).filter((d) => d !== doc && d.kind === 'pdf' && d.exact && (d.doc === 'manual' || d.doc === 'datasheet')).sort((a, b) => Number(b.doc === 'manual') - Number(a.doc === 'manual'))
+      const { text: docText, pdf, images, manual } = await loadDoc(doc, fModel.trim(), setFindStatus, companions)
       setPhotos([])
       setPhotoStatus('')
       // A PDF has no photo to offer: take them from the product page found with it.
@@ -283,21 +285,34 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     try {
       const ai = await import('./ai')
       const started = clock()
-      const { result, engine } = await ai.extractAuto({ text: source, pdf, device, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setStatus })
+      const first = await ai.extractAuto({ text: source, pdf, device, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setStatus })
+      const engine = first.engine
+      // The two readings disagree: a third one, shown both and the sheet again, settles it.
+      const disputed = first.result.second ? ai.disagreements(first.result.groups, first.result.second).length : 0
+      if (disputed) setStatus(`Les deux IA ne sont pas d’accord sur ${disputed} point(s) : une troisième lecture tranche…`)
+      const settled = disputed ? await ai.settle(first.result, source, device) : undefined
+      const result = settled ?? first.result
       const seconds = Math.max(1, Math.round((clock() - started) / 1000))
       // Each row checked against the sheet and the rule-based reading, which owes nothing to the AI.
       const rules = source.trim() ? parseDatasheet(source, BRANDS).groups : []
-      const checked = ai.checkAnswer(result.groups, source, rules, result.second)
+      const checked = settled
+        ? ai.checkAnswer(settled.groups, source, rules).map((g) => {
+            const read = [...first.result.groups, ...(first.result.second ?? [])].filter((o) => o.connector === g.connector && o.dir === g.dir)
+            return read.some((o) => o.count === g.count) ? g : { ...g, doubts: [...g.doubts, `aucune des deux lectures ne lisait ${g.count}`] }
+          })
+        : ai.checkAnswer(result.groups, source, rules, result.second)
       const rows = checked.map(({ quote, doubts, ...g }) => row({ ...g, ai: true, doubts, evidence: quote ? [quote] : undefined }))
       setDraft(fromResult(result, rows))
       // What the rules or the second AI read and the first AI left out: offered, not added.
-      const missed = ai.missedGroups(result.groups, result.second).map(({ quote, ...g }) => row({ ...g, evidence: quote ? [quote] : undefined }))
+      const missed = ai.missedGroups(result.groups, settled ? [...first.result.groups, ...(first.result.second ?? [])] : result.second)
+        .filter((g, i, all) => all.findIndex((o) => o.connector === g.connector && o.dir === g.dir) === i)
+        .map(({ quote, ...g }) => row({ ...g, evidence: quote ? [quote] : undefined }))
       const fromRules = rules.filter((r) => !r.guessed && !checked.some((g) => g.connector === r.connector) && !missed.some((m) => m.connector === r.connector)).map((g) => row(g))
       setSuggestions([...missed, ...fromRules])
       const doubtful = checked.filter((g) => g.doubts.length).length
       setStatus(
         `${checked.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]}${result.by ? ` (${result.by})` : ''} en ${seconds} s pour ${label} : ` +
-          `${checked.length - doubtful} confirmé(s)${result.second ? ' par les deux IA et la fiche' : ' par la fiche'}${doubtful ? `, ${doubtful} à vérifier (en orange)` : ''}.`,
+          `${checked.length - doubtful} confirmé(s)${settled ? ' après arbitrage' : result.second ? ' par les deux IA et la fiche' : ' par la fiche'}${doubtful ? `, ${doubtful} à vérifier (en orange)` : ''}.`,
       )
       return doubtful
     } catch (e) {
@@ -561,7 +576,8 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
                   <div>
                     <b>{d.title}</b>
                     <small className="muted">
-                      {d.host} · {d.kind === 'pdf' ? 'PDF' : 'page web'}
+                      {d.host} · {d.doc === 'manual' ? 'mode d’emploi' : d.doc === 'datasheet' ? 'fiche technique' : d.doc === 'quickstart' ? 'guide rapide' : d.kind === 'pdf' ? 'PDF' : 'page web'}
+                      {d.kind === 'pdf' && d.doc ? ' (PDF)' : ''}
                       {d.official && <span className="badge-official"> site du fabricant</span>}
                     </small>
                   </div>

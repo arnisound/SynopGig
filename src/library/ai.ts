@@ -73,6 +73,9 @@ Counting:
 - Mixers: mic inputs, line inputs, main outputs, aux / FX / monitor sends, subgroups, matrix, control room, headphones, insert and footswitch jacks are each physical connectors when the sheet gives their count ("4 subgroups" = 4 outputs).
 - Stereo inputs and outputs: L and R on two jacks, two XLR or two RCA count 2 connectors per stereo input; a single TRS or mini-jack stereo socket counts 1. A stereo RCA input is "rca" x2.
 - Bluetooth, Wi-Fi and apps are not connectors.
+- Per channel inputs: "Inputs 1-8: XLR / 1/4" TRS combo" is xlr-combo x8. "Inputs 9-12: XLR or dual 1/4" TRS" is xlr3 x4 and jack x8 (each channel has one XLR and two jacks).
+- A footswitch socket is a "jack" input with signal "control". A monitor or control room output pair on jacks is jack x2.
+- Line-level outputs (main, aux, subgroup, monitor, matrix) carry "audio-analog", never "speaker": "speaker" is only for amplifier outputs to loudspeakers.
 - A sheet may be wrong or mixed with another product (web pages often are): when a section clearly describes another kind of device (e.g. loudspeaker data on a mixer page), ignore it, weight and size included.
 Types:
 - Ethernet, Dante, AES67, AVB and USB ports are "io". etherCON is "ethercon", a plain RJ45 is "rj45". Primary + secondary Dante = 2 ports.
@@ -115,6 +118,8 @@ export const RESULT_SCHEMA = {
   required: ['model', 'category', 'ports'],
 }
 
+const SPEAKER_SOCKETS = new Set<ConnectorType>(['speakon', 'speakon8', 'binding-post', 'euroblock', 'ca-com', 'jack', 'harting'])
+
 const CONNECTOR_BY_LABEL = new Map(Object.entries(CONNECTORS).map(([k, v]) => [v.toLowerCase(), k as ConnectorType]))
 
 /** Never trust model output: keep only known codes and sane numbers. */
@@ -129,9 +134,11 @@ export function sanitizeAi(raw: unknown): AiResult {
     const q = p as Record<string, unknown>
     const c = str(q.connector, 40)
     const connector = (Object.hasOwn(CONNECTORS, c) ? c : CONNECTOR_BY_LABEL.get(c.toLowerCase())) as ConnectorType | undefined
-    const signal = (Object.hasOwn(SIGNALS, str(q.signal, 20)) ? q.signal : undefined) as SignalType | undefined
+    let signal = (Object.hasOwn(SIGNALS, str(q.signal, 20)) ? q.signal : undefined) as SignalType | undefined
     if (!connector || !signal) continue
     const dir = DIRS.includes(q.dir as PortDirection) ? (q.dir as PortDirection) : 'in'
+    // Loudspeaker power never travels on XLR, RCA, mini-jack or USB: that is a line output.
+    if (signal === 'speaker' && !SPEAKER_SOCKETS.has(connector)) signal = 'audio-analog'
     const count = Math.max(1, Math.min(256, Math.round(Number(q.count) || 1)))
     const quote = str(q.quote, 160) || undefined
     // The same connector given twice (spec table, then panel description): kept once.
@@ -413,8 +420,8 @@ export async function extractGemini(input: { text?: string; pdf?: File; device?:
 }
 
 /** What the relay accepts: the prompt, the schema, the useful lines and/or the PDF (for Gemini). */
-export function relayRequest(input: { text?: string; pdfBase64?: string }) {
-  return { v: 2, system: SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, pdfBase64: input.pdfBase64 }
+export function relayRequest(input: { text?: string; pdfBase64?: string; single?: boolean; system?: string }) {
+  return { v: 2, system: input.system ?? SYSTEM_PROMPT, schema: RESULT_SCHEMA, text: input.text, pdfBase64: input.pdfBase64, ...(input.single ? { single: true } : {}) }
 }
 
 /** A PDF small enough to be shown to Gemini as it is (tables, panel drawings). */
@@ -545,4 +552,40 @@ export async function extractAuto(o: AutoOptions): Promise<{ result: AiResult; e
     }
   }
   throw new Error(errors.join(' · '))
+}
+
+// ---- Settling a disagreement
+
+/** The two readings disagree on these groups: a different count, or seen by one only. */
+export function disagreements(first: AiGroup[], second: AiGroup[] = []) {
+  const differ = first.filter((g) => {
+    const o = second.filter((x) => sameKind(x, g))
+    return !o.length || (!o.some((x) => x.count === g.count) && o.reduce((n, x) => n + x.count, 0) !== g.count)
+  })
+  return [...differ, ...missedGroups(first, second)]
+}
+
+const ARBITER = `${SYSTEM_PROMPT}
+Two readings of this sheet by two other AIs disagree; they are given before the extracts. Read the extracts again and give the final, complete list of connectors. Keep what the sheet proves, whoever found it; drop what it does not. For every group, quote the passage. When the sheet really cannot settle a count, keep the count a quote supports.`
+
+const listed = (groups: AiGroup[]) =>
+  groups.map((g) => `- ${g.count} x ${g.connector} ${g.signal} ${g.dir} "${g.prefix}"${g.quote ? ` (quote: ${g.quote.slice(0, 100)})` : ''}`).join('\n') || '- (nothing)'
+
+/**
+ * A third reading by the relay's best text model, told both readings and
+ * shown the sheet again, settles what they disagree on. Undefined when it
+ * cannot answer (quota): the two readings stay as they are.
+ */
+export async function settle(result: AiResult, sheet: string, device = '', url = AI_PROXY_URL, request: typeof fetch = fetch): Promise<AiResult | undefined> {
+  if (!url || !result.second || !sheet.trim() || disagreements(result.groups, result.second).length === 0) return undefined
+  const text = `${deviceLine(device)}Reading A:\n${listed(result.groups)}\nReading B:\n${listed(result.second)}\n\nData sheet extracts:\n${focusText(sheet, 6000, device)}`
+  try {
+    const res = await request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(relayRequest({ system: ARBITER, text, single: true })) })
+    if (!res.ok) return undefined
+    const data = (await res.json()) as { text?: string; engine?: string }
+    const final = sanitizeAi(JSON.parse(data.text || '{}'))
+    return final.groups.length ? { ...result, groups: final.groups, by: `${result.by ?? ''}, tranché par ${ENGINE_NAMES[data.engine ?? ''] ?? data.engine ?? 'une 3e IA'}` } : undefined
+  } catch {
+    return undefined
+  }
 }

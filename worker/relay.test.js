@@ -41,6 +41,14 @@ describe('AI relay', () => {
     expect(init.headers.Authorization).toBe('Bearer G')
   })
 
+  it('gives one reading only when asked to settle a disagreement', async () => {
+    const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
+    vi.stubGlobal('fetch', upstream)
+    const res = await relay.fetch(post({ ...relayRequest({ text: 'Reading A: ...' }), single: true }), { GROQ_API_KEY: 'G8', GEMINI_API_KEY: 'M8' })
+    expect(await res.json()).toEqual({ text: '{"model":"X"}', engine: 'groq' })
+    expect(upstream.mock.calls.some(([u]) => String(u).includes(':generateContent'))).toBe(false)
+  })
+
   it('shows Gemini the PDF itself, with its text layer, and puts its reading first', async () => {
     const upstream = vi.fn(async (url) => (String(url).includes('generativelanguage') ? geminiOk() : String(url).endsWith('/models') ? models('llama-3.3-70b-versatile') : groqOk()))
     vi.stubGlobal('fetch', upstream)
@@ -251,6 +259,23 @@ describe('finding a product documentation', async () => {
     )
     expect(r.map((x) => x.host)).toEqual(['fohhn.com', 'fohhn.com', 'thomann.de'])
     expect(r[0]).toMatchObject({ kind: 'pdf', official: true })
+  })
+
+  it('puts the user guide first, even on the file server of the maker group', () => {
+    const r = rankDocs(
+      [
+        { url: 'https://www.altoprofessional.com/products/tmd16', title: 'Alto Professional - TMD Series > TMD16' },
+        { url: 'https://support.altoprofessional.com/en/support/solutions/articles/69000874431', title: 'TMD16 | Frequently Asked Questions' },
+        { url: 'https://altoprofessional.com/media/NF03280(LYNX-MIX USB SERIES).pdf', title: 'NF03280(LYNX-MIX USB SERIES A...' },
+        { url: 'https://cdn.inmusicbrands.com/AltoPro/mixers/tmd16/TMD16%20-%20User%20Guide%20-%20v1.0%281%29.pdf', title: 'TMD16 - User Guide' },
+        { url: 'https://manuals.plus/alto/tmd16-manual.pdf', title: 'PDF ALTO TMD16 Instruction Manual' },
+      ],
+      'Alto',
+      'tmd 16',
+    )
+    expect(r[0]).toMatchObject({ host: 'cdn.inmusicbrands.com', kind: 'pdf', official: true, doc: 'manual' })
+    // Another range's PDF comes after this model's documents.
+    expect(r.findIndex((x) => x.title.startsWith('NF03280'))).toBe(r.length - 1)
   })
 
   it('searches without any key and lists what it found', async () => {

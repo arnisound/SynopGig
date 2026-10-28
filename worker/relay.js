@@ -100,7 +100,7 @@ export function cleanRequest(body) {
   const hasPdf = typeof pdfBase64 === 'string' && pdfBase64.length > 0 && pdfBase64.length <= MAX_PDF_BASE64
   // The text for every model, the PDF too for Gemini (it reads tables and drawings).
   if (!hasText && !hasPdf) return null
-  return { system, schema, text: hasText ? text : undefined, pdfBase64: hasPdf ? pdfBase64 : undefined }
+  return { system, schema, text: hasText ? text : undefined, pdfBase64: hasPdf ? pdfBase64 : undefined, single: body.single === true }
 }
 
 /** The provider's own error message, short and without anything secret. */
@@ -600,7 +600,18 @@ const SHOPS = /amazon|ebay|thomann|woodbrass|musicstore|bax-shop|sweetwater|fnac
 
 const words = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()
 
-/** Official site first, then data sheets (PDF) and pages that name the exact model; shops and forums last. */
+// Where brand groups keep the manuals of their brands (Alto, Akai and Numark on inMusic's, Behringer and Midas on Music Tribe's...).
+const MAKER_CDNS = /inmusicbrands|musictribe|harman|yamaha|steinberg|sennheiser|shure|allen-heath|audio-technica|rolandcdn|roland|boss\.info|pioneerdj|alphatheta|adamhall|ldsystems|dbaudio|l-acoustics|nexo-sa|robe|claypaky|martin\.com|chauvet|avid|focusrite|presonus|qsc|electro-voice|bosch|telex|rcf|fbt|kvgroup|kv2audio|digico|soundcraft|crownaudio|akg|dbx|bss/i
+const MANUAL = /user'?s? ?(?:guide|manual)|owner'?s? manual|instruction manual|reference manual|operation manual|bedienungsanleitung|mode d.emploi|manuel|handbuch|\bmanual\b|guide/i
+const SHEET = /data ?sheet|spec(?:ification)?s?(?: sheet)?|fiche technique|datenblatt|technical data/i
+const QUICK = /quick ?start|qsg|getting started/i
+
+/**
+ * Official site (or the maker group's file servers) first, then the
+ * documents that describe the panels: user guide or manual above data
+ * sheet above quick start, PDF above page, the exact model above the
+ * range; shops and forums last.
+ */
 export function rankDocs(found, brand, model) {
   const b = words(brand).split(' ').filter((w) => w.length >= 3)
   const m = words(model).replace(/ /g, '')
@@ -613,12 +624,16 @@ export function rankDocs(found, brand, model) {
     if (seen.has(key)) continue
     seen.add(key)
     const host = url.hostname.replace(/^www\./, '')
-    const hay = words(`${f.title ?? ''} ${url.pathname}`).replace(/ /g, '')
-    const official = b.some((w) => host.replace(/[^a-z0-9]/g, '').includes(w)) && !SHOPS.test(host)
+    const label = `${f.title ?? ''} ${decodeURIComponent(url.pathname)}`
+    const hay = words(label).replace(/ /g, '')
     const pdf = /\.pdf($|\?)/i.test(url.pathname) || f.pdf === true
     const exact = m.length >= 2 && hay.includes(m)
-    const score = (official ? 4 : 0) + (exact ? 3 : 0) + (pdf ? 2 : 0) - (SHOPS.test(host) ? 3 : 0)
-    out.push({ title: String(f.title || host).slice(0, 140), url: url.href, host, kind: pdf ? 'pdf' : 'page', official, score })
+    const shop = SHOPS.test(host)
+    const official = !shop && (b.some((w) => host.replace(/[^a-z0-9]/g, '').includes(w)) || (pdf && exact && MAKER_CDNS.test(host)))
+    const doc = QUICK.test(label) ? 'quickstart' : MANUAL.test(label) ? 'manual' : SHEET.test(label) ? 'datasheet' : undefined
+    const score =
+      (official ? 4 : 0) + (exact ? 3 : 0) + (pdf ? 2 : 0) + (doc === 'manual' ? 3 : doc === 'datasheet' ? 2 : doc === 'quickstart' ? 1 : 0) - (shop ? 3 : 0) - (!exact && pdf ? 2 : 0)
+    out.push({ title: String(f.title || host).slice(0, 140), url: url.href, host, kind: pdf ? 'pdf' : 'page', official, exact, ...(doc ? { doc } : {}), score })
   }
   return out.sort((x, y) => y.score - x.score).slice(0, 8)
 }
@@ -660,7 +675,7 @@ async function searchGroq(q, env) {
   // Only the models this account has (compound ones are not on every account).
   const available = await groqAvailable(env).catch(() => [])
   const models = [...new Set([env.GROQ_SEARCH_MODEL, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'])].filter((m) => m && (!available.length || available.includes(m)))
-  const prompt = `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. Give the product page and the PDF data sheet or user manual on the manufacturer's website, one URL per line with its title. Only real URLs you found.`
+  const prompt = `Search the web for the official manufacturer documentation of this professional audio / lighting / video product: ${q}. Give the PDF user guide (owner's manual), the PDF data sheet and the product page on the manufacturer's website or its file server, one URL per line with its title. Only real URLs you found.`
   const notes = []
   for (const model of models) {
     const compound = model.startsWith('groq/compound')
@@ -753,7 +768,13 @@ async function findDocs(body, env) {
   const model = String(body?.model ?? '').trim().slice(0, 80)
   if (!model) return { status: 400, error: 'Indiquez au moins le modèle.' }
   const q = `${brand} ${model}`.trim()
-  const searches = [searchDuckDuckGo(`${q} datasheet specifications`), searchDuckDuckGo(`${q} pdf`), searchBing(`${q} datasheet pdf`)]
+  // The manual describes every socket of the panels: searched for by name, as the data sheet.
+  const searches = [
+    searchDuckDuckGo(`${q} user guide pdf`),
+    searchDuckDuckGo(`${q} datasheet specifications`),
+    searchBing(`${q} user guide manual pdf`),
+    searchBing(`${q} datasheet pdf`),
+  ]
   if (env.GROQ_API_KEY) searches.push(searchGroq(q, env))
   // Google's search grounding has its own small free quota: kept for the analysis unless asked for.
   if (env.GEMINI_API_KEY && env.GEMINI_SEARCH === 'on') searches.push(searchGemini(q, env))
@@ -995,6 +1016,11 @@ export async function analyse(req, env) {
   }
   const gemini = env.GEMINI_API_KEY ? [['gemini', askGemini]] : []
   const errors = []
+  // Settling a disagreement: one reading only, by the first text model (Gemini when none answers).
+  if (req.single) {
+    const one = await firstAnswer([...text, ...gemini], req, env, errors, { quota: false })
+    return { results: one ? [one] : [], errors, quota: errors.some((e) => /429|quota/i.test(e)) }
+  }
   const flags = { quota: false }
   const [g, t] = await Promise.all([firstAnswer(gemini, req, env, errors, flags), firstAnswer(text, req, env, errors, flags)])
   const results = (req.pdfBase64 ? [g, t] : [t, g]).filter(Boolean)
