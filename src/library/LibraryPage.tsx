@@ -142,6 +142,17 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
   const [fModel, setFModel] = useState('')
   const [found, setFound] = useState<FoundDoc[]>()
   const [used, setUsed] = useState<{ title: string; url: string }[]>([])
+  const [report, setReport] = useState('')
+  const [reportStatus, setReportStatus] = useState('')
+  const copyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(report)
+      setReportStatus('Rapport copié : collez-le dans la conversation avec Claude, ou envoyez-le à Arnisound tools.')
+    } catch {
+      download('rapport-analyse-synopgig.txt', report, 'text/plain')
+      setReportStatus('Rapport téléchargé (copie impossible dans ce navigateur).')
+    }
+  }
   const [foundKnown, setFoundKnown] = useState<DeviceTemplate[]>([])
   const [finding, setFinding] = useState(false)
   const [findStatus, setFindStatus] = useState('')
@@ -233,7 +244,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
       setFile(r.pdf)
       setFindStatus('')
       // The exact name the user gave decides: a neighbouring model would give a wrong sheet.
-      const doubtful = await runAi(r.text, r.used.map((u) => `« ${u.title} »`).join(' et '), r.pdf, `${fBrand.trim()} ${model}`.trim())
+      const doubtful = await runAi(r.text, r.used.map((u) => `« ${u.title} »`).join(' et '), r.pdf, `${fBrand.trim()} ${model}`.trim(), r.used)
       // Only a sheet that confirms every row is shared with everyone without a second look.
       setDraft((d) => d && { ...d, brand: fBrand.trim() || d.brand, model, found: { url: r.used[0].url, share: doubtful === 0 } })
       if (doubtful > 0) setStatus((s) => `${s} Le partage USER attend votre relecture : cochez-le une fois les lignes en orange vérifiées.`)
@@ -283,8 +294,9 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
   }
 
   /** Returns how many rows the sheet does not confirm (-1: no AI could answer). */
-  const runAi = async (source: string, label: string, pdf?: File, device?: string) => {
+  const runAi = async (source: string, label: string, pdf?: File, device?: string, sources: { title: string; url: string }[] = []) => {
     setBusy(true)
+    setReport('')
     try {
       const ai = await import('./ai')
       const started = clock()
@@ -313,6 +325,26 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
       const fromRules = rules.filter((r) => !r.guessed && !checked.some((g) => g.connector === r.connector) && !missed.some((m) => m.connector === r.connector)).map((g) => row(g))
       setSuggestions([...missed, ...fromRules])
       const doubtful = checked.filter((g) => g.doubts.length).length
+      // Everything this analysis read, sent and got back, to understand a wrong result.
+      const t = result.trace
+      setReport(
+        [
+          `Rapport d’analyse SynopGig — ${new Date().toISOString()}`,
+          `Produit : ${device || label}`,
+          `Documents lus : ${sources.map((u) => `${u.title} <${u.url}>`).join(' ; ') || label}`,
+          `Texte lu : ${source.length} caractères${pdf ? ` · PDF lu dans le navigateur (${pdf.name})` : ''}${t?.pdf ? ' · PDF envoyé à Gemini' : ''} · Gemini a reçu ${t?.geminiChars ?? '?'} caractères`,
+          '',
+          '=== Texte envoyé à l’IA texte ===',
+          t?.sent ?? '(aucun)',
+          '',
+          ...(t?.answers ?? []).flatMap((a, i) => [`=== Réponse ${i + 1} : ${a.engine ?? '?'} ===`, a.raw ?? '(vide)', '']),
+          '=== Résultat affiché ===',
+          ...checked.map((g) => `${g.count} × ${g.connector} · ${g.signal} · ${g.dir} · « ${g.prefix} »${g.note ? ` · corrigé : ${g.note}` : ''}${g.doubts.length ? ` · à vérifier : ${g.doubts.join(', ')}` : ''}`),
+          '',
+          '=== Début du texte lu ===',
+          source.slice(0, 4000),
+        ].join('\n'),
+      )
       setStatus(
         `${checked.length} groupe(s) de connectique proposé(s) par ${ENGINE_LABELS[engine]}${result.by ? ` (${result.by})` : ''} en ${seconds} s pour ${label} : ` +
           `${checked.length - doubtful} confirmé(s)${settled ? ' après arbitrage' : result.second ? ' par les deux IA et la fiche' : ' par la fiche'}${doubtful ? `, ${doubtful} à vérifier (en orange)` : ''}.`,
@@ -652,6 +684,12 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
             </label>
           </details>
           {status && <p className="status">{status}</p>}
+          {report && (
+            <div className="row wrap">
+              <button onClick={copyReport} title="Ce que l’analyse a lu, envoyé et reçu : pour comprendre un résultat faux">Copier le rapport d’analyse</button>
+              {reportStatus && <span className="muted small">{reportStatus}</span>}
+            </div>
+          )}
           {known.length > 0 && (
             <div className="suggestions">
               {known.length > 1 && <span className="muted small">Autres modèles reconnus :</span>}

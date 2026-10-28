@@ -53,6 +53,8 @@ export interface AiResult {
   second?: AiGroup[]
   /** Services that answered, e.g. "Gemini + Groq". */
   by?: string
+  /** What was sent and what came back, word for word: the analysis report. */
+  trace?: { sent?: string; geminiChars?: number; pdf?: boolean; answers: { engine?: string; raw?: string }[] }
 }
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Autre']
@@ -497,14 +499,20 @@ export async function extractRelay(input: { text?: string; pdf?: File; device?: 
   if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
   const main = sanitizeAi(JSON.parse(data.text || '{}'))
   const name = (e?: string) => (e ? (ENGINE_NAMES[e] ?? e) : '')
-  if (!data.second) return { ...main, by: name(data.engine) || undefined }
+  const trace = {
+    sent: body.text,
+    geminiChars: (body.fullText ?? body.text)?.length,
+    pdf: !!body.pdfBase64,
+    answers: [{ engine: data.engine, raw: data.text }, ...(data.second ? [{ engine: data.secondEngine, raw: data.second }] : [])],
+  }
+  if (!data.second) return { ...main, by: name(data.engine) || undefined, trace }
   let second: AiResult | undefined
   try {
     second = sanitizeAi(JSON.parse(data.second))
   } catch {
     second = undefined
   }
-  return { ...main, second: second?.groups, by: [name(data.engine), second ? name(data.secondEngine) : ''].filter(Boolean).join(' + ') }
+  return { ...main, second: second?.groups, by: [name(data.engine), second ? name(data.secondEngine) : ''].filter(Boolean).join(' + '), trace }
 }
 
 // ---- AI built into Chrome (Prompt API, Gemini Nano)
@@ -634,7 +642,8 @@ export async function settle(result: AiResult, sheet: string, device = '', url =
     if (!res.ok) return undefined
     const data = (await res.json()) as { text?: string; engine?: string }
     const final = sanitizeAi(JSON.parse(data.text || '{}'))
-    return final.groups.length ? { ...result, groups: final.groups, by: `${result.by ?? ''}, tranché par ${ENGINE_NAMES[data.engine ?? ''] ?? data.engine ?? 'une 3e IA'}` } : undefined
+    const trace = result.trace && { ...result.trace, answers: [...result.trace.answers, { engine: `arbitre (${data.engine ?? '?'})`, raw: data.text }] }
+    return final.groups.length ? { ...result, trace, groups: final.groups, by: `${result.by ?? ''}, tranché par ${ENGINE_NAMES[data.engine ?? ''] ?? data.engine ?? 'une 3e IA'}` } : undefined
   } catch {
     return undefined
   }
