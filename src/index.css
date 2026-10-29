@@ -124,6 +124,9 @@ main { flex: 1; min-height: 0; overflow: auto; }
 }
 .palette-item:hover { background: var(--bg); }
 .palette-item small { grid-column: 2; color: var(--muted); font-size: 11px; }
+.block-item { display: flex; align-items: center; }
+.block-item .palette-item { grid-template-columns: 1fr; }
+.block-item .palette-item small { grid-column: 1; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-top: 3px; flex: none; }
 
 .canvas { position: relative; min-width: 0; background: var(--canvas); }

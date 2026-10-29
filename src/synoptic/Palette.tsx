@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { CATEGORY_COLORS, FAMILY_ORDER } from '../data/library'
 import { USER_FAMILY } from '../library/userLibrary'
 import DeviceArt from '../ui/DeviceArt'
+import type { Block } from '../blocks/blocks'
 import type { DeviceTemplate } from '../types'
 
 export const DND_TYPE = 'application/x-synopgig-template'
@@ -17,6 +18,10 @@ interface Props {
   onNew?: (query: string) => void
   /** Ids of the products just added, newest first: shown at the top. */
   recent?: string[]
+  /** Saved groups of cabled devices, to drop in whole. */
+  blocks?: Block[]
+  onBlock?: (b: Block) => void
+  onDeleteBlock?: (b: Block) => void
 }
 
 const rank = (family: string) => {
@@ -35,7 +40,7 @@ function byBrand(list: DeviceTemplate[]) {
     .map(([b, items]) => [b, [...items].sort((x, y) => alpha(x.model, y.model))] as const)
 }
 
-export default function Palette({ templates, onAdd, onNew, recent = [] }: Props) {
+export default function Palette({ templates, onAdd, onNew, recent = [], blocks = [], onBlock, onDeleteBlock }: Props) {
   const [query, setQuery] = useState('')
   const [brand, setBrand] = useState('')
   const q = query.trim().toLowerCase()
@@ -106,6 +111,24 @@ export default function Palette({ templates, onAdd, onNew, recent = [] }: Props)
           <div className="brand">Ajoutés récemment</div>
           {recentItems.map(item)}
         </div>
+      )}
+      {blocks.length > 0 && !filtered && onBlock && (
+        <details className="blocks" open>
+          <summary>
+            Mes blocs <small>{blocks.length}</small>
+          </summary>
+          {[...blocks].sort((a, b) => alpha(a.name, b.name)).map((b) => (
+            <div key={b.id} className="block-item">
+              <button className="palette-item" onClick={() => onBlock(b)} title={b.nodes.map((n) => n.data.name).join(', ')}>
+                <span>{b.name}</span>
+                <small>
+                  {b.nodes.length} équipement{b.nodes.length > 1 ? 's' : ''} · {b.edges.length} câble{b.edges.length > 1 ? 's' : ''}
+                </small>
+              </button>
+              {onDeleteBlock && <button className="icon" title="Supprimer ce bloc" onClick={() => onDeleteBlock(b)}>×</button>}
+            </div>
+          ))}
+        </details>
       )}
       {groups.length === 0 && <p className="hint">Aucun résultat.</p>}
       {groups.map(({ cat, families, count }) => (

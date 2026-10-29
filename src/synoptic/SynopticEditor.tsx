@@ -17,6 +17,7 @@ import { toPng } from 'html-to-image'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
+import { loadBlocks, makeBlock, placeBlock, saveBlocks, type Block } from '../blocks/blocks'
 import { ipIssues } from '../network/network'
 import { connectPorts, createCase, createDevice, setPanel, slug, uid } from '../project'
 import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
@@ -196,16 +197,31 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     if (t) addAt(t, screenToFlowPosition({ x: e.clientX, y: e.clientY }))
   }
 
-  const addCentered = (t: DeviceTemplate) => {
+  const viewCenter = () => {
     const { x, y, zoom } = getViewport()
     const el = document.querySelector('.react-flow')
     const w = el?.clientWidth ?? 800
     const h = el?.clientHeight ?? 600
-    const target = { x: (w / 2 - x) / zoom - 100, y: (h / 2 - y) / zoom - 60 }
+    return { x: (w / 2 - x) / zoom - 100, y: (h / 2 - y) / zoom - 60 }
+  }
+
+  const addCentered = (t: DeviceTemplate) => {
+    const target = viewCenter()
     // Successive clicks cascade instead of stacking on the same spot.
     let k = 0
     while (k < 20 && nodes.some((n) => Math.abs(n.position.x - (target.x + k * 40)) < 20 && Math.abs(n.position.y - (target.y + k * 40)) < 20)) k++
     addAt(t, { x: target.x + k * 40, y: target.y + k * 40 })
+  }
+
+  const [blocks, setBlocksState] = useState<Block[]>(loadBlocks)
+  const setBlocks = (b: Block[]) => {
+    saveBlocks(b)
+    setBlocksState(b)
+  }
+  const saveBlock = () => {
+    const sel = nodes.filter((n) => n.selected)
+    const name = prompt('Nom du bloc (par exemple « Kit batterie », « Rack retours ») :', sel.length === 1 ? sel[0].data.name : '')?.trim()
+    if (name) setBlocks([...blocks, makeBlock(project, sel.map((n) => n.id), name)])
   }
 
   const selectedNode = nodes.find((n) => n.selected)
@@ -281,6 +297,13 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           templates={templates}
           onNew={userLibrary ? (query) => { setNewProduct((p) => ({ mode: 'find', query, n: (p?.n ?? 0) + 1 })); setCreating(true) } : undefined}
           recent={recent}
+          blocks={blocks}
+          onBlock={(b) => {
+            const at = viewCenter()
+            setProject((p) => placeBlock(p, b, at))
+            setDrawer(undefined)
+          }}
+          onDeleteBlock={(b) => confirm(`Supprimer le bloc « ${b.name} » ?`) && setBlocks(blocks.filter((x) => x.id !== b.id))}
           onAdd={(t) => {
             addCentered(t)
             setDrawer(undefined)
@@ -303,7 +326,10 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
             {issueCount ? `${issueCount} liaison(s) à vérifier` : 'Toutes les liaisons sont conformes'}
           </span>
           {nodes.some((n) => n.selected) && (
-            <button onClick={createRackFromSelection}>Créer un rack avec la sélection</button>
+            <>
+              <button onClick={createRackFromSelection}>Créer un rack avec la sélection</button>
+              <button onClick={saveBlock} title="Garder ces équipements et leurs câbles pour les reposer dans un autre projet">Enregistrer en bloc</button>
+            </>
           )}
           <input className="cable-find" list="cable-ids" placeholder="Trouver un câble (C012)…" value={find} onChange={(e) => findCable(e.target.value)} />
           <datalist id="cable-ids">
