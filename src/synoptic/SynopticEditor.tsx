@@ -135,6 +135,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       const isFrame = (c: NodeChange<FlowNode>) => 'id' in c && c.id.startsWith('frame-')
       const moves = all.filter((c) => isFrame(c) && c.type === 'position' && c.position)
       const changes = all.filter((c) => !isFrame(c)) as NodeChange<DeviceNode>[]
+      // Rack frames are drawn from the cases: their own size reports change nothing.
+      if (!changes.length && !moves.length) return
       setProject((p) => {
         let nodesNext = applyNodeChanges(changes, p.nodes)
         for (const m of moves) {
