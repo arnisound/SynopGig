@@ -1,21 +1,27 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Project } from '../types'
-import { buildGuide } from './steps'
+import { buildGuide, findSteps } from './steps'
 
 interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
   onShow: (ids: string[]) => void
+  /** What to look for straight away (a label's QR code). */
+  initialQuery?: string
 }
 
-export default function TechGuide({ project, setProject, onShow }: Props) {
+export default function TechGuide({ project, setProject, onShow, initialQuery = '' }: Props) {
   const { progress } = project
+  const [query, setQuery] = useState(initialQuery)
+  const [left, setLeft] = useState(false)
 
   const sections = useMemo(() => buildGuide(project), [project])
 
   const all = sections.flatMap((s) => s.steps)
   const done = all.filter((s) => progress[s.id]).length
   const pct = all.length ? Math.round((done / all.length) * 100) : 0
+  const shown = useMemo(() => (query.trim() || left ? findSteps(sections, query, left ? progress : undefined) : sections), [sections, query, left, progress])
+  const found = shown.reduce((n, s) => n + s.steps.length, 0)
 
   const toggle = (id: string) =>
     setProject((p) => ({ ...p, progress: { ...p.progress, [id]: !p.progress[id] } }))
@@ -42,7 +48,21 @@ export default function TechGuide({ project, setProject, onShow }: Props) {
         <div style={{ width: `${pct}%` }} />
         <span>{done} / {all.length} étapes · {pct} %</span>
       </div>
-      {sections.map((s) => (
+      <div className="guide-find no-print">
+        <input
+          type="search"
+          placeholder="Où va… un câble (C-042), un équipement, un port"
+          aria-label="Chercher dans le guide"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <label className="check">
+          <input type="checkbox" checked={left} onChange={(e) => setLeft(e.target.checked)} /> Reste à faire
+        </label>
+        {(query.trim() || left) && <span className="muted small">{found} étape{found > 1 ? 's' : ''}</span>}
+      </div>
+      {(query.trim() || left) && found === 0 && <p className="muted">{left && !query.trim() ? 'Tout est fait. Bon spectacle !' : 'Rien ne correspond.'}</p>}
+      {shown.map((s) => (
         <section key={s.title}>
           <h3>{s.title}</h3>
           {s.steps.length === 0 && <p className="muted">Rien à faire ici.</p>}

@@ -95,3 +95,28 @@ export function buildGuide(project: Project): GuideSection[] {
     { title: '3. Configuration', steps: config },
   ]
 }
+
+/** Lower case, no accents, no separators, no leading zeros: "C-042" and "c42" are the same. */
+const fold = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '')
+    .replace(/(^|[^0-9])0+(?=\d)/g, '$1')
+
+/**
+ * The steps that answer a question typed on site ("C-042", "console in 3",
+ * "retour"): every word must appear in the step, case and accents aside.
+ */
+export function findSteps(sections: GuideSection[], query: string, onlyLeft?: Record<string, boolean>): GuideSection[] {
+  const words = query.split(/\s+/).map(fold).filter(Boolean)
+  const whole = fold(query)
+  const matches = (st: Step) => !onlyLeft?.[st.id] && words.every((w) => fold(`${st.title} ${st.detail ?? ''}`).includes(w))
+  // A cable id typed in full ("c1", "C-001") is that cable, not every C1x.
+  const exact = (st: Step) => !!whole && fold(st.title.split(' — ')[0]) === whole
+  const anyExact = sections.some((s) => s.steps.some((st) => matches(st) && exact(st)))
+  return sections
+    .map((s) => ({ ...s, steps: s.steps.filter((st) => matches(st) && (!anyExact || exact(st))) }))
+    .filter((s) => s.steps.length > 0 || (!words.length && !onlyLeft))
+}

@@ -52,7 +52,8 @@ export default function App() {
     updatedAt: SHARED_ID ? cachedShared(SHARED_ID)?.updatedAt : undefined,
   }))
   const [sharing, setSharing] = useState(false)
-  const [tab, setTab] = useState<Tab>(TARGET?.kind === 'case' ? 'cases' : 'synoptic')
+  // On a phone, the crew opening the show's link wants the checklist first.
+  const [tab, setTab] = useState<Tab>(TARGET?.kind === 'case' ? 'cases' : SHARED_ID && !TARGET && matchMedia('(max-width: 760px)').matches ? 'guide' : 'synoptic')
   const [dossier, setDossier] = useState(false)
   const [labels, setLabels] = useState(false)
   const [menu, setMenu] = useState(false)
