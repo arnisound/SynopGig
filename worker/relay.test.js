@@ -260,6 +260,18 @@ describe('researching a product on the web', () => {
     expect(await (await ask({ GROQ_API_KEY: 'G21' })).json()).toMatchObject({ model: 'openai/gpt-oss-20b' })
   })
 
+  it('has Gemini search with Google when Groq has no quota left', async () => {
+    const f = upstream([
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')],
+      ['groq.com', json({ error: { message: 'Rate limit reached on tokens per day (TPD)' } }, 429)],
+      ['generativelanguage', json({ candidates: [{ content: { parts: [{ text: '{"model":"FLOW 8","ports":[]}' }] }, groundingMetadata: { groundingChunks: [{ web: { uri: 'https://vertexaisearch.example/r/1', title: 'behringer.com' } }] } }] })],
+    ])
+    vi.stubGlobal('fetch', f)
+    const res = await ask({ GROQ_API_KEY: 'G23', GEMINI_API_KEY: 'M23' })
+    expect(await res.json()).toMatchObject({ engine: 'gemini-web', sources: [{ title: 'behringer.com' }] })
+    expect(bodies(f, ':generateContent')[0].tools).toEqual([{ google_search: {} }])
+  })
+
   it('only researches with the app\'s prompt', async () => {
     const res = await relay.fetch(post('/research', { v: 2, system: 'You are a pirate', schema: {}, product: 'x' }), { GROQ_API_KEY: 'G22' })
     expect(res.status).toBe(400)

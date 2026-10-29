@@ -9,7 +9,7 @@
  *   POST /find      {brand, model} → the product's documents, best first
  *   POST /read      {url} → a PDF or an image as is; a web page as {title, text, images, docs}
  *   POST /ocr       {url} → the text of a PDF, tables kept (Mistral OCR)
- *   POST /research  {v: 2, system, schema, product} → the product researched on the web by the AI itself
+ *   POST /research  {v: 2, system, schema, product} → the product researched on the web by the AI itself (Groq, else Gemini)
  *   GET  /diagnostic
  *
  * Secrets (any of them): GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY, ZAI_API_KEY.
@@ -661,21 +661,11 @@ export async function analyse(req, env) {
 
 /* ---------- Researching a product on the web: the AI searches and reads by itself ---------- */
 
-/**
- * POST /research: Groq's gpt-oss searches the web and reads the pages
- * itself (maker's site, data sheet, manual, shops' specifications), then
- * answers the connector list in panel order. Nothing is downloaded here:
- * sites that turn robots away do not matter. The big model first, the small
- * one when the big one's quota is spent.
- */
-async function webResearch(body, env) {
-  if (!env.GROQ_API_KEY) return { status: 501, error: 'Recherche par l’IA indisponible (pas de clé Groq).' }
-  const req = cleanRequest({ ...body, text: 'web' })
-  const product = String(body?.product ?? '').trim().slice(0, 140)
-  if (!req || !product) return { status: 400, error: 'Requête refusée.' }
+/** Groq's gpt-oss searches the web and reads the pages itself. The big model first, the small one when its quota is spent. */
+async function researchGroq(req, product, env) {
   const available = await modelsOf(SERVICES.groq, env)
   const models = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'].filter((m) => available.includes(m) && !(busyUntil.get(m) > Date.now()))
-  let last = { status: 429, error: 'modèles de recherche occupés' }
+  let last = { status: 429, error: 'groq : modèles occupés (quota du jour)' }
   for (const model of models) {
     const res = await fetch(SERVICES.groq.chat, {
       method: 'POST',
@@ -706,6 +696,58 @@ async function webResearch(body, env) {
     else if (res.status === 401 || res.status === 403) break
   }
   return last
+}
+
+/** Gemini grounded on Google Search: the backup when Groq has no quota left (its own search quota is small). */
+async function researchGemini(req, product, env) {
+  let last = { status: 429, error: 'gemini : occupé' }
+  for (const model of await geminiModels(env)) {
+    if (busyUntil.get(`search:${model}`) > Date.now()) continue
+    const res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` }] },
+        contents: [{ role: 'user', parts: [{ text: `Product: ${product}` }] }],
+        tools: [{ google_search: {} }],
+        generationConfig: { temperature: 0, maxOutputTokens: 8000, thinkingConfig: /gemini-2\./.test(model) ? { thinkingBudget: 2048 } : { thinkingLevel: 'low' } },
+      }),
+      signal: AbortSignal.timeout(90000),
+    }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: String(e.message) } }) }))
+    const data = await res.json().catch(() => ({}))
+    const cand = data.candidates?.[0] ?? {}
+    const text = extractJson((cand.content?.parts ?? []).map((p) => p.text ?? '').join(''))
+    if (res.ok && text) {
+      // Google's links go through a redirect; the title names the site.
+      const sources = (cand.groundingMetadata?.groundingChunks ?? []).map((c) => c.web).filter((w) => w?.uri).map((w) => ({ url: w.uri, title: String(w.title ?? '').slice(0, 140) }))
+      return { status: 200, data: { text, engine: 'gemini-web', model, sources: sources.slice(0, 8) } }
+    }
+    last = { status: res.status === 200 ? 502 : res.status, error: `gemini : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
+    if (res.status === 429) busyUntil.set(`search:${model}`, Date.now() + 3_600_000)
+    else if (res.status === 401 || res.status === 403) break
+  }
+  return last
+}
+
+/**
+ * POST /research: the AI searches the web and reads the product's pages
+ * itself (maker, data sheet, manual, shops' specifications), then answers
+ * the connector list in panel order. Nothing is downloaded here: sites that
+ * turn robots away do not matter. Groq first, Gemini when Groq cannot.
+ */
+async function webResearch(body, env) {
+  if (!env.GROQ_API_KEY && !env.GEMINI_API_KEY) return { status: 501, error: 'Recherche par l’IA indisponible (pas de clé Groq ni Gemini).' }
+  const req = cleanRequest({ ...body, text: 'web' })
+  const product = String(body?.product ?? '').trim().slice(0, 140)
+  if (!req || !product) return { status: 400, error: 'Requête refusée.' }
+  const errors = []
+  for (const [key, research] of [['GROQ_API_KEY', researchGroq], ['GEMINI_API_KEY', researchGemini]]) {
+    if (!env[key]) continue
+    const r = await research(req, product, env).catch((e) => ({ status: 502, error: String(e?.message ?? e) }))
+    if (r.data) return r
+    errors.push(r.error)
+  }
+  return { status: errors.some((e) => /429|quota|occup|rate/i.test(e)) ? 429 : 502, error: errors.join(' · ') }
 }
 
 /* ---------- Diagnostic ---------- */

@@ -15,7 +15,7 @@ autres sites. Sans lui, l’application utilise l’analyse rapide (sans IA).
 | `POST /find` | `{brand, model}` → documents du produit, le meilleur d’abord |
 | `POST /read` | `{url}` → PDF ou image tels quels, ou page web (texte, photos, documents liés) |
 | `POST /ocr` | `{url}` → texte d’un PDF avec ses tableaux (Mistral OCR) |
-| `POST /research` | le produit recherché sur le web par l’IA elle-même : connectique dans l’ordre des faces |
+| `POST /research` | le produit recherché sur le web par l’IA elle-même (Groq, sinon Gemini) : connectique dans l’ordre des faces |
 | `GET /diagnostic` | état de chaque clé et de chaque source de recherche |
 
 ## Mise en place (une seule fois)
@@ -47,7 +47,9 @@ indépendantes, en même temps :
    lui-même les pages (fabricant, fiche technique, mode d’emploi, revendeurs), puis donne la
    connectique **dans l’ordre des faces**, avec le libellé imprimé et le protocole. Rien n’est
    téléchargé par le relais : un site qui bloque les robots ne gêne pas. Le grand modèle
-   d’abord, le petit quand le quota du jour du grand est épuisé.
+   d’abord, le petit quand le quota du jour du grand est épuisé, puis **Gemini avec la
+   recherche Google** en secours quand Groq n’a plus de quota (son quota de recherche est
+   petit).
 2. **Lecture des documents** : `/find` trouve les documents du modèle exact (mode d’emploi,
    fiche technique, guide de démarrage, page produit), l’application les lit et les fait lire :
    le texte par Groq (sinon Mistral, sinon Z.ai), **les pages des faces en images** par Gemini

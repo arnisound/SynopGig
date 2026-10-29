@@ -686,8 +686,9 @@ export async function researchWeb(brand: string, model: string, url = AI_PROXY_U
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ v: 2, system: RESEARCH_PROMPT, schema: RESULT_SCHEMA, product }),
   })
-  const data = (await res.json().catch(() => ({}))) as { text?: string; model?: string; sources?: { url: string; title: string }[]; error?: { message?: string } }
+  const data = (await res.json().catch(() => ({}))) as { text?: string; engine?: string; model?: string; sources?: { url: string; title: string }[]; error?: { message?: string } }
   if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
   const result = sanitizeAi(JSON.parse(data.text || '{}'))
-  return { ...result, by: 'Groq (recherche web)', sources: data.sources ?? [], trace: { sent: `Product: ${product}`, answers: [{ engine: `recherche web (${data.model ?? 'groq'})`, raw: data.text }] } }
+  const who = data.engine === 'gemini-web' ? 'Gemini' : 'Groq'
+  return { ...result, by: `${who} (recherche web)`, sources: data.sources ?? [], trace: { sent: `Product: ${product}`, answers: [{ engine: `recherche web ${who} (${data.model ?? '?'})`, raw: data.text }] } }
 }
