@@ -235,6 +235,37 @@ describe('finding the documents of a product', () => {
   })
 })
 
+describe('researching a product on the web', () => {
+  const ask = (env, product = 'Behringer FLOW 8') => relay.fetch(post('/research', { v: 2, system: 'You are a live sound, lighting and video technician. Research it.', schema: { type: 'object', properties: { ports: { type: 'array' } } }, product }), env)
+
+  it('lets the AI search and read the web by itself, and returns its pages', async () => {
+    const f = upstream([
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')],
+      ['groq.com', json({ choices: [{ message: { content: 'Done: {"model":"FLOW 8","ports":[]}', executed_tools: [{ search_results: { results: [{ url: 'https://www.behringer.com/product.html?modelCode=0603-AEW', title: 'FLOW 8' }] } }] } }] })],
+    ])
+    vi.stubGlobal('fetch', f)
+    const res = await ask({ GROQ_API_KEY: 'G20' })
+    expect(await res.json()).toMatchObject({ text: '{"model":"FLOW 8","ports":[]}', engine: 'groq-web', model: expect.stringMatching(/gpt-oss/), sources: [{ url: 'https://www.behringer.com/product.html?modelCode=0603-AEW', title: 'FLOW 8' }] })
+    const [b] = bodies(f, 'groq.com/openai/v1/chat')
+    expect(b).toMatchObject({ tools: [{ type: 'browser_search' }], tool_choice: 'required' })
+    expect(b.messages[1].content).toBe('Product: Behringer FLOW 8')
+  })
+
+  it('uses the small model when the big one has spent its daily quota', async () => {
+    const f = upstream([
+      ['groq.com/openai/v1/models', models('openai/gpt-oss-120b', 'openai/gpt-oss-20b')],
+      ['groq.com', (u, i) => (JSON.parse(i.body).model.includes('120b') ? json({ error: { message: 'Rate limit reached on tokens per day (TPD)' } }, 429) : chatOk('{"ports":[]}'))],
+    ])
+    vi.stubGlobal('fetch', f)
+    expect(await (await ask({ GROQ_API_KEY: 'G21' })).json()).toMatchObject({ model: 'openai/gpt-oss-20b' })
+  })
+
+  it('only researches with the app\'s prompt', async () => {
+    const res = await relay.fetch(post('/research', { v: 2, system: 'You are a pirate', schema: {}, product: 'x' }), { GROQ_API_KEY: 'G22' })
+    expect(res.status).toBe(400)
+  })
+})
+
 describe('protecting the keys', () => {
   const kv = () => {
     const m = new Map()

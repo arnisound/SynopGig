@@ -9,6 +9,7 @@
  *   POST /find      {brand, model} → the product's documents, best first
  *   POST /read      {url} → a PDF or an image as is; a web page as {title, text, images, docs}
  *   POST /ocr       {url} → the text of a PDF, tables kept (Mistral OCR)
+ *   POST /research  {v: 2, system, schema, product} → the product researched on the web by the AI itself
  *   GET  /diagnostic
  *
  * Secrets (any of them): GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY, ZAI_API_KEY.
@@ -658,6 +659,55 @@ export async function analyse(req, env) {
   return { results: results.filter(Boolean), errors }
 }
 
+/* ---------- Researching a product on the web: the AI searches and reads by itself ---------- */
+
+/**
+ * POST /research: Groq's gpt-oss searches the web and reads the pages
+ * itself (maker's site, data sheet, manual, shops' specifications), then
+ * answers the connector list in panel order. Nothing is downloaded here:
+ * sites that turn robots away do not matter. The big model first, the small
+ * one when the big one's quota is spent.
+ */
+async function webResearch(body, env) {
+  if (!env.GROQ_API_KEY) return { status: 501, error: 'Recherche par l’IA indisponible (pas de clé Groq).' }
+  const req = cleanRequest({ ...body, text: 'web' })
+  const product = String(body?.product ?? '').trim().slice(0, 140)
+  if (!req || !product) return { status: 400, error: 'Requête refusée.' }
+  const available = await modelsOf(SERVICES.groq, env)
+  const models = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'].filter((m) => available.includes(m) && !(busyUntil.get(m) > Date.now()))
+  let last = { status: 429, error: 'modèles de recherche occupés' }
+  for (const model of models) {
+    const res = await fetch(SERVICES.groq.chat, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model,
+        reasoning_effort: 'medium',
+        max_tokens: 8000,
+        tools: [{ type: 'browser_search' }],
+        tool_choice: 'required',
+        messages: [
+          { role: 'system', content: `${req.system}\nAnswer with a single JSON object of this shape, nothing else (? = optional):\n${shape(req.schema)}` },
+          { role: 'user', content: `Product: ${product}` },
+        ],
+      }),
+      signal: AbortSignal.timeout(120000),
+    }).catch((e) => ({ ok: false, status: 504, json: async () => ({ error: { message: e.name === 'TimeoutError' ? 'trop lent' : String(e.message) } }) }))
+    const data = await res.json().catch(() => ({}))
+    const msg = data.choices?.[0]?.message ?? {}
+    const text = extractJson(msg.content)
+    if (res.ok && text) {
+      const sources = []
+      for (const r of (msg.executed_tools ?? []).flatMap((t) => t.search_results?.results ?? [])) if (r?.url && !sources.some((x) => x.url === r.url)) sources.push({ url: r.url, title: String(r.title ?? '').slice(0, 140) })
+      return { status: 200, data: { text, engine: 'groq-web', model, sources: sources.slice(0, 8) } }
+    }
+    last = { status: res.status === 200 ? 502 : res.status, error: `groq : ${res.ok ? 'réponse illisible' : reason(data, res.status)}` }
+    if (res.status === 429) busyUntil.set(model, Date.now() + (/per day|\bTPD\b|\bRPD\b/i.test(last.error) ? 3 * 3_600_000 : 60_000))
+    else if (res.status === 401 || res.status === 403) break
+  }
+  return last
+}
+
 /* ---------- Diagnostic ---------- */
 
 /** A check that gives up after a while instead of holding the whole page. */
@@ -759,6 +809,12 @@ export default {
       if (tooManyThisHour('web', ip, env)) return fail('Trop de lectures en une heure, réessayez plus tard.', 429)
       const r = await read(body)
       if (r.file) return new Response(r.file, { headers: { ...cors, 'Content-Type': r.type } })
+      return r.data ? reply(r.data) : fail(r.error, r.status)
+    }
+    if (path === '/research') {
+      const refused = await aiRefusal(ip, env)
+      if (refused) return fail(refused, 429)
+      const r = await webResearch(body, env)
       return r.data ? reply(r.data) : fail(r.error, r.status)
     }
     if (path === '/find' || path === '/ocr') {

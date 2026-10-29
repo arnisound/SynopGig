@@ -15,6 +15,7 @@ autres sites. Sans lui, l’application utilise l’analyse rapide (sans IA).
 | `POST /find` | `{brand, model}` → documents du produit, le meilleur d’abord |
 | `POST /read` | `{url}` → PDF ou image tels quels, ou page web (texte, photos, documents liés) |
 | `POST /ocr` | `{url}` → texte d’un PDF avec ses tableaux (Mistral OCR) |
+| `POST /research` | le produit recherché sur le web par l’IA elle-même : connectique dans l’ordre des faces |
 | `GET /diagnostic` | état de chaque clé et de chaque source de recherche |
 
 ## Mise en place (une seule fois)
@@ -39,18 +40,23 @@ Sites autorisés : `arnisoundtools.com`, GitHub Pages et `localhost:5173` (varia
 
 ## « Le chercher pour vous »
 
-1. `/find` cherche sur Bing, DuckDuckGo et avec la recherche web de Groq, puis classe : site du
-   fabricant (ou serveur de fichiers de son groupe : inMusic, Music Tribe, Harman…), modèle
-   exact, **mode d’emploi** avant fiche technique avant guide rapide, PDF avant page ;
-   revendeurs et forums en dernier.
-2. L’application prend seule le mode d’emploi du modèle (sinon sa fiche technique) et sa page
-   produit (photos, documents liés), les lit — PDF par `/ocr`, sinon dans le navigateur — et
-   lance l’analyse. L’utilisateur peut en choisir un autre dans la liste.
-3. L’analyse lit deux fois en même temps : un lecteur d’images (Gemini, sinon GLM-4.6V-Flash
-   de Z.ai) voit **les pages des faces avant et arrière** (dessins des prises) et un long
-   extrait ; une IA texte (Groq, sinon Mistral, sinon Z.ai) lit les passages utiles. Si les
-   deux lectures divergent, une troisième tranche. Chaque ligne est vérifiée contre le texte,
-   des règles de technicien corrigent les erreurs évidentes, ce qui reste douteux est en orange.
+L’utilisateur donne la marque et le modèle, puis relit et corrige. Deux lectures
+indépendantes, en même temps :
+
+1. **Recherche par l’IA** (`/research`) : `gpt-oss` de Groq cherche sur le web et lit
+   lui-même les pages (fabricant, fiche technique, mode d’emploi, revendeurs), puis donne la
+   connectique **dans l’ordre des faces**, avec le libellé imprimé et le protocole. Rien n’est
+   téléchargé par le relais : un site qui bloque les robots ne gêne pas. Le grand modèle
+   d’abord, le petit quand le quota du jour du grand est épuisé.
+2. **Lecture des documents** : `/find` trouve les documents du modèle exact (mode d’emploi,
+   fiche technique, guide de démarrage, page produit), l’application les lit et les fait lire :
+   le texte par Groq (sinon Mistral, sinon Z.ai), **les pages des faces en images** par Gemini
+   (sinon GLM-4.6V-Flash de Z.ai).
+
+Là où les deux concordent, la ligne est confirmée ; là où elles diffèrent, une troisième
+lecture tranche avec les documents ; ce qui reste douteux est en orange. Avec une seule
+lecture disponible, toute la liste est « à relire ». Des règles de technicien corrigent les
+erreurs évidentes (sorties principales stéréo en XLR, casque sur une prise…).
 
 ## Protection
 

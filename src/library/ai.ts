@@ -53,6 +53,8 @@ export interface AiResult {
   second?: AiGroup[]
   /** Services that answered, e.g. "Gemini + Groq". */
   by?: string
+  /** Pages the AI read on the web, when it researched the product itself. */
+  sources?: { url: string; title: string }[]
   /** What was sent and what came back, word for word: the analysis report. */
   trace?: { sent?: string; geminiChars?: number; images?: number; answers: { engine?: string; raw?: string }[] }
 }
@@ -318,7 +320,7 @@ export function checkAnswer(
       } else if (!quoteInSheet(g.quote, sheet)) {
         if (!agreed) doubts.push('passage introuvable dans la fiche')
       } else if (!quoteHasCount(g.quote, g.count) && !(g.note && g.count % 2 === 0 && quoteHasCount(g.quote, g.count / 2)) && !agreed) doubts.push(`quantité ${g.count} non écrite dans le passage`)
-    } else if (!agreed) doubts.push('fiche scannée : rien à comparer')
+    }
     const same = rules.filter((r) => !r.guessed && sameKind(r, g))
     if (same.length && !same.some((r) => r.count === g.count)) doubts.push(`l’analyse rapide lit ${[...new Set(same.map((r) => r.count))].join(' ou ')}`)
     if (g.count > 32 && !agreed) doubts.push('nombre élevé')
@@ -663,4 +665,29 @@ export async function settle(result: AiResult, sheet: string, device = '', url =
   } catch {
     return undefined
   }
+}
+
+// ---- Researching a product on the web
+
+export const RESEARCH_PROMPT = `${SYSTEM_PROMPT}
+Here you receive no extracts, only the product name: research it yourself, to reproduce it faithfully in SynopGig (a tool drawing the cabling of live shows).
+1. Search the web: the manufacturer's product page and specifications, its user guide or quick start guide (they describe every panel), and the specifications of shops such as Thomann or Sweetwater to cross-check.
+2. Make sure every source is about this exact model, not another one of the range.
+3. List every physical connector in panel order: the rear panel first, left to right as printed, then the front and top panels. One group per run of identical sockets ("Mic 1-2", "Ch 3-4"...).
+4. label: the name printed on the panel, short ("Mic 1-2", "Line 5-8", "Main L/R", "Monitor 1-2", "Phones", "Footswitch", "USB", "Power"); quote: the words of the source you read it in.
+5. signal: the protocol each connector carries (analog audio, AES3, Dante, AES50, MIDI, DMX, Art-Net, video, power...).`
+
+/** The relay's AI searches the web and reads the product's pages by itself, then lists its connectors in panel order. */
+export async function researchWeb(brand: string, model: string, url = AI_PROXY_URL, request: typeof fetch = fetch): Promise<AiResult> {
+  if (!url) throw new Error('relais indisponible')
+  const product = `${brand} ${model}`.trim()
+  const res = await request(`${url.replace(/\/+$/, '')}/research`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ v: 2, system: RESEARCH_PROMPT, schema: RESULT_SCHEMA, product }),
+  })
+  const data = (await res.json().catch(() => ({}))) as { text?: string; model?: string; sources?: { url: string; title: string }[]; error?: { message?: string } }
+  if (!res.ok) throw new Error(data.error?.message ?? `erreur ${res.status}`)
+  const result = sanitizeAi(JSON.parse(data.text || '{}'))
+  return { ...result, by: 'Groq (recherche web)', sources: data.sources ?? [], trace: { sent: `Product: ${product}`, answers: [{ engine: `recherche web (${data.model ?? 'groq'})`, raw: data.text }] } }
 }

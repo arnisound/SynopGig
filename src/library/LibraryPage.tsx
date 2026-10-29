@@ -8,7 +8,7 @@ import { findKnownModels } from './findKnown'
 import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared } from './userLibrary'
-import { findDocs, research, type FoundDoc } from './finder'
+import { research, type FoundDoc } from './finder'
 import { fetchImage, pageImages, shrink } from './images'
 import DeviceArt from '../ui/DeviceArt'
 import type { UserLibrary } from './useUserLibrary'
@@ -51,6 +51,8 @@ interface Row extends PortGroup {
   doubts?: string[]
   /** What a technician's rule corrected or added. */
   note?: string
+  /** Read by one source only: nothing to compare it with. */
+  single?: boolean
 }
 
 interface Draft {
@@ -219,13 +221,42 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     setFoundKnown(hits)
     if (hits.length) return setFindStatus('Déjà disponible : utilisez-le directement depuis la palette, ou cherchez quand même sa documentation.')
     setFinding(true)
-    setFindStatus('Recherche de la documentation officielle…')
+    setReport('')
+    const brand = fBrand.trim()
+    const model = fModel.trim()
+    const started = clock()
     try {
-      const docs = await findDocs(fBrand.trim(), fModel.trim())
-      setFound(docs)
-      await analyseDocs(docs)
+      const ai = await import('./ai')
+      const { readProduct } = await import('./addProduct')
+      const p = await readProduct(brand, model, BRANDS, setFindStatus, {
+        readSheet: async (text, pdf, device) =>
+          (await ai.extractAuto({ text, pdf, device, personalKey: geminiKey, personalModel: geminiModel, allowChrome, onProgress: setFindStatus })).result,
+      })
+      setFound(p.docs)
+      setUsed(p.sources)
+      setText(p.read?.text ?? '')
+      setFile(p.read?.pdf)
+      setPhotos([])
+      setPhotoStatus('')
+      const rows = p.checked.map(({ quote, doubts, ...g }) => row({ ...g, ai: true, doubts, single: p.readings < 2, evidence: quote ? [quote] : undefined }))
+      const doubtful = p.checked.filter((g) => g.doubts.length).length
+      // Only a product confirmed row by row by two readings is shared with everyone without a second look.
+      setDraft({ ...fromResult(p.result, rows), brand: brand || p.result.brand || '', model, found: { url: p.sources[0]?.url ?? '', share: doubtful === 0 && p.readings > 1 } })
+      setSuggestions(p.suggestions.map(({ quote, ...g }) => row({ ...g, evidence: quote ? [quote] : undefined })))
+      setReport(p.report)
+      const seconds = Math.max(1, Math.round((clock() - started) / 1000))
+      const summary =
+        p.readings < 2
+          ? `${p.checked.length} groupe(s) de connectique en ${seconds} s, lus par une seule source (${p.result.by}) : relisez la liste en entier, corrigez, puis enregistrez.`
+          : `${p.checked.length} groupe(s) de connectique en ${seconds} s (${p.result.by}) : ${p.checked.length - doubtful} confirmé(s) par deux lectures` +
+            (doubtful ? `, ${doubtful} à vérifier en orange. Corrigez-les, puis enregistrez.` : '. Vérifiez d’un coup d’œil, puis enregistrez.')
+      setFindStatus(summary)
+      setStatus(summary)
+      setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+      const page = p.docs.find((d) => d.kind === 'page' && d.official)
+      void (p.read?.images.length ? Promise.resolve(p.read.images) : page ? pageImages(page.url, model) : Promise.resolve([])).then(loadPhotos)
     } catch (e) {
-      setFindStatus(`Recherche impossible : ${(e as Error).message}`)
+      setFindStatus(`Recherche impossible : ${(e as Error).message}. Déposez la fiche du produit ci-dessous, ou créez-le à la main.`)
     } finally {
       setFinding(false)
     }
@@ -844,7 +875,7 @@ function RowNotes({ r }: { r: Row }) {
     return (
       <details className="evidence">
         <summary>
-          <span className="ai">IA</span> {doubts.length ? <span className="doubt">à vérifier</span> : <span className="sure">confirmé par la fiche</span>}
+          <span className="ai">IA</span> {doubts.length ? <span className="doubt">à vérifier</span> : r.single ? <span>à relire</span> : <span className="sure">confirmé</span>}
           {doubts.length > 0 && ` · ${doubts.join(' · ')}`}
           {r.note && <span className="fixed"> · corrigé : {r.note}</span>}
         </summary>
