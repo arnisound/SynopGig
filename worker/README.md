@@ -106,6 +106,14 @@ l’arrêter (clé gardée dans ce navigateur). 2 Mo maximum par projet, conserv
 d’un an après la dernière mise à jour. Aucun réglage en plus : recollez simplement le
 nouveau `library.js` et *Deploy*.
 
+## Vérifications par les techniciens
+
+Chaque matériel USER peut être **vérifié** (✓) ou **signalé** (⚠, avec une courte note
+visible par tous) depuis la bibliothèque : `POST /<id>/check`. Une voix par navigateur
+(identifiant aléatoire, gardé seulement sous forme d’empreinte), qu’on peut changer ;
+les 5 derniers signalements sont affichés. Deux écritures KV par vote. Recollez
+`library.js` et *Deploy*, rien d’autre à régler.
+
 ## Modération
 
 Chaque matériel est une clé `entry:user-…` dans *KV* → `SYNOPGIG_LIBRARY`. Pour en retirer

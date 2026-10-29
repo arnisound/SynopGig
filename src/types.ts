@@ -143,6 +143,9 @@ export interface DeviceTemplate extends ProductInfo {
   family?: string
   /** Pseudo of the user who shared it (USER library). */
   author?: string
+  /** USER library: technicians who confirmed it, and the latest error reports. */
+  checks?: number
+  reports?: { note: string; at: string }[]
   /** Height in rack units, if the device is rackable. */
   rackU?: number
   /** Weight in kg, used for flight case packing. */

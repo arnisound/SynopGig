@@ -140,3 +140,36 @@ describe('product sheets', async () => {
     expect(out).toMatchObject({ description: 'Enceinte bdeux/b voies.', url: 'https://www.fohhn.com/en/catalog/pt-70', specs: [['Physique', 'Poids', '39', 'kg']], docs: [['Fiche', 'https://www.fohhn.com/pt-70.pdf']] })
   })
 })
+
+describe('checks by technicians', () => {
+  const A = 'voter-aaaaaaaaaaaaaaaa'
+  const B = 'voter-bbbbbbbbbbbbbbbb'
+
+  it('counts one vote per browser and keeps the latest reports', async () => {
+    const env = { LIBRARY: memoryKv() }
+    const { entry } = await (await send(env, 'POST', '/', { model, pseudo: 'a' })).json()
+    const check = (body) => send(env, 'POST', `/${entry.id}/check`, body)
+    expect((await check({ voter: A, verdict: 'ok' })).status).toBe(200)
+    expect((await check({ voter: A, verdict: 'ok' })).status).toBe(200)
+    let r = await (await check({ voter: B, verdict: 'ok' })).json()
+    expect(r.entry.checks).toBe(2)
+    expect((await check({ voter: B, verdict: 'report' })).status).toBe(400)
+    r = await (await check({ voter: B, verdict: 'report', note: 'Il manque la sortie casque' })).json()
+    expect(r.entry.checks).toBe(1)
+    expect(r.entry.reports[0].note).toBe('Il manque la sortie casque')
+    const listed = (await (await send(env, 'GET', '/')).json()).entries[0]
+    expect(listed.checks).toBe(1)
+    expect(entryToTemplate(listed)?.reports?.[0].note).toBe('Il manque la sortie casque')
+    // Changing one's mind removes one's report.
+    r = await (await check({ voter: B, verdict: 'ok' })).json()
+    expect(r.entry.checks).toBe(2)
+    expect(r.entry.reports).toBeUndefined()
+  })
+
+  it('refuses bad requests', async () => {
+    const env = { LIBRARY: memoryKv() }
+    expect((await send(env, 'POST', '/user-1/check', { voter: A, verdict: 'ok' })).status).toBe(404)
+    expect((await send(env, 'POST', '/user-1/check', { voter: 'x', verdict: 'ok' })).status).toBe(400)
+    expect((await send(env, 'POST', '/user-1/check', { voter: A, verdict: 'maybe' })).status).toBe(400)
+  })
+})

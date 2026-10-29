@@ -521,6 +521,15 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
       .catch((e) => setStatus(`Retrait impossible : ${e instanceof Error ? e.message : String(e)}`))
   }
 
+  const vote = (t: DeviceTemplate, verdict: 'ok' | 'report') => {
+    const note = verdict === 'report' ? prompt(`Qu’est-ce qui est faux sur « ${t.model} » ? (un port en trop, un connecteur, le poids…)`)?.trim() : undefined
+    if (verdict === 'report' && !note) return
+    userLibrary
+      .check(t.id, verdict, note)
+      .then(() => setStatus(verdict === 'ok' ? `Merci : « ${t.model} » compte une vérification de plus.` : `Merci : le signalement sur « ${t.model} » est visible par tous, et par son auteur.`))
+      .catch((e) => setStatus(`Envoi impossible : ${e instanceof Error ? e.message : String(e)}`))
+  }
+
   const remove = (t: DeviceTemplate) => {
     if (!confirm(`Supprimer « ${t.model} » de votre bibliothèque ? Les appareils déjà placés restent sur le synoptique.`)) return
     setProject((p) => ({ ...p, customTemplates: p.customTemplates.filter((x) => x.id !== t.id) }))
@@ -592,8 +601,27 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
               <button className="palette-item" title="Copier dans ma bibliothèque pour le modifier" onClick={() => { setDraft(fromTemplate(t, false)); setSuggestions([]); setStatus(`Copie de ${t.model} (par ${t.author}) : modifiez-la puis enregistrez.`) }}>
                 <span className="dot" style={{ background: CATEGORY_COLORS[t.category] }} />
                 <span>{t.brand ? <b>{t.brand} </b> : null}{t.model}</span>
-                <small>par {t.author} · {t.ports.length} ports</small>
+                <small>
+                  par {t.author} · {t.ports.length} ports
+                  {t.checks ? <span className="checked"> · ✓ vérifié par {t.checks} technicien{t.checks > 1 ? 's' : ''}</span> : null}
+                  {t.reports?.length ? <span className="reported"> · ⚠ {t.reports.length} signalement{t.reports.length > 1 ? 's' : ''}</span> : null}
+                </small>
+                {t.reports?.map((r, i) => <small key={i} className="report-note">⚠ {r.note}</small>)}
               </button>
+              {!userLibrary.isMine(t.id) && (
+                <>
+                  <button
+                    className={`icon ${userLibrary.voteOf(t.id) === 'ok' ? 'active' : ''}`}
+                    title="Je l’ai vérifié : ports et fiche sont justes"
+                    onClick={() => vote(t, 'ok')}
+                  >
+                    ✓
+                  </button>
+                  <button className={`icon ${userLibrary.voteOf(t.id) === 'report' ? 'active' : ''}`} title="Signaler une erreur" onClick={() => vote(t, 'report')}>
+                    ⚠
+                  </button>
+                </>
+              )}
               {userLibrary.isMine(t.id) && (
                 <button className="icon" title="Retirer de la bibliothèque USER (partagé par vous)" onClick={() => unshare(t)}>
                   ×

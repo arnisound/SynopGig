@@ -27,6 +27,27 @@ const writeKeys = (keys: Record<string, string>) => {
   }
 }
 
+// This browser's anonymous voter id (the server keeps it only hashed) and its votes.
+const VOTER = 'synopgig.voter'
+const VOTES = 'synopgig.votes'
+type Verdict = 'ok' | 'report'
+function voterId() {
+  try {
+    let v = localStorage.getItem(VOTER)
+    if (!v) localStorage.setItem(VOTER, (v = crypto.randomUUID()))
+    return v
+  } catch {
+    return crypto.randomUUID()
+  }
+}
+const readVotes = (): Record<string, Verdict> => {
+  try {
+    return JSON.parse(localStorage.getItem(VOTES) ?? '{}') ?? {}
+  } catch {
+    return {}
+  }
+}
+
 async function call(url: string, init: RequestInit) {
   const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json' } })
   const data = await res.json().catch(() => ({}))
@@ -58,6 +79,7 @@ export function useUserLibrary() {
   const [templates, setTemplates] = useState<DeviceTemplate[]>([])
   const [status, setStatus] = useState<'loading' | 'live' | 'offline'>('loading')
   const [keys, setKeys] = useState(readKeys)
+  const [votes, setVotes] = useState(readVotes)
 
   useEffect(() => {
     let cancelled = false
@@ -110,7 +132,24 @@ export function useUserLibrary() {
     [keys],
   )
 
-  return { templates, status, share, remove, isMine: (id: string) => id in keys }
+  /** A technician confirms the model, or reports what is wrong with it. */
+  const check = useCallback(async (id: string, verdict: Verdict, note?: string) => {
+    if (!LIBRARY_URL) throw new Error('la bibliothèque USER n’est pas disponible sur cette version.')
+    const { entry } = (await call(`${LIBRARY_URL}/${encodeURIComponent(id)}/check`, { method: 'POST', body: JSON.stringify({ voter: voterId(), verdict, note }) })) as { entry: UserEntry }
+    const t = entryToTemplate(entry, `${LIBRARY_URL}/img/`)
+    setTemplates((list) => list.map((x) => (x.id === id ? { ...x, checks: t?.checks, reports: t?.reports } : x)))
+    setVotes((v) => {
+      const next = { ...v, [id]: verdict }
+      try {
+        localStorage.setItem(VOTES, JSON.stringify(next))
+      } catch {
+        // The vote counts on the server all the same.
+      }
+      return next
+    })
+  }, [])
+
+  return { templates, status, share, remove, check, voteOf: (id: string): Verdict | undefined => votes[id], isMine: (id: string) => id in keys }
 }
 
 export type UserLibrary = ReturnType<typeof useUserLibrary>

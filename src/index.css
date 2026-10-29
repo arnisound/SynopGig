@@ -124,6 +124,10 @@ main { flex: 1; min-height: 0; overflow: auto; }
 }
 .palette-item:hover { background: var(--bg); }
 .palette-item small { grid-column: 2; color: var(--muted); font-size: 11px; }
+.checked { color: var(--ok); }
+.reported, .report-note { color: var(--accent); }
+.report-note { grid-column: 2; }
+.icon.active { color: var(--ok); }
 .block-item { display: flex; align-items: center; }
 .block-item .palette-item { grid-template-columns: 1fr; }
 .block-item .palette-item small { grid-column: 1; }

@@ -39,6 +39,8 @@ export interface UserEntry extends Omit<SharedModel, 'v'> {
   createdAt: string
   /** A product photo is stored with it (served at <library>/img/<id>). */
   image?: boolean
+  checks?: number
+  reports?: { note: string; at: string }[]
 }
 
 export interface UserLibraryFile {
@@ -159,6 +161,16 @@ export function toGroups(tuples: GroupTuple[]): PortGroup[] {
   return tuples.map(([prefix, count, connector, signal, dir]) => ({ prefix, count, connector, signal, dir }))
 }
 
+/** The technicians' checks of an entry, as plain counts and texts. */
+function checksOf(e: UserEntry): Pick<DeviceTemplate, 'checks' | 'reports'> {
+  const checks = typeof e.checks === 'number' && e.checks > 0 ? Math.min(Math.round(e.checks), 100000) : undefined
+  const reports = (Array.isArray(e.reports) ? e.reports : [])
+    .slice(0, 5)
+    .filter((r) => r && typeof r.note === 'string' && r.note.trim())
+    .map((r) => ({ note: r.note.slice(0, 300), at: typeof r.at === 'string' ? r.at.slice(0, 30) : '' }))
+  return { ...(checks ? { checks } : {}), ...(reports.length ? { reports } : {}) }
+}
+
 /** A USER entry as a palette template; invalid entries are dropped. */
 export function entryToTemplate(e: UserEntry, imageBase?: string): DeviceTemplate | undefined {
   const v = validateShared({ ...e, v: 1 })
@@ -175,5 +187,6 @@ export function entryToTemplate(e: UserEntry, imageBase?: string): DeviceTemplat
     author: cleanPseudo(e.author) || 'anonyme',
     image: e.image === true && imageBase ? `${imageBase}${String(e.id)}` : undefined,
     ...cleanInfo(v.value as unknown as Record<string, unknown>),
+    ...checksOf(e),
   }
 }

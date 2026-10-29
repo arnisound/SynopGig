@@ -11,6 +11,8 @@
  *   GET /img/<id>    the product photo of a shared model
  *   POST /           share one piece of equipment, with the creator's pseudo
  *   DELETE /<id>     remove it again (only with the key given to its creator)
+ *   POST /<id>/check a technician confirms it ({verdict: "ok"}) or reports an
+ *                    error ({verdict: "report", note}); one vote per browser
  *   POST /projects       publish a read-only copy of a project, returns its link id
  *   GET /projects/<id>   read it (anyone with the link)
  *   PUT /projects/<id>   update it, DELETE /projects/<id> remove it (creator's key)
@@ -143,6 +145,37 @@ async function removeEntry(kv, id, token) {
   return { status: 200, data: { ok: true } }
 }
 
+const MAX_VOTERS = 2000
+const MAX_REPORTS = 5
+
+/**
+ * A technician's verdict on a shared model. The browser's random voter id is
+ * kept only hashed and shortened; voting again replaces the earlier vote.
+ * The list everyone loads is patched in place (two writes, no listing).
+ */
+async function checkEntry(kv, id, body) {
+  const verdict = body?.verdict
+  const voter = typeof body?.voter === 'string' && /^[A-Za-z0-9-]{16,64}$/.test(body.voter) ? body.voter : ''
+  if (!/^user-\d+$/.test(id) || !voter || !['ok', 'report'].includes(verdict)) return { status: 400, error: 'Requête refusée.' }
+  const note = clean(body?.note, 300)
+  if (verdict === 'report' && !note) return { status: 400, error: 'Dites en quelques mots ce qui est faux.' }
+  const stored = await kv.get(`entry:${id}`, 'json')
+  if (!stored) return { status: 404, error: 'Ce matériel n’est plus partagé.' }
+  const voters = stored.voters ?? {}
+  const key = (await sha256(`${id}:${voter}`)).slice(0, 12)
+  if (!(key in voters) && Object.keys(voters).length >= MAX_VOTERS) return { status: 507, error: 'Trop de votes sur ce matériel.' }
+  voters[key] = verdict
+  const entry = { ...stored.entry, checks: Object.values(voters).filter((v) => v === 'ok').length }
+  // A report is replaced by the same voter's newer one; the latest few are shown.
+  const reports = (entry.reports ?? []).filter((r) => r.by !== key)
+  entry.reports = verdict === 'report' ? [{ note, at: new Date().toISOString(), by: key }, ...reports].slice(0, MAX_REPORTS) : reports
+  if (!entry.reports.length) delete entry.reports
+  await kv.put(`entry:${id}`, JSON.stringify({ ...stored, entry, voters }))
+  const all = await readLibrary(kv)
+  await kv.put('all', JSON.stringify(all.map((e) => (e.id === id ? entry : e))))
+  return { status: 200, data: { entry } }
+}
+
 /* ---------- Shared projects (read-only links) ---------- */
 
 const MAX_PROJECT = 2_000_000
@@ -246,9 +279,11 @@ async function handle(request, env, path, reply, fail, allowed) {
   const r =
     request.method === 'POST' && path === ''
       ? await shareEntry(kv, body)
-      : request.method === 'DELETE'
-        ? await removeEntry(kv, path.slice(1), body?.token)
-        : { status: 405, error: 'Méthode non prise en charge.' }
+      : request.method === 'POST' && path.endsWith('/check')
+        ? await checkEntry(kv, path.slice(1, -'/check'.length), body)
+        : request.method === 'DELETE'
+          ? await removeEntry(kv, path.slice(1), body?.token)
+          : { status: 405, error: 'Méthode non prise en charge.' }
   return r.data ? reply(r.data) : fail(r.error, r.status)
 }
 

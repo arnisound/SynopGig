@@ -83,6 +83,8 @@ export default function Palette({ templates, onAdd, onNew, recent = [], blocks =
         {t.panel ? `${t.panel.holes.filter((h) => h.connector).length} connecteurs` : `${t.ports.length} port${t.ports.length > 1 ? 's' : ''}`}
         {t.rackU ? ` · ${t.rackU}U` : ''}
         {t.author ? ` · par ${t.author}` : ''}
+        {t.checks ? ` · ✓ ${t.checks}` : ''}
+        {t.reports?.length ? ' · ⚠' : ''}
       </small>
     </button>
   )
