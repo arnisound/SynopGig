@@ -226,6 +226,39 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     if (name) setBlocks([...blocks, makeBlock(project, sel.map((n) => n.id), name)])
   }
 
+  /** Copies the selected devices with the cables between them, a little lower right. */
+  const duplicate = () => {
+    const sel = nodes.filter((n) => n.selected)
+    if (!sel.length) return
+    const at = { x: Math.min(...sel.map((n) => n.position.x)) + 40, y: Math.min(...sel.map((n) => n.position.y)) + 40 }
+    setProject((p) => placeBlock(p, makeBlock(p, sel.map((n) => n.id), ''), at))
+  }
+  const findInput = useRef<HTMLInputElement>(null)
+  const duplicateRef = useRef(duplicate)
+  duplicateRef.current = duplicate
+  // Shortcuts: Ctrl/⌘+D duplicates the selection, Ctrl/⌘+F finds a cable, Échap deselects.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest('input, textarea, select, [contenteditable]')) return
+      const mod = e.ctrlKey || e.metaKey
+      if (mod && e.key.toLowerCase() === 'd') {
+        e.preventDefault()
+        duplicateRef.current()
+      } else if (mod && e.key.toLowerCase() === 'f') {
+        e.preventDefault()
+        findInput.current?.focus()
+      } else if (e.key === 'Escape') {
+        setProject((p) =>
+          p.nodes.some((n) => n.selected) || p.edges.some((x) => x.selected)
+            ? { ...p, nodes: p.nodes.map((n) => (n.selected ? { ...n, selected: false } : n)), edges: p.edges.map((x) => (x.selected ? { ...x, selected: false } : x)) }
+            : p,
+        )
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [setProject])
+
   const selectedNode = nodes.find((n) => n.selected)
   const selectedEdge = edges.find((e) => e.selected)
 
@@ -329,11 +362,12 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           </span>
           {nodes.some((n) => n.selected) && (
             <>
+              <button onClick={duplicate} title="Dupliquer la sélection avec ses câbles (Ctrl+D)">Dupliquer</button>
               <button onClick={createRackFromSelection}>Créer un rack avec la sélection</button>
               <button onClick={saveBlock} title="Garder ces équipements et leurs câbles pour les reposer dans un autre projet">Enregistrer en bloc</button>
             </>
           )}
-          <input className="cable-find" list="cable-ids" placeholder="Trouver un câble (C012)…" value={find} onChange={(e) => findCable(e.target.value)} />
+          <input ref={findInput} className="cable-find" list="cable-ids" title="Ctrl+F" placeholder="Trouver un câble (C012)…" value={find} onChange={(e) => findCable(e.target.value)} />
           <datalist id="cable-ids">
             {cables.map((c) => (
               <option key={c.edge.id} value={c.edge.data?.cableId}>{`${c.from?.data.name ?? '?'} → ${c.to?.data.name ?? '?'}`}</option>

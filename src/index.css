@@ -744,9 +744,14 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .port-side .count { margin-left: 4px; font-size: 10px; padding: 0 6px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); font-weight: 400; }
 .small-btn { font-size: 11px; padding: 3px 7px; }
 .drop-hint { padding: 6px 0; text-align: center; }
-.port-row { display: grid; grid-template-columns: 14px 10px 1fr auto; grid-template-areas: 'grip dot name actions' 'meta meta meta meta'; gap: 3px 4px; align-items: center; padding: 4px 2px; border-top: 1px solid var(--border); }
+.port-row { display: grid; grid-template-columns: 14px 16px 10px 1fr auto; grid-template-areas: 'grip pick dot name actions' 'meta meta meta meta meta'; gap: 3px 4px; align-items: center; padding: 4px 2px; border-top: 1px solid var(--border); }
 .port-row .grip { grid-area: grip; cursor: grab; color: var(--muted); font-size: 11px; letter-spacing: -2px; user-select: none; }
 .port-row .dot { grid-area: dot; }
+.port-row .pick { grid-area: pick; margin: 0; width: 14px; height: 14px; }
+/* Up and down arrows for fingers; a mouse drags. */
+@media (pointer: fine) { .port-row .step { display: none; } }
+.ports-bulk { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 6px; border-radius: 8px; background: color-mix(in srgb, var(--accent) 12%, var(--panel)); border: 1px solid var(--accent); }
+.ports-bulk select { font-size: 11px; padding: 2px 3px; max-width: 120px; }
 .port-row .port-name { grid-area: name; min-width: 0; padding: 3px 6px; }
 .port-row select { min-width: 0; font-size: 11px; padding: 2px 3px; }
 .port-row .port-actions { grid-area: actions; display: flex; gap: 0; }
@@ -754,10 +759,10 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .port-row.dragging { opacity: 0.4; }
 .port-row.over { box-shadow: inset 0 2px 0 var(--accent); }
 /* Narrow panel: the three menus go under the name. */
-.port-row .port-meta { grid-column: 1 / -1; display: grid; grid-template-columns: 0.8fr 1.3fr 1fr; gap: 3px; padding-left: 28px; }
+.port-row .port-meta { grid-column: 1 / -1; display: grid; grid-template-columns: 0.8fr 1.3fr 1fr; gap: 3px; padding-left: 46px; }
 /* Wide panel: everything on one line. */
 @container (min-width: 520px) {
-  .port-row { grid-template-columns: 14px 10px minmax(90px, 1.3fr) minmax(250px, 2.4fr) auto; grid-template-areas: 'grip dot name meta actions'; }
+  .port-row { grid-template-columns: 14px 16px 10px minmax(90px, 1.3fr) minmax(250px, 2.4fr) auto; grid-template-areas: 'grip pick dot name meta actions'; }
   .port-row .port-meta { grid-area: meta; grid-template-columns: 78px 1.3fr 1fr; padding-left: 0; }
 }
 .device-sheet .sheet-head h3 { font-size: 15px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

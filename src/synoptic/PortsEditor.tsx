@@ -19,6 +19,7 @@ export default function PortsEditor({ ports, onChange }: { ports: Port[]; onChan
   const [dragged, setDragged] = useState<string>()
   const [over, setOver] = useState<string>()
   const [closed, setClosed] = useState<Set<Side>>(new Set())
+  const [picked, setPicked] = useState<Set<string>>(new Set())
   const sides = portSides(ports)
   const sideOf = (p: Port): Side => (sides.left.includes(p) ? 'left' : 'right')
 
@@ -39,6 +40,22 @@ export default function PortsEditor({ ports, onChange }: { ports: Port[]; onChan
     onChange([...rest.slice(0, at), placed, ...rest.slice(at)])
   }
 
+  /** One place up or down on its side, for touch screens where dragging is awkward. */
+  const step = (p: Port, side: Side, delta: -1 | 1) => {
+    const list = side === 'left' ? sides.left : sides.right
+    const i = list.indexOf(p)
+    const other = list[i + delta]
+    if (!other) return
+    const rest = ports.filter((x) => x.id !== p.id)
+    const at = rest.indexOf(other) + (delta > 0 ? 1 : 0)
+    onChange([...rest.slice(0, at), { ...p, side }, ...rest.slice(at)])
+  }
+
+  // Several ports picked: change them together.
+  const live = ports.filter((p) => picked.has(p.id))
+  const setPicked2 = (patch: Partial<Port>) => onChange(ports.map((p) => (picked.has(p.id) ? { ...p, ...patch } : p)))
+  const togglePick = (id: string) => setPicked((s) => (s.has(id) ? new Set([...s].filter((x) => x !== id)) : new Set([...s, id])))
+
   const sortSide = (side: Side) => {
     const mine = (side === 'left' ? sides.left : sides.right).slice().sort(natural)
     let k = 0
@@ -58,6 +75,35 @@ export default function PortsEditor({ ports, onChange }: { ports: Port[]; onChan
 
   return (
     <div className="ports-editor">
+      {live.length > 0 && (
+        <div className="ports-bulk">
+          <b>{live.length} port{live.length > 1 ? 's' : ''}</b>
+          <select aria-label="Sens des ports choisis" value="" onChange={(e) => e.target.value && setPicked2({ dir: e.target.value as PortDirection })}>
+            <option value="">Sens…</option>
+            {Object.entries(DIRS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+          <select aria-label="Signal des ports choisis" value="" onChange={(e) => e.target.value && setPicked2({ signal: e.target.value as SignalType })}>
+            <option value="">Signal…</option>
+            {SIGNAL_OPTIONS.map((k) => <option key={k} value={k}>{SIGNALS[k].label}</option>)}
+          </select>
+          <select aria-label="Connecteur des ports choisis" value="" onChange={(e) => e.target.value && setPicked2({ connector: e.target.value as ConnectorType })}>
+            <option value="">Connecteur…</option>
+            {CONNECTOR_OPTIONS.map((k) => <option key={k} value={k}>{CONNECTORS[k]}</option>)}
+          </select>
+          <button className="small-btn" onClick={() => setPicked2({ side: 'left' })}>← Gauche</button>
+          <button className="small-btn" onClick={() => setPicked2({ side: 'right' })}>Droite →</button>
+          <button
+            className="small-btn danger"
+            onClick={() => {
+              onChange(ports.filter((p) => !picked.has(p.id)))
+              setPicked(new Set())
+            }}
+          >
+            Supprimer
+          </button>
+          <button className="link" onClick={() => setPicked(new Set())}>Aucun</button>
+        </div>
+      )}
       {(['left', 'right'] as Side[]).map((side) => {
         const list = side === 'left' ? sides.left : sides.right
         const isClosed = closed.has(side)
@@ -104,6 +150,7 @@ export default function PortsEditor({ ports, onChange }: { ports: Port[]; onChan
                   onDrop={drop(side, p.id)}
                 >
                   <span className="grip" title="Glisser pour déplacer" aria-hidden>⋮⋮</span>
+                  <input type="checkbox" className="pick" aria-label={`Choisir ${p.label}`} checked={picked.has(p.id)} onChange={() => togglePick(p.id)} />
                   <span className="dot" style={{ background: SIGNALS[p.signal].color }} />
                   <input className="port-name" aria-label="Nom du port" value={p.label} onChange={(e) => set(p.id, { label: e.target.value })} />
                   <span className="port-meta">
@@ -118,6 +165,8 @@ export default function PortsEditor({ ports, onChange }: { ports: Port[]; onChan
                   </select>
                   </span>
                   <span className="port-actions">
+                    <button className="icon step" title="Monter" disabled={list[0] === p} onClick={() => step(p, side, -1)}>↑</button>
+                    <button className="icon step" title="Descendre" disabled={list[list.length - 1] === p} onClick={() => step(p, side, 1)}>↓</button>
                     <button className="icon" title={`Passer ${side === 'left' ? 'à droite' : 'à gauche'}`} onClick={() => move(p.id, side === 'left' ? 'right' : 'left')}>⇆</button>
                     <button
                       className="icon"
@@ -129,7 +178,16 @@ export default function PortsEditor({ ports, onChange }: { ports: Port[]; onChan
                     >
                       ⧉
                     </button>
-                    <button className="icon" title="Supprimer" onClick={() => onChange(ports.filter((x) => x.id !== p.id))}>×</button>
+                    <button
+                      className="icon"
+                      title="Supprimer"
+                      onClick={() => {
+                        onChange(ports.filter((x) => x.id !== p.id))
+                        if (picked.has(p.id)) togglePick(p.id)
+                      }}
+                    >
+                      ×
+                    </button>
                   </span>
                 </div>
               ))}

@@ -188,7 +188,7 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
         ) : (
           <>
             <p className="muted small">Comme sur la boîte du synoptique : glissez un port pour changer sa place ou son côté, ⇆ l’envoie en face. « Enregistrer comme modèle » garde ces réglages pour la suite.</p>
-            <PortsEditor ports={d.ports} onChange={(ports) => set({ ports })} />
+            <PortsEditor key={node.id} ports={d.ports} onChange={(ports) => set({ ports })} />
           </>
         ))}
 
