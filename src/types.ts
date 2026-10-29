@@ -130,6 +130,8 @@ export type ProductInfo = {
   url?: string
   specs?: Spec[]
   docs?: ProductDoc[]
+  /** Power drawn from the mains, in watts (for the power budget). */
+  watts?: number
 }
 
 export interface DeviceTemplate extends ProductInfo {
@@ -303,4 +305,8 @@ export interface Project {
   stage?: StagePlot
   /** Read-only link published from this project (its key stays in the browser). */
   share?: { id: string; updatedAt?: string }
+  /** Power budget: the phase of each power outlet ("nodeId:portId" → L1, L2, L3). */
+  power?: { phases?: Record<string, Phase> }
 }
+
+export type Phase = 'L1' | 'L2' | 'L3'

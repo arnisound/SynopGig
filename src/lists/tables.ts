@@ -1,6 +1,7 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { extId, intId } from '../data/panels'
 import { cableOn, internalRack, otherEnd, rackOfNode, resolveCables } from '../project'
+import { powerBudget, wattsOf } from '../power/power'
 import type { Project } from '../types'
 
 export type Cell = string | number | undefined
@@ -109,12 +110,34 @@ export function buildTables(project: Project): TableBlock[] {
       .map((n) => [n.data.config.dmxUniverse || '1', n.data.config.dmxAddress, n.data.name, n.data.model, n.data.config.mode, n.data.zone]),
   }
 
+  const power = (() => {
+    const b = powerBudget(project)
+    const head = ['Source', 'Départ', 'Phase', 'Équipements', 'Puissance (W)', 'Intensité (A)', 'Calibre (A)', 'Alertes']
+    const rows: Cell[][] = b.sources.flatMap((s) =>
+      s.outlets.map((o) => [
+        s.node.data.name,
+        o.port.label,
+        s.threePhase ? o.phase : 'mono',
+        o.fed.map((n) => n.data.name).join(', '),
+        Math.round(o.watts),
+        o.amps.toFixed(1),
+        o.rating,
+        [o.load !== undefined && o.load > 1 ? 'surcharge' : o.load !== undefined && o.load > 0.8 ? 'peu de marge' : '', o.unknown.length ? `consommation inconnue : ${o.unknown.map((n) => n.data.name).join(', ')}` : '']
+          .filter(Boolean)
+          .join(' / '),
+      ]),
+    )
+    for (const n of b.unpowered) rows.push(['—', '—', '', n.data.name, wattsOf(n.data) ?? '', '', '', 'non alimenté sur le synoptique'])
+    return { head, rows }
+  })()
+
   const blocks: TableBlock[] = [
     { title: 'Liste de câbles', file: 'cables', alerts: true, ...cables },
     { title: 'Nomenclature', file: 'nomenclature', ...bom },
     { title: 'Plan d’adressage IP', file: 'ip', ...ips },
     { title: 'Patch DMX', file: 'dmx', ...dmx },
     { title: 'Bandeaux de câblage', file: 'bandeaux', ...panels },
+    { title: 'Bilan électrique', file: 'energie', alerts: true, ...power },
   ]
   return blocks
 }

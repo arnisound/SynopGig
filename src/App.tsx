@@ -5,6 +5,7 @@ import CaseEditor from './cases/CaseEditor'
 import { LIBRARY } from './data/library'
 import TechGuide from './guide/TechGuide'
 import LibraryPage from './library/LibraryPage'
+import PowerPage from './power/PowerPage'
 import { useUserLibrary } from './library/useUserLibrary'
 import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
@@ -18,13 +19,14 @@ import { demoProject, download, emptyProject, loadProject, parseProject, savePro
 import SynopticEditor from './synoptic/SynopticEditor'
 import type { Project } from './types'
 
-type Tab = 'synoptic' | 'patch' | 'stage' | 'racks' | 'guide' | 'lists' | 'cases' | 'library'
+type Tab = 'synoptic' | 'patch' | 'stage' | 'racks' | 'power' | 'guide' | 'lists' | 'cases' | 'library'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'synoptic', label: 'Synoptique' },
   { id: 'patch', label: 'Patch' },
   { id: 'stage', label: 'Plan de scène' },
   { id: 'racks', label: 'Racks' },
+  { id: 'power', label: 'Énergie' },
   { id: 'guide', label: 'Guide technicien' },
   { id: 'lists', label: 'Listes' },
   { id: 'cases', label: 'Flight cases' },
@@ -237,6 +239,7 @@ export default function App() {
           />
         )}
         {tab === 'lists' && <Lists project={project} />}
+        {tab === 'power' && <PowerPage project={project} setProject={setProject} />}
         {tab === 'cases' && <CaseEditor project={project} setProject={setProject} />}
         {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} />}
       </main>

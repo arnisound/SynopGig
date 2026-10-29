@@ -16,6 +16,7 @@ export const SECTIONS = [
   { id: 'ip', label: 'Plan d’adressage IP' },
   { id: 'dmx', label: 'Patch DMX' },
   { id: 'panels', label: 'Bandeaux de câblage' },
+  { id: 'power', label: 'Bilan électrique' },
   { id: 'racks', label: 'Racks (faces avant et arrière)' },
   { id: 'cases', label: 'Flight cases et bandeaux' },
   { id: 'guide', label: 'Guide technicien (feuille de montage)' },

@@ -16,7 +16,7 @@ import Page from './PrintPage'
 import SynopticPages, { type SynopticMode } from './SynopticPages'
 import DeviceArt from '../ui/DeviceArt'
 
-const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux' }
+const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux', power: 'energie' }
 
 function Table({ block }: { block: Pick<TableBlock, 'head' | 'rows'> }) {
   return (
@@ -211,6 +211,7 @@ export default function Dossier({
       {table('ip')}
       {table('dmx')}
       {table('panels')}
+      {table('power')}
 
       {has('racks') &&
         racks.map((r) => {

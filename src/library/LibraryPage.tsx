@@ -98,6 +98,7 @@ const fromTemplate = (t: DeviceTemplate, keepId: boolean): Draft => ({
   url: t.url,
   specs: t.specs,
   docs: t.docs,
+  watts: t.watts,
 })
 
 const fromResult = (r: AiResult, rows: Row[]): Draft => ({
@@ -473,6 +474,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     url: d.url?.trim() || undefined,
     specs: d.specs?.filter((s) => s.label.trim() && s.value.trim()),
     docs: d.docs?.filter((x) => x.url.trim()),
+    watts: d.watts || undefined,
   })
 
   const save = () => {
@@ -807,6 +809,10 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
               <label className="field narrow">
                 <span>Poids (kg)</span>
                 <input type="number" min={0} step={0.1} value={draft.weight ?? ''} onChange={(e) => set({ weight: e.target.value ? Number(e.target.value) : undefined })} />
+              </label>
+              <label className="field narrow">
+                <span>Conso. (W)</span>
+                <input type="number" min={0} value={draft.watts ?? ''} onChange={(e) => set({ watts: e.target.value ? Number(e.target.value) : undefined })} />
               </label>
             </div>
             <label className="field">

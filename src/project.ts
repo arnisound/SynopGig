@@ -46,6 +46,7 @@ export function createDevice(
       url: template.url,
       specs: template.specs && structuredClone(template.specs),
       docs: template.docs && structuredClone(template.docs),
+      watts: template.watts,
     },
   }
 }
