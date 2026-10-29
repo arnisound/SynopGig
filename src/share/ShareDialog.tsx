@@ -1,11 +1,25 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { projectChanges } from './changes'
 import type { Project } from '../types'
-import { publish, shareKey, shareLink, unpublish } from './share'
+import { publish, sentCopy, shareKey, shareLink, unpublish } from './share'
 
 interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
   onClose: () => void
+}
+
+/** A list of changes, folded when long. */
+export function ChangeList({ changes, title }: { changes: string[]; title: string }) {
+  if (!changes.length) return <p className="muted small">{title}</p>
+  return (
+    <details className="changes" open={changes.length <= 6}>
+      <summary>{title}</summary>
+      <ul>
+        {changes.map((c, i) => <li key={i}>{c}</li>)}
+      </ul>
+    </details>
+  )
 }
 
 /** Creates or updates the read-only link of the project, for the crew. */
@@ -15,6 +29,8 @@ export default function ShareDialog({ project, setProject, onClose }: Props) {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
   const link = id ? shareLink(id) : ''
+  const [sent, setSent] = useState(() => (mine && id ? sentCopy(id) : null))
+  const changes = useMemo(() => (sent ? projectChanges(sent, project) : undefined), [sent, project])
 
   const run = async () => {
     setBusy(true)
@@ -22,6 +38,7 @@ export default function ShareDialog({ project, setProject, onClose }: Props) {
     try {
       const r = await publish(project)
       setProject((p) => ({ ...p, share: { id: r.id, updatedAt: r.updatedAt } }))
+      setSent(sentCopy(r.id))
       setStatus(mine ? 'Lien mis à jour : l’équipe voit la nouvelle version en rouvrant le lien.' : 'Lien créé : envoyez-le à l’équipe.')
     } catch (e) {
       setStatus(`Partage impossible : ${e instanceof Error ? e.message : String(e)}`)
@@ -75,6 +92,9 @@ export default function ShareDialog({ project, setProject, onClose }: Props) {
             </div>
             {project.share?.updatedAt && <p className="muted small">Version partagée du {new Date(project.share.updatedAt).toLocaleString('fr-FR')}.</p>}
           </>
+        )}
+        {changes && (
+          <ChangeList changes={changes} title={changes.length ? `${changes.length} changement${changes.length > 1 ? 's' : ''} pas encore envoyé${changes.length > 1 ? 's' : ''}` : 'L’équipe a la dernière version.'} />
         )}
         {id && !mine && <p className="muted small">Ce lien a été créé depuis un autre navigateur : vous pouvez en créer un nouveau d’ici.</p>}
         {status && <p className="small status-line">{status}</p>}

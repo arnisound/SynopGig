@@ -10,6 +10,8 @@ import type { Project } from '../types'
 
 const KEYS = 'synopgig.shareKeys'
 const SHARED = 'synopgig.shared.'
+/** The copy last sent from this browser, to show what changed since. */
+const SENT = 'synopgig.sent.'
 
 /** What a link opens straight away: a flight case, or a device on the synoptic (labels' QR codes). */
 export type ShareTarget = { kind: 'case' | 'device'; id: string }
@@ -65,15 +67,29 @@ function publishable(p: Project): Project {
 export async function publish(p: Project): Promise<{ id: string; updatedAt: string }> {
   const id = p.share?.id
   const token = id ? shareKey(id) : undefined
-  if (id && token) return call(`/projects/${id}`, { method: 'PUT', body: JSON.stringify({ project: publishable(p), token }) })
-  const r = await call('/projects', { method: 'POST', body: JSON.stringify({ project: publishable(p) }) })
+  const copy = publishable(p)
+  if (id && token) {
+    const r = await call(`/projects/${id}`, { method: 'PUT', body: JSON.stringify({ project: copy, token }) })
+    store.set(SENT + id, copy)
+    return r
+  }
+  const r = await call('/projects', { method: 'POST', body: JSON.stringify({ project: copy }) })
   store.set(KEYS, { ...store.get<Record<string, string>>(KEYS, {}), [r.id]: r.token })
+  store.set(SENT + r.id, copy)
   return { id: r.id, updatedAt: r.updatedAt }
 }
 
 export async function unpublish(id: string) {
   await call(`/projects/${id}`, { method: 'DELETE', body: JSON.stringify({ token: shareKey(id) }) })
+  try {
+    localStorage.removeItem(SENT + id)
+  } catch {
+    // Nothing to forget.
+  }
 }
+
+/** The version last sent from this browser. */
+export const sentCopy = (id: string) => store.get<Project | null>(SENT + id, null)
 
 type Stored = { project: Project; updatedAt: string }
 

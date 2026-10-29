@@ -10,8 +10,9 @@ import { useUserLibrary } from './library/useUserLibrary'
 import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
 import LabelsDialog from './labels/LabelsDialog'
+import { projectChanges } from './share/changes'
 import { cachedShared, fetchShared, saveSharedProgress, sharedIdFromHash, sharedTargetFromHash, sharedProgress } from './share/share'
-import ShareDialog from './share/ShareDialog'
+import ShareDialog, { ChangeList } from './share/ShareDialog'
 import StagePage from './stage/StagePage'
 import { applyTheme, readTheme, THEME_LABELS, type Theme } from './theme'
 import Lists from './lists/Lists'
@@ -47,7 +48,7 @@ function initialProject(): Project {
 
 export default function App() {
   const [project, setProject] = useState<Project>(initialProject)
-  const [shared, setShared] = useState<{ status: 'loading' | 'ready' | 'error'; updatedAt?: string; error?: string }>(() => ({
+  const [shared, setShared] = useState<{ status: 'loading' | 'ready' | 'error'; updatedAt?: string; error?: string; changes?: string[] }>(() => ({
     status: SHARED_ID && cachedShared(SHARED_ID) ? 'ready' : 'loading',
     updatedAt: SHARED_ID ? cachedShared(SHARED_ID)?.updatedAt : undefined,
   }))
@@ -74,10 +75,16 @@ export default function App() {
 
   const loadShared = useCallback(() => {
     if (!SHARED_ID) return
+    // The copy read last time: the crew sees what changed since.
+    const before = cachedShared(SHARED_ID)
     fetchShared(SHARED_ID)
       .then((r) => {
         setProject({ ...emptyProject(), ...r.project, progress: sharedProgress(SHARED_ID) })
-        setShared({ status: 'ready', updatedAt: r.updatedAt })
+        setShared((s) => ({
+          status: 'ready',
+          updatedAt: r.updatedAt,
+          changes: before && before.updatedAt !== r.updatedAt ? projectChanges({ ...emptyProject(), ...before.project }, { ...emptyProject(), ...r.project }) : s.changes,
+        }))
       })
       .catch((e) => setShared((s) => ({ ...s, status: s.updatedAt ? 'ready' : 'error', error: e instanceof Error ? e.message : String(e) })))
   }, [])
@@ -222,6 +229,9 @@ export default function App() {
               <b>Projet partagé, lecture seule</b>
               {shared.updatedAt && ` · version du ${new Date(shared.updatedAt).toLocaleDateString('fr-FR')}`}
               {shared.error && ' · hors ligne (dernière version lue)'} · seules vos cases cochées du guide sont gardées.
+              {!!shared.changes?.length && (
+                <ChangeList changes={shared.changes} title={`Mis à jour depuis votre dernière lecture : ${shared.changes.length} changement${shared.changes.length > 1 ? 's' : ''}`} />
+              )}
             </>
           )}
         </div>
