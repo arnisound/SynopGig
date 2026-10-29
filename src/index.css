@@ -764,3 +764,31 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .load.over > span { background: var(--danger); }
 .load b { position: relative; font-size: 10px; padding-left: 4px; }
 .missing-watts { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+
+/* Labels: on screen nothing, printed on A4 with cut lines. */
+.labels-print { display: none; }
+.toggle.sub { padding-left: 22px; }
+@media print {
+  body.printing-labels #root { display: none !important; }
+  body.printing-labels .labels-print { display: block; }
+  .labels-print { font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
+  .label-grid { display: grid; gap: 0; break-after: page; }
+  .label-grid:last-child { break-after: auto; }
+  .label { border: 0.2mm dashed #999; padding: 2mm 3mm; overflow: hidden; break-inside: avoid; display: flex; }
+  .label-grid.cables { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 24mm; }
+  .cable-tag { flex-direction: column; justify-content: center; border-left: 3mm solid #888; font-size: 7.5pt; line-height: 1.25; }
+  .cable-tag b { font-size: 13pt; }
+  .cable-tag span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cable-tag small { color: #444; font-size: 6.5pt; }
+  .label-grid.devices { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 37mm; }
+  .thing-label { justify-content: space-between; align-items: center; gap: 2mm; font-size: 8pt; }
+  .thing-label > div { display: flex; flex-direction: column; min-width: 0; }
+  .thing-label b { font-size: 12pt; }
+  .thing-label .qr { flex: none; width: 24mm; height: 24mm; }
+  .label-grid.cases { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 70mm; }
+  .case-label { flex-direction: column; padding: 0; }
+  .case-band { font: bold 20pt Impact, 'Arial Black', sans-serif; padding: 3mm 4mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .case-body { flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 3mm 4mm; gap: 3mm; font-size: 10pt; }
+  .case-body > div { display: flex; flex-direction: column; gap: 1.5mm; }
+  .case-body .qr { flex: none; width: 36mm; height: 36mm; }
+}

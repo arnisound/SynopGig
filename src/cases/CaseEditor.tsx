@@ -45,11 +45,13 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
+  /** Case to show first (opened from a label's QR code). */
+  focusCase?: string
 }
 
-export default function CaseEditor({ project, setProject }: Props) {
+export default function CaseEditor({ project, setProject, focusCase }: Props) {
   const { cases, nodes } = project
-  const [selectedId, setSelectedId] = useState<string | undefined>(cases[0]?.id)
+  const [selectedId, setSelectedId] = useState<string | undefined>(focusCase ?? cases[0]?.id)
   const fc = cases.find((c) => c.id === selectedId) ?? cases[0]
 
   const update = (patch: Partial<FlightCase>) =>

@@ -11,8 +11,16 @@ import type { Project } from '../types'
 const KEYS = 'synopgig.shareKeys'
 const SHARED = 'synopgig.shared.'
 
-export const shareLink = (id: string) => `${location.origin}${location.pathname}#/p/${id}`
-export const sharedIdFromHash = (hash = location.hash) => hash.match(/^#\/p\/([A-Za-z0-9]{10})$/)?.[1]
+/** What a link opens straight away: a flight case, or a device on the synoptic (labels' QR codes). */
+export type ShareTarget = { kind: 'case' | 'device'; id: string }
+
+export const shareLink = (id: string, target?: ShareTarget) => `${location.origin}${location.pathname}#/p/${id}${target ? `/${target.kind}/${encodeURIComponent(target.id)}` : ''}`
+const HASH = /^#\/p\/([A-Za-z0-9]{10})(?:\/(case|device)\/([^/]+))?$/
+export const sharedIdFromHash = (hash = location.hash) => HASH.exec(hash)?.[1]
+export const sharedTargetFromHash = (hash = location.hash): ShareTarget | undefined => {
+  const m = HASH.exec(hash)
+  return m?.[2] ? { kind: m[2] as ShareTarget['kind'], id: decodeURIComponent(m[3]) } : undefined
+}
 
 const store = {
   get<T>(k: string, d: T): T {

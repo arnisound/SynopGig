@@ -106,6 +106,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const { cables, cableByEdge, used, viewEdges, viewNodes, frames } = useCanvasModel(project, highlight, hoverEdge)
 
 
+  // A shared project arrives after the page: frame its devices once they are there.
+  const focusReady = focus.some((id) => project.nodes.some((n) => n.id === id))
   useEffect(() => {
     if (focus.length === 0) return
     const nodeIds = new Set<string>()
@@ -120,7 +122,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     const t = setTimeout(() => fitView({ nodes: [...nodeIds].map((id) => ({ id })), duration: 500, padding: 0.4 }), 50)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focus])
+  }, [focus, focusReady])
 
   const framesRef = useRef(frames)
   framesRef.current = frames

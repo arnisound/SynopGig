@@ -9,7 +9,8 @@ import PowerPage from './power/PowerPage'
 import { useUserLibrary } from './library/useUserLibrary'
 import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
-import { cachedShared, fetchShared, saveSharedProgress, sharedIdFromHash, sharedProgress } from './share/share'
+import LabelsDialog from './labels/LabelsDialog'
+import { cachedShared, fetchShared, saveSharedProgress, sharedIdFromHash, sharedTargetFromHash, sharedProgress } from './share/share'
 import ShareDialog from './share/ShareDialog'
 import StagePage from './stage/StagePage'
 import { applyTheme, readTheme, THEME_LABELS, type Theme } from './theme'
@@ -35,6 +36,8 @@ const TABS: { id: Tab; label: string }[] = [
 
 /** Opened from a read-only link (#/p/<id>): the shared project, never the user's own. */
 const SHARED_ID = sharedIdFromHash()
+// A label's QR code opens one flight case or one device straight away.
+const TARGET = sharedTargetFromHash()
 
 function initialProject(): Project {
   if (!SHARED_ID) return loadProject()
@@ -49,8 +52,9 @@ export default function App() {
     updatedAt: SHARED_ID ? cachedShared(SHARED_ID)?.updatedAt : undefined,
   }))
   const [sharing, setSharing] = useState(false)
-  const [tab, setTab] = useState<Tab>('synoptic')
+  const [tab, setTab] = useState<Tab>(TARGET?.kind === 'case' ? 'cases' : 'synoptic')
   const [dossier, setDossier] = useState(false)
+  const [labels, setLabels] = useState(false)
   const [menu, setMenu] = useState(false)
   const [theme, setThemeState] = useState<Theme>(readTheme)
   const setTheme = (t: Theme) => {
@@ -58,7 +62,7 @@ export default function App() {
     setThemeState(t)
   }
   const nextTheme: Record<Theme, Theme> = { auto: 'light', light: 'dark', dark: 'auto' }
-  const [focus, setFocus] = useState<string[]>([])
+  const [focus, setFocus] = useState<string[]>(TARGET?.kind === 'device' ? [TARGET.id] : [])
   const fileInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -198,6 +202,7 @@ export default function App() {
             </>
           )}
           <button onClick={() => setDossier(true)} title="Dossier technique complet à imprimer ou en PDF">Dossier PDF</button>
+          <button onClick={() => setLabels(true)} title="Étiquettes de câbles, d’équipements et de flight cases, avec QR codes">Étiquettes</button>
           <button onClick={() => setTheme(nextTheme[theme])} title={`Thème : ${THEME_LABELS[theme]} (cliquer pour changer)`}>
             {theme === 'light' ? '☀ Clair' : theme === 'dark' ? '☾ Sombre' : '◐ Auto'}
           </button>
@@ -205,6 +210,7 @@ export default function App() {
         </div>
       </header>
       {dossier && <DossierDialog project={project} onClose={() => setDossier(false)} />}
+      {labels && <LabelsDialog project={project} onClose={() => setLabels(false)} onShare={SHARED_ID ? undefined : () => { setLabels(false); setSharing(true) }} />}
       {sharing && <ShareDialog project={project} setProject={setProject} onClose={() => setSharing(false)} />}
       {SHARED_ID && (
         <div className="shared-banner no-print">
@@ -240,7 +246,7 @@ export default function App() {
         )}
         {tab === 'lists' && <Lists project={project} />}
         {tab === 'power' && <PowerPage project={project} setProject={setProject} />}
-        {tab === 'cases' && <CaseEditor project={project} setProject={setProject} />}
+        {tab === 'cases' && <CaseEditor project={project} setProject={setProject} focusCase={TARGET?.kind === 'case' ? TARGET.id : undefined} />}
         {tab === 'library' && <LibraryPage project={project} setProject={setProject} userLibrary={userLibrary} />}
       </main>
     </div>
