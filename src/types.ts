@@ -78,6 +78,8 @@ export interface Port {
   face?: 'ext' | 'int'
   /** Patch panel ports: id of the other face of the same hole. */
   pair?: string
+  /** Side of the device box chosen by the user (else: inputs left, outputs right). */
+  side?: 'left' | 'right'
 }
 
 /** One D-series hole of a patch panel. */

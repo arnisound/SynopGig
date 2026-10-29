@@ -14,7 +14,7 @@ import {
   type NodeChange,
 } from '@xyflow/react'
 import { toPng } from 'html-to-image'
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { connectPorts, createCase, createDevice, setPanel, slug, uid } from '../project'
@@ -52,10 +52,46 @@ interface Props {
   userLibrary?: UserLibrary
 }
 
+const INSPECTOR_W = 340
+const INSPECTOR_MIN = 280
+const INSPECTOR_MAX = 820
+
 export default function SynopticEditor({ project, setProject, templates, focus, onOpenRacks, theme, onTheme, userLibrary }: Props) {
   const { screenToFlowPosition, fitView, getViewport } = useReactFlow()
   const { nodes, edges } = project
   const view = viewOf(project)
+  // Width of the inspector, chosen by dragging its edge, kept for the next visits.
+  const [inspectorW, setInspectorW] = useState(() => {
+    try {
+      return Math.min(INSPECTOR_MAX, Math.max(INSPECTOR_MIN, Number(localStorage.getItem('synopgig.inspector')) || INSPECTOR_W))
+    } catch {
+      return INSPECTOR_W
+    }
+  })
+  const saveInspectorW = (w: number) => {
+    setInspectorW(w)
+    try {
+      localStorage.setItem('synopgig.inspector', String(w))
+    } catch {
+      // Storage blocked: the width lasts for this visit only.
+    }
+  }
+  const startResize = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const startX = e.clientX
+    const startW = inspectorW
+    let w = startW
+    const move = (ev: PointerEvent) => {
+      w = Math.min(INSPECTOR_MAX, Math.max(INSPECTOR_MIN, startW + startX - ev.clientX))
+      setInspectorW(w)
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      saveInspectorW(w)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
   // "Ajouter un nouveau produit": made in a window over the synoptic; the newest ones head the palette.
   const [newProduct, setNewProduct] = useState<NewProductRequest>()
   const [creating, setCreating] = useState(false)
@@ -230,7 +266,9 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const issueCount = cables.filter((c) => c.issues.length > 0).length
 
   return (
-    <div className={`synoptic ${drawer ? `show-${drawer}` : ''}`}>
+    <div className={`synoptic ${drawer ? `show-${drawer}` : ''}`} style={{ '--inspector-w': `${inspectorW}px` } as CSSProperties}>
+      {/* Drag to widen the inspector; a double click brings it back to its usual width. */}
+      <div className="inspector-resize" title="Glisser pour élargir le panneau (double-clic : largeur d’origine)" onPointerDown={startResize} onDoubleClick={() => saveInspectorW(INSPECTOR_W)} />
       {/* Phones and tablets: the palette slides in from the left, the inspector rises from the bottom. */}
       {drawer && drawer !== 'legend' && <div className="drawer-backdrop" onClick={() => setDrawer(undefined)} />}
       <div className="palette-wrap">

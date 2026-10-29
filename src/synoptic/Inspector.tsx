@@ -1,24 +1,13 @@
 import { useState, type ReactNode } from 'react'
-import { CONNECTOR_OPTIONS, CONNECTORS, SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { ZONES } from '../data/library'
-import { uid, type ResolvedCable } from '../project'
+import type { ResolvedCable } from '../project'
 import PanelEditor from '../racks/PanelEditor'
 import DeviceArt from '../ui/DeviceArt'
 import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
-import type {
-  CableData,
-  Category,
-  ConnectorType,
-  DeviceData,
-  DeviceNode,
-  PanelSpec,
-  Port,
-  PortDirection,
-  SignalType,
-} from '../types'
+import type { CableData, Category, DeviceData, DeviceNode, PanelSpec } from '../types'
+import PortsEditor from './PortsEditor'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Câblage', 'Autre']
-const DIRS: Record<PortDirection, string> = { in: 'Entrée', out: 'Sortie', io: 'Bidirectionnel' }
 
 interface Props {
   node?: DeviceNode
@@ -36,42 +25,6 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span>{label}</span>
       {children}
     </label>
-  )
-}
-
-function NewPort({ onAdd }: { onAdd: (p: Port) => void }) {
-  const [label, setLabel] = useState('')
-  const [connector, setConnector] = useState<ConnectorType>('xlr3')
-  const [signal, setSignal] = useState<SignalType>('audio-analog')
-  const [dir, setDir] = useState<PortDirection>('in')
-  return (
-    <div className="new-port">
-      <input placeholder="Nom du port" value={label} onChange={(e) => setLabel(e.target.value)} />
-      <select value={connector} onChange={(e) => setConnector(e.target.value as ConnectorType)}>
-        {CONNECTOR_OPTIONS.map((k) => (
-          <option key={k} value={k}>{CONNECTORS[k]}</option>
-        ))}
-      </select>
-      <select value={signal} onChange={(e) => setSignal(e.target.value as SignalType)}>
-        {SIGNAL_OPTIONS.map((k) => (
-          <option key={k} value={k}>{SIGNALS[k].label}</option>
-        ))}
-      </select>
-      <select value={dir} onChange={(e) => setDir(e.target.value as PortDirection)}>
-        {Object.entries(DIRS).map(([k, v]) => (
-          <option key={k} value={k}>{v}</option>
-        ))}
-      </select>
-      <button
-        disabled={!label.trim()}
-        onClick={() => {
-          onAdd({ id: `p-${uid()}`, label: label.trim(), connector, signal, dir })
-          setLabel('')
-        }}
-      >
-        + Ajouter le port
-      </button>
-    </div>
   )
 }
 
@@ -126,7 +79,6 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
   const d = node.data
   const set = (patch: Partial<DeviceData>) => onNode(node.id, patch)
   const setConfig = (patch: Partial<DeviceData['config']>) => set({ config: { ...d.config, ...patch } })
-  const setPort = (id: string, patch: Partial<Port>) => set({ ports: d.ports.map((x) => (x.id === id ? { ...x, ...patch } : x)) })
   const tabs: [Tab, string, number?][] = [
     ['fiche', 'Fiche'],
     ['ports', 'Ports', d.panel ? d.panel.holes.filter((h) => h.connector).length : d.ports.length],
@@ -228,28 +180,8 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
           <PanelEditor spec={d.panel} selected={holes} onSelect={setHoles} onChange={(spec) => onPanel(node.id, spec)} />
         ) : (
           <>
-            <p className="muted small">Dans l’ordre de la face. Une correction ici ne vaut que pour cet équipement ; « Enregistrer comme modèle » la garde pour la suite.</p>
-            <ul className="port-list editable">
-              {d.ports.map((p) => (
-                <li key={p.id}>
-                  <span className="dot" style={{ background: SIGNALS[p.signal].color }} />
-                  <input aria-label="Nom du port" value={p.label} onChange={(e) => setPort(p.id, { label: e.target.value })} />
-                  <button className="icon" title="Supprimer le port" onClick={() => set({ ports: d.ports.filter((x) => x.id !== p.id) })}>×</button>
-                  <div className="port-meta">
-                    <select aria-label="Sens" value={p.dir} onChange={(e) => setPort(p.id, { dir: e.target.value as PortDirection })}>
-                      {Object.entries(DIRS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                    </select>
-                    <select aria-label="Connecteur" value={p.connector} onChange={(e) => setPort(p.id, { connector: e.target.value as ConnectorType })}>
-                      {CONNECTOR_OPTIONS.map((k) => <option key={k} value={k}>{CONNECTORS[k]}</option>)}
-                    </select>
-                    <select aria-label="Signal" value={p.signal} onChange={(e) => setPort(p.id, { signal: e.target.value as SignalType })}>
-                      {SIGNAL_OPTIONS.map((k) => <option key={k} value={k}>{SIGNALS[k].label}</option>)}
-                    </select>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <NewPort onAdd={(p) => set({ ports: [...d.ports, p] })} />
+            <p className="muted small">Comme sur la boîte du synoptique : glissez un port pour changer sa place ou son côté, ⇆ l’envoie en face. « Enregistrer comme modèle » garde ces réglages pour la suite.</p>
+            <PortsEditor ports={d.ports} onChange={(ports) => set({ ports })} />
           </>
         ))}
 
