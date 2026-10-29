@@ -16,7 +16,7 @@ import Page from './PrintPage'
 import SynopticPages, { type SynopticMode } from './SynopticPages'
 import DeviceArt from '../ui/DeviceArt'
 
-const TABLE_OF: Partial<Record<SectionId, string>> = { cables: 'cables', bom: 'nomenclature', ip: 'ip', dmx: 'dmx', panels: 'bandeaux', power: 'energie' }
+const TABLE_OF: Partial<Record<SectionId, string | string[]>> = { cables: 'cables', bom: 'nomenclature', ip: ['ip', 'reseau'], dmx: 'dmx', panels: 'bandeaux', power: 'energie' }
 
 function Table({ block }: { block: Pick<TableBlock, 'head' | 'rows'> }) {
   return (
@@ -75,14 +75,17 @@ export default function Dossier({
   }
 
   const table = (id: SectionId) => {
-    const t = tables.get(TABLE_OF[id] ?? '')
-    if (!has(id) || !t) return null
-    return (
-      <section className="d-page">
-        <h2>{t.title}</h2>
-        <Table block={t} />
-      </section>
-    )
+    if (!has(id)) return null
+    return [TABLE_OF[id] ?? []].flat().map((file) => {
+      const t = tables.get(file)
+      if (!t || (file === 'reseau' && t.rows.length === 0)) return null
+      return (
+        <section key={file} className="d-page">
+          <h2>{t.title}</h2>
+          <Table block={t} />
+        </section>
+      )
+    })
   }
 
   const toc = SECTIONS.filter((s) => s.id !== 'cover' && has(s.id))

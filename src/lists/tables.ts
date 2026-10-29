@@ -1,6 +1,7 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { extId, intId } from '../data/panels'
 import { cableOn, internalRack, otherEnd, rackOfNode, resolveCables } from '../project'
+import { ipIssues, netLinks } from '../network/network'
 import { powerBudget, wattsOf } from '../power/power'
 import type { Project } from '../types'
 
@@ -91,13 +92,25 @@ export function buildTables(project: Project): TableBlock[] {
     }
   })()
 
-  const ips = {
-    head: ['Équipement', 'Modèle', 'Zone', 'Adresse IP'],
-    rows: nodes
-      .filter((n) => n.data.config.ip)
-      .sort((a, b) => (a.data.config.ip ?? '').localeCompare(b.data.config.ip ?? '', undefined, { numeric: true }))
-      .map((n) => [n.data.name, n.data.model, n.data.zone, n.data.config.ip]),
-  }
+  const ips = (() => {
+    const issues = ipIssues(project)
+    return {
+      head: ['Équipement', 'Modèle', 'Zone', 'Adresse IP', 'Alertes'],
+      rows: nodes
+        .filter((n) => n.data.config.ip)
+        .sort((a, b) => (a.data.config.ip ?? '').localeCompare(b.data.config.ip ?? '', undefined, { numeric: true }))
+        .map((n) => [n.data.name, n.data.model, n.data.zone, n.data.config.ip, (issues.get(n.id) ?? []).join(' / ')]),
+    }
+  })()
+
+  const network = (() => {
+    const { links, notes } = netLinks(project)
+    const rows: Cell[][] = links
+      .sort((a, b) => a.protocol.localeCompare(b.protocol, 'fr') || a.cable.localeCompare(b.cable, 'fr', { numeric: true }))
+      .map((l) => [l.cable, l.from, l.to, l.protocol, l.role ?? '', ''])
+    for (const n of notes) rows.push(['—', '', '', '', '', n])
+    return { head: ['Repère', 'De', 'Vers', 'Protocole', 'Rôle', 'Alertes'], rows }
+  })()
 
   const dmx = {
     head: ['Univers', 'Adresse', 'Équipement', 'Modèle', 'Mode', 'Zone'],
@@ -134,7 +147,8 @@ export function buildTables(project: Project): TableBlock[] {
   const blocks: TableBlock[] = [
     { title: 'Liste de câbles', file: 'cables', alerts: true, ...cables },
     { title: 'Nomenclature', file: 'nomenclature', ...bom },
-    { title: 'Plan d’adressage IP', file: 'ip', ...ips },
+    { title: 'Plan d’adressage IP', file: 'ip', alerts: true, ...ips },
+    { title: 'Liaisons réseau', file: 'reseau', alerts: true, ...network },
     { title: 'Patch DMX', file: 'dmx', ...dmx },
     { title: 'Bandeaux de câblage', file: 'bandeaux', ...panels },
     { title: 'Bilan électrique', file: 'energie', alerts: true, ...power },

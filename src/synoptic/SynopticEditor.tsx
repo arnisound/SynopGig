@@ -17,6 +17,7 @@ import { toPng } from 'html-to-image'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
+import { ipIssues } from '../network/network'
 import { connectPorts, createCase, createDevice, setPanel, slug, uid } from '../project'
 import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
 import CableEdgeView from './CableEdgeView'
@@ -103,6 +104,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   const [viewPanel, setViewPanel] = useState(false)
   const [hoverEdge, setHoverEdge] = useState<string>()
   const highlight = useMemo(() => new Set(focus), [focus])
+  const ips = useMemo(() => ipIssues(project), [project])
   const { cables, cableByEdge, used, viewEdges, viewNodes, frames } = useCanvasModel(project, highlight, hoverEdge)
 
 
@@ -415,6 +417,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
       <Inspector
         node={selectedNode}
+        ipIssues={selectedNode ? ips.get(selectedNode.id) : undefined}
         cable={selectedEdge ? cableByEdge.get(selectedEdge.id) : undefined}
         onNode={(id, patch) =>
           setProject((p) => ({ ...p, nodes: p.nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...patch } } : n)) }))

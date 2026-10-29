@@ -18,6 +18,8 @@ interface Props {
   onPanel: (id: string, spec: PanelSpec) => void
   onSaveTemplate: (node: DeviceNode) => void
   onDelete: () => void
+  /** What is wrong with the selected device's IP address. */
+  ipIssues?: string[]
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -31,7 +33,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 type Tab = 'fiche' | 'ports' | 'specs' | 'docs'
 
-export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete }: Props) {
+export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete, ipIssues }: Props) {
   const [holes, setHoles] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<Tab>('fiche')
 
@@ -162,6 +164,7 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
           <Field label="Adresse IP">
             <input placeholder="192.168.1.10" value={d.config.ip ?? ''} onChange={(e) => setConfig({ ip: e.target.value })} />
           </Field>
+          {ipIssues?.map((i) => <div key={i} className="issue danger">{i}</div>)}
           <div className="row">
             <Field label="Univers DMX">
               <input value={d.config.dmxUniverse ?? ''} onChange={(e) => setConfig({ dmxUniverse: e.target.value })} />
