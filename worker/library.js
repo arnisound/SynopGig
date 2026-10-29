@@ -56,7 +56,30 @@ export function cleanShared(raw) {
     groups.push([clean(prefix, 40) || 'Port', c, connector, signal, dir])
   }
   if (total > 512) return null
-  const out = { brand: clean(raw.brand, 40), model, category: raw.category, family: clean(raw.family, 60), rackU: number(raw.rackU, 1, 48, true), weight: number(raw.weight, 0.01, 2000), groups }
+  // The product sheet: description, maker's page, specifications, documents (web addresses only).
+  const url = (v) => (typeof v === 'string' && v.length <= 400 && /^https?:\/\/[^\s<>"]+$/i.test(v) ? v : undefined)
+  const specs = (Array.isArray(raw.specs) ? raw.specs : [])
+    .slice(0, 40)
+    .filter((s) => Array.isArray(s) && s.length === 4)
+    .map(([g, l, v, u]) => [clean(g, 40) ?? '', clean(l, 60) ?? '', clean(v, 80) ?? '', clean(u, 20) ?? ''])
+    .filter(([, l, v]) => l && v)
+  const docs = (Array.isArray(raw.docs) ? raw.docs : [])
+    .slice(0, 10)
+    .filter((d) => Array.isArray(d) && d.length === 2 && url(d[1]))
+    .map(([t, u]) => [clean(t, 120) ?? '', u])
+  const out = {
+    brand: clean(raw.brand, 40),
+    model,
+    category: raw.category,
+    family: clean(raw.family, 60),
+    rackU: number(raw.rackU, 1, 48, true),
+    weight: number(raw.weight, 0.01, 2000),
+    groups,
+    description: clean(raw.description, 400),
+    url: url(raw.url),
+    specs: specs.length ? specs : undefined,
+    docs: docs.length ? docs : undefined,
+  }
   for (const k of Object.keys(out)) if (out[k] === undefined || out[k] === '') delete out[k]
   return out
 }

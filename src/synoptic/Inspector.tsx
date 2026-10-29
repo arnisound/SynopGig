@@ -3,6 +3,8 @@ import { CONNECTOR_OPTIONS, CONNECTORS, SIGNAL_OPTIONS, SIGNALS } from '../data/
 import { ZONES } from '../data/library'
 import { uid, type ResolvedCable } from '../project'
 import PanelEditor from '../racks/PanelEditor'
+import DeviceArt from '../ui/DeviceArt'
+import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
 import type {
   CableData,
   Category,
@@ -73,8 +75,11 @@ function NewPort({ onAdd }: { onAdd: (p: Port) => void }) {
   )
 }
 
+type Tab = 'fiche' | 'ports' | 'specs' | 'docs'
+
 export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete }: Props) {
   const [holes, setHoles] = useState<Set<string>>(new Set())
+  const [tab, setTab] = useState<Tab>('fiche')
 
   if (cable) {
     const d = cable.edge.data ?? { cableId: '' }
@@ -121,81 +126,135 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
   const d = node.data
   const set = (patch: Partial<DeviceData>) => onNode(node.id, patch)
   const setConfig = (patch: Partial<DeviceData['config']>) => set({ config: { ...d.config, ...patch } })
+  const setPort = (id: string, patch: Partial<Port>) => set({ ports: d.ports.map((x) => (x.id === id ? { ...x, ...patch } : x)) })
+  const tabs: [Tab, string, number?][] = [
+    ['fiche', 'Fiche'],
+    ['ports', 'Ports', d.panel ? d.panel.holes.filter((h) => h.connector).length : d.ports.length],
+    ['specs', 'Caractéristiques', d.specs?.length ?? 0],
+    ['docs', 'Documents', d.docs?.length ?? 0],
+  ]
 
   return (
-    <aside className="inspector">
-      <h3>{d.name}</h3>
-      <Field label="Nom">
-        <input value={d.name} onChange={(e) => set({ name: e.target.value })} />
-      </Field>
-      <Field label="Modèle">
-        <input value={d.model} onChange={(e) => set({ model: e.target.value })} />
-      </Field>
-      <div className="row">
-        <Field label="Zone">
-          <input list="zones" value={d.zone} onChange={(e) => set({ zone: e.target.value })} />
-          <datalist id="zones">
-            {ZONES.map((z) => <option key={z} value={z} />)}
-          </datalist>
-        </Field>
-        <Field label="Catégorie">
-          <select value={d.category} onChange={(e) => set({ category: e.target.value as Category })}>
-            {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-          </select>
-        </Field>
-      </div>
-      <div className="row">
-        <Field label="Hauteur rack (U)">
-          <input type="number" min={0} value={d.rackU ?? ''} onChange={(e) => set({ rackU: e.target.value ? Number(e.target.value) : undefined })} />
-        </Field>
-        <Field label="Poids (kg)">
-          <input type="number" min={0} value={d.weight ?? ''} onChange={(e) => set({ weight: e.target.value ? Number(e.target.value) : undefined })} />
-        </Field>
-      </div>
+    <aside className="inspector device-sheet">
+      <header className="sheet-head">
+        <DeviceArt image={d.image} family={d.family} templateId={d.templateId} model={d.model} category={d.category} size={44} />
+        <div>
+          <h3>{d.name}</h3>
+          <small className="muted">{[d.brand, d.model].filter(Boolean).join(' · ')}</small>
+        </div>
+      </header>
+      <nav className="sheet-tabs" role="tablist">
+        {tabs.map(([id, label, n]) => (
+          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>
+            {label}
+            {n !== undefined && <span className="count">{n}</span>}
+          </button>
+        ))}
+      </nav>
 
-      <h4>Configuration</h4>
-      <Field label="Adresse IP">
-        <input placeholder="192.168.1.10" value={d.config.ip ?? ''} onChange={(e) => setConfig({ ip: e.target.value })} />
-      </Field>
-      <div className="row">
-        <Field label="Univers DMX">
-          <input value={d.config.dmxUniverse ?? ''} onChange={(e) => setConfig({ dmxUniverse: e.target.value })} />
-        </Field>
-        <Field label="Adresse DMX">
-          <input value={d.config.dmxAddress ?? ''} onChange={(e) => setConfig({ dmxAddress: e.target.value })} />
-        </Field>
-      </div>
-      <Field label="Mode / preset">
-        <input value={d.config.mode ?? ''} onChange={(e) => setConfig({ mode: e.target.value })} />
-      </Field>
-      <Field label="Consignes de configuration">
-        <textarea rows={4} value={d.config.notes ?? ''} onChange={(e) => setConfig({ notes: e.target.value })} />
-      </Field>
+      {tab === 'fiche' && (
+        <>
+          <h4>Produit</h4>
+          <div className="row">
+            <Field label="Marque">
+              <input value={d.brand ?? ''} onChange={(e) => set({ brand: e.target.value || undefined })} />
+            </Field>
+            <Field label="Modèle">
+              <input value={d.model} onChange={(e) => set({ model: e.target.value })} />
+            </Field>
+          </div>
+          <div className="row">
+            <Field label="Département">
+              <select value={d.category} onChange={(e) => set({ category: e.target.value as Category })}>
+                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Famille">
+              <input value={d.family ?? ''} onChange={(e) => set({ family: e.target.value || undefined })} />
+            </Field>
+          </div>
+          <Field label="Description">
+            <textarea rows={3} value={d.description ?? ''} placeholder="Ce que c’est, à quoi ça sert." onChange={(e) => set({ description: e.target.value || undefined })} />
+          </Field>
+          <Field label="Page du fabricant">
+            <input value={d.url ?? ''} placeholder="https://…" onChange={(e) => set({ url: e.target.value || undefined })} />
+          </Field>
+          {d.url && /^https?:\/\//.test(d.url) && (
+            <a className="small" href={d.url} target="_blank" rel="noopener noreferrer">Ouvrir la page du fabricant ↗</a>
+          )}
 
-      {d.panel ? (
-        <>
-          <h4>Bandeau de câblage</h4>
-          <PanelEditor spec={d.panel} selected={holes} onSelect={setHoles} onChange={(spec) => onPanel(node.id, spec)} />
-        </>
-      ) : (
-        <>
-          <h4>Ports ({d.ports.length})</h4>
-          <ul className="port-list">
-            {d.ports.map((p) => (
-              <li key={p.id}>
-                <span className="dot" style={{ background: SIGNALS[p.signal].color }} />
-                <input
-                  value={p.label}
-                  onChange={(e) => set({ ports: d.ports.map((x) => (x.id === p.id ? { ...x, label: e.target.value } : x)) })}
-                />
-                <small>{DIRS[p.dir]} · {CONNECTORS[p.connector]}</small>
-                <button className="icon" title="Supprimer le port" onClick={() => set({ ports: d.ports.filter((x) => x.id !== p.id) })}>×</button>
-              </li>
-            ))}
-          </ul>
-          <NewPort onAdd={(p) => set({ ports: [...d.ports, p] })} />
+          <h4>Sur ce spectacle</h4>
+          <Field label="Repère">
+            <input value={d.name} onChange={(e) => set({ name: e.target.value })} />
+          </Field>
+          <div className="row">
+            <Field label="Zone">
+              <input list="zones" value={d.zone} onChange={(e) => set({ zone: e.target.value })} />
+              <datalist id="zones">
+                {ZONES.map((z) => <option key={z} value={z} />)}
+              </datalist>
+            </Field>
+            <Field label="Hauteur rack (U)">
+              <input type="number" min={0} value={d.rackU ?? ''} onChange={(e) => set({ rackU: e.target.value ? Number(e.target.value) : undefined })} />
+            </Field>
+            <Field label="Poids (kg)">
+              <input type="number" min={0} value={d.weight ?? ''} onChange={(e) => set({ weight: e.target.value ? Number(e.target.value) : undefined })} />
+            </Field>
+          </div>
+
+          <h4>Réglages</h4>
+          <Field label="Adresse IP">
+            <input placeholder="192.168.1.10" value={d.config.ip ?? ''} onChange={(e) => setConfig({ ip: e.target.value })} />
+          </Field>
+          <div className="row">
+            <Field label="Univers DMX">
+              <input value={d.config.dmxUniverse ?? ''} onChange={(e) => setConfig({ dmxUniverse: e.target.value })} />
+            </Field>
+            <Field label="Adresse DMX">
+              <input value={d.config.dmxAddress ?? ''} onChange={(e) => setConfig({ dmxAddress: e.target.value })} />
+            </Field>
+          </div>
+          <Field label="Mode / preset">
+            <input value={d.config.mode ?? ''} onChange={(e) => setConfig({ mode: e.target.value })} />
+          </Field>
+          <Field label="Consignes de configuration">
+            <textarea rows={3} value={d.config.notes ?? ''} onChange={(e) => setConfig({ notes: e.target.value })} />
+          </Field>
         </>
       )}
+
+      {tab === 'ports' &&
+        (d.panel ? (
+          <PanelEditor spec={d.panel} selected={holes} onSelect={setHoles} onChange={(spec) => onPanel(node.id, spec)} />
+        ) : (
+          <>
+            <p className="muted small">Dans l’ordre de la face. Une correction ici ne vaut que pour cet équipement ; « Enregistrer comme modèle » la garde pour la suite.</p>
+            <ul className="port-list editable">
+              {d.ports.map((p) => (
+                <li key={p.id}>
+                  <span className="dot" style={{ background: SIGNALS[p.signal].color }} />
+                  <input aria-label="Nom du port" value={p.label} onChange={(e) => setPort(p.id, { label: e.target.value })} />
+                  <button className="icon" title="Supprimer le port" onClick={() => set({ ports: d.ports.filter((x) => x.id !== p.id) })}>×</button>
+                  <div className="port-meta">
+                    <select aria-label="Sens" value={p.dir} onChange={(e) => setPort(p.id, { dir: e.target.value as PortDirection })}>
+                      {Object.entries(DIRS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                    <select aria-label="Connecteur" value={p.connector} onChange={(e) => setPort(p.id, { connector: e.target.value as ConnectorType })}>
+                      {CONNECTOR_OPTIONS.map((k) => <option key={k} value={k}>{CONNECTORS[k]}</option>)}
+                    </select>
+                    <select aria-label="Signal" value={p.signal} onChange={(e) => setPort(p.id, { signal: e.target.value as SignalType })}>
+                      {SIGNAL_OPTIONS.map((k) => <option key={k} value={k}>{SIGNALS[k].label}</option>)}
+                    </select>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <NewPort onAdd={(p) => set({ ports: [...d.ports, p] })} />
+          </>
+        ))}
+
+      {tab === 'specs' && <SpecsEditor specs={d.specs} onChange={(specs) => set({ specs })} />}
+      {tab === 'docs' && <DocsEditor docs={d.docs} onChange={(docs) => set({ docs })} />}
 
       <div className="actions">
         <button onClick={() => onSaveTemplate(node)}>Enregistrer comme modèle</button>

@@ -124,3 +124,19 @@ describe('product photos of the USER library', () => {
     expect(entry.image).toBeUndefined()
   })
 })
+
+describe('product sheets', async () => {
+  const { cleanShared } = await import('./library.js')
+  it('keeps the description, specifications and documents, web addresses only', () => {
+    const out = cleanShared({
+      model: 'PT-70',
+      category: 'Son',
+      groups: [['Speaker In', 2, 'speakon', 'speaker', 'in']],
+      description: 'Enceinte <b>deux</b> voies.',
+      url: 'https://www.fohhn.com/en/catalog/pt-70',
+      specs: [['Physique', 'Poids', '39', 'kg'], ['x']],
+      docs: [['Fiche', 'https://www.fohhn.com/pt-70.pdf'], ['Bad', 'javascript:alert(1)']],
+    })
+    expect(out).toMatchObject({ description: 'Enceinte bdeux/b voies.', url: 'https://www.fohhn.com/en/catalog/pt-70', specs: [['Physique', 'Poids', '39', 'kg']], docs: [['Fiche', 'https://www.fohhn.com/pt-70.pdf']] })
+  })
+})

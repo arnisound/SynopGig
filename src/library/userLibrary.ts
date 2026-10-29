@@ -1,5 +1,5 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors.ts'
-import type { Category, ConnectorType, DeviceTemplate, PortDirection, SignalType } from '../types.ts'
+import type { Category, ConnectorType, DeviceTemplate, PortDirection, ProductDoc, SignalType, Spec } from '../types.ts'
 import { expandGroups, type PortGroup } from './portGroups.ts'
 
 /*
@@ -25,6 +25,12 @@ export interface SharedModel {
   rackU?: number
   weight?: number
   groups: GroupTuple[]
+  description?: string
+  url?: string
+  /** [group, label, value, unit]. */
+  specs?: [string, string, string, string][]
+  /** [title, address]. */
+  docs?: [string, string][]
 }
 
 export interface UserEntry extends Omit<SharedModel, 'v'> {
@@ -40,7 +46,7 @@ export interface UserLibraryFile {
   entries: UserEntry[]
 }
 
-export function encodeShared(t: Pick<DeviceTemplate, 'brand' | 'model' | 'category' | 'family' | 'rackU' | 'weight'>, groups: PortGroup[]): SharedModel {
+export function encodeShared(t: Pick<DeviceTemplate, 'brand' | 'model' | 'category' | 'family' | 'rackU' | 'weight' | 'description' | 'url' | 'specs' | 'docs'>, groups: PortGroup[]): SharedModel {
   return {
     v: 1,
     brand: t.brand,
@@ -50,6 +56,39 @@ export function encodeShared(t: Pick<DeviceTemplate, 'brand' | 'model' | 'catego
     rackU: t.rackU,
     weight: t.weight,
     groups: groups.map((g) => [g.prefix, g.count, g.connector, g.signal, g.dir]),
+    ...(t.description ? { description: t.description } : {}),
+    ...(t.url ? { url: t.url } : {}),
+    ...(t.specs?.length ? { specs: t.specs.map((s) => [s.group, s.label, s.value, s.unit ?? ''] as [string, string, string, string]) } : {}),
+    ...(t.docs?.length ? { docs: t.docs.map((d) => [d.title, d.url] as [string, string]) } : {}),
+  }
+}
+
+/** A public web address, or nothing. */
+export const webUrl = (v: unknown) => {
+  if (typeof v !== 'string' || v.length > 400) return undefined
+  try {
+    const u = new URL(v)
+    return /^https?:$/.test(u.protocol) ? u.href : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Specifications and documents from outside: plain text, sane sizes, web addresses only. */
+export function cleanInfo(r: Record<string, unknown>): { description?: string; url?: string; specs?: Spec[]; docs?: ProductDoc[] } {
+  const specs = (Array.isArray(r.specs) ? r.specs : [])
+    .slice(0, 40)
+    .map((s): Spec | undefined => (Array.isArray(s) ? { group: text(s[0], 40), label: text(s[1], 60), value: text(s[2], 80), unit: text(s[3], 20) || undefined } : undefined))
+    .filter((s): s is Spec => !!s && !!s.label && !!s.value)
+  const docs = (Array.isArray(r.docs) ? r.docs : [])
+    .slice(0, 10)
+    .map((d): ProductDoc | undefined => (Array.isArray(d) ? { title: text(d[0], 120), url: webUrl(d[1]) ?? '' } : undefined))
+    .filter((d): d is ProductDoc => !!d && !!d.url)
+  return {
+    description: text(r.description, 400) || undefined,
+    url: webUrl(r.url),
+    specs: specs.length ? specs : undefined,
+    docs: docs.length ? docs : undefined,
   }
 }
 
@@ -104,9 +143,17 @@ export function validateShared(raw: unknown): Result<SharedModel> {
       rackU: num(r.rackU, 1, 48, true),
       weight: num(r.weight, 0.01, 2000),
       groups,
+      ...encodeInfo(cleanInfo(r)),
     },
   }
 }
+
+const encodeInfo = (i: ReturnType<typeof cleanInfo>) => ({
+  ...(i.description ? { description: i.description } : {}),
+  ...(i.url ? { url: i.url } : {}),
+  ...(i.specs ? { specs: i.specs.map((s) => [s.group, s.label, s.value, s.unit ?? ''] as [string, string, string, string]) } : {}),
+  ...(i.docs ? { docs: i.docs.map((d) => [d.title, d.url] as [string, string]) } : {}),
+})
 
 export function toGroups(tuples: GroupTuple[]): PortGroup[] {
   return tuples.map(([prefix, count, connector, signal, dir]) => ({ prefix, count, connector, signal, dir }))
@@ -127,5 +174,6 @@ export function entryToTemplate(e: UserEntry, imageBase?: string): DeviceTemplat
     ports: expandGroups(toGroups(v.value.groups)),
     author: cleanPseudo(e.author) || 'anonyme',
     image: e.image === true && imageBase ? `${imageBase}${String(e.id)}` : undefined,
+    ...cleanInfo(v.value as unknown as Record<string, unknown>),
   }
 }

@@ -42,6 +42,10 @@ export function createDevice(
       panel: template.panel && structuredClone(template.panel),
       family: template.family,
       image: template.image,
+      description: template.description,
+      url: template.url,
+      specs: template.specs && structuredClone(template.specs),
+      docs: template.docs && structuredClone(template.docs),
     },
   }
 }

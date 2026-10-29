@@ -692,3 +692,27 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 /* Palette items with their illustration instead of the coloured dot. */
 .palette .palette-item:has(> .device-art) { grid-template-columns: 26px 1fr; column-gap: 8px; }
 .palette .palette-item > .device-art { grid-row: 1 / span 2; }
+
+/* Product sheet: inspector tabs, characteristics, documents. */
+.device-sheet .sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.device-sheet .sheet-head h3 { margin: 0; }
+.sheet-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin: 4px 0 10px; overflow-x: auto; }
+.sheet-tabs button { border: none; background: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 6px 5px; color: var(--muted); white-space: nowrap; font-size: 12px; }
+.sheet-tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.sheet-tabs .count { margin-left: 5px; font-size: 10px; padding: 0 6px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
+.port-list.editable li { grid-template-columns: 10px 1fr auto; row-gap: 3px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.port-list.editable .port-meta { grid-column: 2 / 4; display: grid; grid-template-columns: 0.8fr 1fr 1.2fr; gap: 3px; }
+.port-list.editable .port-meta select { font-size: 11px; padding: 2px 3px; min-width: 0; }
+.spec-sheet details { margin-bottom: 6px; }
+.spec-sheet summary { font-weight: 600; cursor: pointer; padding: 4px 0; }
+.spec-row, .doc-row { display: flex; gap: 4px; align-items: center; margin: 3px 0; flex-wrap: wrap; }
+.spec-row { padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.spec-row input { min-width: 0; padding: 3px 6px; }
+.spec-row input:first-child { flex: 1 1 100%; background: none; border-color: transparent; font-weight: 600; padding-left: 0; }
+.spec-row .spec-value { flex: 1 1 0; text-align: right; }
+.spec-row .spec-unit { flex: 0 0 56px; }
+.doc-row input { flex: 1 1 35%; min-width: 0; }
+.doc-row .doc-url { flex: 1 1 55%; }
+
+.card textarea.plain { font-family: inherit; font-size: 13px; }
+.card .spec-row input:first-child { flex: 0 0 38%; }

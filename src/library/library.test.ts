@@ -143,3 +143,23 @@ describe('port groups', () => {
     expect(groupPorts(ports)).toEqual(groups)
   })
 })
+
+describe('product sheets shared with everyone', async () => {
+  const { encodeShared, validateShared, entryToTemplate } = await import('./userLibrary')
+  it('carries the description, the maker page, the specifications and the documents', () => {
+    const shared = encodeShared(
+      { model: 'PT-70', brand: 'Fohhn', category: 'Son', description: 'Enceinte deux voies.', url: 'https://www.fohhn.com/en/catalog/pt-70', specs: [{ group: 'Physique', label: 'Poids', value: '39', unit: 'kg' }], docs: [{ title: 'Fiche', url: 'https://www.fohhn.com/pt-70.pdf' }] },
+      [{ prefix: 'Speaker In', count: 2, connector: 'speakon', signal: 'speaker', dir: 'in' }],
+    )
+    const v = validateShared(shared)
+    expect(v.ok).toBe(true)
+    const t = entryToTemplate({ ...(v.ok ? v.value : shared), id: 'user-1', author: 'Théo', createdAt: '' })
+    expect(t).toMatchObject({ description: 'Enceinte deux voies.', url: 'https://www.fohhn.com/en/catalog/pt-70', specs: [{ group: 'Physique', label: 'Poids', value: '39', unit: 'kg' }], docs: [{ title: 'Fiche', url: 'https://www.fohhn.com/pt-70.pdf' }] })
+  })
+
+  it('drops scripts and other addresses', () => {
+    const v = validateShared({ v: 1, model: 'X', category: 'Son', groups: [['In', 1, 'xlr3', 'audio-analog', 'in']], url: 'javascript:alert(1)', docs: [['x', 'file:///etc/passwd']], description: '<script>' })
+    expect(v.ok && v.value).toMatchObject({ model: 'X' })
+    expect(v.ok && (v.value.url ?? v.value.docs)).toBeFalsy()
+  })
+})

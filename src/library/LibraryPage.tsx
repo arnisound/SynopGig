@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CONNECTOR_OPTIONS, CONNECTORS, SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS, FAMILY_ORDER, LIBRARY } from '../data/library'
 import { download, uid } from '../project'
-import type { Category, ConnectorType, DeviceTemplate, PortDirection, Project, SignalType } from '../types'
+import type { Category, ConnectorType, DeviceTemplate, PortDirection, ProductInfo, Project, SignalType } from '../types'
 import { availableEngines, ENGINE_LABELS, GEMINI_DEFAULT_MODEL, type AiResult, type Engine } from './ai'
 import { findKnownModels } from './findKnown'
 import { parseDatasheet } from './parseDatasheet'
@@ -11,6 +11,7 @@ import { encodeShared } from './userLibrary'
 import { research, type FoundDoc } from './finder'
 import { fetchImage, pageImages, shrink } from './images'
 import DeviceArt from '../ui/DeviceArt'
+import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
 import type { UserLibrary } from './useUserLibrary'
 import type { NewProductRequest } from './newProduct'
 
@@ -55,7 +56,7 @@ interface Row extends PortGroup {
   single?: boolean
 }
 
-interface Draft {
+interface Draft extends ProductInfo {
   id?: string
   brand: string
   model: string
@@ -93,6 +94,10 @@ const fromTemplate = (t: DeviceTemplate, keepId: boolean): Draft => ({
   weight: t.weight,
   rows: groupPorts(t.ports).map((g) => row(g)),
   image: t.image,
+  description: t.description,
+  url: t.url,
+  specs: t.specs,
+  docs: t.docs,
 })
 
 const fromResult = (r: AiResult, rows: Row[]): Draft => ({
@@ -103,6 +108,8 @@ const fromResult = (r: AiResult, rows: Row[]): Draft => ({
   rackU: r.rackU,
   weight: r.weight,
   rows,
+  description: r.description,
+  specs: r.specs?.length ? r.specs : undefined,
 })
 
 interface Props {
@@ -172,7 +179,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
       setFModel(b ? request.query.slice(first.length).trim() : request.query)
       setFound(undefined)
       setFoundKnown([])
-      setFindStatus(request.query ? 'Vérifiez la marque et le modèle, puis « Chercher ce produit ».' : 'Indiquez la marque et le modèle, puis « Chercher ce produit ».')
+      setFindStatus(request.query ? 'Vérifiez la marque et le modèle, puis « Trouver ce produit ».' : 'Indiquez la marque et le modèle, puis « Trouver ce produit ».')
     } else if (request.mode === 'manual') {
       setDraft(blank())
       setSuggestions([])
@@ -241,7 +248,16 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
       const rows = p.checked.map(({ quote, doubts, ...g }) => row({ ...g, ai: true, doubts, single: p.readings < 2, evidence: quote ? [quote] : undefined }))
       const doubtful = p.checked.filter((g) => g.doubts.length).length
       // Only a product confirmed row by row by two readings is shared with everyone without a second look.
-      setDraft({ ...fromResult(p.result, rows), brand: brand || p.result.brand || '', model, found: { url: p.sources[0]?.url ?? '', share: doubtful === 0 && p.readings > 1 } })
+      // The maker's page: a source on a site bearing the brand's name.
+      const maker = p.sources.find((s) => brand && new URL(s.url).hostname.replace(/[^a-z0-9]/gi, '').toLowerCase().includes(brand.toLowerCase().replace(/[^a-z0-9]/g, '')))
+      setDraft({
+        ...fromResult(p.result, rows),
+        brand: brand || p.result.brand || '',
+        model,
+        url: maker?.url,
+        docs: p.sources,
+        found: { url: p.sources[0]?.url ?? '', share: doubtful === 0 && p.readings > 1 },
+      })
       setSuggestions(p.suggestions.map(({ quote, ...g }) => row({ ...g, evidence: quote ? [quote] : undefined })))
       setReport(p.report)
       const seconds = Math.max(1, Math.round((clock() - started) / 1000))
@@ -437,7 +453,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
         return
       }
       if (analyseNow) await analyse(true, false, { text: t, file: f })
-      else setStatus(`${f.name} chargé. Cliquez sur « Analyser ».`)
+      else setStatus(`${f.name} chargé. Cliquez sur « Lire la fiche ».`)
     } catch (e) {
       setStatus(`Lecture impossible : ${(e as Error).message}`)
     }
@@ -453,6 +469,10 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
     weight: d.weight || undefined,
     ports: expandGroups(d.rows),
     image: d.image,
+    description: d.description?.trim() || undefined,
+    url: d.url?.trim() || undefined,
+    specs: d.specs?.filter((s) => s.label.trim() && s.value.trim()),
+    docs: d.docs?.filter((x) => x.url.trim()),
   })
 
   const save = () => {
@@ -607,10 +627,10 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           </div>
         )}
         <section className="card finder" ref={finderRef}>
-          <h3>Le chercher pour vous</h3>
+          <h3>Ajouter un produit</h3>
           <p className="muted small">
-            Donnez la marque et le modèle exacts : SynopGig trouve lui-même la documentation officielle (le mode d’emploi d’abord), la lit et en tire la fiche et ses ports. Vous
-            relisez, puis enregistrez : le produit rejoint la bibliothèque USER pour tout le monde.
+            La marque et le modèle, c’est tout. SynopGig épluche le web et la doc constructeur, puis ressort la connectique face par face, avec ses protocoles, et la fiche du
+            produit. Un coup d’œil, une correction si besoin, et c’est rangé : le produit rejoint la bibliothèque USER pour toute la communauté.
           </p>
           <div className="row wrap">
             <label className="field">
@@ -623,7 +643,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
             </label>
             <datalist id="finder-brands">{BRANDS.map((b) => <option key={b} value={b} />)}</datalist>
           </div>
-          <button className="primary" disabled={finding || !fModel.trim()} onClick={() => findProduct()}>{finding ? 'Recherche…' : 'Chercher ce produit'}</button>
+          <button className="primary" disabled={finding || !fModel.trim()} onClick={() => findProduct()}>{finding ? 'Recherche en cours…' : 'Trouver ce produit'}</button>
           {findStatus && <p className="status">{findStatus}</p>}
           {foundKnown.length > 0 && (
             <div className="suggestions">
@@ -637,7 +657,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           )}
           {used.length > 0 && (
             <p className="muted small">
-              Documents lus :{' '}
+              Sources :{' '}
               {used.map((u, i) => (
                 <span key={u.url}>
                   {i > 0 && ' · '}
@@ -648,7 +668,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           )}
           {found && found.length > 0 && (
             <details className="found-more">
-              <summary className="muted small">Documents trouvés ({found.length}) : en analyser un autre</summary>
+              <summary className="muted small">Autres documents trouvés ({found.length}) : en faire lire un autre</summary>
               <ul className="found-docs">
                 {found.map((d) => (
                   <li key={d.url}>
@@ -661,7 +681,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
                       </small>
                     </div>
                     <a href={d.url} target="_blank" rel="noopener noreferrer" title="Ouvrir pour vérifier">↗</a>
-                    <button disabled={finding} onClick={() => analyseDocs([d])}>Analyser celui-ci</button>
+                    <button disabled={finding} onClick={() => analyseDocs([d])}>Lire celui-ci</button>
                   </li>
                 ))}
               </ul>
@@ -670,9 +690,9 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
         </section>
 
         <section className="card" ref={sheetRef}>
-          <h3>Analyser une fiche technique</h3>
+          <h3>Vous avez déjà la fiche ?</h3>
           <p className="muted small">
-            Déposez la fiche (PDF) ou collez ses caractéristiques, puis « Analyser ».{' '}
+            Déposez le PDF du constructeur ou collez ses caractéristiques : SynopGig en tire la connectique et la fiche.{' '}
             {engines === undefined
               ? 'Recherche d’une IA disponible…'
               : engines.length
@@ -689,9 +709,9 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           </div>
           <textarea rows={5} placeholder={'Ex. :\nInputs: 16 x XLR mic/line\nOutputs: 8 x XLR\nNetwork: 2 x etherCON (Dante primary / secondary)\n3U, 8 kg'} value={text} onChange={(e) => { setText(e.target.value); setFile(undefined) }} />
           <div className="row wrap">
-            <button className="primary" disabled={busy} onClick={() => analyse(true)}>{busy ? 'Analyse en cours…' : 'Analyser'}</button>
+            <button className="primary" disabled={busy} onClick={() => analyse(true)}>{busy ? 'Lecture en cours…' : 'Lire la fiche'}</button>
             {engines !== undefined && engines.length > 0 && (
-              <button disabled={busy} onClick={() => analyse(false)} title="Sans IA : ne garde que les quantités écrites dans la fiche">Analyse rapide (sans IA)</button>
+              <button disabled={busy} onClick={() => analyse(false)} title="Sans IA : ne garde que les quantités écrites dans la fiche">Lecture rapide (sans IA)</button>
             )}
           </div>
           <details className="advanced">
@@ -737,7 +757,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
         {draft ? (
           <section className="card" ref={editorRef}>
             <div className="section-head">
-              <h3>{draft.id ? 'Modifier le modèle' : 'Nouveau matériel'}</h3>
+              <h3>{draft.id ? 'Modifier le produit' : 'Nouveau produit'}</h3>
               <button className="icon" title="Fermer" onClick={() => setDraft(undefined)}>×</button>
             </div>
             <div className="illustration">
@@ -789,6 +809,14 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
                 <input type="number" min={0} step={0.1} value={draft.weight ?? ''} onChange={(e) => set({ weight: e.target.value ? Number(e.target.value) : undefined })} />
               </label>
             </div>
+            <label className="field">
+              <span>Description</span>
+              <textarea className="plain" rows={2} value={draft.description ?? ''} placeholder="Ce que c’est, à quoi ça sert, en une ou deux phrases." onChange={(e) => set({ description: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>Page du fabricant</span>
+              <input value={draft.url ?? ''} placeholder="https://…" onChange={(e) => set({ url: e.target.value })} />
+            </label>
 
             <h4>Connectique ({portCount} ports)</h4>
             <table className="groups">
@@ -823,6 +851,10 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
                 ))}
               </tbody>
             </table>
+            <h4>Caractéristiques</h4>
+            <SpecsEditor specs={draft.specs} onChange={(specs) => set({ specs })} />
+            <h4>Documents</h4>
+            <DocsEditor docs={draft.docs} onChange={(docs) => set({ docs })} />
             {suggestions.length > 0 && (
               <div className="suggestions">
                 <span className="muted small">Aussi relevé dans la fiche, à vérifier (cliquez pour ajouter) :</span>
@@ -860,7 +892,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           </section>
         ) : embedded ? null : (
           <section className="card muted">
-            <p>Choisissez « + Nouveau » pour saisir un matériel à la main, analysez une fiche technique, ou partez d’un modèle existant ou de la bibliothèque USER.</p>
+            <p>Rien sur l’établi. Ajoutez un produit par sa marque et son modèle, faites lire une fiche, partez d’un modèle existant ou de la bibliothèque USER, ou créez-le à la main avec « + Nouveau ».</p>
           </section>
         )}
       </div>

@@ -1,6 +1,6 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { FAMILY_ORDER } from '../data/library'
-import type { Category, ConnectorType, PortDirection, SignalType } from '../types'
+import type { Category, ConnectorType, PortDirection, SignalType, Spec } from '../types'
 import type { PortGroup } from './portGroups'
 
 /*
@@ -49,6 +49,8 @@ export interface AiResult {
   rackU?: number
   weight?: number
   groups: AiGroup[]
+  description?: string
+  specs?: Spec[]
   /** A second, independent reading of the same sheet (relay), to compare with. */
   second?: AiGroup[]
   /** Services that answered, e.g. "Gemini + Groq". */
@@ -94,6 +96,8 @@ Types:
 - label: short French name, e.g. "Entrée", "Sortie", "Link", "Sortie HP", "Dante", "Secteur", "Casque".
 When pictures of the panel pages come with the text, read the drawings too: every socket drawn on the front or rear panel is a connector, with its printed label; trust the drawing over a summary.
 Also give brand, model, category, family, rackU (height in rack units, only for 19 inch rack devices) and weight in kg, when written.
+description: one or two sentences in French saying what the device is and what it is for (no marketing).
+specs: its main characteristics as written, with French labels, the value and the unit apart, grouped: "Physique" (Dimensions H × L × P, Poids), "Alimentation" (Tension, Consommation, Puissance), then "Audio", "Vidéo", "Lumière" or "Réseau" (e.g. Réponse en fréquence, SPL max, Puissance par canal, Impédance, Latence, Résolution, Flux lumineux). Only what the sources say.
 Connector codes: ${Object.entries(CONNECTORS).map(([k, v]) => `${k} = ${v}`).join('; ')}.
 Signal codes: ${Object.entries(SIGNALS).map(([k, v]) => `${k} = ${v.label}`).join('; ')}.
 Departments (category): ${CATEGORIES.join(', ')}.
@@ -109,6 +113,15 @@ export const RESULT_SCHEMA = {
     family: { type: 'string' },
     rackU: { type: 'integer' },
     weight: { type: 'number' },
+    description: { type: 'string' },
+    specs: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { group: { type: 'string' }, label: { type: 'string' }, value: { type: 'string' }, unit: { type: 'string' } },
+        required: ['group', 'label', 'value', 'unit'],
+      },
+    },
     ports: {
       type: 'array',
       items: {
@@ -172,6 +185,12 @@ export function sanitizeAi(raw: unknown): AiResult {
     rackU: rack && Math.round(rack),
     weight: num(r.weight, 2000),
     groups,
+    description: str(r.description, 400) || undefined,
+    specs: (Array.isArray(r.specs) ? r.specs : [])
+      .slice(0, 30)
+      .map((x) => (x && typeof x === 'object' ? (x as Record<string, unknown>) : {}))
+      .map((x) => ({ group: str(x.group, 40) || 'Autres', label: str(x.label, 60), value: str(x.value, 80), unit: str(x.unit, 20) || undefined }))
+      .filter((x) => x.label && x.value),
   })
 }
 

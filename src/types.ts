@@ -105,7 +105,32 @@ export type Category =
   | 'Câblage'
   | 'Autre'
 
-export interface DeviceTemplate {
+/** One characteristic of a product: "Physique · Poids · 39 · kg". */
+export type Spec = {
+  group: string
+  label: string
+  value: string
+  unit?: string
+}
+
+/** A document about a product: data sheet, user guide, product page. */
+export type ProductDoc = {
+  title: string
+  url: string
+}
+
+/** What is known about a product beyond its sockets: shown on its sheet. */
+// Types, not interfaces: the canvas wants node data indexable.
+export type ProductInfo = {
+  /** One or two sentences on what it is. */
+  description?: string
+  /** The maker's page of the product. */
+  url?: string
+  specs?: Spec[]
+  docs?: ProductDoc[]
+}
+
+export interface DeviceTemplate extends ProductInfo {
   id: string
   brand?: string
   model: string
@@ -132,7 +157,7 @@ export interface DeviceConfig {
   notes?: string
 }
 
-export type DeviceData = {
+export type DeviceData = ProductInfo & {
   templateId: string
   model: string
   category: Category
