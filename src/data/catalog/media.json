@@ -4880,6 +4880,15 @@
    }
   ]
  },
+ "senn-e602": {
+  "photo": "https://assets.sennheiser.com/assets/e_602_II_Product_shot_cutout_Logo.png.png/Zz03N2VlZTRlMGU3YWUxMWYwYjViMzc2OGVlOGU5N2FlYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/microphones/e-602-ii/e-602-ii-500797"
+   }
+  ]
+ },
  "senn-e604": {
   "photo": "https://assets.sennheiser.com/assets/e604_product_shot_cutout_shot_side_view.png.png/Zz1mNzI2NzY4NGU3YWQxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
   "docs": [
@@ -5055,6 +5064,15 @@
    }
   ]
  },
+ "senn-ek-xsw-iem": {
+  "photo": "https://assets.sennheiser.com/assets/XS_Wireless_IEM_EK_Product_Shot_Cutout_Receiver_Front.png.png/Zz1jYmU0MGRhOGU3YjAxMWYwYTI1MjdhZWFhOWMzNzY0YQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-iem-ek/xsw-iem-ek-a-509156"
+   }
+  ]
+ },
  "senn-ek100g4": {
   "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_EK_100_front_view.png/Zz01OGVhODFhY2U3YmUxMWYwYjViMzc2OGVlOGU5N2FlYQ==",
   "docs": [
@@ -5163,6 +5181,15 @@
    }
   ]
  },
+ "senn-em6000": {
+  "photo": "https://assets.sennheiser.com/assets/DIGITAL_6000_EM_6000_Product_shot_cutout_Isofront_50100.png/Zz00MDllNGMxNGU3YmUxMWYwYmZiMmJlYjQzYzY2MTIyYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/sistema-inalambrico/em-6000/em-6000-dante-508475"
+   }
+  ]
+ },
  "senn-em6000-a": {
   "photo": "https://assets.sennheiser.com/assets/DIGITAL_6000_EM_6000_Product_shot_cutout_Isofront_50100.png/Zz00MDllNGMxNGU3YmUxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
   "docs": [
@@ -5268,6 +5295,24 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-dx-skm-s/ew-dx-skm-s-r1-9-509413"
+   }
+  ]
+ },
+ "senn-ewdx-ts3": {
+  "photo": "https://assets.sennheiser.com/images/assets/EW-DX_Tablestand_Top_XLR3.png/Zz05Y2RjMDdlOGU3Y2IxMWYwYTg2NmNlM2Q3NWM0MGYwNw==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/ew-dx-ts-3-pin/ew-dx-ts-3-pin-q1-9-509440"
+   }
+  ]
+ },
+ "senn-ewdx-ts5": {
+  "photo": "https://assets.sennheiser.com/images/assets/EW-DX_Tablestand_Top_XLR5.png/Zz05ZTk1MTVkZWU3Y2IxMWYwOGM4OTJhMzQxNzliYzkxZA==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/ew-dx-ts-5-pin/ew-dx-ts-5-pin-s1-10-700193"
    }
   ]
  },
@@ -5707,12 +5752,75 @@
    }
   ]
  },
+ "senn-sl-bnd-dw": {
+  "photo": "https://assets.sennheiser.com/assets/product_detail_x2_desktop_SpeechLine_Digital_Wireless_Front_SL_Boundary_DW_big.png/Zz02ZDAwZjFiY2U3YmUxMWYwOGM4OTJhMzQxNzliYzkxZA==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/sl-dw-boundary-114/sl-boundary-114-s-dw-3-b-506607"
+   }
+  ]
+ },
+ "senn-sl-bp-dw": {
+  "photo": "https://assets.sennheiser.com/assets/Speechline_Digital_Wireless_Product_shot_cutout_SL_Bodypack_DW_Isofront.png/Zz00NDNhZmYwY2U3ZDcxMWYwYjJjYTc2OGVlOGU5N2FlYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/accessories/sl-dw-bodypack/sl-bodypack-dw-4-us-505900"
+   }
+  ]
+ },
  "senn-sl-headmic1": {
   "photo": "https://assets.sennheiser.com/assets/Speechline_Digital_Wireless_Product_shot_cutout_SL_Headmic_1-4_BE.png/Zz0zMGRiZjlhMmU3YmUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/sl-headmic-1/headmic-1-beige-3-pin-506906"
+   }
+  ]
+ },
+ "senn-sl-hh-dw": {
+  "photo": "https://assets.sennheiser.com/assets/SpeechLine_Digital_Wireless_Handheld_open-sennheiser-1312.png/Zz03MTU2MjkzYWU3YmUxMWYwOGM4OTJhMzQxNzliYzkxZA==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/sl-dw-handheld/sl-handheld-dw-4-us-505902"
+   }
+  ]
+ },
+ "senn-sl-mcr2": {
+  "photo": "https://assets.sennheiser.com/assets/SpeechLine_Digital_Wireless_shot_cutout_front_Multi_Channel_Receiver.png/Zz0wN2IwNDBhMmU3YmQxMWYwYWE5OGVhNTViNWQyZmI4Ng==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/sl-dw-mcr/sl-mcr-2-dw-3-508849"
+   }
+  ]
+ },
+ "senn-sl-mcr4": {
+  "photo": "https://assets.sennheiser.com/assets/SpeechLine_Digital_Wireless_shot_cutout_front_Multi_Channel_Receiver.png/Zz0wN2IwNDBhMmU3YmQxMWYwYWE5OGVhNTViNWQyZmI4Ng==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/sl-dw-mcr/sl-mcr-4-dw-4-508855"
+   }
+  ]
+ },
+ "senn-sl-rack-dw": {
+  "photo": "https://assets.sennheiser.com/assets/SpeechLine_Digital_Wireless_Product_shot_cutout_SL_Rack_Receiver_DW_Front_Screen01.png/Zz0zNzM0NjBjOGU3YmUxMWYwOGNiZDJhMzQxNzliYzkxZA==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/sl-dw-rack-receiver-5362c/sl-rack-receiver-dw-4-us-505899"
+   }
+  ]
+ },
+ "senn-sl-tab-dw": {
+  "photo": "https://assets.sennheiser.com/assets/SpeechLine_Digital_Wireless_Product_shot_cutout_SL_Tablestand_133_S_DW_Top.png/Zz0wYThhNjBjMmU3YmUxMWYwYTg4MDdhZWFhOWMzNzY0YQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/sl-dw-tablestand-133/sl-ts-133-s-dw-3-b-506610"
    }
   ]
  },
@@ -5752,6 +5860,15 @@
    }
   ]
  },
+ "senn-sr-xsw-iem": {
+  "photo": "https://assets.sennheiser.com/assets/XS_Wireless_IEM_SR_Product_Shot_Cutout_Transmitter_Front.png.png/Zz1kMjU1OTBmOGU3YjAxMWYwYWE5OGVhNTViNWQyZmI4Ng==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-iem-sr/xsw-iem-sr-a-509151"
+   }
+  ]
+ },
  "senn-sr2000": {
   "photo": "https://assets.sennheiser.com/assets/2000_Series_SR_2000_IEM_Product_shot_cutout.png.png/Zz1iZWRhYzIxY2U3YWQxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
   "docs": [
@@ -5773,6 +5890,42 @@
  "senn-tcc2": {
   "photo": "https://webobjects2.cdw.com/is/image/CDW/6305654?fit=fit%2C1&hei=462&resMode=bilin&wid=760",
   "docs": []
+ },
+ "senn-tccm": {
+  "photo": "https://assets.sennheiser.com/images/assets/TeamConnect_Ceiling_Medium_S-W.png/Zz1iY2I1NDkwMmU3ZGIxMWYwODhkYjc2OGVlOGU5N2FlYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/meeting-and-conference-systems/teamconnect-ceiling-medium/teamconnect-ceiling-medium-s-w-700294"
+   }
+  ]
+ },
+ "senn-xswd-mj-rx": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_MINI_JACK_RX_01.png/Zz1lMmM0NGIyNGU3YzMxMWYwYmNlN2JlYjQzYzY2MTIyYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-mini-jack-rx-508500"
+   }
+  ]
+ },
+ "senn-xswd-pedal-rx": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_PEDALBOARD_RX_01.png/Zz0zYTY0YzYzNmU3Y2IxMWYwYTg2NmNlM2Q3NWM0MGYwNw==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-pedalboard-rx-508499"
+   }
+  ]
+ },
+ "senn-xswd-xlr-tx": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_FEMALE_TX_01.png/Zz1kZTE2ZjQyOGU3YzMxMWYwYmZiMmJlYjQzYzY2MTIyYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-xlr-female-tx-508494"
+   }
+  ]
  },
  "shure-520dx": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/35c/dc6/46-/setcard/d96a41034f75b55a3f86ff3281786703.jpeg",
