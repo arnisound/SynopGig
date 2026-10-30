@@ -9944,6 +9944,24 @@
    }
   ]
  },
+ "yam-pm3": {
+  "photo": "https://usa.yamaha.com/files/rivage-pm3-index_re_09e69ed929fec180fd165a6955499fc2.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/rivage_pm/index.html"
+   }
+  ]
+ },
+ "yam-pm5": {
+  "photo": "https://usa.yamaha.com/files/rivage-pm5-index_1a76dd52aa5b3e4edda4d7b74289ba07.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/rivage_pm/index.html"
+   }
+  ]
+ },
  "yam-px10": {
   "photo": "https://usa.yamaha.com/files/px10_front01_ae231d26c8d6ce2132b5f5b44b9cc10c.jpg?impolicy=resize&imwid=800&imhei=147",
   "docs": [
@@ -10093,6 +10111,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://usa.yamaha.com/products/proaudio/interfaces/tio1608-d2/index.html"
+   }
+  ]
+ },
+ "yam-vxl1": {
+  "photo": "https://usa.yamaha.com/files/vxl1b-16_front_01_9f40b023cc43015087db3ef928e33f6d.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/vxl/index.html"
    }
   ]
  },
