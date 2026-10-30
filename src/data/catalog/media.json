@@ -5114,12 +5114,111 @@
    }
   ]
  },
+ "roland-p20hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/p-20hd_top_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/p-20hd/"
+   }
+  ]
+ },
+ "roland-v02hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-02hdmkii_top_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-02hd_mk_ii/"
+   }
+  ]
+ },
  "roland-v160hd": {
   "photo": "https://static.roland.com/assets/images/products/main/v-160hd_top_main.jpg",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://proav.roland.com/global/products/v-160hd/"
+   }
+  ]
+ },
+ "roland-v1hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-1hd_plus_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-1hd_plus/"
+   }
+  ]
+ },
+ "roland-v600uhd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-600uhd_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-600uhd/"
+   }
+  ]
+ },
+ "roland-v60hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-60hd_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-60hd/"
+   }
+  ]
+ },
+ "roland-v80hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-80hd_top_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-80hd/"
+   }
+  ]
+ },
+ "roland-v8hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-8hd_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-8hd/"
+   }
+  ]
+ },
+ "roland-vc100uhd": {
+  "photo": "https://static.roland.com/assets/images/products/main/vc-100uhd_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/vc-100uhd/"
+   }
+  ]
+ },
+ "roland-vr120hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/vr-120hd_top_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/vr-120hd/"
+   }
+  ]
+ },
+ "roland-vr6hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/vr-6hd_top_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/vr-6hd/"
+   }
+  ]
+ },
+ "roland-xs62s": {
+  "photo": "https://static.roland.com/assets/images/products/main/xs-62s_main_tn.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/xs-62s/"
    }
   ]
  },
