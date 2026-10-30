@@ -20,11 +20,12 @@ export const RATING: Partial<Record<ConnectorType, number>> = {
   'p17-32a': 32,
   'p17-32a-mono': 32,
   'p17-63a': 63,
+  'p17-125a': 125,
   socapex: 16,
 }
 
 /** Three-phase inlets: their outlets are spread on L1, L2, L3. */
-const THREE_PHASE = new Set<ConnectorType>(['p17-32a', 'p17-63a'])
+const THREE_PHASE = new Set<ConnectorType>(['p17-32a', 'p17-63a', 'p17-125a'])
 
 /** The device's consumption: its own figure, else the one written in its characteristics. */
 export function wattsOf(d: DeviceData): number | undefined {

@@ -44,7 +44,8 @@ export function refineSignal(port: Port): SignalType {
     if (/\bavb\b|milan/i.test(l)) return 'avb'
     if (/art-?net|sacn|dmx/i.test(l)) return 'artnet'
     if (/\bndi\b|2110|vid[ée]o ip/i.test(l)) return 'ndi'
-    if (/contr[ôo]le|control|osc\b|t[ée]l[ée]commande|remote/i.test(l)) return 'control-ip'
+    if (/contr[ôo]le|control|osc\b|t[ée]l[ée]commande|remote|\boca\b|l-net|r1\b|ipmi|administration/i.test(l)) return 'control-ip'
+    if (/ethersound/i.test(l)) return 'audio-link'
   }
   if (port.signal === 'audio-digital') {
     if (/aes50|optocore|supermac|twinlane|gigaace|dsnake|slink|ultranet|liaison/i.test(l)) return 'audio-link'
@@ -72,6 +73,7 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   speakon8: 'Speakon NL8',
   iec: 'IEC C14',
   'p17-63a': 'P17 63A tri',
+  'p17-125a': 'P17 125A tri',
   usb: 'USB',
   bnc: 'BNC (HF 50 Ω)',
   ntype: 'N (HF)',

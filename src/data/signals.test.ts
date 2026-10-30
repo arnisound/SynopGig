@@ -20,6 +20,8 @@ describe('signals on a network', () => {
     expect(refineSignal(p('network', 'io', 'Art-Net / sACN'))).toBe('artnet')
     expect(refineSignal(p('audio-digital', 'io', 'AES50 A'))).toBe('audio-link')
     expect(refineSignal(p('network', 'io', 'Réseau'))).toBe('network')
+    expect(refineSignal(p('network', 'io', 'Ethernet OCA A'))).toBe('control-ip')
+    expect(refineSignal(p('network', 'io', 'EtherSound in'))).toBe('audio-link')
     expect(LIBRARY.some((t) => t.ports.some((q) => q.signal === 'dante'))).toBe(true)
   })
 })

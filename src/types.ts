@@ -38,6 +38,7 @@ export type ConnectorType =
   | 'speakon8'
   | 'iec'
   | 'p17-63a'
+  | 'p17-125a'
   | 'usb'
   | 'bnc'
   | 'ntype'
