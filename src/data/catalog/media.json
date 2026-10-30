@@ -2613,6 +2613,33 @@
    }
   ]
  },
+ "epson-eb-l1755u": {
+  "photo": "https://i8.amplience.net/i/epsonemear/22344-productpicture-lores-en-eb-l1755u_main",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.epson.eu/en_EU/products/projector/professional/eb-l1755u/p/22344"
+   }
+  ]
+ },
+ "epson-eb-pu2010": {
+  "photo": "https://mediaserver.goepson.com/adaptivemedia/rendition?id=c015165bc9784be2860a1e8081c3ef98410c23cc&vid=c015165bc9784be2860a1e8081c3ef98410c23cc&prid=300Wx300H&clid=SAPDAM&prclid=productpictures&assetDescr=EB-PU2010B_top-headon_690x460",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://epson.com/For-Work/Projectors/Large-Venue/EB-PU2010B-WUXGA-3LCD-Laser-Projector-with-4K-Enhancement/p/V11HA52820"
+   }
+  ]
+ },
+ "epson-eb-pu2220b": {
+  "photo": "https://i8.amplience.net/i/epsonemear/pu2200_b_std_03_png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.epson.eu/en_EU/products/projector/professional/eb-pu2220b-projector/p/34365"
+   }
+  ]
+ },
  "etc-colorsource40": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/etc-colorsource-40-av-266892.jpg",
   "docs": [
@@ -9415,6 +9442,42 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://solidstatelogic.com/products/l550"
+   }
+  ]
+ },
+ "swisson-xmt350": {
+  "photo": "https://www.swisson.com/site/assets/files/1162/xmt-350_6-1.500x0.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.swisson.com/en/products/discontinued-products/rdm-controller-dmx-tester/"
+   }
+  ]
+ },
+ "ubnt-u7-pro": {
+  "photo": "https://cdn.ecomm.ui.com/products/fa8dd4e4-36c8-4c79-a928-22c7bff2ce29/ab5bc8a4-6135-402e-a695-e3ea5e16d3e6.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://store.ui.com/us/en/products/u7-pro"
+   }
+  ]
+ },
+ "ubnt-usw-agg": {
+  "photo": "https://cdn.ecomm.ui.com/products/1c748fb1-b4df-43ef-83e0-d5ed26f9db7c/b06fde87-241d-4b4e-8319-8d7d29f6f6c2.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://store.ui.com/us/en/products/usw-aggregation"
+   }
+  ]
+ },
+ "ubnt-usw-flex-mini": {
+  "photo": "https://cdn.ecomm.ui.com/products/5a176b22-af34-40f2-820c-958610df1825/19394e07-5146-4f8c-b72d-7fdbdf679c97.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://store.ui.com/us/en/products/usw-flex-mini"
    }
   ]
  },
