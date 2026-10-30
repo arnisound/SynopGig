@@ -215,6 +215,18 @@
    }
   ]
  },
+ "ah-avantis": {
+  "photo": "https://cdn11.bigcommerce.com/s-dd19b/images/stencil/original/products/19611/90224/371041__66967.1631206013.jpg?c=2",
+  "docs": []
+ },
+ "ah-cdm32": {
+  "photo": "https://store.miroc.co.jp/client_info/ROCKON/itemimage/1072123/1072123_2.jpg",
+  "docs": []
+ },
+ "ah-cq12t": {
+  "photo": "https://thumbs.static-thomann.de/thumb//bdbmagic/pics/prod/573727.jpg",
+  "docs": []
+ },
  "ah-cq18t": {
   "photo": "https://www.allen-heath.com/content/uploads/2023/08/CQ-18T-Top-Green-Lit0000.jpg",
   "docs": [
@@ -232,6 +244,26 @@
     "url": "https://www.allen-heath.com/hardware/cq/cq-20b/"
    }
   ]
+ },
+ "ah-dlive-c1500": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/02/dLive-C1500-800x600-1.jpg.webp",
+  "docs": []
+ },
+ "ah-dlive-c2500": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/02/dLive-C2500-800x600-1.jpg.webp",
+  "docs": []
+ },
+ "ah-dlive-c3500": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/02/dLive-C3500-800x600-1.jpg.webp",
+  "docs": []
+ },
+ "ah-dlive-s5000": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/02/dLive-S5000-800x600-1.jpg.webp",
+  "docs": []
+ },
+ "ah-dlive-s7000": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/02/dLive-S7000-800x600-1.jpg.webp",
+  "docs": []
  },
  "ah-dt168": {
   "photo": "https://www.allen-heath.com/content/uploads/2023/01/DT168-Front_570x284.jpg",
@@ -367,6 +399,26 @@
     "url": "https://www.analogway.com/products/pulse-4k"
    }
   ]
+ },
+ "antari-hz500": {
+  "photo": "https://briteq-lighting.com/media/catalog/product/cache/8/image/1600x1600/9df78eab33525d08d6e5fb8d27136e95/4/8/4817-6.jpg",
+  "docs": []
+ },
+ "antari-ice101": {
+  "photo": "https://cdn.long-mcquade.com/files/455203/lg_baa10a1b319814092f26e3fa05b5699a.png",
+  "docs": []
+ },
+ "antari-m11": {
+  "photo": "https://france-effect.com/16158-thickbox_default/machine-a-fumee-m-11-antari.jpg",
+  "docs": []
+ },
+ "apc-smt1500rm": {
+  "photo": "https://download.se.com/files?default_image=DefaultProductImage.png&p_Doc_Ref=APC-SLIE-89AKU9_00&p_File_Type=rendition_369_jpg",
+  "docs": []
+ },
+ "apc-smt3000": {
+  "photo": "https://cdn11.bigcommerce.com/s-hltjsp5jm3/images/stencil/1280x1280/products/1732/4515/media__00458.1769214162.jpg?c=1",
+  "docs": []
  },
  "astera-art7": {
   "photo": "https://media.astera-led.com/wp-content/uploads/astera-art7-cse-protective-transportation-case-for-art7.png",
@@ -548,6 +600,10 @@
    }
   ]
  },
+ "avid-s6l-24c": {
+  "photo": "https://images.tcdn.com.br/img/img_prod/1468331/mesa_de_som_ao_vivo_digital_avid_venue_s6l_24c_4_20260511144723_ef35980d5b01.jpg",
+  "docs": []
+ },
  "avo-arena": {
   "photo": "https://www.avolites.com/app/uploads/intervention/cache/arena-e1536747792693-1257699191.png",
   "docs": [
@@ -593,6 +649,34 @@
    }
   ]
  },
+ "axiom-ax1012a": {
+  "photo": "https://www.proelnorthamerica.com/cdn/shop/products/AX1012A_900x.jpg?v=1643916292",
+  "docs": []
+ },
+ "axiom-ax12c": {
+  "photo": "https://beta.b2b.proel.com/image/cache/data/proel/AX12C_front_SX-800x800h.jpg",
+  "docs": []
+ },
+ "axiom-ax16cl": {
+  "photo": "https://www.proelnorthamerica.com/cdn/shop/files/AX16C_34_DX_FRONT.jpg?v=1683481331",
+  "docs": []
+ },
+ "axiom-ax2010p": {
+  "photo": "https://beta.b2b.proel.com/image/cache/data/AXIOM/AX2010APNG-400x400w.png",
+  "docs": []
+ },
+ "axiom-ed150a": {
+  "photo": "https://e-shop.highendstudios.de/images/product_images/original_images/ED150-1.jpg",
+  "docs": []
+ },
+ "axiom-ed150p": {
+  "photo": "https://e-shop.highendstudios.de/images/product_images/original_images/ED150-5_0.jpg",
+  "docs": []
+ },
+ "axiom-ed23p": {
+  "photo": "https://beta.b2b.proel.com/image/cache/data/proel/ED23_REAR-800x800w.JPG",
+  "docs": []
+ },
  "ayrton-cobra": {
   "photo": "https://www.ayrton.eu/wp-content/uploads/2022/04/cobra-960x960.jpg",
   "docs": [
@@ -637,6 +721,10 @@
     "url": "https://www.ayrton.eu/produit/perseo-profile/"
    }
   ]
+ },
+ "barco-e2": {
+  "photo": "https://www.avendor.com/cdn/shop/files/1720175474_IMG_2279964_800x.jpg?v=1746505206",
+  "docs": []
  },
  "beh-s16": {
   "photo": "https://cdn-media.empowertribe.com/52dc39cc65ed466492e899b4acd1ff2e/Image_BE_0606-ABC_S16_Front_XL.png",
@@ -809,6 +897,10 @@
    }
   ]
  },
+ "bmd-atem-panel10": {
+  "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_50/502555/17756163_800.jpg",
+  "docs": []
+ },
  "bmd-atem-sdi-extreme": {
   "photo": "https://images.blackmagicdesign.com/images/products/atemsdi/product-grid/atem-sdi-extreme-iso@2x.jpg",
   "docs": [
@@ -826,6 +918,10 @@
     "url": "https://www.blackmagicdesign.com/products/microconverters"
    }
   ]
+ },
+ "bmd-fiber-converter": {
+  "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_52/525697/17262509_800.jpg",
+  "docs": []
  },
  "bmd-hyperdeck": {
   "photo": "https://images.blackmagicdesign.com/images/products/hyperdeckstudio/product-grid/hyperdeck-studio-hd-plus@2x.jpg",
@@ -944,6 +1040,10 @@
    }
   ]
  },
+ "brompton-s8": {
+  "photo": "https://panavidgear.com/cdn/shop/files/Brompton_Tessera_S8_Processor_Back.jpg?v=1702337122&width=1400",
+  "docs": []
+ },
  "brompton-sx40": {
   "photo": "https://www.bromptontech.com/wp-content/uploads/2026/03/Brompton_Products_SX40_Angled-1536x864.webp",
   "docs": [
@@ -961,6 +1061,18 @@
     "url": "https://bssaudio.com/en-US/products/ar-133"
    }
   ]
+ },
+ "canon-crn100": {
+  "photo": "https://petapixel.com/assets/uploads/2023/09/canon-ptz-cr-n100.jpg",
+  "docs": []
+ },
+ "canon-crn500": {
+  "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_62/626008/20479006_800.jpg",
+  "docs": []
+ },
+ "canon-rc-ip1000": {
+  "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_61/619991/20482583_800.jpg",
+  "docs": []
  },
  "chamsys-mq500m": {
   "photo": "https://uk.chamsyslighting.com/wp-content/uploads/2023/11/MQ500M-WING-FRONT.png",
@@ -3500,6 +3612,10 @@
    }
   ]
  },
+ "ma3-compact": {
+  "photo": "https://www.urakataya.com/data/urakataya/product/consoles/MAlighting/grandMA3_compact_03.jpeg",
+  "docs": []
+ },
  "martin-atomic3000": {
   "photo": "https://adn.harmanpro.com/productattachment/4860/product_attachment/x_large-caf850ea44d97429eed343aac7c22f9e.webp",
   "docs": [
@@ -3616,6 +3732,10 @@
     "url": "https://www.midasconsoles.com/en/products/0603-ADX"
    }
   ]
+ },
+ "midas-m32-live": {
+  "photo": "https://cdn11.bigcommerce.com/s-o7ivkhfbpd/images/stencil/2048x2048/products/4447/11593/Untitled-2_0002_M32_P0B3I_Right_XL__96885.1676084666.jpg?c=2",
+  "docs": []
  },
  "netgear-gs108": {
   "photo": "https://assets.netgear.com/transform/f16868fd-1a5e-4ec9-9706-9c5e8ed002c1/B3_gs108_32",
@@ -4145,6 +4265,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://ptzoptics.com/controllers/superjoy"
+   }
+  ]
+ },
+ "qsc-core110f": {
+  "photo": "https://www.qsc.com/resource-files/productresources/dn/dsp_cores/core_110f/q_dn_core_110f_img_frontright.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.qsc.com/systems/products/q-sys-platform/products-peripherals-accessories/q-sys-cores/core-110f/"
    }
   ]
  },
@@ -4877,6 +5006,10 @@
    }
   ]
  },
+ "senn-e908d": {
+  "photo": "https://muzeekworld.com/cdn/shop/products/2_b02b7858-6649-4262-abce-ba8c02add95b_1024x1024.jpg?v=1564303512",
+  "docs": []
+ },
  "senn-e914": {
   "photo": "https://assets.sennheiser.com/assets/e_914_product_shot_cutout_front_view.png.png/Zz04YThhMjQyMGU3YWUxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
   "docs": [
@@ -5147,6 +5280,10 @@
    }
   ]
  },
+ "senn-hd26": {
+  "photo": "https://r2.gear4music.com/media/52/520322/1200/preview.jpg",
+  "docs": []
+ },
  "senn-hd280": {
   "photo": "https://assets.sennheiser.com/assets/HD_280_PRO_Product_shot_cutout_Isofront.png.png/Zz1kYTU1NTk4NGU3YWUxMWYwYWZkMWVhNTViNWQyZmI4Ng==",
   "docs": [
@@ -5180,6 +5317,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/hd-490-pro/hd-490-pro-700286"
+   }
+  ]
+ },
+ "senn-hmd26": {
+  "photo": "https://www.sennheiser.com/cdn-cgi/image/width%3D1920%2Cformat%3Davif%2Cquality%3D75/globalassets/digizuite/44569-en-square_louped_hmd_26-ii_sq_01_sennheiser.png/SennheiserFullWidth",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/de-ch/catalog/products/mikrofon/hmd-26-ce07ad90/hmd-26-ii-600-eol-505773"
    }
   ]
  },
@@ -5624,6 +5770,10 @@
    }
   ]
  },
+ "senn-tcc2": {
+  "photo": "https://webobjects2.cdw.com/is/image/CDW/6305654?fit=fit%2C1&hei=462&resMode=bilin&wid=760",
+  "docs": []
+ },
  "shure-520dx": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/35c/dc6/46-/setcard/d96a41034f75b55a3f86ff3281786703.jpeg",
   "docs": [
@@ -5668,6 +5818,10 @@
     "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_b87a"
    }
   ]
+ },
+ "shure-ad2-ksm11": {
+  "photo": "https://media.guitarcenter.com/is/image/MMGS7/M07341000000001-00-600x600.jpg",
+  "docs": []
  },
  "shure-ad2-ksm8": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/271/446/08-/setcard/c9b47553262628002406b0b22dbbf2fe.jpeg",
@@ -5722,6 +5876,10 @@
     "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad4d"
    }
   ]
+ },
+ "shure-ad4d-a": {
+  "photo": "https://media.guitarcenter.com/is/image/MMGS7/J86149000001001-00-720x720.jpg",
+  "docs": []
  },
  "shure-ad4q": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/6fd/720/d4-/setcard/9fac1eac2df87b1e7ecdac443a200928.jpeg",
@@ -5849,6 +6007,10 @@
    }
   ]
  },
+ "shure-beta27": {
+  "photo": "https://media.guitarcenter.com/is/image/MMGS7/Beta-27-Side-Address-Microphone/430564000000000-00-2000x2000.jpg",
+  "docs": []
+ },
  "shure-beta52": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/f70/a54/eb-/setcard/05986d56de71a5eae2f0649200ea71b6.jpeg",
   "docs": [
@@ -5947,6 +6109,18 @@
     "url": "https://www.shure.com/en-US/products/wireless-systems/blx_wireless/blx1"
    }
   ]
+ },
+ "shure-blx2-b58": {
+  "photo": "https://www.fairlight.nl/media/catalog/product/cache/7c087aca4312630fd6d4540fb5ddcc51/s/u/su-37.0149.jpg",
+  "docs": []
+ },
+ "shure-blx2-pg58": {
+  "photo": "https://service.pcconnection.com/images/inhouse/A60B9753-47E3-4874-910A-22181869AA1D.jpg?interpolation=lanczos-none&resize=450%3A%2A",
+  "docs": []
+ },
+ "shure-blx2-sm58": {
+  "photo": "https://images.crutchfieldonline.com/ImageHandler/trim/869/652/products/2014/1/183/g183BL2S5H-o_Battery.jpg",
+  "docs": []
  },
  "shure-blx4": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/333/93c/ca-/setcard/9b4cfe21e2cd206c3b3b84a17cefc2ba.jpeg",
@@ -6263,6 +6437,10 @@
    }
   ]
  },
+ "shure-mxa920": {
+  "photo": "https://cdn11.bigcommerce.com/s-tt1cdl8d7a/images/stencil/1280x1280/products/1487/7119/image__80158.1650483531.png?c=2%3Fimbypass%3Don",
+  "docs": []
+ },
  "shure-mxw1": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4a2/134/b1-/setcard/7b6d3cbab4921342bf4a5166f44c1529.jpeg",
   "docs": [
@@ -6343,6 +6521,10 @@
     "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm1000/p10rp"
    }
   ]
+ },
+ "shure-p10t": {
+  "photo": "https://panavidgear.com/cdn/shop/files/shure_p10t_front.jpg?v=1694125427&width=2048",
+  "docs": []
  },
  "shure-p300": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ac5/3f5/ab-/setcard/ab602af36c63c4f46fba70eb06fa7c2c.jpeg",
@@ -6659,6 +6841,10 @@
    }
   ]
  },
+ "shure-slxd2-b58": {
+  "photo": "https://cdn.rubbermonkey.com/ProductImage/Huge/194183.jpg/shure-slxd2-b58-digital-wireless-handheld-microphone-transmitter-with-beta-58-capsule.jpg",
+  "docs": []
+ },
  "shure-slxd3": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/86e/a8e/66-/setcard/3fd97ea0d96dac69dfa946cf657b0d92.jpeg",
   "docs": [
@@ -6856,6 +7042,10 @@
     "url": "https://www.shure.com/en-US/products/accessories/ua834"
    }
   ]
+ },
+ "shure-ua844": {
+  "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_34/340496/11611999_800.jpg",
+  "docs": []
  },
  "shure-ua845": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/549/2ef/c1-/setcard/5f45082dd425412462578da6f3dc45e3.jpeg",
@@ -7055,6 +7245,10 @@
    }
   ]
  },
+ "sony-fx6": {
+  "photo": "https://www.repaire.net/forums/attachments/sony_pxw-fx6-jpg.48484/",
+  "docs": []
+ },
  "ssl-l100": {
   "photo": "https://solidstatelogic.com/assets/components/phpthumbof/cache/SSL%20Live%20L100_angle.c299cd572bba4033282a4c96ce58702b.jpg",
   "docs": [
@@ -7163,6 +7357,10 @@
    }
   ]
  },
+ "yam-dm7": {
+  "photo": "https://mds-audio.com/media/djcatalog2/images/item/0/dm7_f.png",
+  "docs": []
+ },
  "yam-mg10xu": {
   "photo": "https://shop.sg.yamaha.com/media/catalog/product/f/r/front_15.png?optimize=high&fit=bounds&height=&width=&canvas=:&format=jpeg",
   "docs": [
@@ -7178,6 +7376,41 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://shop.sg.yamaha.com/products/professional-audio/mixers/mg16xu.html"
+   }
+  ]
+ },
+ "yam-ql1": {
+  "photo": "https://fr.yamaha.com/fr/files/photoviewer_mixers_ql1_overhead_tcm122-1717827.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.yamaha.com/fr/business/audio/products/mixers/ql-series/"
+   }
+  ]
+ },
+ "yam-ql5": {
+  "photo": "https://fr.yamaha.com/fr/files/photoviewer_mixers_ql5_overhead_tcm122-1634359.jpg",
+  "docs": []
+ },
+ "yam-rio1608": {
+  "photo": "https://fr.yamaha.com/fr/files/rio1608-d2_tilt_a_tcm122-1639078.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.yamaha.com/fr/business/audio/products/mixers/ql-series/"
+   }
+  ]
+ },
+ "yam-rio3224": {
+  "photo": "https://etha.de/media/uploads/yamaha-rio3224-d2-angle.webp",
+  "docs": []
+ },
+ "yam-rsio64": {
+  "photo": "https://fr.yamaha.com/fr/files/photoviewer_interfaces_rsio64-d_left_tcm122-1651336.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.yamaha.com/fr/business/audio/products/mixers/ql-series/"
    }
   ]
  }
