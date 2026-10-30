@@ -410,6 +410,15 @@
    }
   ]
  },
+ "analogway-midra": {
+  "photo": "https://cdn.prod.website-files.com/6540cb540116ce87ec8b62fe/657712d9d30b8df49018e277_Aquilon-4U-C-FAV-det-webr.avif",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.analogway.com/products/aquilon-c"
+   }
+  ]
+ },
  "analogway-pulse4k": {
   "photo": "https://cdn.prod.website-files.com/6540cb540116ce87ec8b62fe/65816405a9f259f78c6b44f9_pulse-4k-fav-300dpi-rvb.avif",
   "docs": [
@@ -9315,6 +9324,15 @@
  },
  "swisson-xsp5": {
   "photo": "https://cdn.shopify.com/s/files/1/0614/8122/2322/products/53379_sq.jpg?v=1774983989"
+ },
+ "tplink-sg108pe": {
+  "photo": "https://static.tp-link.com/01_large_1598408391497k.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.tp-link.com/us/business-networking/poe-switch/tl-sg108pe/"
+   }
+  ]
  },
  "ubnt-u7-pro": {
   "photo": "https://cdn.ecomm.ui.com/products/fa8dd4e4-36c8-4c79-a928-22c7bff2ce29/ab5bc8a4-6135-402e-a695-e3ea5e16d3e6.png",
