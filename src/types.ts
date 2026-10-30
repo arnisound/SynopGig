@@ -39,6 +39,7 @@ export type ConnectorType =
   | 'iec'
   | 'p17-63a'
   | 'p17-125a'
+  | 'microdot'
   | 'usb'
   | 'bnc'
   | 'ntype'

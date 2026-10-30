@@ -74,6 +74,7 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   iec: 'IEC C14',
   'p17-63a': 'P17 63A tri',
   'p17-125a': 'P17 125A tri',
+  microdot: 'MicroDot (DPA)',
   usb: 'USB',
   bnc: 'BNC (HF 50 Ω)',
   ntype: 'N (HF)',
