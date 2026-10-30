@@ -1420,6 +1420,8 @@
    }
   ]
  },
+ "bmd-videohub-12": {},
+ "bmd-videohub-20": {},
  "bmd-videohub-40": {
   "photo": "https://images.blackmagicdesign.com/images/products/blackmagicvideohub/product-grid/blackmagic-videohub-40x40-12g@2x.jpg",
   "docs": [
@@ -4328,6 +4330,10 @@
     "url": "https://www.labgruppen.com/en/products/0107-AAH"
    }
   ]
+ },
+ "lake-lm26": {
+  "photo": "https://www.australismusic.com.au/Files/Images/2021_productImages/LM26_1.png",
+  "docs": []
  },
  "lectro-dsqd": {
   "photo": "https://lectrosonics.com/wp-content/uploads/2024/05/dsqd-digital-receiver_379283498.jpg",
