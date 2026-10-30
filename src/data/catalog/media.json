@@ -653,17 +653,143 @@
   "photo": "https://www.proelnorthamerica.com/cdn/shop/products/AX1012A_900x.jpg?v=1643916292",
   "docs": []
  },
+ "axiom-ax1012p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/AX1012_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=22677"
+   }
+  ]
+ },
  "axiom-ax12c": {
   "photo": "https://beta.b2b.proel.com/image/cache/data/proel/AX12C_front_SX-800x800h.jpg",
   "docs": []
+ },
+ "axiom-ax12lf": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/AX12LF_front_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=22049"
+   }
+  ]
  },
  "axiom-ax16cl": {
   "photo": "https://www.proelnorthamerica.com/cdn/shop/files/AX16C_34_DX_FRONT.jpg?v=1683481331",
   "docs": []
  },
+ "axiom-ax2010a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/AX2010A-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=1018"
+   }
+  ]
+ },
  "axiom-ax2010p": {
   "photo": "https://beta.b2b.proel.com/image/cache/data/AXIOM/AX2010APNG-400x400w.png",
   "docs": []
+ },
+ "axiom-ax2065a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/AX2065-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=16399"
+   }
+  ]
+ },
+ "axiom-ax2065p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/AXIOM/AX2065AV2_34DX-500x500.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=16400"
+   }
+  ]
+ },
+ "axiom-ax6c": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/AXIOM/AX6C_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=21455"
+   }
+  ]
+ },
+ "axiom-ax800a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/AXIOM/AX800A_01-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17970"
+   }
+  ]
+ },
+ "axiom-ax8cl": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/AX8C_34_DX_FRONT-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=24955"
+   }
+  ]
+ },
+ "axiom-cx14a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/CX14A_34DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=22099"
+   }
+  ]
+ },
+ "axiom-cx15a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/AXIOM/CX15A.0-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=16398"
+   }
+  ]
+ },
+ "axiom-cxl12a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/CXL12A_34_RX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=24512"
+   }
+  ]
+ },
+ "axiom-ed120a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED120A_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20281"
+   }
+  ]
+ },
+ "axiom-ed120p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED120A_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20280"
+   }
+  ]
+ },
+ "axiom-ed12p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED12P-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17259"
+   }
+  ]
  },
  "axiom-ed150a": {
   "photo": "https://e-shop.highendstudios.de/images/product_images/original_images/ED150-1.jpg",
@@ -673,9 +799,189 @@
   "photo": "https://e-shop.highendstudios.de/images/product_images/original_images/ED150-5_0.jpg",
   "docs": []
  },
+ "axiom-ed15p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED15P-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17257"
+   }
+  ]
+ },
+ "axiom-ed210p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED210P-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17258"
+   }
+  ]
+ },
  "axiom-ed23p": {
   "photo": "https://beta.b2b.proel.com/image/cache/data/proel/ED23_REAR-800x800w.JPG",
   "docs": []
+ },
+ "axiom-ed25p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/AXIOM/ED25P-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17264"
+   }
+  ]
+ },
+ "axiom-ed60p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED60P_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20278"
+   }
+  ]
+ },
+ "axiom-ed80p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED80P_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20279"
+   }
+  ]
+ },
+ "axiom-qc24": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/QC2.4_3-4-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17155"
+   }
+  ]
+ },
+ "axiom-qc44": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/QC4.4_3-4-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17159"
+   }
+  ]
+ },
+ "axiom-sw1800a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW1800A_ver-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17969"
+   }
+  ]
+ },
+ "axiom-sw18a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW18A_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20283"
+   }
+  ]
+ },
+ "axiom-sw2100a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW2100P_34_DX_TOP-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20304"
+   }
+  ]
+ },
+ "axiom-sw210p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW210P_34_DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=20282"
+   }
+  ]
+ },
+ "axiom-sw212a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW212A_34DX-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=24957"
+   }
+  ]
+ },
+ "axiom-sw215a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW215.2-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=16401"
+   }
+  ]
+ },
+ "axiom-sw215p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW215.2-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=16403"
+   }
+  ]
+ },
+ "axiom-sw218a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW218A-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=11699"
+   }
+  ]
+ },
+ "axiom-sw218p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW218P-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=11700"
+   }
+  ]
+ },
+ "axiom-sw218xa": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW218XA_34_DX_TOP-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17267"
+   }
+  ]
+ },
+ "axiom-sw218xp": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW218XA_34_DX_TOP-500x500.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17266"
+   }
+  ]
+ },
+ "axiom-sw36xfa": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW36XF-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17260"
+   }
+  ]
+ },
+ "axiom-sw36xfp": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW36XFP-500x500.JPG",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17261"
+   }
+  ]
  },
  "ayrton-cobra": {
   "photo": "https://www.ayrton.eu/wp-content/uploads/2022/04/cobra-960x960.jpg",
