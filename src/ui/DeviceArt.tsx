@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CATEGORY_COLORS, LIBRARY } from '../data/library'
 import { symbolKey } from '../data/symbolKey'
+import { useModelPhoto } from '../library/modelPhotos'
 import type { Category } from '../types'
 import { DeviceSymbol } from './DeviceSymbol'
 
@@ -23,7 +24,10 @@ export default function DeviceArt({
   size?: number
 }) {
   // A photo given by its address on another site: when the link is dead, the symbol comes back.
+  // No photo of its own: its model's ('' asks for the symbol).
   const [broken, setBroken] = useState<string>()
+  const ofModel = useModelPhoto(image === undefined ? templateId : undefined)
+  image ??= ofModel
   if (image && image !== broken) {
     const remote = /^https?:/.test(image)
     return (

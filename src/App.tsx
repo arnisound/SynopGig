@@ -12,6 +12,8 @@ import DossierDialog from './print/DossierDialog'
 import LabelsDialog from './labels/LabelsDialog'
 import { projectChanges } from './share/changes'
 import { savedDocs, savedPhotos } from './library/photos'
+import { addModelPhotos } from './library/modelPhotos'
+import { fetchSharedPhotos } from './library/sharedPhotos'
 import { cachedShared, fetchShared, saveSharedProgress, sharedIdFromHash, sharedTargetFromHash, sharedProgress } from './share/share'
 import ShareDialog, { ChangeList } from './share/ShareDialog'
 import StagePage from './stage/StagePage'
@@ -146,6 +148,11 @@ export default function App() {
   }, [undo])
 
   const userLibrary = useUserLibrary()
+  // Photos picked in this browser, then those other users found for models still without one.
+  useEffect(() => {
+    addModelPhotos(savedPhotos(), true)
+    fetchSharedPhotos().then((shared) => addModelPhotos(shared))
+  }, [])
   // Photos and documents found for base models in this browser join them.
   const base = useMemo(() => {
     const photos = savedPhotos()

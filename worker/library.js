@@ -16,6 +16,9 @@
  *   POST /projects       publish a read-only copy of a project, returns its link id
  *   GET /projects/<id>   read it (anyone with the link)
  *   PUT /projects/<id>   update it, DELETE /projects/<id> remove it (creator's key)
+ *   GET /photos      the photos of catalogue models: their addresses on the makers'
+ *                    sites, found by the app through the AI relay, shared by everyone
+ *   POST /photos     {id, url, replace?} adds one (checked to be a picture)
  *   GET /diagnostic  check the storage and refresh the list
  */
 
@@ -247,6 +250,55 @@ function tooManyShares(request) {
   return false
 }
 
+/* ---------- Catalogue photos (addresses, never copies) ---------- */
+
+const MAX_PHOTOS = 5000
+const PHOTOS_PER_HOUR = 120
+const photoPosts = new Map()
+
+/** A catalogue model id and the https address of its photo. */
+export function cleanPhoto(body) {
+  const id = typeof body?.id === 'string' && /^[a-z0-9][a-z0-9-]{1,63}$/.test(body.id) ? body.id : ''
+  const url = typeof body?.url === 'string' && body.url.length <= 500 && /^https:\/\/[^\s<>"']+$/i.test(body.url) ? body.url : ''
+  return id && url ? { id, url } : null
+}
+
+/** Is it really a picture? Only its first bytes are read. */
+async function isImage(url) {
+  try {
+    const res = await fetch(url, { headers: { Range: 'bytes=0-2047', 'User-Agent': 'Mozilla/5.0 (SynopGig photo check)' }, redirect: 'follow' })
+    const type = res.headers.get('Content-Type') ?? ''
+    await res.body?.cancel()
+    return res.ok && /^image\//i.test(type)
+  } catch {
+    return false
+  }
+}
+
+function tooManyPhotos(request) {
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
+  const now = Date.now()
+  const recent = (photoPosts.get(ip) ?? []).filter((t) => now - t < 3_600_000)
+  if (recent.length >= PHOTOS_PER_HOUR) return true
+  recent.push(now)
+  photoPosts.set(ip, recent)
+  if (photoPosts.size > 5000) photoPosts.clear()
+  return false
+}
+
+/** The first photo found for a model stays; a user picking another one replaces it. */
+async function sharePhoto(kv, body) {
+  const p = cleanPhoto(body)
+  if (!p) return { status: 400, error: 'Photo refusée.' }
+  const all = (await kv.get('photos', 'json')) ?? {}
+  if (all[p.id] === p.url || (all[p.id] && body.replace !== true)) return { status: 200, data: { photo: all[p.id] } }
+  if (!all[p.id] && Object.keys(all).length >= MAX_PHOTOS) return { status: 507, error: 'Trop de photos.' }
+  if (!(await isImage(p.url))) return { status: 400, error: 'Cette adresse ne mène pas à une image.' }
+  all[p.id] = p.url
+  await kv.put('photos', JSON.stringify(all))
+  return { status: 200, data: { photo: p.url } }
+}
+
 async function handle(request, env, path, reply, fail, allowed) {
   const kv = env.LIBRARY
   if (path === '/projects' || path.startsWith('/projects/')) {
@@ -266,9 +318,15 @@ async function handle(request, env, path, reply, fail, allowed) {
     // Any page may show it (the printed file draws it too): public, cached for a year.
     return new Response(bytes, { headers: { 'Content-Type': img.type, 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=31536000, immutable' } })
   }
+  if (request.method === 'GET' && path === '/photos') return reply({ photos: kv ? ((await kv.get('photos', 'json')) ?? {}) : {} })
   if (request.method === 'GET') return reply({ version: 1, entries: kv ? await readLibrary(kv) : [] })
   if (!allowed) return fail('Site non autorisé.', 403)
   if (!kv) return fail('Partage non configuré (stockage LIBRARY manquant).', 503)
+  if (request.method === 'POST' && path === '/photos') {
+    if (tooManyPhotos(request)) return fail('Trop de photos en une heure.', 429)
+    const r = await sharePhoto(kv, await request.json().catch(() => null))
+    return r.data ? reply(r.data) : fail(r.error, r.status)
+  }
   if (tooManyShares(request)) return fail('Trop de partages en une heure, réessayez plus tard.', 429)
   let body
   try {

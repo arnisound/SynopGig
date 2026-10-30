@@ -12,7 +12,6 @@ import { research, type FoundDoc } from './finder'
 import { pageImages, shrink } from './images'
 import { loads } from './photos'
 import DeviceArt from '../ui/DeviceArt'
-import CatalogFiller from './CatalogFiller'
 import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
 import type { UserLibrary } from './useUserLibrary'
 import type { NewProductRequest } from './newProduct'
@@ -597,7 +596,6 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           <input ref={importRef} type="file" accept=".json,application/json" hidden onChange={(e) => { importLibrary(e.target.files?.[0]); e.target.value = '' }} />
         </div>
 
-        {!embedded && <CatalogFiller templates={LIBRARY} />}
 
         <h4>Bibliothèque USER <small className="muted">({userLibrary.templates.length}{userLibrary.status === 'offline' ? ', hors ligne' : ''})</small></h4>
         <p className="muted small">Matériel partagé par les utilisateurs, disponible pour tous dans la palette.</p>

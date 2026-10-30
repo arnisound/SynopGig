@@ -25,6 +25,12 @@ describe('catalogue', () => {
     }
   })
 
+  it('shows photos from their own address, never copied in', () => {
+    const photos = LIBRARY.filter((t) => t.image)
+    expect(photos.length).toBeGreaterThan(500)
+    for (const t of photos) expect(t.image).toMatch(/^https:\/\/[^\s"']+$/)
+  })
+
   it('draws every model with a symbol of its kind', () => {
     expect(LIBRARY.filter((t) => !t.panel && symbolKey(t) === 'box').map((t) => t.id)).toEqual([])
   })

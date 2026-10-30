@@ -173,3 +173,30 @@ describe('checks by technicians', () => {
     expect((await send(env, 'POST', '/user-1/check', { voter: A, verdict: 'maybe' })).status).toBe(400)
   })
 })
+
+describe('catalogue photos', async () => {
+  const { vi, afterEach } = await import('vitest')
+  afterEach(() => vi.unstubAllGlobals())
+  const picture = (type = 'image/jpeg') => vi.fn(async () => new Response('x', { status: 200, headers: { 'Content-Type': type } }))
+
+  it('keeps the first photo found for a model, for everyone, and checks it is a picture', async () => {
+    const env = { LIBRARY: memoryKv() }
+    vi.stubGlobal('fetch', picture())
+    const url = 'https://www.example-maker.com/img/sm58.jpg'
+    expect((await send(env, 'POST', '/photos', { id: 'shure-sm58', url })).status).toBe(200)
+    expect((await send(env, 'POST', '/photos', { id: 'shure-sm58', url: 'https://other.example/x.jpg' })).status).toBe(200)
+    expect((await (await send(env, 'GET', '/photos')).json()).photos).toEqual({ 'shure-sm58': url })
+    // Someone picking another photo replaces it.
+    await send(env, 'POST', '/photos', { id: 'shure-sm58', url: 'https://other.example/x.jpg', replace: true })
+    expect((await (await send(env, 'GET', '/photos')).json()).photos['shure-sm58']).toBe('https://other.example/x.jpg')
+  })
+
+  it('refuses what is not a picture, or not an https address', async () => {
+    const env = { LIBRARY: memoryKv() }
+    vi.stubGlobal('fetch', picture('text/html'))
+    expect((await send(env, 'POST', '/photos', { id: 'shure-sm57', url: 'https://www.example-maker.com/page' })).status).toBe(400)
+    expect((await send(env, 'POST', '/photos', { id: 'shure-sm57', url: 'http://x.example/a.jpg' })).status).toBe(400)
+    expect((await send(env, 'POST', '/photos', { id: 'Bad Id', url: 'https://x.example/a.jpg' })).status).toBe(400)
+    expect((await (await send(env, 'GET', '/photos')).json()).photos).toEqual({})
+  })
+})

@@ -1,1 +1,5204 @@
-{}
+{
+ "ah-ab168": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/AB-168-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/ab168/"
+   }
+  ]
+ },
+ "ah-ar2412": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/AR2412-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/ar2412/"
+   }
+  ]
+ },
+ "ah-ar84": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/AR84-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/ar84/"
+   }
+  ]
+ },
+ "ah-cq18t": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/08/CQ-18T-Top-Green-Lit0000.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/cq/cq-18t/"
+   }
+  ]
+ },
+ "ah-cq20b": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/08/CQ-20B-Top-Orange-Lit0000.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/cq/cq-20b/"
+   }
+  ]
+ },
+ "ah-dt168": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/DT168-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/dt168/"
+   }
+  ]
+ },
+ "ah-dx012": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/DX-012-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/dx012/"
+   }
+  ]
+ },
+ "ah-dx164w": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/DX164-W-Front_570x284-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/dx164-w/"
+   }
+  ]
+ },
+ "ah-dx168": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/DX168-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/dx168/"
+   }
+  ]
+ },
+ "ah-dx32": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/DX32-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/dx32/"
+   }
+  ]
+ },
+ "ah-gx4816": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/GX4816-Front_570x284.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/everything-i-o/gx4816/"
+   }
+  ]
+ },
+ "ah-me-u": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/ME-U_570x380-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/me-series/me-u/"
+   }
+  ]
+ },
+ "ah-me1": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/ME-1_570x380-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/me-series/me-1/"
+   }
+  ]
+ },
+ "ah-qu16": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/01/Qu-16-Front_570-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/qu/qu-classic/qu-16/"
+   }
+  ]
+ },
+ "ah-qu24": {
+  "photo": "https://www.allen-heath.com/content/uploads/2023/02/Qu-24-Front_570-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/qu/qu-classic/qu-24/"
+   }
+  ]
+ },
+ "ah-sq5": {
+  "photo": "https://www.allen-heath.com/content/uploads/2022/11/SQ-5-800.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/sq/sq-5/"
+   }
+  ]
+ },
+ "ah-sq6": {
+  "photo": "https://www.allen-heath.com/content/uploads/2022/11/SQ-6-800.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/sq/sq-6/"
+   }
+  ]
+ },
+ "ah-sq7": {
+  "photo": "https://www.allen-heath.com/content/uploads/2022/11/SQ-7-800.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.allen-heath.com/hardware/sq/sq-7/"
+   }
+  ]
+ },
+ "analogway-aquilon-rs4": {
+  "photo": "https://cdn.prod.website-files.com/6540cb540116ce87ec8b62fe/656f29e69548eb7609172602_Aquilon-5U-RS4-FAV-det-webr.avif",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.analogway.com/products/aquilon-rs4"
+   }
+  ]
+ },
+ "analogway-pulse4k": {
+  "photo": "https://cdn.prod.website-files.com/6540cb540116ce87ec8b62fe/65816405a9f259f78c6b44f9_pulse-4k-fav-300dpi-rvb.avif",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.analogway.com/products/pulse-4k"
+   }
+  ]
+ },
+ "astera-art7": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/astera-art7-cse-protective-transportation-case-for-art7.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/art7-case/"
+   }
+  ]
+ },
+ "astera-ax1": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/astera-ax1-pixel-tube.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/ax1-pixeltube/"
+   }
+  ]
+ },
+ "astera-ax3": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/AX3_WEB.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/ax3-lightdrop/"
+   }
+  ]
+ },
+ "astera-ax5": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/AX5_TriplePAR_V1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/ax5-triplepar/"
+   }
+  ]
+ },
+ "astera-box": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/astera-box.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/asterabox/"
+   }
+  ]
+ },
+ "astera-hyperion": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/HyperionTube_V2.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/hyperion-tube/"
+   }
+  ]
+ },
+ "astera-titan": {
+  "photo": "https://media.astera-led.com/wp-content/uploads/astera-fp1-kit-titan-tube.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://astera-led.com/products/titan-tube-kit/"
+   }
+  ]
+ },
+ "at-ae6100": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/e/ae6100_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-gb/ae6100"
+   }
+  ]
+ },
+ "at-at4050": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/at4050_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-gb/at4050"
+   }
+  ]
+ },
+ "at-atm350": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atm350_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-gb/atm350"
+   }
+  ]
+ },
+ "at-atm650": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atm650_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atm650"
+   }
+  ]
+ },
+ "at-atw-a49": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-a49_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-a49"
+   }
+  ]
+ },
+ "at-atw-da49": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-da49_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-da49"
+   }
+  ]
+ },
+ "at-atw-r3210": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-r3210_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-r3210"
+   }
+  ]
+ },
+ "at-atw-r3210n": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-r3210n_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-r3210n"
+   }
+  ]
+ },
+ "at-atw-r5220": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-r5220_01_3.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-r5220"
+   }
+  ]
+ },
+ "at-atw-t3201": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-t3201_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-t3201"
+   }
+  ]
+ },
+ "at-atw-t3202": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/a/t/atw-t3202_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-us/atw-t3202"
+   }
+  ]
+ },
+ "at-m3r": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/m/3/m3r.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-gb/m3r"
+   }
+  ]
+ },
+ "at-m3t": {
+  "photo": "https://www.audio-technica.com/media/catalog/product/cache/4c54125f062bf26160bb6e241a5e0899/m/3/m3r.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.audio-technica.com/en-gb/m3r"
+   }
+  ]
+ },
+ "avo-arena": {
+  "photo": "https://www.avolites.com/app/uploads/intervention/cache/arena-e1536747792693-1257699191.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.avolites.com/product/arena/"
+   }
+  ]
+ },
+ "avo-d9-215": {
+  "photo": "https://www.avolites.com/app/uploads/intervention/cache/D9-215_Image-1257699191.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.avolites.com/product/d9-215/"
+   }
+  ]
+ },
+ "avo-quartz": {
+  "photo": "https://www.avolites.com/app/uploads/intervention/cache/Quartz-Front-Plus-Screen-1257699191.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.avolites.com/product/quartz/"
+   }
+  ]
+ },
+ "avo-tiger": {
+  "photo": "https://www.avolites.com/app/uploads/intervention/cache/Tiger-Touch-II-e1541421605432-1257699191.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.avolites.com/product/tiger-touch-ii/"
+   }
+  ]
+ },
+ "ayrton-cobra": {
+  "photo": "https://www.ayrton.eu/wp-content/uploads/2022/04/cobra-960x960.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.ayrton.eu/produit/cobra/cobra/"
+   }
+  ]
+ },
+ "ayrton-diablo": {
+  "photo": "https://www.ayrton.eu/wp-content/uploads/2019/06/ayrton_plus_vignettes_Diablo-819x630.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.ayrton.eu/produit/diablo/"
+   }
+  ]
+ },
+ "ayrton-huracan": {
+  "photo": "https://www.ayrton.eu/wp-content/uploads/2022/10/ayrton_plus_vignettes_Huracan-Wash-819x630.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.ayrton.eu/produit/huracan-wash/"
+   }
+  ]
+ },
+ "ayrton-khamsin": {
+  "photo": "https://www.ayrton.eu/wp-content/uploads/2018/10/ayrton_plus_vignettes_Khamsin-819x630.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.ayrton.eu/produit/khamsin/"
+   }
+  ]
+ },
+ "ayrton-perseo": {
+  "photo": "https://www.ayrton.eu/wp-content/uploads/2019/03/ayrton_plus_vignettes_Perseo-profile-819x630.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.ayrton.eu/produit/perseo-profile/"
+   }
+  ]
+ },
+ "bmd-atem-camera-control": {
+  "photo": "https://images.blackmagicdesign.com/images/products/atemcameracontrolpanel/product-grid/atem-camera-control-panel.jpg?_v=1527724161",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.blackmagicdesign.com/products/atemcameracontrolpanel"
+   }
+  ]
+ },
+ "bss-ar133": {
+  "photo": "https://adn.harmanpro.com/productattachment/1848/product_attachment/x_large-54732f12781cfbef0665babd87212c6b.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://bssaudio.com/en-US/products/ar-133"
+   }
+  ]
+ },
+ "chauvet-colorado-pxl16": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/COLORADO_PXL_BAR-16-FRONT-FEAT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/colorado-pxl-bar-16/"
+   }
+  ]
+ },
+ "chauvet-colorado2": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/COLORADO-2-SOLO-FRONT-FEAT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/colorado-2-solo/"
+   }
+  ]
+ },
+ "chauvet-maverick-force-s": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/MAVERICK-FORCE-S-PROFILE-FRONT-FEAT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/maverick-force-s-profile/"
+   }
+  ]
+ },
+ "chauvet-maverick-storm1": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/MAVERICK-STORM-1-WASH-FRONT-FEAT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/maverick-storm-1-wash/"
+   }
+  ]
+ },
+ "chauvet-r2wash": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/ROGUE_R2_WASH-FRONT-FEAT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/rogue-r2-wash/"
+   }
+  ]
+ },
+ "chauvet-strike-array4": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/STRIKE-ARRAY-4-FRONT-FEAT-1024x1024.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/strike-array-4/"
+   }
+  ]
+ },
+ "chauvet-strike4": {
+  "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/STRIKE-4-FRONT-FEAT-1024x1024.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chauvetprofessional.com/product/strike-4/"
+   }
+  ]
+ },
+ "cp-sharpy": {
+  "photo": "https://www.claypaky.it/wp-content/uploads/2025/06/Claypaky_UltimoSharpy.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.claypaky.it/en/ultimo-sharpy/"
+   }
+  ]
+ },
+ "cp-sharpy-plus": {
+  "photo": "https://www.claypaky.it/wp-content/uploads/2022/10/Claypaky_SharpyPlus.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.claypaky.it/products/sharpy-plus/"
+   }
+  ]
+ },
+ "cp-skylos": {
+  "photo": "https://www.claypaky.it/wp-content/uploads/2025/06/Claypaky_Skylos.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.claypaky.it/products/skylos/"
+   }
+  ]
+ },
+ "cp-volero-wave": {
+  "photo": "https://www.claypaky.it/wp-content/uploads/2022/10/Claypaky_VoleroWave.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.claypaky.it/products/volero-wave/"
+   }
+  ]
+ },
+ "cp-xtylos": {
+  "photo": "https://www.claypaky.it/wp-content/uploads/2025/06/Claypaky_XtylosAqua.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.claypaky.it/products/xtylos-aqua/"
+   }
+  ]
+ },
+ "db-10d": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/e/3/csm_dbaudio-10D-amplifier-isometric_73509daa85.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/10d/"
+   }
+  ]
+ },
+ "db-10s": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/a/8/csm_dbaudio-10s-loudspeaker-front_7b495935be.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/10s/"
+   }
+  ]
+ },
+ "db-10sd": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-10s-d-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/10s-d/"
+   }
+  ]
+ },
+ "db-12s": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-12s-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/12s/"
+   }
+  ]
+ },
+ "db-12sd": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-12s-d-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/12s-d/"
+   }
+  ]
+ },
+ "db-16c": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xc-series/thumbs-teaserlist-640x640/dbaudio-16c-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xc-series/16c/"
+   }
+  ]
+ },
+ "db-18ssub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-18s-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/18s-sub/"
+   }
+  ]
+ },
+ "db-21ssub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-21s-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/21s-sub/"
+   }
+  ]
+ },
+ "db-24c": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xc-series/thumbs-teaserlist-640x640/dbaudio-24c-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xc-series/24c/"
+   }
+  ]
+ },
+ "db-24ce": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xc-series/thumbs-teaserlist-640x640/dbaudio-24e-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xc-series/24c-e/"
+   }
+  ]
+ },
+ "db-30d": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/5/c/csm_dbaudio-30D-amplifier-front_70d212f2ec.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/30d/"
+   }
+  ]
+ },
+ "db-40d": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/e/0/csm_dbaudio-amplifiers-40d_ec61f64012.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/40d/"
+   }
+  ]
+ },
+ "db-44s": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/d/c/csm_dbaudio-44s-loudspeaker-front_20a845e881.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/44s/"
+   }
+  ]
+ },
+ "db-4s": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-4s-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/4s/"
+   }
+  ]
+ },
+ "db-5s": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-5s-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/5s/"
+   }
+  ]
+ },
+ "db-8s": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/xs-series/thumbs-teaserlist-640x640/dbaudio-8s-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/xs-series/8s/"
+   }
+  ]
+ },
+ "db-a-series": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/6/f/csm_dbaudio-al60-front-horizontal_fae4fe52e7.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/a-series/al60/"
+   }
+  ]
+ },
+ "db-al90": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/a/0/csm_dbaudio-al90-front-horizontal_45cf5f11a6.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/a-series/al90/"
+   }
+  ]
+ },
+ "db-b22": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/c/8/csm_dbaudio-b22-subwoofer-front_f9cdace3a3.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/subwoofers/b22-sub/"
+   }
+  ]
+ },
+ "db-b2sub": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/9/1/csm_dbaudio-b2-sub-subwoofer_42b01870e7.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/b2-sub/"
+   }
+  ]
+ },
+ "db-b4sub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-b4-subwoofer-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/b4-sub/"
+   }
+  ]
+ },
+ "db-b6sub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/y-series/thumbs-teaserlist-640x640/dbaudio-b6-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/y-series/b6-sub/"
+   }
+  ]
+ },
+ "db-ccl12": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/b/f/csm_dbaudio-ccl12-front_3071050ae2.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/cl-series/ccl12/"
+   }
+  ]
+ },
+ "db-ccl8": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/f/8/csm_dbaudio-ccl8-front_0bd42fcd86.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/cl-series/ccl8/"
+   }
+  ]
+ },
+ "db-d20": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/b/8/csm_dbaudio-D20-amplifier-front_478ba6beed.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/d20/"
+   }
+  ]
+ },
+ "db-d40": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/6/b/csm_dbaudio-amplifier-d40_b608bafb43.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/d40/"
+   }
+  ]
+ },
+ "db-d6": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/3/5/csm_dbaudio-D6-amplifier-front_a2f6f2f6bc.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/d6/"
+   }
+  ]
+ },
+ "db-d80": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/4/b/csm_dbaudio-D80-amplifier-front_80bfe63d46.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/d80/"
+   }
+  ]
+ },
+ "db-d90": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/1/0/csm_dbaudio-products-d90-isometric_7b228fe061.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/amplifiers/d90/"
+   }
+  ]
+ },
+ "db-ds10": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/3/8/csm_dbaudio-DS10-audio-network-bridge-front_f0648f6d88.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/processing-and-matrix/ds10/"
+   }
+  ]
+ },
+ "db-ds100": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/7/a/csm_dbaudio-DS100-signal-engine-isometric_124b3fa222.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/processing-and-matrix/ds100/"
+   }
+  ]
+ },
+ "db-ds20": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/8/7/csm_dbaudio-DS20-audio-network-bridge-isometric_37f74b45ab.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/processing-and-matrix/ds20/"
+   }
+  ]
+ },
+ "db-e12": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e12-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e12/"
+   }
+  ]
+ },
+ "db-e12d": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e12-d-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e12-d/"
+   }
+  ]
+ },
+ "db-e15xsub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e15x-subwoofer-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e15x-sub/"
+   }
+  ]
+ },
+ "db-e3": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/4/f/csm_dbaudio-e3-loudspeaker_31688ddd5a.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/e3/"
+   }
+  ]
+ },
+ "db-e4": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e4-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e4/"
+   }
+  ]
+ },
+ "db-e5": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e5-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e5/"
+   }
+  ]
+ },
+ "db-e6": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/f/2/csm_dbaudio-e6-loudspeaker-front_d0d9ca8cbb.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e6/"
+   }
+  ]
+ },
+ "db-e8": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e8-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/e-series/e8/"
+   }
+  ]
+ },
+ "db-epac": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/a/e/csm_dbaudio-epac-amplifiers-isometric_04fff2c0d2.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/e-pac/"
+   }
+  ]
+ },
+ "db-gsl12": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/5/2/csm_dbaudio-gsl12-loudspeaker-front_438422aee5.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/sl-series/gsl12/"
+   }
+  ]
+ },
+ "db-gsl8": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/sl-series/thumbs-teaserlist-640x640/dbaudio-gsl8-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/sl-series/gsl8/"
+   }
+  ]
+ },
+ "db-j12": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/j-series/thumbs-teaserlist-640x640/dbaudio-j12-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/j12/"
+   }
+  ]
+ },
+ "db-j8": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/j-series/thumbs-teaserlist-640x640/dbaudio-j8-loudspeaker-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/j8/"
+   }
+  ]
+ },
+ "db-jinfra": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/j-series/thumbs-teaserlist-640x640/dbaudio-j-infra-subwoofer-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/j-infra/"
+   }
+  ]
+ },
+ "db-jsub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/j-series/thumbs-teaserlist-640x640/dbaudio-j-infra-subwoofer-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/j-sub/"
+   }
+  ]
+ },
+ "db-ksl-sub": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/6/1/csm_dbaudio-ksl-sub-subwoofer-th_6363abf69f.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/sl-series/ksl-sub/"
+   }
+  ]
+ },
+ "db-ksl12": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/f/e/csm_dbaudio-ksl12-loudspeaker-front-reddot-award_f79e543c38.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/sl-series/ksl12/"
+   }
+  ]
+ },
+ "db-ksl8": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/b/6/csm_dbaudio-ksl8-loudspeaker-th_db98d63238.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/sl-series/ksl8/"
+   }
+  ]
+ },
+ "db-m2": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/monitors/thumbs-teaserlist-640x640/dbaudio-m2-monitors-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/monitors/m2/"
+   }
+  ]
+ },
+ "db-m4": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/monitors/thumbs-teaserlist-640x640/dbaudio-m4-monitors-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/monitors/m4/"
+   }
+  ]
+ },
+ "db-m6": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/monitors/thumbs-teaserlist-640x640/dbaudio-m6-monitors-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/monitors/m6/"
+   }
+  ]
+ },
+ "db-max12": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/5/e/csm_dbaudio-max12-monitors_8840dc00fc.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/max12/"
+   }
+  ]
+ },
+ "db-max2": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/monitors/thumbs-teaserlist-640x640/dbaudio-max2-monitors-front-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/monitors/max2/"
+   }
+  ]
+ },
+ "db-q1": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/8/2/csm_dbaudio-q1-loudspeaker-front_13c75f97a3.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/q1/"
+   }
+  ]
+ },
+ "db-q10": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/2/1/csm_dbaudio-q10-loudspeaker-front_bae5db38d3.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/q10/"
+   }
+  ]
+ },
+ "db-q7": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/3/1/csm_dbaudio-q7-loudspeaker-front_f7e2ac7215.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/q7/"
+   }
+  ]
+ },
+ "db-qsub": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/1/a/csm_dbaudio-q-sub-subwoofer-front_4ed15e4e17.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/heritage/q-sub/"
+   }
+  ]
+ },
+ "db-slgsub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/sl-series/thumbs-teaserlist-640x640/dbaudio-sl-gsub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/sl-series/sl-gsub/"
+   }
+  ]
+ },
+ "db-slsub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/sl-series/thumbs-teaserlist-640x640/dbaudio-sl-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/all/series/sl-series/sl-sub/"
+   }
+  ]
+ },
+ "db-t10": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/t-series/thumbs-teaserlist-640x640/dbaudio-t10-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/t-series/t10/"
+   }
+  ]
+ },
+ "db-tsub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/t-series/thumbs-teaserlist-640x640/dbaudio-t-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/t-series/t-sub/"
+   }
+  ]
+ },
+ "db-v10p": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/v-series/thumbs-teaserlist-640x640/dbaudio-v10p-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/v-series/v10p/"
+   }
+  ]
+ },
+ "db-v12": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/v-series/thumbs-teaserlist-640x640/dbaudio-v12-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/v-series/v12/"
+   }
+  ]
+ },
+ "db-v7p": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/v-series/thumbs-teaserlist-640x640/dbaudio-v7p-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/v-series/v7p/"
+   }
+  ]
+ },
+ "db-v8": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/c/1/csm_dbaudio-v8-loudspeaker-front-line-array-2_5c1e18dd6a.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/v-series/v8/"
+   }
+  ]
+ },
+ "db-vgsub": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/8/1/csm_dbaudio-v-gsub-subwoofer-th_f150060c23.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/v-series/v-gsub/"
+   }
+  ]
+ },
+ "db-vsub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/v-series/thumbs-teaserlist-640x640/dbaudio-v-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/v-series/v-sub/"
+   }
+  ]
+ },
+ "db-xsl12": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/4/2/csm_dbaudio-xsl12-loudspeaker-rear_1946f33458.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/sl-series/xsl12/"
+   }
+  ]
+ },
+ "db-xsl8": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/c/b/csm_dbaudio-xsl8-loudspeaker-rear_fe2e279348.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/sl-series/xsl8/"
+   }
+  ]
+ },
+ "db-y10p": {
+  "photo": "https://www.dbaudio.com/assets/products/_processed_/6/0/csm_dbaudio-y10p-loudspeaker-front-with-accessory-2_a0cf52489e.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/y-series/y10p/"
+   }
+  ]
+ },
+ "db-y12": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/y-series/thumbs-teaserlist-640x640/dbaudio-y12-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/y-series/y12/"
+   }
+  ]
+ },
+ "db-y7p": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/y-series/thumbs-teaserlist-640x640/dbaudio-y7p-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/y-series/y7p/"
+   }
+  ]
+ },
+ "db-y8": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/y-series/thumbs-teaserlist-640x640/dbaudio-y8-loudspeaker-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/y-series/y8/"
+   }
+  ]
+ },
+ "db-ysub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/y-series/thumbs-teaserlist-640x640/dbaudio-y-sub-subwoofer-th.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dbaudio.com/global/en/products/series/y-series/y-sub/"
+   }
+  ]
+ },
+ "digico-d2-rack": {
+  "photo": "https://digico.biz/wp-content/uploads/2018/11/D2_rack_BNC_AES-1-1200x750.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/racks/d2-rack/"
+   }
+  ]
+ },
+ "digico-sd-mini": {
+  "photo": "https://digico.biz/wp-content/uploads/2018/11/SD_Mini_Rack_1-1-1200x750.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/racks/sd-mini-rack/"
+   }
+  ]
+ },
+ "digico-sd-rack": {
+  "photo": "https://digico.biz/wp-content/uploads/2018/10/SD_Rack_withCards-600x375.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/racks/sd-rack/"
+   }
+  ]
+ },
+ "digico-sd10": {
+  "photo": "https://digico.biz/wp-content/uploads/2018/11/SD10_intro-1200x750.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/consoles/sd10/"
+   }
+  ]
+ },
+ "digico-sd12": {
+  "photo": "https://digico.biz/wp-content/uploads/2019/03/SD12-1200x750.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/consoles/sd12/"
+   }
+  ]
+ },
+ "digico-sd9": {
+  "photo": "https://digico.biz/wp-content/uploads/2018/11/SD9_intro-1200x750.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/consoles/sd9/"
+   }
+  ]
+ },
+ "dpa-2011": {
+  "photo": "https://www.dpamicrophones.com/media/sc4fy5ok/2011a-ddicate-2011a-twin-diaphragm-cardioid-microphone.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dpamicrophones.com/microphones/pencil/2011/"
+   }
+  ]
+ },
+ "dpa-4088": {
+  "photo": "https://www.dpamicrophones.com/media/0vuphufe/4088-dc-a-b-lh-dfine-core-4088-directional-headset-mic-black.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dpamicrophones.com/microphones/headset-and-earset/4088/"
+   }
+  ]
+ },
+ "dpa-4099": {
+  "photo": "https://www.dpamicrophones.com/media/zkzn3do5/4099-dp-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dpamicrophones.com/microphones/instrument/4099/"
+   }
+  ]
+ },
+ "dpa-6060": {
+  "photo": "https://www.dpamicrophones.com/media/1enchadk/6060-core-omni-submini-mic-normal-spl-6060-oc-u-b00-black.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dpamicrophones.com/microphones/lavalier/6060/"
+   }
+  ]
+ },
+ "dpa-6066": {
+  "photo": "https://www.dpamicrophones.com/media/2ipjmtwi/6066-core-omni-headset-mic-black-6066-oc-r-b00-lo-res.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dpamicrophones.com/microphones/headset-and-earset/6066/"
+   }
+  ]
+ },
+ "elation-fuze-profile": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/eab60b015c7475520c06b849001b88e84423bb5b_FUZ495__IMG__002__775b825c0bea.jpg?v=1776815026&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/fuze-profile"
+   }
+  ]
+ },
+ "elation-proteus-hybrid": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/37425e2fa2e1776927003f88e6ded9937fabf6d4_PRH021__IMG__001__51217b138583.jpg?v=1776814781&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/proteus-hybrid"
+   }
+  ]
+ },
+ "elation-proteus-max": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/c0cfdc6e8c4020e8d6a8c32b1ba9d9a93bcaa229_PRM992__IMG__002__7152aceb057b.jpg?v=1776815619&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/proteus-maximus"
+   }
+  ]
+ },
+ "elation-protron-eclypse": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/0645145fb0c594460fddbda5b0a24cac6f4823b0_PRO954__IMG__001__2f590707f380.jpg?v=1776815920&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/protron-eclypse"
+   }
+  ]
+ },
+ "elation-sixbar1000": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/e9bbd10c55a2546928e84a0f850337a4b52835bf_SIX086__IMG__001__4d03a9ebf964.jpg?v=1776815102&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/sixbar-1000"
+   }
+  ]
+ },
+ "elation-sixpar300": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/ebd208f2a6553aa3478493a8e68efc15264a9d08_SIX062__IMG__001__6dc438e7e261.jpg?v=1776815259&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/sixpar-300"
+   }
+  ]
+ },
+ "elation-smarty-hybrid": {
+  "photo": "https://www.elationlighting.com/cdn/shop/files/196e7fd072122d9c75f2bb517d0f78215a436e26_ESH253__IMG__002__384d9629f178.jpg?v=1776815389&width=2048",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.elationlighting.com/products/smarty-hybrid"
+   }
+  ]
+ },
+ "ev-ekx-12": {
+  "photo": "https://keenfinity.cdn-norce.tech/5f179aa0-9f67-47b1-8081-e05580d7b2a7",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-12"
+   }
+  ]
+ },
+ "ev-ekx-12p": {
+  "photo": "https://keenfinity.cdn-norce.tech/8ae60d55-1ed6-4b5c-99d6-63374b97565b",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-12p"
+   }
+  ]
+ },
+ "ev-ekx-15": {
+  "photo": "https://keenfinity.cdn-norce.tech/b5afd57d-09de-4140-9280-cf4ff203c8f9",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-15"
+   }
+  ]
+ },
+ "ev-ekx-15p": {
+  "photo": "https://keenfinity.cdn-norce.tech/b5c6928e-30b9-404e-b101-04c18b033dc8",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-15p"
+   }
+  ]
+ },
+ "ev-ekx-15s": {
+  "photo": "https://keenfinity.cdn-norce.tech/a2a25e99-52d8-4d2b-885e-1cd666ced2dd",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-15s"
+   }
+  ]
+ },
+ "ev-ekx-15sp": {
+  "photo": "https://keenfinity.cdn-norce.tech/4dc02532-aab6-4ac2-9d57-3ec7ea9c5341",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-15sp"
+   }
+  ]
+ },
+ "ev-ekx-18s": {
+  "photo": "https://keenfinity.cdn-norce.tech/dd32548b-239b-472f-8185-48f764b759d7",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-18s"
+   }
+  ]
+ },
+ "ev-ekx-18sp": {
+  "photo": "https://keenfinity.cdn-norce.tech/2ab196f2-a9fc-419e-9a6d-9a154999b875",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/ekx-18sp"
+   }
+  ]
+ },
+ "ev-elx200-10": {
+  "photo": "https://keenfinity.cdn-norce.tech/aa2668cf-72d0-4b60-9b66-b7fd5a0d998d",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-10"
+   }
+  ]
+ },
+ "ev-elx200-10p": {
+  "photo": "https://keenfinity.cdn-norce.tech/7a02bf65-d88b-43e5-bbcf-f7fe521e9e19",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-10p"
+   }
+  ]
+ },
+ "ev-elx200-12": {
+  "photo": "https://keenfinity.cdn-norce.tech/ac522374-fd39-431f-9378-308e278a515a",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-12"
+   }
+  ]
+ },
+ "ev-elx200-12p": {
+  "photo": "https://keenfinity.cdn-norce.tech/9b695295-e5f3-40af-a4da-5f03dcd7ddb7",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-12p"
+   }
+  ]
+ },
+ "ev-elx200-12sp": {
+  "photo": "https://keenfinity.cdn-norce.tech/6ffabeb7-86bf-4864-b24d-82f16cc7a9aa",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-12sp"
+   }
+  ]
+ },
+ "ev-elx200-15": {
+  "photo": "https://keenfinity.cdn-norce.tech/4faa6ce3-aabb-4b7d-abd0-502e18e6a872",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-15"
+   }
+  ]
+ },
+ "ev-elx200-15p": {
+  "photo": "https://keenfinity.cdn-norce.tech/6ecbf4a4-89b0-4aba-a80d-8513fb9ad780",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-15p"
+   }
+  ]
+ },
+ "ev-elx200-18s": {
+  "photo": "https://keenfinity.cdn-norce.tech/371c547e-d09e-48c4-9933-b2b67e1c230c",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-18s"
+   }
+  ]
+ },
+ "ev-elx200-18sp": {
+  "photo": "https://keenfinity.cdn-norce.tech/c45408ab-e3da-4810-a318-5baa0ff7bcb1",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/elx200-18sp"
+   }
+  ]
+ },
+ "ev-etx-10p": {
+  "photo": "https://keenfinity.cdn-norce.tech/314dca93-1e98-4b38-8da7-6623246e8f97",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/etx-10p"
+   }
+  ]
+ },
+ "ev-etx-12p": {
+  "photo": "https://keenfinity.cdn-norce.tech/70d5b299-ee53-4d3e-9a32-25c619d31e41",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/etx-12p"
+   }
+  ]
+ },
+ "ev-etx-15p": {
+  "photo": "https://keenfinity.cdn-norce.tech/bc8050b5-8bc5-4ba7-92a2-9a5f87670237",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/etx-15p"
+   }
+  ]
+ },
+ "ev-etx-15sp": {
+  "photo": "https://keenfinity.cdn-norce.tech/fa29bdef-12d7-4774-bb1a-56eed864f234",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/etx-15sp"
+   }
+  ]
+ },
+ "ev-etx-18sp": {
+  "photo": "https://keenfinity.cdn-norce.tech/68070d61-4fd8-4841-8868-29f7a7121bc2",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/etx-18sp"
+   }
+  ]
+ },
+ "ev-etx-35p": {
+  "photo": "https://keenfinity.cdn-norce.tech/663e5189-9da2-4aee-8c14-c8a19c3e9c1f",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/etx-35p"
+   }
+  ]
+ },
+ "ev-everse-12": {
+  "photo": "https://keenfinity.cdn-norce.tech/73ebb51b-4c20-4db6-a068-6feffa91d895",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/everse-12"
+   }
+  ]
+ },
+ "ev-everse-8": {
+  "photo": "https://keenfinity.cdn-norce.tech/d1521bfe-e927-4b64-8f79-3bf5194b9a58",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/everse-8"
+   }
+  ]
+ },
+ "ev-evolve-30m": {
+  "photo": "https://keenfinity.cdn-norce.tech/b4108e9a-2517-496f-bd68-67d1dde84b2e",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/evolve-30m"
+   }
+  ]
+ },
+ "ev-evolve-50": {
+  "photo": "https://keenfinity.cdn-norce.tech/a7d0794d-c677-4192-9368-f8bd4601f39c",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/evolve-50"
+   }
+  ]
+ },
+ "ev-evolve-50m": {
+  "photo": "https://media.cdn-norce.tech/1649/bfc08f64-4758-43f8-a6d4-d61c279dd974",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/evolve-50m-g2"
+   }
+  ]
+ },
+ "ev-nd44": {
+  "photo": "https://keenfinity.cdn-norce.tech/093e10f8-7361-4ff9-a84d-f60c4a153112",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd44"
+   }
+  ]
+ },
+ "ev-nd46": {
+  "photo": "https://keenfinity.cdn-norce.tech/167a00ff-fbd0-4fb1-a654-604aeb0c0fa1",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd46"
+   }
+  ]
+ },
+ "ev-nd66": {
+  "photo": "https://keenfinity.cdn-norce.tech/b4824105-efc7-41a5-bfa5-1b8545f547af",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd66"
+   }
+  ]
+ },
+ "ev-nd76": {
+  "photo": "https://keenfinity.cdn-norce.tech/59984af2-717f-4601-b307-438ac45c6995",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd76"
+   }
+  ]
+ },
+ "ev-nd76s": {
+  "photo": "https://keenfinity.cdn-norce.tech/f3dcf743-490d-4cb4-9aa1-a48029955d93",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd76s"
+   }
+  ]
+ },
+ "ev-nd86": {
+  "photo": "https://keenfinity.cdn-norce.tech/9114c412-1370-41f2-9c59-58d3a93370f5",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd86"
+   }
+  ]
+ },
+ "ev-nd96": {
+  "photo": "https://keenfinity.cdn-norce.tech/d76ccb14-f64d-4e5d-956b-c5e52edd13ea",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/nd96"
+   }
+  ]
+ },
+ "ev-pl33": {
+  "photo": "https://keenfinity.cdn-norce.tech/c056fa89-640f-4173-ac5a-4a43ce3e6ab1",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/pl33"
+   }
+  ]
+ },
+ "ev-pl80a": {
+  "photo": "https://keenfinity.cdn-norce.tech/214d7de9-72d7-426d-97d2-2c3d1dcf7bb9",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/pl80a"
+   }
+  ]
+ },
+ "ev-pxm-12mp": {
+  "photo": "https://keenfinity.cdn-norce.tech/2245c725-95d3-4fc5-b347-c7c755596d24",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/pxm-12mp"
+   }
+  ]
+ },
+ "ev-r300-rx": {
+  "photo": "https://keenfinity.cdn-norce.tech/5308aed5-ef82-47ae-9bc6-2f2a4a37d128",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/r300-e"
+   }
+  ]
+ },
+ "ev-re20": {
+  "photo": "https://keenfinity.cdn-norce.tech/8f3ffc8e-c85b-4849-a7a9-b797759e95cf",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/re20"
+   }
+  ]
+ },
+ "ev-re27nd": {
+  "photo": "https://keenfinity.cdn-norce.tech/8dcb6741-df29-4a3e-b803-8d67be92b59f",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/re27n-d"
+   }
+  ]
+ },
+ "ev-re320": {
+  "photo": "https://keenfinity.cdn-norce.tech/c34205ca-2e4e-41a5-81b4-16edf97bc3bd",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/re320"
+   }
+  ]
+ },
+ "ev-re520": {
+  "photo": "https://keenfinity.cdn-norce.tech/1990365a-a1d1-43bc-a4b9-5804c87d936c",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/re520"
+   }
+  ]
+ },
+ "ev-x1-212-120": {
+  "photo": "https://keenfinity.cdn-norce.tech/5ca72470-2a9f-4608-a779-22d9a4d1cbac",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/x1-212-120"
+   }
+  ]
+ },
+ "ev-x1-212-90": {
+  "photo": "https://keenfinity.cdn-norce.tech/33104879-b605-415b-9037-8ecc36eae2c6",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/x1-212-90"
+   }
+  ]
+ },
+ "ev-x12-128": {
+  "photo": "https://keenfinity.cdn-norce.tech/2b6eba18-7ad9-4e4f-bce7-cd5bb39ddd8f",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/x12-128"
+   }
+  ]
+ },
+ "ev-x2-212-120": {
+  "photo": "https://keenfinity.cdn-norce.tech/498900a5-1a12-4f62-a355-9c4bf0c37e2c",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/x2-212-120"
+   }
+  ]
+ },
+ "ev-x2-212-90": {
+  "photo": "https://keenfinity.cdn-norce.tech/0ec5f90b-9083-4c3e-a8f7-f2c31811095c",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/x2-212-90"
+   }
+  ]
+ },
+ "ev-xld281": {
+  "photo": "https://keenfinity.cdn-norce.tech/cb80b3bc-3061-4a7e-979a-bd90a6a6197c",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/xld281-fgw-3-way-compact-line-array-element"
+   }
+  ]
+ },
+ "ev-xld291": {
+  "photo": "https://keenfinity.cdn-norce.tech/6862374e-69bc-4001-9ad2-8b8e00ccffdb",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/xld291-fgw-3-way-compact-line-array-element"
+   }
+  ]
+ },
+ "ev-xle181": {
+  "photo": "https://keenfinity.cdn-norce.tech/7776a8c1-8479-4238-b8a2-8d2481b77ab4",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/xle181-fgw-2-way-very-compact-line-array-element"
+   }
+  ]
+ },
+ "ev-xle191": {
+  "photo": "https://keenfinity.cdn-norce.tech/6b0c4c94-be7e-4aa8-bc3b-21b1fa730ebf",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/xle191-fgw-2-way-very-compact-line-array-element"
+   }
+  ]
+ },
+ "ev-zlx-12": {
+  "photo": "https://keenfinity.cdn-norce.tech/c238b811-cf95-43d1-ba17-22308fdbf2e6",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-12-g2"
+   }
+  ]
+ },
+ "ev-zlx-12p": {
+  "photo": "https://keenfinity.cdn-norce.tech/3c55d0a3-51ac-4042-bea4-d3aea5ee70ac",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-12p-g2"
+   }
+  ]
+ },
+ "ev-zlx-12p-g2": {
+  "photo": "https://keenfinity.cdn-norce.tech/3c55d0a3-51ac-4042-bea4-d3aea5ee70ac",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-12p-g2"
+   }
+  ]
+ },
+ "ev-zlx-15": {
+  "photo": "https://keenfinity.cdn-norce.tech/3588b73c-6545-407c-b984-870aebf056cd",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-15-g2"
+   }
+  ]
+ },
+ "ev-zlx-15p": {
+  "photo": "https://keenfinity.cdn-norce.tech/eab11cc2-6e5c-4611-a554-05302e583db0",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-15p-g2"
+   }
+  ]
+ },
+ "ev-zlx-15p-g2": {
+  "photo": "https://keenfinity.cdn-norce.tech/eab11cc2-6e5c-4611-a554-05302e583db0",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-15p-g2"
+   }
+  ]
+ },
+ "ev-zlx-8p-g2": {
+  "photo": "https://keenfinity.cdn-norce.tech/f5708e07-c837-4cf1-800a-21f360417770",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.electrovoice.com/product/zlx-8p-g2"
+   }
+  ]
+ },
+ "fohhn-abx1": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/e/2/csm_ABX-1_1715_mainimage_784a6ddacf.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/abx-1"
+   }
+  ]
+ },
+ "fohhn-abx2": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/2/2/csm_ABX-2_1716_mainimage_4ed0697404.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/abx-2"
+   }
+  ]
+ },
+ "fohhn-abx6": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/6/1/csm_ABX-6_1721_mainimage_1755244806.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/abx-6"
+   }
+  ]
+ },
+ "fohhn-as10": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/8/4/csm_AS-10_4003_mainimage_a5408fa5c7.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/as-10"
+   }
+  ]
+ },
+ "fohhn-as10asx": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/7/7/csm_AS-10_ASX_1705_mainimage_ef4993315b.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/as-10-asx"
+   }
+  ]
+ },
+ "fohhn-di22000": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/6/3/csm_DI-2.2000_6010_mainimage_0349dc7657.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/di-22000"
+   }
+  ]
+ },
+ "fohhn-di24000": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/f/a/csm_DI-2.4000_6012_mainimage_7eb5f7f60f.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/di-24000"
+   }
+  ]
+ },
+ "fohhn-di41000": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/5/2/csm_DI-4.1000_6011_mainimage_a54efd3a6b.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/di-41000"
+   }
+  ]
+ },
+ "fohhn-di42000": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/e/7/csm_DI-4.2000_6013_mainimage_181d392dfb.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/di-42000"
+   }
+  ]
+ },
+ "fohhn-fs110": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/1/8/csm_FS-110_1352_mainimage_7f13d67a3f.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/fs-110"
+   }
+  ]
+ },
+ "fohhn-fs150": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/a/csm_FS-150_1353_mainimage_a0ef9d830b.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/fs-150"
+   }
+  ]
+ },
+ "fohhn-len100": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/0/3/csm_LEN-100_1808_mainimage_b9c68bdbd4.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/len-100"
+   }
+  ]
+ },
+ "fohhn-len60": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/8/c/csm_LEN-60_1807_mainimage_a793b592bb.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/len-60"
+   }
+  ]
+ },
+ "fohhn-na11": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/3/3/csm_NA-11_6115_mainimage_b998888aa1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/na-11"
+   }
+  ]
+ },
+ "fohhn-ps800": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/6/e/csm_PS-800_4209_mainimage_3fec4254c9.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/ps-800"
+   }
+  ]
+ },
+ "fohhn-ps850": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/5/csm_PS-850_4208_mainimage_44b0cb019b.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/ps-850"
+   }
+  ]
+ },
+ "fohhn-xm4": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/c/d/csm_XM-4_1614_mainimage_9c626c3190.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xm-4"
+   }
+  ]
+ },
+ "fohhn-xs22p": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/3/c/csm_XS-22_passive_4116_mainimage_3278afdd50.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xs-22-passive"
+   }
+  ]
+ },
+ "fohhn-xs4p": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/c/5/csm_XS-4_passive_4113_mainimage_0a1eae94e4.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xs-4-passive"
+   }
+  ]
+ },
+ "fohhn-xt22": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/1/5/csm_XT-22_1604_mainimage_ac239e5bab.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xt-22"
+   }
+  ]
+ },
+ "fohhn-xt4": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/8/0/csm_XT-4_1609_mainimage_9f9be05925.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xt-4"
+   }
+  ]
+ },
+ "furman-pl8c": {
+  "photo": "https://furmanpower.com/cdn/shop/files/Lights_-230V-_PL-8C-E_-Furman-Pro-6320229.png?v=1729628784",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://furmanpower.com/products/pl-8c-e"
+   }
+  ]
+ },
+ "furman-plplus-c": {
+  "photo": "https://furmanpower.com/cdn/shop/files/Lights-and-Voltmeter_-220V-240V-_PL-PLUS-C-E_-Furman-Pro-6320393.png?v=1729628787",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://furmanpower.com/products/pl-plus-c-e"
+   }
+  ]
+ },
+ "glp-jdc1": {
+  "photo": "https://glp.de/templates/yootheme/cache/7e/JDC1_Header-2-7ead3699.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://glp.de/de/produkte/discontinued/jdc1"
+   }
+  ]
+ },
+ "glp-jdc2": {
+  "photo": "https://glp.de/images/products/JDC2IP/JDC2-IP_Header.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://glp.de/de/produkte/entertainment-lighting/strobes/jdc2-ip"
+   }
+  ]
+ },
+ "la-5xt": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/02/3DR_5XT_3_4_Avant_Catalogue_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/5xt/"
+   }
+  ]
+ },
+ "la-k1": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xK1K1-BUMP_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/k1/"
+   }
+  ]
+ },
+ "la-k1sb": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xK1-SBK1-BUMP_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/k1-sb/"
+   }
+  ]
+ },
+ "la-k2": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xK2K2-BUMP_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/k2/"
+   }
+  ]
+ },
+ "la-k3": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xK3K3-BUMP_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/k3/"
+   }
+  ]
+ },
+ "la-k3i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xK3iK3i-BUMPWhite_RAL_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/k3i/"
+   }
+  ]
+ },
+ "la-kara": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xKara_IIM-BUMP_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/kara-ii/"
+   }
+  ]
+ },
+ "la-kara2": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xKara_IIM-BUMP_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/kara-ii/"
+   }
+  ]
+ },
+ "la-kara2i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xKara_IIiKARAIIi-BUMP_RAL_White_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/kara-iii/"
+   }
+  ]
+ },
+ "la-kiva": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xKiva_IIKIBU-SB_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/kiva-ii/"
+   }
+  ]
+ },
+ "la-kiva2": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_8xKiva_IIKIBU-SB_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/kiva-ii/"
+   }
+  ]
+ },
+ "la-ks21": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_KS21_Perspective_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/ks21/"
+   }
+  ]
+ },
+ "la-ks21i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_KS21i_Perspective_White_RAL_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/ks21i/"
+   }
+  ]
+ },
+ "la-ks28": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_KS28_Perspective_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/ks28/"
+   }
+  ]
+ },
+ "la-l2": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2023/04/Single-L2-front-800x400-1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/l2/"
+   }
+  ]
+ },
+ "la-l2d": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2023/04/Single-L2D-front-800x400-1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/l2d/"
+   }
+  ]
+ },
+ "la-la1-16i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2025/05/3DR_LA1.16i_Perspective_01-1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la1-16i/"
+   }
+  ]
+ },
+ "la-la12x": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA12X_Perspective.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la12x/"
+   }
+  ]
+ },
+ "la-la2xi": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA2Xi_Perspective.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la2xi/"
+   }
+  ]
+ },
+ "la-la4": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA4X_Perspective.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la4x/"
+   }
+  ]
+ },
+ "la-la4x": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA4X_Perspective.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la4x/"
+   }
+  ]
+ },
+ "la-la7-16": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2023/02/3DR_LA7.16_Perspective_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la7-16/"
+   }
+  ]
+ },
+ "la-la7-16i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA7.16i_Perspective.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la7-16i/"
+   }
+  ]
+ },
+ "la-larak": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2023/02/3DR_LA-RAK_III_AVB_3_4_Avant_Catalogue_01-1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la-rak-iii/"
+   }
+  ]
+ },
+ "la-larak2": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA-RAK_II_AVB_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la-rak-ii-avb/"
+   }
+  ]
+ },
+ "la-larak2avb": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_LA-RAK_II_AVB_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/la-rak-ii-avb/"
+   }
+  ]
+ },
+ "la-lisa-p1": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/10/3DR_L-ISA_PROCESSOR_II_Perspective_01-1600X1600.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/l-isa-processor-ii-core/"
+   }
+  ]
+ },
+ "la-lisa-p2": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/10/3DR_L-ISA_PROCESSOR_II_Perspective_01-1600X1600.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/l-isa-processor-ii-core/"
+   }
+  ]
+ },
+ "la-lms": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/10/3DR_LS10_Perspective_03.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/ls10/"
+   }
+  ]
+ },
+ "la-p1": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/10/3DR_P1_Perspective.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/p1/"
+   }
+  ]
+ },
+ "la-sb10i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/08/3DR_SB10i_Perspective_01_web-4.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/sb10i/"
+   }
+  ]
+ },
+ "la-sb15m": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_SB15M_Horizontal_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/sb15m/"
+   }
+  ]
+ },
+ "la-sb18": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_SB18_Horizontal_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/sb18/"
+   }
+  ]
+ },
+ "la-sb18i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_SB18_IIi_Perspective_01_White_RAL_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/sb18-iii/"
+   }
+  ]
+ },
+ "la-sb28": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/04/3DR_SB28-COV_01.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/sb28-cov/"
+   }
+  ]
+ },
+ "la-sb6i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/05/3DR_SB6i_3_4_Avant_Catalogue_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/sb6i/"
+   }
+  ]
+ },
+ "la-soka": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/11/3DR_Soka_3_4_Avant_Catalogue_800x800.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/soka/"
+   }
+  ]
+ },
+ "la-syva": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_Syva_3_4_Avant_Catalogue_07.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/syva/"
+   }
+  ]
+ },
+ "la-syva-low": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_Syva-Low_3_4_Avant_Catalogue_06.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/fr/products/syva-low/"
+   }
+  ]
+ },
+ "la-syva-sub": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2021/03/3DR_Syva_Sub_Perspective_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/syva-sub/"
+   }
+  ]
+ },
+ "la-x12": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_X12_3_4_Avant_Catalogue_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/x12/"
+   }
+  ]
+ },
+ "la-x15": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_X15HiQ_Perspective_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/x15-hiq/"
+   }
+  ]
+ },
+ "la-x4i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2024/01/x4i-pan.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/x4i-pan/"
+   }
+  ]
+ },
+ "la-x6i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2023/12/x6i.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/x6i/"
+   }
+  ]
+ },
+ "la-x8": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_X8_3_4_Avant_Catalogue_01.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/x8/"
+   }
+  ]
+ },
+ "la-x8i": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2022/12/x8i.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.l-acoustics.com/products/x8i/"
+   }
+  ]
+ },
+ "lectro-dsqd": {
+  "photo": "https://lectrosonics.com/wp-content/uploads/2024/05/dsqd-digital-receiver_379283498.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://lectrosonics.com/product/dsqd/"
+   }
+  ]
+ },
+ "lectro-ssm": {
+  "photo": "https://lectrosonics.com/wp-content/uploads/2024/05/SSM.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://lectrosonics.com/product/ssm/"
+   }
+  ]
+ },
+ "lectro-venue2": {
+  "photo": "https://lectrosonics.com/wp-content/uploads/2024/05/venue2-2021.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://lectrosonics.com/product/venue2/"
+   }
+  ]
+ },
+ "luminex-gc10": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/GigaCore-10i-Front-Cam-Iso.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/gigacore/gigacore-10i/"
+   }
+  ]
+ },
+ "luminex-gc18t": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/GigaCore-18t-Front-Cam-Iso.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/gigacore/gigacore-18t/"
+   }
+  ]
+ },
+ "luminex-gc30i": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/GigaCore-30i-Front-Cam-Straight.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/gigacore/gigacore-30i/"
+   }
+  ]
+ },
+ "luminex-lumi1": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/LumiNode-1-Rear-Cam-Iso.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/luminode/luminode-1/"
+   }
+  ]
+ },
+ "luminex-lumi12": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/LumiNode-12-Front-Cam-Iso.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/luminode/luminode-12/"
+   }
+  ]
+ },
+ "luminex-lumi2": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/LumiNode-2-Front-Cam-Iso.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/luminode/luminode-2/"
+   }
+  ]
+ },
+ "luminex-lumi4": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2025/02/LumiNode-4-Front-Cam-ISO.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/luminode/luminode-4/"
+   }
+  ]
+ },
+ "luminex-lumisplit": {
+  "photo": "https://www.luminex.be/wp-content/uploads/2017/01/LumiSplit-2.10-front.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.luminex.be/products/lumisplit/lumisplit-2-10/"
+   }
+  ]
+ },
+ "martin-atomic3000": {
+  "photo": "https://adn.harmanpro.com/productattachment/4860/product_attachment/x_large-caf850ea44d97429eed343aac7c22f9e.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/atomic-3000-led"
+   }
+  ]
+ },
+ "martin-aura-pxl": {
+  "photo": "https://adn.harmanpro.com/productattachment/11973/product_attachment/x_large-405d2e500f88a8f703df7ab87a842f65.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/mac-aura-pxl"
+   }
+  ]
+ },
+ "martin-aura-xb": {
+  "photo": "https://adn.harmanpro.com/productattachment/4821/product_attachment/x_large-c3352fc68c412cf3ff940047dbe67d37.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/mac-aura-xb"
+   }
+  ]
+ },
+ "martin-elp-cl": {
+  "photo": "https://adn.harmanpro.com/productattachment/7028/product_attachment/x_large-7585204fdcb485b9e58a0edf39e1a50a.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/elp-cl"
+   }
+  ]
+ },
+ "martin-encore-perf": {
+  "photo": "https://adn.harmanpro.com/productattachment/5010/product_attachment/x_large-f0bf9bb5fd615e73cefc193df83b07cc.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/mac-encore-performance-cld"
+   }
+  ]
+ },
+ "martin-mac-ultra": {
+  "photo": "https://adn.harmanpro.com/productattachment/10081/product_attachment/x_large-e6a233739fa59758d3debd9dd6ca02fb.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/mac-ultra-performance"
+   }
+  ]
+ },
+ "martin-quantum-wash": {
+  "photo": "https://adn.harmanpro.com/productattachment/4816/product_attachment/x_large-d34b790b608247b60dea39f34b3ce7c9.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/mac-quantum-wash"
+   }
+  ]
+ },
+ "martin-rush-mh6": {
+  "photo": "https://adn.harmanpro.com/productattachment/4831/product_attachment/x_large-bbf9b069b889aee365c57154041f1e98.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/rush-mh-6-wash"
+   }
+  ]
+ },
+ "martin-viper": {
+  "photo": "https://adn.harmanpro.com/productattachment/4793/product_attachment/x_large-43e4a05fe0ffb90572b8a6525cba5f88.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/mac-viper-profile"
+   }
+  ]
+ },
+ "netgear-gs108": {
+  "photo": "https://assets.netgear.com/transform/f16868fd-1a5e-4ec9-9706-9c5e8ed002c1/B3_gs108_32",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs108/"
+   }
+  ]
+ },
+ "netgear-gs308p": {
+  "photo": "https://assets.netgear.com/transform/71d27828-5ca5-4293-b730-51f662b4705b/B3_gs308pp_32",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs308pp/"
+   }
+  ]
+ },
+ "netgear-wax630": {
+  "photo": "https://assets.netgear.com/transform/4b260d24-b11b-4737-8055-c453a667ddc1/Prodcarousel_Image_WAX608Y_wShadow_Front_17Jan23",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wifi/access-points/wax630/"
+   }
+  ]
+ },
+ "neumann-kms105": {
+  "photo": "https://assets.sennheiser.com/assets/KMS-105-with-SG105_Neumann-Stage-Microphone_M.png/Zz0xMmY5NzE1MmU3YWIxMWYwYmZiMmJlYjQzYzY2MTIyYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.neumann.com/en-gb/products/microphones/kms-105"
+   }
+  ]
+ },
+ "neumann-tlm103": {
+  "photo": "https://assets.sennheiser.com/assets/TLM-103-with-EA1_Neumann-Studio-Microphone_M.png/Zz1kZTJmOTBjY2U3YWIxMWYwOGNiZDJhMzQxNzliYzkxZA==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.neumann.com/en-gb/products/microphones/tlm-103"
+   }
+  ]
+ },
+ "neumann-u87": {
+  "photo": "https://assets.sennheiser.com/assets/U-87-Ai-Studio-Set_Neumann-Studio-Microphone_M.png/Zz0wMzM5NjNmY2U3YWMxMWYwYWE5OGVhNTViNWQyZmI4Ng==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.neumann.com/en-gb/products/microphones/u-87-ai"
+   }
+  ]
+ },
+ "nexo-45n12": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/45n12-angle-1200x900.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/45n12/"
+   }
+  ]
+ },
+ "nexo-els400": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ePS-modules-eLS400-1-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/els400/"
+   }
+  ]
+ },
+ "nexo-eps10": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ePS-modules-ePS10-1-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/eps10/"
+   }
+  ]
+ },
+ "nexo-eps6": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ePS-modules-ePS6-1-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/eps6/"
+   }
+  ]
+ },
+ "nexo-eps8": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ePS-modules-ePS8-1-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/eps8/"
+   }
+  ]
+ },
+ "nexo-geo-m620": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/geo-m620.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/geo-m620/"
+   }
+  ]
+ },
+ "nexo-geo-s1210": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/geo-s1210-front.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/geo-s1210/"
+   }
+  ]
+ },
+ "nexo-geo-s1230": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/geo-s1230-front.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/geo-s1230/"
+   }
+  ]
+ },
+ "nexo-id14": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ID14t-1.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/id14t/"
+   }
+  ]
+ },
+ "nexo-id24": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ID24t.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/id24t/"
+   }
+  ]
+ },
+ "nexo-id84": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ID84-T-2.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/id84-t/"
+   }
+  ]
+ },
+ "nexo-ids108": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/IDS108t.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/id-s108t/"
+   }
+  ]
+ },
+ "nexo-ids110": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/IDS110t.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/id-s110t/"
+   }
+  ]
+ },
+ "nexo-l15": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-L15-2-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/l15/"
+   }
+  ]
+ },
+ "nexo-l18": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-L18-2.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/l18/"
+   }
+  ]
+ },
+ "nexo-l20": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-L20-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/l20/"
+   }
+  ]
+ },
+ "nexo-ls18": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ls18-e1476457570490-1200x966.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/ls18/"
+   }
+  ]
+ },
+ "nexo-ls600": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ls600-1200x909.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/ls600/"
+   }
+  ]
+ },
+ "nexo-msub15": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/GEO-MSUB15-module-pic-1200x476.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/msub15/"
+   }
+  ]
+ },
+ "nexo-msub18": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/SM-MSUB18.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/msub18/"
+   }
+  ]
+ },
+ "nexo-nxamp4x1": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/nxamp-4x1-front-1200x451.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/nxamp4x1/"
+   }
+  ]
+ },
+ "nexo-nxamp4x1mk2": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/NXAMP4x1mk2.front-2-1200x303.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/nxamp4x1mk2/"
+   }
+  ]
+ },
+ "nexo-nxamp4x2": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/NXAMP4x2mk2-Front.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/nxamp4x2mk2/"
+   }
+  ]
+ },
+ "nexo-nxamp4x2mk2": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/NXAMP4x2mk2-Front.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/nxamp4x2mk2/"
+   }
+  ]
+ },
+ "nexo-nxamp4x4mk2": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/NXAMP4X4MK2_Front-e1568381258416-1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/nxamp4x4mk2/"
+   }
+  ]
+ },
+ "nexo-p10": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-P10-2-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/p10/"
+   }
+  ]
+ },
+ "nexo-p12": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-P12-2-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/p12/"
+   }
+  ]
+ },
+ "nexo-p15": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-P15-2-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/p15/"
+   }
+  ]
+ },
+ "nexo-p18": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-P18-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/p18/"
+   }
+  ]
+ },
+ "nexo-p8": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/P-Series-modules-P8-2-1200x676.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/p8/"
+   }
+  ]
+ },
+ "nexo-ps8": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/ps8-1200x1732.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/ps8/"
+   }
+  ]
+ },
+ "nexo-rs18": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/rs18-front-1200x637.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/products/rs18/"
+   }
+  ]
+ },
+ "ps-quattrocanali": {
+  "photo": "https://www.powersoft.com/api/media/file/Quattrocanali4804DSP_gallery-cardL_front-6-800x391.webp?v=mug83p60",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.powersoft.com/en/products/install-amps/quattrocanali-series/quattrocanali-4804dspd"
+   }
+  ]
+ },
+ "ps-t604": {
+  "photo": "https://www.powersoft.com/api/media/file/T604_gallery-cardL_front-2-800x391.webp?v=mug83vhy",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.powersoft.com/en/products/touring-amps/t-series/t604"
+   }
+  ]
+ },
+ "ps-x4": {
+  "photo": "https://www.powersoft.com/api/media/file/X4_gallery-cardL_front-1-800x391.webp?v=mug83pgs",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.powersoft.com/en/products/touring-amps/x-series/x4"
+   }
+  ]
+ },
+ "ps-x8": {
+  "photo": "https://www.powersoft.com/api/media/file/X8_gallery-cardL_front-1-800x391.webp?v=mug83psz",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.powersoft.com/en/products/touring-amps/x-series/x8"
+   }
+  ]
+ },
+ "ptzoptics-superjoy": {
+  "photo": "https://cdn.prod.website-files.com/69a5a9fd0bfb9a26219eba91/6a67b80db66968f708967d03_Product-Photo-PT-SUPERJOY-G1-Cutout-Front.avif",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://ptzoptics.com/controllers/superjoy"
+   }
+  ]
+ },
+ "radial-j48": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2018/03/j48-feature-1.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/j48"
+   }
+  ]
+ },
+ "radial-j48-st": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2018/04/j48-stereo-feature.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/j48-stereo"
+   }
+  ]
+ },
+ "radial-jdi": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2017/12/jdi-featured-image.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/jdi"
+   }
+  ]
+ },
+ "radial-proav2": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2018/05/proav2-feature.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/proav2"
+   }
+  ]
+ },
+ "radial-prod2": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2018/04/prod2-feature.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/prod2"
+   }
+  ]
+ },
+ "radial-prodi": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2018/04/prodi-feature.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/prodi"
+   }
+  ]
+ },
+ "radial-usbpro": {
+  "photo": "https://www.radialeng.com/wp-content/uploads/2018/04/usbpro-featured.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.radialeng.com/product/usb-pro"
+   }
+  ]
+ },
+ "rfvenue-combine4": {
+  "photo": "https://www.rfvenue.com/hs-fs/hubfs/Marketing%20Packet/Product%20Photos/COMBINE4/Comb4_front.png?width=800&height=566&name=Comb4_front.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rfvenue.com/all-products/combine4"
+   }
+  ]
+ },
+ "rfvenue-distro4": {
+  "photo": "https://www.rfvenue.com/hs-fs/hubfs/Marketing%20Packet/Product%20Photos/DISTRO4/Distro4_Front.png?width=800&height=566&name=Distro4_Front.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rfvenue.com/all-products/distro4"
+   }
+  ]
+ },
+ "rj-cyrano": {
+  "photo": "https://www.robertjuliat.com/images/PhotosHD_Products/PhotoWeb_CYRANO_1015.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.robertjuliat.com/followspots/cyrano.html"
+   }
+  ]
+ },
+ "rj-gradateur": {
+  "photo": "https://www.robertjuliat.com/images/DIMMERS/PhotoWebHD_DIGITOUR_6S_vNF.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.robertjuliat.com/dimmers/digitour6.html"
+   }
+  ]
+ },
+ "rj-merlin": {
+  "photo": "https://www.robertjuliat.com/images/FB_Images/MERLIN_FB.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.robertjuliat.com/followspots/Merlin.html"
+   }
+  ]
+ },
+ "sc-si-expr3": {
+  "photo": "https://adn.harmanpro.com/productattachment/3148/product_attachment/x_large-28232605182c90f15d2b3dd1616c8abc.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/si-expression-3"
+   }
+  ]
+ },
+ "sc-si-impact": {
+  "photo": "https://adn.harmanpro.com/productattachment/3122/product_attachment/x_large-3aa1093f2f6fe055a40f397a4addacb4.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/si-impact"
+   }
+  ]
+ },
+ "sc-sig22": {
+  "photo": "https://adn.harmanpro.com/productattachment/3223/product_attachment/x_large-2f73e0f85f9ac1b271645fdfb3096f2f.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/signature-22-mtk"
+   }
+  ]
+ },
+ "sc-ui16": {
+  "photo": "https://adn.harmanpro.com/productattachment/3164/product_attachment/x_large-61437c982ae56fc092ac7205244ce477.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/ui16"
+   }
+  ]
+ },
+ "sc-ui24r": {
+  "photo": "https://adn.harmanpro.com/productattachment/4564/product_attachment/x_large-1f25faef33fc9a737cd8e88f2771fefc.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/ui24r"
+   }
+  ]
+ },
+ "sc-vi1000": {
+  "photo": "https://adn.harmanpro.com/productattachment/4984/product_attachment/x_large-c335bea824f06ca29fc32a4b303e7dcd.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/vi1000"
+   }
+  ]
+ },
+ "sc-vi3000": {
+  "photo": "https://adn.harmanpro.com/productattachment/1979/product_attachment/x_large-ac044b80cf357c54f503e136c2a22fa4.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/vi3000"
+   }
+  ]
+ },
+ "senn-a1031": {
+  "photo": "https://assets.sennheiser.com/assets/A_1031_U_Product_shot_cutout.png/Zz04NTg0MDdmYWU3YzQxMWYwODA0ZmJlYjQzYzY2MTIyYQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/a-1031-u/a-1031-u-004645"
+   }
+  ]
+ },
+ "senn-a5000cp": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser-Product-A-5000_CP_front-01jpg.png/Zz1jOWRjOWY4MGU3YzMxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/a-5000-cp/a-5000-cp-500887"
+   }
+  ]
+ },
+ "senn-ab3700": {
+  "photo": "https://assets.sennheiser.com/assets/square_louped_AB_3700_502196.png/Zz1lY2FjNjIwOGU3ZDYxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ab-3700/ab-3700-502196"
+   }
+  ]
+ },
+ "senn-ab4": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser-Accessory-AB-4-Antenna-Booster-Product-Image.png/Zz1jNGI0NTUyYWU3YzMxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ab-4/ab-4-bw-508541"
+   }
+  ]
+ },
+ "senn-ac3200": {
+  "photo": "https://assets.sennheiser.com/assets/ac_3200-II.png/Zz04ODE5ZjJmYWU3YzMxMWYwYjViMzc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ac-3200-ii/ac-3200-ii-505497"
+   }
+  ]
+ },
+ "senn-ac41": {
+  "photo": "https://assets.sennheiser.com/assets/AC-41-Sennheiser-01-1312px.png/Zz04ODE2YmIzMGU3YzMxMWYwOGM4OTJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ac-41/ac-41-eu-508243"
+   }
+  ]
+ },
+ "senn-ad3700": {
+  "photo": "https://assets.sennheiser.com/assets/square_louped_ad_3700_01_sq_accessory_sennheiser.png/Zz1lZGNhYTM3ZWU3YzMxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ad-3700/ad-3700-502197"
+   }
+  ]
+ },
+ "senn-adn-cu1": {
+  "photo": "https://assets.sennheiser.com/assets/ADN_CU1_Product_shot_cutout_Isofront.png.png/Zz1jNzkwYTM0MGU3YWQxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/adn-cu1/adn-cu1-502757"
+   }
+  ]
+ },
+ "senn-adn-d1": {
+  "photo": "https://assets.sennheiser.com/assets/ADN_D1_Product_shot_cutout_Isotop_front.png.png/Zz1jODMxZTg3MmU3YWQxMWYwYTYwYWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/adn-d1/adn-d1-502758"
+   }
+  ]
+ },
+ "senn-adp-uhf": {
+  "photo": "https://assets.sennheiser.com/images/assets/Evolution_Wireless_Digital_ADP_UHF_Directional_Antenna_Sennheiser2.png/Zz05YTE3MGNjY2U3YzMxMWYwYWE5OGVhNTViNWQyZmI4Ng==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/adp-uhf/adp-uhf-470-1075-mhz-508863"
+   }
+  ]
+ },
+ "senn-asa1": {
+  "photo": "https://assets.sennheiser.com/assets/ASA_1_Product_shot_cutout.png/Zz0xMWI1NzU0NGU3YzgxMWYwYWFiZTJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/asa-1/asa-1-1g8-504914"
+   }
+  ]
+ },
+ "senn-asa214": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_ASA_214_front_view.png/Zz0xNTY5NjM2Y2U3YzgxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/asa-214/asa-214-1g8-508242"
+   }
+  ]
+ },
+ "senn-asa3000": {
+  "photo": "https://assets.sennheiser.com/assets/asa_3000_01_sq_sennheiser.png/Zz04Y2RjZDVmMGU3YzMxMWYwOGNiZDJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/asa-3000/asa-3000-uk-009408"
+   }
+  ]
+ },
+ "senn-asp212": {
+  "photo": "https://assets.sennheiser.com/assets/ASP_212_Sennheiser.png/Zz05MTQ3OThjOGU3YzMxMWYwYTM1NGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/asp-212/asp-212-003421"
+   }
+  ]
+ },
+ "senn-e604": {
+  "photo": "https://assets.sennheiser.com/assets/e604_product_shot_cutout_shot_side_view.png.png/Zz1mNzI2NzY4NGU3YWQxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-604/3-pack-e-604-506667"
+   }
+  ]
+ },
+ "senn-e608": {
+  "photo": "https://assets.sennheiser.com/assets/e_608_Product_shot_cutout_clamp_old.png.png/Zz03ZTg5NTQyMGU3YWUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-608/e-608-004520"
+   }
+  ]
+ },
+ "senn-e609": {
+  "photo": "https://assets.sennheiser.com/assets/e_609_Silver_Product_shot_cutout_front_view.png.png/Zz04MGVkZTFmNGU3YWUxMWYwODcxNjJhMzQxNzliYzkxZA==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-609/e-609-silver-500074"
+   }
+  ]
+ },
+ "senn-e614": {
+  "photo": "https://assets.sennheiser.com/assets/e_614_Product_shot_cutout_front_view.png/Zz1jMzNjN2MyNGU3YmMxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-614/e-614-009895"
+   }
+  ]
+ },
+ "senn-e835": {
+  "photo": "https://assets.sennheiser.com/assets/e-835-3-pack-product_shot_01.png/Zz0zMTI2MDY3MmU3ZDgxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-835/3-pack-e-835-506666"
+   }
+  ]
+ },
+ "senn-e835s": {
+  "photo": "https://assets.sennheiser.com/assets/e_835_s_product_shot_cutout_front_view.png/Zz1jYTFkM2FmNmU3YmMxMWYwYjk1OWNlM2Q3NWM0MGYwNw==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-835/e-835-s-004514"
+   }
+  ]
+ },
+ "senn-e845": {
+  "photo": "https://assets.sennheiser.com/assets/e_845_product_shot_cutout_front_view.png/Zz1jYWQ3NTdhNmU3YmMxMWYwYjViMzc2OGVlOGU5N2FlYQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-845/e-845-004515"
+   }
+  ]
+ },
+ "senn-e845s": {
+  "photo": "https://assets.sennheiser.com/assets/e_845_S_product_shot_cutout_front_view.png/Zz1jYWI5NmE3YWU3YmMxMWYwOGNiZDJhMzQxNzliYzkxZA==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-845/e-845-s-004516"
+   }
+  ]
+ },
+ "senn-e865": {
+  "photo": "https://assets.sennheiser.com/assets/e_865_S_Product_shot_cutout.png.png/Zz04MTMzMzE2NGU3YWUxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-865/e-865-s-004847"
+   }
+  ]
+ },
+ "senn-e901": {
+  "photo": "https://assets.sennheiser.com/assets/e901_Sennheiser.png/Zz00ODcyZTZkZWU3YmUxMWYwODA0ZmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-901/e-901-500198"
+   }
+  ]
+ },
+ "senn-e902": {
+  "photo": "https://assets.sennheiser.com/assets/e_902_product_shot_cutout_front_view.png.png/Zz04MWY2YzYzOGU3YWUxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-902/e-902-500199"
+   }
+  ]
+ },
+ "senn-e904": {
+  "photo": "https://assets.sennheiser.com/assets/e904_Sennheiser.png/Zz00YTVhNDI0ZWU3YmUxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-904/e-904-500200"
+   }
+  ]
+ },
+ "senn-e906": {
+  "photo": "https://assets.sennheiser.com/assets/e_906_product_shot_cutout_front_view.png.png/Zz04Njc3ODVlZWU3YWUxMWYwYjJjYTc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-906/e-906-500202"
+   }
+  ]
+ },
+ "senn-e908b": {
+  "photo": "https://assets.sennheiser.com/assets/e_908_b_Product_shot_cutout.png.png/Zz04OGEwZjE4ZWU3YWUxMWYwYTM1NGVhNTViNWQyZmI4Ng==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-908/e-908-b-500203"
+   }
+  ]
+ },
+ "senn-e914": {
+  "photo": "https://assets.sennheiser.com/assets/e_914_product_shot_cutout_front_view.png.png/Zz04YThhMjQyMGU3YWUxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-914/e-914-500206"
+   }
+  ]
+ },
+ "senn-e935": {
+  "photo": "https://assets.sennheiser.com/assets/e_935_product_shot_cutout_front_view.png.png/Zz04YjgyM2ZlOGU3YWUxMWYwOWNlNjJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-935/e-935-009421"
+   }
+  ]
+ },
+ "senn-e945": {
+  "photo": "https://assets.sennheiser.com/assets/e_945_product_shot_cutout_front_view.png/Zz1jYzg5ZGYxMGU3YmMxMWYwOGI0MDc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-945/e-945-009422"
+   }
+  ]
+ },
+ "senn-e965": {
+  "photo": "https://assets.sennheiser.com/assets/e_965_product_shot_cutout_front_view.png.png/Zz04ZGFjZmJhMGU3YWUxMWYwYTg4MDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/e-965/e-965-500881"
+   }
+  ]
+ },
+ "senn-ek-iem-g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_EK_IEM_front_view.png.png/Zz00OGRhODQ4ZWU3YWUxMWYwOGNiZDJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ek-iem-g4/ek-iem-g4-d-508194"
+   }
+  ]
+ },
+ "senn-ek100g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_EK_100_front_view.png/Zz01OGVhODFhY2U3YmUxMWYwYjViMzc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ek-100-g4/ek-100-g4-a-509519"
+   }
+  ]
+ },
+ "senn-ek2000": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_EK_2000_IEM_Product_shot_cutout.png.png/Zz1iMzU2YTMzZWU3YWQxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/de-at/catalog/products/zubehor/ek-2000-iem/ek-2000-iem-gw-503863"
+   }
+  ]
+ },
+ "senn-ek6042": {
+  "photo": "https://assets.sennheiser.com/assets/ek_6042-sennheiser.png/Zz05ODJkNWRkYWU3YzMxMWYwYjk1OWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ek-6042/ek-6042-506210"
+   }
+  ]
+ },
+ "senn-ekp-avx": {
+  "photo": "https://assets.sennheiser.com/assets/AVX_EKP_product_shot_cutout_RGB.png.png/Zz1kYTZiNDE2ZWU3YWQxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ekp-avx/ekp-avx-3-au-506156"
+   }
+  ]
+ },
+ "senn-em-xsw1": {
+  "photo": "https://assets.sennheiser.com/assets/EM_XS_Wireless_1_Dual_Sennheiser_01.png/Zz05OGVjMzA4NGU3YzMxMWYwYmNlN2JlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-xsw-1/em-xsw-1-c-507310"
+   }
+  ]
+ },
+ "senn-em-xsw2": {
+  "photo": "https://assets.sennheiser.com/assets/XSW_2_835_Receiver_Isofront_antennas_Sennheiser.png/Zz1mZjNkMzQzY2U3YzMxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-xsw-2/em-xsw-2-c-507317"
+   }
+  ]
+ },
+ "senn-em100g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_EM_100_back_view.png.png/Zz00YWNiYTlmOGU3YWUxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-100-g4/em-100-g4-1g8-509907"
+   }
+  ]
+ },
+ "senn-em2000": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_EM_2000_Product_shot_cutout.png.png/Zz1iNzY4YTJlY2U3YWQxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/em-2000/em-2000-503143"
+   }
+  ]
+ },
+ "senn-em2050": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_EM_2050_Product_shot_cutout_Front_Back.png.png/Zz1iODE0ZjZiZWU3YWQxMWYwYTYwYWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/em-2050/em-2050-503747"
+   }
+  ]
+ },
+ "senn-em300g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_EM_300_front_back_view.png.png/Zz00ZTEzMmE2ZWU3YWUxMWYwOTg2Y2JlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-300-500-g4/em-300-500-g4-aw-509670"
+   }
+  ]
+ },
+ "senn-em3732": {
+  "photo": "https://assets.sennheiser.com/assets/EM-3732II-Front.png/Zz05NmNmZjk5OGU3YzMxMWYwYjk1OWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-3732-ii/em-3732-ii-504077"
+   }
+  ]
+ },
+ "senn-em500g3": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_EM_300_front_back_view.png.png/Zz00ZTEzMmE2ZWU3YWUxMWYwOTg2Y2JlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-500-g3/em-300-500-g4-as-509717"
+   }
+  ]
+ },
+ "senn-em6000-a": {
+  "photo": "https://assets.sennheiser.com/assets/DIGITAL_6000_EM_6000_Product_shot_cutout_Isofront_50100.png/Zz00MDllNGMxNGU3YmUxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-6000/em-6000-506657"
+   }
+  ]
+ },
+ "senn-em9046": {
+  "photo": "https://assets.sennheiser.com/assets/DIGITAL_9000_EM_9046_Product_shot_cutout_Isofront.png.png/Zz1lYmFmNGJmMGU3YWQxMWYwOGE1NTdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/em-9046/em-9046-aao-502508"
+   }
+  ]
+ },
+ "senn-ewd-em": {
+  "photo": "https://assets.sennheiser.com/assets/Evolution_Wireless_Digital_EW_D_EM_RGB.png.png/Zz0zYTU0ZTNiZWU3YWUxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-d-em/ew-d-em-y1-3-508809"
+   }
+  ]
+ },
+ "senn-ewdx-em2": {
+  "photo": "https://assets.sennheiser.com/images/assets/EW-DX_EM_2_Product_Shot_Cutout_Front.png/Zz0yYjY3YWEyYWU3YmUxMWYwYWUzMDdhZWFhOWMzNzY0YQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-dx-em-2/ew-dx-em-2-y1-3-509355"
+   }
+  ]
+ },
+ "senn-ewdx-em4": {
+  "photo": "https://assets.sennheiser.com/images/assets/EW-DX_EM_4_Dante_Product_Shot_Cutout_Back.png/Zz0yM2E0ZGUyOGU3YzUxMWYwOTQ2OWNlM2Q3NWM0MGYwNw==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-dx-em-4-dante/ew-dx-em-4-dante-s4-10-509376"
+   }
+  ]
+ },
+ "senn-ewdx-sk": {
+  "photo": "https://assets.sennheiser.com/images/assets/EW-DX_SK_Product_Shot_Cutout_Front_red.png/Zz0yNDlhMzA2NGU3YmUxMWYwYWUzMDdhZWFhOWMzNzY0YQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-dx-sk/ew-dx-sk-s4-10-509390"
+   }
+  ]
+ },
+ "senn-ewdx-skm": {
+  "photo": "https://assets.sennheiser.com/images/assets/Sennheiser_EW-DX_SKM_Product_Shot_Cutout_Back_wo_capsule.png/Zz1kYzJlYjNmNGU3Y2MxMWYwOGNiZDJhMzQxNzliYzkxZA==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-dx-skm/ew-dx-skm-s4-10-509432"
+   }
+  ]
+ },
+ "senn-ewdx-skm-s": {
+  "photo": "https://assets.sennheiser.com/images/assets/EW-DX_SKM-S_Product_Shot_Cutout_Front_wo_capsule_Sennheiser.png/Zz0xNzYwZGRhOGU3Y2QxMWYwYWE5OGVhNTViNWQyZmI4Ng==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/ew-dx-skm-s/ew-dx-skm-s-r1-9-509413"
+   }
+  ]
+ },
+ "senn-hd25": {
+  "photo": "https://assets.sennheiser.com/images/assets/HD_25_Product_shot_cutout_03.png.png/Zz1kMTI2MWZiMGU3YWUxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/hd-25/hd-25-506909"
+   }
+  ]
+ },
+ "senn-hd280": {
+  "photo": "https://assets.sennheiser.com/assets/HD_280_PRO_Product_shot_cutout_Isofront.png.png/Zz1kYTU1NTk4NGU3YWUxMWYwYWZkMWVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/hd-280-pro/hd-280-13-004975"
+   }
+  ]
+ },
+ "senn-hd300": {
+  "photo": "https://assets.sennheiser.com/assets/HD_300_PRO_Product_shot_cutout_Isofront_view.png.png/Zz1lNWIwMjM2OGU3YWUxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/hd-300-pro/hd-300-pro-508288"
+   }
+  ]
+ },
+ "senn-hd400": {
+  "photo": "https://assets.sennheiser.com/assets/HD_400_PRO_Product_Shot_Cutout_Side_02_RGB_red.png.png/Zz1mMDI4NjIyNGU3YWUxMWYwYmNlN2JlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/hd-400-pro/hd-400-pro-700047"
+   }
+  ]
+ },
+ "senn-hd490": {
+  "photo": "https://assets.sennheiser.com/assets/HD-490-PRO_TEC-Winner-2025.png/Zz1iYWZiOTlmY2U3ZDMxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/hd-490-pro/hd-490-pro-700286"
+   }
+  ]
+ },
+ "senn-hsp2": {
+  "photo": "https://assets.sennheiser.com/assets/HSP-2-EW/Zz1mOTI0YjdmOGQwNjQxMWYwYTE5ZDhhNmYxOGEzNTAzMQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/hsp-2/hsp-2-ew-3-m-500692"
+   }
+  ]
+ },
+ "senn-ie100": {
+  "photo": "https://assets.sennheiser.com/assets/IE_100_PRO_BLACK_Product_shot_cutout_Right.png.png/Zz0xYWVjY2E5MGU3YWYxMWYwYTI1MjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/ie-100-pro/ie-100-pro-black-508940"
+   }
+  ]
+ },
+ "senn-ie400": {
+  "photo": "https://assets.sennheiser.com/assets/IE_400_PRO_CLEAR_Product_shot_cutout_Set_view_back.png.png/Zz0zMDFjOWU5YWU3YWYxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/ie-400-pro/ie-400-pro-clear-507484"
+   }
+  ]
+ },
+ "senn-ie500": {
+  "photo": "https://assets.sennheiser.com/assets/IE_500_PRO_Set_02_clear_RGB_red.png/Zz0wMGNjMThiNGU3YmUxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/headphones/ie-500-pro/ie-500-pro-clear-507480"
+   }
+  ]
+ },
+ "senn-md42": {
+  "photo": "https://assets.sennheiser.com/assets/MD_42_Product_shot_cutout.png.png/Zz01MWMzODA1NGU3YWYxMWYwOTg2Y2JlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-42/md-42-005173"
+   }
+  ]
+ },
+ "senn-md421": {
+  "photo": "https://assets.sennheiser.com/assets/MD_421_II_Product_shot_cutout_Sennheiser.png/Zz1jNWFhMGE2MGU3Y2QxMWYwODA0ZmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-421-ii/md-421-ii-000984"
+   }
+  ]
+ },
+ "senn-md421k": {
+  "photo": "https://assets.sennheiser.com/images/assets/MD_421_KOMPAKT_Product_Shot_Cutout_Side_View_with_NAMM_TEC_AWARD_2026.png/Zz1lN2ZmYzMxMDBiZmExMWYxYTlkZmQyNDE2M2UxMGFkYg==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-421-kompakt/md-421-kompakt-700587"
+   }
+  ]
+ },
+ "senn-md431": {
+  "photo": "https://assets.sennheiser.com/assets/MD_431_II_Product_shot_cutout.png/Zz02MGMxMjg0YWU3YmUxMWYwYWUzMDdhZWFhOWMzNzY0YQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-431/md-431-ii-001605"
+   }
+  ]
+ },
+ "senn-md435": {
+  "photo": "https://assets.sennheiser.com/assets/MD_435_Product_shot_cutout_Front.png.png/Zz01M2JmMjZjZWU3YWYxMWYwOGE1NTdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-435/md-435-508827"
+   }
+  ]
+ },
+ "senn-md441": {
+  "photo": "https://assets.sennheiser.com/assets/MD_441_U_Product_shot_cutout.png.png/Zz01NTlhYjJiMGU3YWYxMWYwODhkYjc2OGVlOGU5N2FlYQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-441/md-441-u-000762"
+   }
+  ]
+ },
+ "senn-md445": {
+  "photo": "https://assets.sennheiser.com/assets/MD_445_Product_shot_cutout_Front.png.png/Zz01YTE4ZjZlNGU3YWYxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-445/md-445-508828"
+   }
+  ]
+ },
+ "senn-md46": {
+  "photo": "https://assets.sennheiser.com/assets/product_detail_x1_desktop_square_louped_md_46_01_sq_vocal_sennheiser.png/Zz02NzVmY2Y2Y2U3YmUxMWYwYWZkMWVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/md-46/md-46-005172"
+   }
+  ]
+ },
+ "senn-me4": {
+  "photo": "https://assets.sennheiser.com/assets/ME_4_Product_Shot_Cutout.png/Zz1lMDY0NjRlY2U3YmMxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/me-4/me-4-508936"
+   }
+  ]
+ },
+ "senn-mk4": {
+  "photo": "https://assets.sennheiser.com/assets/MK_4_Product_shot_cutout_solo.png.png/Zz1hZWJjZWJkOGU3YWYxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mk-4/mk-4-504298"
+   }
+  ]
+ },
+ "senn-mke1": {
+  "photo": "https://assets.sennheiser.com/assets/502881.png/Zz02MTVhN2Q2Y2U3Y2IxMWYwYjViMzc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mke-1/mke-1-beige-3-pin-paintable-502881"
+   }
+  ]
+ },
+ "senn-mke2": {
+  "photo": "https://assets.sennheiser.com/images/assets/MKE_2_Beige_3-Pin_Product_Shot_Cutout_RGB_red.png/Zz1jZTM1Nzg2ZTFlZDYxMWYxOGZmZTk2YWZkMjBkNTZmZA==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mke-2/mke-2-beige-3-pin-004739"
+   }
+  ]
+ },
+ "senn-mke600": {
+  "photo": "https://assets.sennheiser.com/assets/MKE_600_Product_shot_cutout_front_view.png.png/Zz04ZDBjNTIzYWU3YWYxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mke-600/mke-600-505453"
+   }
+  ]
+ },
+ "senn-mkh416": {
+  "photo": "https://assets.sennheiser.com/assets/MKH_416_P_48_Product_shot_cutout.png.png/Zz05N2ZiMmYwZWU3YWYxMWYwOTllMjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mkh-416/mkh-416-001511"
+   }
+  ]
+ },
+ "senn-mkh50": {
+  "photo": "https://assets.sennheiser.com/assets/MKH_50_P_48_Product_shot_cutout.png.png/Zz05OGUyYTNmMmU3YWYxMWYwYjk1OWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mkh-50/mkh-50-p48-003109"
+   }
+  ]
+ },
+ "senn-mkh8040": {
+  "photo": "https://assets.sennheiser.com/assets/MKH_8040_Product_shot_cutout.png.png/Zz1hNWEwZWY3Y2U3YWYxMWYwYmNlN2JlYjQzYzY2MTIyYQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mkh-8040/mkh-8040-506289"
+   }
+  ]
+ },
+ "senn-mkh8060": {
+  "photo": "https://assets.sennheiser.com/assets/MKH_8060_Product_Shot_Cutout_Front_RGB_red.png/Zz02NDNkYWMxZWU3YmUxMWYwYjViMzc2OGVlOGU5N2FlYQ==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/mkh-8060/mkh-8060-506292"
+   }
+  ]
+ },
+ "senn-sk-avx": {
+  "photo": "https://assets.sennheiser.com/assets/AVX_SK_product_shot_cutout.png.png/Zz1lNDBjYzc2MGU3YWQxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-avx/sk-avx-6-505877"
+   }
+  ]
+ },
+ "senn-sk-xsw": {
+  "photo": "https://assets.sennheiser.com/assets/XS_Wireless_2_SK_Bodypack_Transmitter_product_shot_cutout_front_view.png.png/Zz1jMzZlYjQ0OGU3YjAxMWYwYTI1MjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-xsw/sk-xsw-c-507324"
+   }
+  ]
+ },
+ "senn-sk100g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SK_100_front_view.png/Zz01OGQ1NzM2NmU3YmUxMWYwOGNiZDJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-100-g4/sk-100-g4-1g8-509870"
+   }
+  ]
+ },
+ "senn-sk2000": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_SK_2000_Product_shot_cutout.png.png/Zz1iZTJlMWYzMGU3YWQxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-2000/sk-2000-aw-503145"
+   }
+  ]
+ },
+ "senn-sk300g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SK_300_front_view_open.png.png/Zz02M2ZjZWQ2YWU3YWUxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-300-g4/sk-300-g4-rc-as-509573"
+   }
+  ]
+ },
+ "senn-sk500g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SK_500_front_view.png.png/Zz02NTUxMzYzMGU3YWUxMWYwOWNlNjJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-500-g4/sk-500-g4-as-509578"
+   }
+  ]
+ },
+ "senn-sk5212": {
+  "photo": "https://assets.sennheiser.com/assets/SK-5212-IIFront.png/Zz1lYjkzODE0OGU3YzMxMWYwYjk1OWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-5212-ii/sk-5212-ii-n-504085"
+   }
+  ]
+ },
+ "senn-sk6000": {
+  "photo": "https://assets.sennheiser.com/assets/DIGITAL_6000_SK_6000_Product_shot_cutout_Isofront.png/Zz00NmVhZGQxY2U3YmUxMWYwYTI1MjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-6000/sk-6000-bk-a1-a2-cn-506334"
+   }
+  ]
+ },
+ "senn-sk6212": {
+  "photo": "https://assets.sennheiser.com/assets/DIGITAL_6000_SK_6212_Product_shot_cutout_Front_50100.png/Zz1kN2EzMTE4MGU3YmUxMWYwOGM4OTJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sk-6212/sk-6212-a5-a8-us-508521"
+   }
+  ]
+ },
+ "senn-skm-avx": {
+  "photo": "https://assets.sennheiser.com/assets/AVX_SKM_product_shot_cutout_with_switch_CMYK.png.png/Zz1lMWQ4MGE3Y2U3YWQxMWYwYWZkMWVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-avx/skm-avx-4-wo-capsule-507187"
+   }
+  ]
+ },
+ "senn-skm100g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKM_100_display.png.png/Zz01YjAzOTk5OGU3YWUxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-100-g4/skm-100-g4-1g8-509892"
+   }
+  ]
+ },
+ "senn-skm2000": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_SKM_2000_CHAM_Product_shot_cutout.png.png/Zz1iZTY5YjdjYWU3YWQxMWYwOTQ2OWNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-2000/skm-2000xp-bk-bw-503795"
+   }
+  ]
+ },
+ "senn-skm300g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKM_300_Display.png.png/Zz01YjZiZmE2YWU3YWUxMWYwOGM4OTJhMzQxNzliYzkxZA==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-300-g4/skm-300-g4-s-jb-509841"
+   }
+  ]
+ },
+ "senn-skm500g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKM_500_display.png.png/Zz01YzEyYWY0YWU3YWUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-500-g4/skm-500-g4-as-509854"
+   }
+  ]
+ },
+ "senn-skm6000": {
+  "photo": "https://assets.sennheiser.com/images/assets/DIGITAL_6000_SKM_6000_Product_shot_cutout_Back_view.png/Zz00ODYyODQ3ZWU3YmUxMWYwOTdlYWVhNTViNWQyZmI4Ng==?width=1920&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-6000/skm-6000-bk-a1-a2-cn-506322"
+   }
+  ]
+ },
+ "senn-skm9000": {
+  "photo": "https://assets.sennheiser.com/assets/DIGITAL_9000_SKM_9000_BLACK_Product_shot_cutout_Isofront.png.png/Zz1lZWUwYzc5YWU3YWQxMWYwYmZiMmJlYjQzYzY2MTIyYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-9000/skm-9000-bk-a1-a4-504718"
+   }
+  ]
+ },
+ "senn-skp100g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKP_100_detail.png.png/Zz01YzhlNDUxMGU3YWUxMWYwYTM1NGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skp-100-g4/skp-100-g4-a-509525"
+   }
+  ]
+ },
+ "senn-skp2000": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_SKP_2000_Product_shot_cutout.png.png/Zz1iZGIwN2NjNGU3YWQxMWYwYTI1MjdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skp-2000/skp-2000xp-gw-558-626-mhz-504052"
+   }
+  ]
+ },
+ "senn-skp500g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKP_500_detail.png/Zz01YmZiMzRjMmU3YmUxMWYwYTM1NGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skp-500-g4/skp-500-g4-as-509589"
+   }
+  ]
+ },
+ "senn-sl-headmic1": {
+  "photo": "https://assets.sennheiser.com/assets/Speechline_Digital_Wireless_Product_shot_cutout_SL_Headmic_1-4_BE.png/Zz0zMGRiZjlhMmU3YmUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/sl-headmic-1/headmic-1-beige-3-pin-506906"
+   }
+  ]
+ },
+ "senn-spectera-sek": {
+  "photo": "https://assets.sennheiser.com/assets/SPECTERA_SEK_Product_Shot_Cutout_without_Antenna_Front_View.png/Zz01MTkyYTg2MGU3Y2YxMWYwYWZkMWVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/spectera-sek/spectera-sek-1g4-509163"
+   }
+  ]
+ },
+ "senn-sr-iem-g4": {
+  "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SR_IEM_front-and-back_view.png.png/Zz02Yjg1OWFkMmU3YWUxMWYwYWE2NDc2OGVlOGU5N2FlYQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/sr-iem-g4/sr-iem-g4-gb-507844"
+   }
+  ]
+ },
+ "senn-sr2000": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_SR_2000_IEM_Product_shot_cutout.png.png/Zz1iZWRhYzIxY2U3YWQxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/uncategorized/sr-2000-iem/sr-2000-iem-503840"
+   }
+  ]
+ },
+ "senn-sr2050": {
+  "photo": "https://assets.sennheiser.com/assets/2000_Series_SR_2050_IEM_Product_shot_cutout.png.png/Zz1jMDZmMWE1NmU3YWQxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-gb/catalog/products/monitoring/sr-2050-iem/sr-2050-iem-gw-503847"
+   }
+  ]
+ },
+ "shure-ad1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/6b3/75b/e5-/setcard/a7a7bc0b15e1d982190e00ce108c148d.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad1"
+   }
+  ]
+ },
+ "shure-ad2-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/1a1/2ea/ed-/setcard/cd056de40bfd03a48a36e10d6c9cfa7d.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_b58a"
+   }
+  ]
+ },
+ "shure-ad2-b87a": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9cb/716/76-/setcard/38a3d784ac0348c6959ab87cce8ce201.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_b87a"
+   }
+  ]
+ },
+ "shure-ad2-ksm8": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/271/446/08-/setcard/c9b47553262628002406b0b22dbbf2fe.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_ksm8"
+   }
+  ]
+ },
+ "shure-ad2-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2f9/ff0/60-/setcard/aa443665fb44a46660a835cc1b6e4cbc.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_ksm9"
+   }
+  ]
+ },
+ "shure-ad2-ksm9hs": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/5c8/49d/31-/setcard/1a587609a2efb62136e6e172e753cd9e.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_ksm9hs"
+   }
+  ]
+ },
+ "shure-ad2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9d8/b5e/ae-/setcard/414fb0b0adc5bcb51e2323c30e1071d6.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_sm58"
+   }
+  ]
+ },
+ "shure-ad3": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/599/b6d/72-/setcard/34d0f58d40139e5a03ffc4f2c551ec4e.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad3"
+   }
+  ]
+ },
+ "shure-adx1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/180/0fa/08-/setcard/b7d32d450abec9172df66402b718a32d.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx1"
+   }
+  ]
+ },
+ "shure-adx1m": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/86e/c89/d1-/setcard/04e91c6d2336e72f19f2c4822287ff27.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx1m"
+   }
+  ]
+ },
+ "shure-adx2-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/349/ffc/7b-/setcard/e235acd9ce77706b9ed6417fec7d0e19.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx2_b58"
+   }
+  ]
+ },
+ "shure-adx2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4c5/fbd/53-/setcard/65ae4ee6ccdb2c43e8158f5a801f6057.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx2_sm58"
+   }
+  ]
+ },
+ "shure-adx2fd-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/e76/e5f/3e-/setcard/298d7b2d7a8107df8964b5b2f4ed2443.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx2fd_b58"
+   }
+  ]
+ },
+ "shure-adx3": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/929/192/a7-/setcard/bfd3f858830e7bda961aa5e0914f5a87.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx3"
+   }
+  ]
+ },
+ "shure-adx5d": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2fe/101/43-/setcard/5500a0b51cf5d465bf4da8b45637c0ba.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx5d"
+   }
+  ]
+ },
+ "shure-aniusb": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/413/e2d/d7-/setcard/62c83f05f7eb4f316b1a4338e58eb1a3.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/aniusb-matrix"
+   }
+  ]
+ },
+ "shure-beta181": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ff5/c1b/92-/setcard/3a0d093d3aaa5c81c6991574ee14ad3c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_181"
+   }
+  ]
+ },
+ "shure-beta52": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/f70/a54/eb-/setcard/05986d56de71a5eae2f0649200ea71b6.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_52a"
+   }
+  ]
+ },
+ "shure-beta56": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/701/252/01-/setcard/b02957d53a09536f0325618474b30cb2.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_56a"
+   }
+  ]
+ },
+ "shure-beta57": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/bc7/a0c/cd-/setcard/baa9c25871ffdc44febe7232d20091c7.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_57a"
+   }
+  ]
+ },
+ "shure-beta58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/304/6c7/1b-/setcard/6ae20df360e613eae4581a188d076e5e.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_58a"
+   }
+  ]
+ },
+ "shure-beta87a": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/70e/9a4/ec-/setcard/49a6f60c177aae7a6ca66cf99db12947.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_87a"
+   }
+  ]
+ },
+ "shure-beta87c": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/77f/8e9/ad-/setcard/a44465fe509f3229a2543e7c37f203af.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_87c"
+   }
+  ]
+ },
+ "shure-beta91": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/570/c68/c3-/setcard/23309ae1ef81986353cdf8c74d90f64c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_91a"
+   }
+  ]
+ },
+ "shure-beta98": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/1e8/1fd/07-/setcard/1c109215804e229c31b95e6fe721632f.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_98h_c"
+   }
+  ]
+ },
+ "shure-beta98ad": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/c52/ba8/0c-/setcard/441c6ba9f7d1824afdc775262ae39125.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_98ad_c"
+   }
+  ]
+ },
+ "shure-beta98amp": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/025/21d/16-/setcard/2ebd33dbe61b26466e7a1c5469e33033.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/beta_98amp_c"
+   }
+  ]
+ },
+ "shure-blx1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/55d/eec/ff-/setcard/cfdb2f252aed48d275e21121f33e7157.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/blx_wireless/blx1"
+   }
+  ]
+ },
+ "shure-blx4": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/333/93c/ca-/setcard/9b4cfe21e2cd206c3b3b84a17cefc2ba.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/blx_wireless/blx4"
+   }
+  ]
+ },
+ "shure-blx4r": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/67e/b83/14-/setcard/2a2477841dcfa3cde57966a73b26bf5f.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/blx_wireless/blx4r"
+   }
+  ]
+ },
+ "shure-blx88": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/919/a90/85-/setcard/83323b69ad92697d32bbc8f476cbe81b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/blx_wireless/blx88"
+   }
+  ]
+ },
+ "shure-glxd1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9f9/73c/38-/setcard/370871175f2dc3e2df73449a40326e24.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d_plus/glxd1p"
+   }
+  ]
+ },
+ "shure-glxd1plus": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9f9/73c/38-/setcard/370871175f2dc3e2df73449a40326e24.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d_plus/glxd1p"
+   }
+  ]
+ },
+ "shure-glxd4": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2e5/9b9/1c-/setcard/12848f0a0c0c5e09b58cf48d4f5d415a.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d-advanced/glxd4"
+   }
+  ]
+ },
+ "shure-glxd4plus": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2e5/9b9/1c-/setcard/12848f0a0c0c5e09b58cf48d4f5d415a.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d-advanced/glxd4"
+   }
+  ]
+ },
+ "shure-glxd4r": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/499/366/0f-/setcard/e9726e1e8818e13d019f639fd303c302.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d_plus/glxd4rp"
+   }
+  ]
+ },
+ "shure-glxd4rplus": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/499/366/0f-/setcard/e9726e1e8818e13d019f639fd303c302.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d_plus/glxd4rp"
+   }
+  ]
+ },
+ "shure-glxd6": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/7d9/4dd/34-/setcard/5da11b81a5a2221c532979b826b001e9.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d-advanced/glxd6"
+   }
+  ]
+ },
+ "shure-glxd6plus": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/7d9/4dd/34-/setcard/5da11b81a5a2221c532979b826b001e9.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d-advanced/glxd6"
+   }
+  ]
+ },
+ "shure-ksm137": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a84/0b5/59-/setcard/e2d408dcf8be5da8b8acd13950f623bc.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm137"
+   }
+  ]
+ },
+ "shure-ksm141": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/869/b3d/41-/setcard/0e2b06e49f279fb3f85e7c2c3fecc0bf.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm141"
+   }
+  ]
+ },
+ "shure-ksm313": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a84/3b6/c3-/setcard/de4bfc92b109ae2b1509a01870b3ce67.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm313"
+   }
+  ]
+ },
+ "shure-ksm32": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/50e/825/f4-/setcard/d0f9ef0cc41b2f7c11eafbb531e677af.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm32c"
+   }
+  ]
+ },
+ "shure-ksm353": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/772/942/f9-/setcard/05804a7e2c86d974af8a7f58af619840.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm353"
+   }
+  ]
+ },
+ "shure-ksm44a": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/f79/7c4/47-/setcard/5216a7d74fe178816cb84dbf904c4177.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm44a"
+   }
+  ]
+ },
+ "shure-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/cba/0dd/94-/setcard/e9b8fcd2432472d94ad00743dbf8aab7.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm9"
+   }
+  ]
+ },
+ "shure-ksm9hs": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/d53/613/b3-/setcard/3dc1b972aa924f87b6cd39060fffc6fe.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/ksm9hs"
+   }
+  ]
+ },
+ "shure-mx153": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/f38/003/7e-/setcard/37757431b555b8709f5de4dbafb8836c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/mx153"
+   }
+  ]
+ },
+ "shure-mxw1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4a2/134/b1-/setcard/7b6d3cbab4921342bf4a5166f44c1529.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/microflex-wireless-next/mxw1x"
+   }
+  ]
+ },
+ "shure-mxw6": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/7ab/14a/8b-/setcard/69372315895290b83cdc90c77417458d.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/microflex-wireless-next/mxw6x"
+   }
+  ]
+ },
+ "shure-mxw8": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/60a/d7e/72-/setcard/ff3f7edd11d09bcab25c1074771b1936.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/microflex-wireless-next/mxw8x"
+   }
+  ]
+ },
+ "shure-mxwapxd2": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/144/2b8/dc-/setcard/00b6feeea202119f742564eb418f4474.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/microflex-wireless-next/mxwapxd2"
+   }
+  ]
+ },
+ "shure-p10r": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/c42/9c9/e4-/setcard/553598046bac2752eed5ed0a7fd4b896.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm1000/p10rp"
+   }
+  ]
+ },
+ "shure-p10r-legacy": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/c42/9c9/e4-/setcard/553598046bac2752eed5ed0a7fd4b896.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm1000/p10rp"
+   }
+  ]
+ },
+ "shure-p3r": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/5b6/10e/df-/setcard/ef2fa07949b8aec3497343c1c6f61670.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm300/p3r"
+   }
+  ]
+ },
+ "shure-p3ra": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2ee/c75/a1-/setcard/1090c3b5b4faca2d6aa174e98ef1a72b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm300/p3ra"
+   }
+  ]
+ },
+ "shure-p9r": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/b0f/fb6/ce-/setcard/a16a56980574f15d2ebbefe06500dd66.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm900/p9rap"
+   }
+  ]
+ },
+ "shure-p9ra": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/b0f/fb6/ce-/setcard/a16a56980574f15d2ebbefe06500dd66.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm900/p9rap"
+   }
+  ]
+ },
+ "shure-pga181": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/18e/56c/1b-/setcard/ec552adedfdff178d5936fea977c28b1.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga181"
+   }
+  ]
+ },
+ "shure-pga48": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/1c5/da7/76-/setcard/f656e7cd4b327a1d9164d649cb5b5dc6.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga48"
+   }
+  ]
+ },
+ "shure-pga52": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/733/7a5/d4-/setcard/dc683bad591fbe92924cf1c14629d431.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga52"
+   }
+  ]
+ },
+ "shure-pga56": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/c92/774/69-/setcard/f3cd83a2074bbcd486b7878033c88d48.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga56"
+   }
+  ]
+ },
+ "shure-pga57": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4b5/7db/7e-/setcard/0c19e95dcc41ba659c563fd0feaed4c5.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga57"
+   }
+  ]
+ },
+ "shure-pga58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a83/04a/ef-/setcard/98c3763caadde2cab13883442b8514bc.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga58"
+   }
+  ]
+ },
+ "shure-pga81": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/236/2ee/92-/setcard/58e5872bcf9df5616d813f71945789c8.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga81"
+   }
+  ]
+ },
+ "shure-pga98h": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/777/1a3/2d-/setcard/fbf1528acd643610853dd55b4b9549e2.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/pga98h"
+   }
+  ]
+ },
+ "shure-qlxd1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/1d1/efc/61-/setcard/c81c9a619ef8966f5506a229ca954e5b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd1"
+   }
+  ]
+ },
+ "shure-qlxd2-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a29/330/05-/setcard/e66f0bd5228eb9e3454402e08c641476.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd2_ksm9"
+   }
+  ]
+ },
+ "shure-qlxd2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/69b/bd1/24-/setcard/04256540a75a3e6446e59ec0621fc740.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd2_sm58"
+   }
+  ]
+ },
+ "shure-qlxd2-sm86": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4f7/6c4/b5-/setcard/98b9a29c921fcbf044ad79edcee227dd.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd2_sm86"
+   }
+  ]
+ },
+ "shure-qlxd4": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/5b7/255/66-/setcard/112cdcdd59a9e7f9294820c264c7150a.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd4"
+   }
+  ]
+ },
+ "shure-scm262": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/7ee/654/9c-/setcard/85c53bf23ca0bd9b51a1c2fef01c2b16.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/scm262"
+   }
+  ]
+ },
+ "shure-scm268": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9f0/f64/60-/setcard/91fec69ef4ef1352954ff0ab23ac2b90.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/scm268"
+   }
+  ]
+ },
+ "shure-scm800": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/554/4a2/ac-/setcard/88cee11de1ea72751b601faaa2283f24.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/scm800"
+   }
+  ]
+ },
+ "shure-se215": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/29c/688/c0-/setcard/d1a9cd04693b7ff4acc8a760b41b2331.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/earphones/se215"
+   }
+  ]
+ },
+ "shure-se425": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/003/e53/e4-/setcard/c143931965fca580649d32061240d553.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/earphones/se425cl"
+   }
+  ]
+ },
+ "shure-se535": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/8ca/58a/23-/setcard/629c617d84cfecd6a702a622145863cf.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/earphones/se535cl"
+   }
+  ]
+ },
+ "shure-se846": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/f81/6b4/f6-/setcard/7b97831f8f26a63b8164cf8fe84fd4e9.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/earphones/se846"
+   }
+  ]
+ },
+ "shure-sm137": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/7f1/d0c/7c-/setcard/d33323ad71cd83d267b5b3ccbed1c186.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm137"
+   }
+  ]
+ },
+ "shure-sm31fh": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/127/cc2/88-/setcard/6b024828c07dd35d38bc57f89bf63954.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm31fh"
+   }
+  ]
+ },
+ "shure-sm35": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/48a/5aa/7c-/setcard/20fa91424692c180c3367d6a53567c37.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm35"
+   }
+  ]
+ },
+ "shure-sm57": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/218/0f8/9b-/setcard/f9411c3e8a6d8a14f4632ebab7749a69.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm57"
+   }
+  ]
+ },
+ "shure-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/31e/242/4b-/setcard/8f8ab8329c1107e0758c041654d7cc30.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm58"
+   }
+  ]
+ },
+ "shure-sm63": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/011/e24/c4-/setcard/51de7b75252a5ad0489121714ae10c6b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm63"
+   }
+  ]
+ },
+ "shure-sm7b": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/3ac/40e/15-/setcard/cb0c8564fc691fe2ff3d2b67889ab1c2.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm7b"
+   }
+  ]
+ },
+ "shure-sm7db": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/770/d92/92-/setcard/7d2a7b7f3c9d4d3e3e6d556dfaacd968.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm7db"
+   }
+  ]
+ },
+ "shure-sm81": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a80/c0e/fd-/setcard/ce0554c5a98d4d62e1cf507cad0fc144.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm81"
+   }
+  ]
+ },
+ "shure-sm86": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/d74/0d6/4f-/setcard/c3ae98e74186861c3b992c52b5cf1dce.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/sm86"
+   }
+  ]
+ },
+ "shure-super55": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/fb5/f73/12-/setcard/0b8888e4da4ad80fc1e69865718da116.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/super_55"
+   }
+  ]
+ },
+ "shure-ulxd1": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a0a/c6b/28-/setcard/73167ef4f4c40e32e7b2acec5bd46931.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd1"
+   }
+  ]
+ },
+ "shure-ulxd2-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/b48/96d/cd-/setcard/fe4e1404fa789de278c62e853c455d11.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_ksm9"
+   }
+  ]
+ },
+ "shure-ulxd2-ksm9hs": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/002/7a0/67-/setcard/fe4e1404fa789de278c62e853c455d11.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_ksm9hs"
+   }
+  ]
+ },
+ "shure-ulxd2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/0a4/bab/aa-/setcard/078eb21f1ad7a9a3d3e26b9bb357effe.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_sm58"
+   }
+  ]
+ },
+ "shure-ulxd2-sm86": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/3f8/4c7/f5-/setcard/967c870856315857a4440df23297fdb4.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_sm86"
+   }
+  ]
+ },
+ "shure-ulxd4": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a0d/43b/33-/setcard/c13a96be17d516bdbc82c29ad244bb8d.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd4"
+   }
+  ]
+ },
+ "shure-ulxd4d": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/e56/bfb/5a-/setcard/f57b35ec5c33ecffc76308949745308c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd4d"
+   }
+  ]
+ },
+ "shure-ulxd4q": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/8ed/a9e/17-/setcard/e5ed31006c35010746bf58406c28c521.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd4q"
+   }
+  ]
+ },
+ "shure-ulxd6": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/0ff/566/c7-/setcard/cf0342866206739e4550e15f555dca80.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd6"
+   }
+  ]
+ },
+ "shure-ulxd8": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2cb/d03/e8-/setcard/e7ec7bd49e113c832e2594fa8d8ff9bc.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd8"
+   }
+  ]
+ },
+ "shure-wl184": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/fa0/88a/4e-/setcard/5f264d17010aa943c6b3bf01b5f70c0b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/wl184"
+   }
+  ]
+ },
+ "shure-wl185": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/02b/8af/a9-/setcard/955b11b10f9582cc949e11674ab14a62.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/microphones/wl185"
+   }
+  ]
+ },
+ "skaarhoj-ptz-fly": {
+  "photo": "https://static.wixstatic.com/media/9c7364_05f9097dad0c4923ba1616c4a8bf97b2~mv2.webp/v1/fill/w_1920,h_1080,al_c/9c7364_05f9097dad0c4923ba1616c4a8bf97b2~mv2.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.skaarhoj.com/product/ptz-fly"
+   }
+  ]
+ },
+ "skaarhoj-ptz-pro": {
+  "photo": "https://static.wixstatic.com/media/9c7364_d60f9acdbf1c4a629c0dcbd4b222cb50~mv2.webp/v1/fill/w_1920,h_1080,al_c/9c7364_d60f9acdbf1c4a629c0dcbd4b222cb50~mv2.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.skaarhoj.com/product/ptz-pro"
+   }
+  ]
+ },
+ "wisy-mpr50": {
+  "photo": "https://wisycom.com/app/uploads/2017/12/MPR50-IEM-400x400.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://wisycom.com/mpr50-iem/"
+   }
+  ]
+ },
+ "wisy-mtk982": {
+  "photo": "https://wisycom.com/app/uploads/2023/05/MTK982-400x400.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://wisycom.com/mtk982/"
+   }
+  ]
+ },
+ "wisy-mtp60": {
+  "photo": "https://wisycom.com/app/uploads/2023/12/PHA60MTP60.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://wisycom.com/correlations/mtp60/"
+   }
+  ]
+ }
+}

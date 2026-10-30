@@ -3,9 +3,10 @@ import FOUND from './media.json'
 
 /*
  * Direct links of the catalogue: the maker's product page, data sheet or
- * user guide, each one checked to exist. Links found later by the
- * "Compléter le catalogue" tool (through the relay, which can read the
- * makers' sites) are exported to media.json and join them here.
+ * user guide, each one checked to exist. media.json holds the product page
+ * and photo read from each maker's own site (its og:image or product shot),
+ * checked to answer with an image: shown from that address, never copied,
+ * and a dead link brings the symbol back.
  */
 
 type Media = { docs?: ProductDoc[]; photo?: string }
@@ -84,9 +85,9 @@ const found = FOUND as Record<string, Media>
 
 /** The checked links and photo of a model, else its maker's site. */
 export function withMedia(t: DeviceTemplate): DeviceTemplate {
-  const media: Media = { ...CHECKED[t.id], ...found[t.id] }
+  const media: Media = { docs: [...(CHECKED[t.id]?.docs ?? []), ...(found[t.id]?.docs ?? [])], photo: CHECKED[t.id]?.photo ?? found[t.id]?.photo }
   const site = t.brand ? SITES[t.brand] : undefined
-  const docs = [...(media.docs ?? []), ...(t.docs ?? [])]
+  const docs = [...(media.docs ?? []), ...(t.docs ?? [])].filter((d, i, all) => all.findIndex((o) => o.url === d.url) === i)
   if (site && !docs.some((d) => d.url.includes(site))) docs.push({ title: `Site du fabricant (${site})`, url: `https://www.${site}/` })
   const url = t.url ?? media.docs?.find((d) => /Page produit/.test(d.title))?.url
   return { ...t, ...(docs.length ? { docs } : {}), ...(url ? { url } : {}), ...(media.photo && !t.image ? { image: media.photo } : {}) }
@@ -94,3 +95,6 @@ export function withMedia(t: DeviceTemplate): DeviceTemplate {
 
 /** Ids given links or a photo here (checked by the tests). */
 export const mediaIds = () => [...Object.keys(CHECKED), ...Object.keys(found)]
+
+/** Models whose photo comes from here. */
+export const photoIds = () => [...Object.keys(CHECKED), ...Object.keys(found)].filter((id) => CHECKED[id]?.photo ?? found[id]?.photo)
