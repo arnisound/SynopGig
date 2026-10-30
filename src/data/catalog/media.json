@@ -4120,6 +4120,33 @@
    }
   ]
  },
+ "midas-dl151": {
+  "photo": "https://cdn-media.empowertribe.com/bc56b9d6eebf465091c010e5fb4cb65c/Image_MI_0606-ABO_DL151_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0606-ABO"
+   }
+  ]
+ },
+ "midas-dl152": {
+  "photo": "https://cdn-media.empowertribe.com/d30e144fa99040b984fbe306562ab7b5/Image_MI_0606-ABP_DL152_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0606-ABP"
+   }
+  ]
+ },
+ "midas-dl153": {
+  "photo": "https://cdn-media.empowertribe.com/5a4fe0c13e5443b9b4c4af54c3c45a93/Image_MI_0606-ABQ_DL153_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0606-ABQ"
+   }
+  ]
+ },
  "midas-dl16": {
   "photo": "https://cdn-media.empowertribe.com/7835f00c8ce143fe9d5cea3d9ef7ab71/Image_MI_0606-ACJ_DL16_Front_XL.png",
   "docs": [
@@ -4150,6 +4177,33 @@
  "midas-m32-live": {
   "photo": "https://cdn11.bigcommerce.com/s-o7ivkhfbpd/images/stencil/2048x2048/products/4447/11593/Untitled-2_0002_M32_P0B3I_Right_XL__96885.1676084666.jpg?c=2",
   "docs": []
+ },
+ "midas-m32r": {
+  "photo": "https://cdn-media.empowertribe.com/b0083fcfed5240b3bddcd1ce581f15a2/Image_MI_0603-AEP_M32R-LIVE_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0603-AEP"
+   }
+  ]
+ },
+ "midas-mr12": {
+  "photo": "https://cdn-media.empowertribe.com/8fa3069a9dc848b4bb37b9167c7d5bbd/Image_MI_0605-AAE_MR12_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0605-AAE"
+   }
+  ]
+ },
+ "midas-mr18": {
+  "photo": "https://cdn-media.empowertribe.com/00108958927e457e8e38e63805c26add/Image_MI_0605-AAF_MR18_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0605-AAF"
+   }
+  ]
  },
  "netgear-gs108": {
   "photo": "https://assets.netgear.com/transform/f16868fd-1a5e-4ec9-9706-9c5e8ed002c1/B3_gs108_32",
@@ -4715,6 +4769,33 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.qsc.com/systems/products/q-sys-platform/products-peripherals-accessories/q-sys-cores/core-110f/"
+   }
+  ]
+ },
+ "qsc-k102": {
+  "photo": "https://www.qscaudio.com/fileadmin/images/live/k2/Q_spk_k2_10_img_front.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://qsc.com/live-sound/products/loudspeakers/powered-loudspeakers/k2-series"
+   }
+  ]
+ },
+ "qsc-k122": {
+  "photo": "https://www.qscaudio.com/fileadmin/images/live/k2/Q_spk_k2_12_img_front.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://qsc.com/live-sound/products/loudspeakers/powered-loudspeakers/k2-series"
+   }
+  ]
+ },
+ "qsc-k82": {
+  "photo": "https://www.qscaudio.com/fileadmin/images/live/k2/Q_spk_k_82_img_frontRight.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://qsc.com/live-sound/products/loudspeakers/powered-loudspeakers/k2-series"
    }
   ]
  },
