@@ -2,6 +2,7 @@ import type { DeviceTemplate } from '../types'
 import { CATALOG } from './catalog'
 import { refineSignal } from './connectors'
 import { PANEL_TEMPLATES } from './panels'
+import { withSheet } from './catalog/sheets'
 import { port, series } from './ports'
 
 const POWER_IN = port('pwr', 'Secteur', 'powercon-true1', 'power', 'in')
@@ -348,7 +349,9 @@ export const LIBRARY: DeviceTemplate[] = [
   ...GENERIC.map((t) => ({ ...t, family: GENERIC_FAMILY[t.id] })),
   ...PANEL_TEMPLATES.map((t) => ({ ...t, family: 'Bandeaux de câblage' })),
   ...CATALOG,
-].map(refined)
+]
+  .map(refined)
+  .map(withSheet)
 
 export const CATEGORY_COLORS: Record<string, string> = {
   Son: '#e5484d',
