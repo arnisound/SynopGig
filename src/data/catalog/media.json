@@ -1239,6 +1239,33 @@
    }
   ]
  },
+ "birddog-keyboard": {
+  "photo": "https://birddog.tv/wp-content/uploads/2021/06/PTZ_keyboard.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://birddog.tv/ptzkeyboard-overview/"
+   }
+  ]
+ },
+ "birddog-p200": {
+  "photo": "https://birddog.tv/wp-content/uploads/2021/06/P200.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://birddog.tv/p200-overview/"
+   }
+  ]
+ },
+ "birddog-p400": {
+  "photo": "https://birddog.tv/wp-content/uploads/2021/06/P400.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://birddog.tv/p400-overview/"
+   }
+  ]
+ },
  "birddog-x5": {
   "photo": "https://birddog.tv/wp-content/uploads/2024/07/X5-white-slider.png",
   "docs": [
@@ -2379,6 +2406,15 @@
    }
   ]
  },
+ "decimator-ducc": {
+  "photo": "https://decimator.com/Products/MultiViewers/DMON-QUAD%20MultiViewer/files/stacks-image-956f2ca.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://decimator.com/Products/MultiViewers/DMON-QUAD%20MultiViewer/DMON-QUAD.html"
+   }
+  ]
+ },
  "digico-d2-rack": {
   "photo": "https://digico.biz/wp-content/uploads/2018/11/D2_rack_BNC_AES-1-1200x750.jpg",
   "docs": [
@@ -2484,6 +2520,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://digico.biz/consoles/sd9/"
+   }
+  ]
+ },
+ "dmxking-ultradmx": {
+  "photo": "https://shop.dmxking.com/assets/images/0113-10-3_front.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://shop.dmxking.com/ultraDMX2-PRO_p_42.html"
    }
   ]
  },
@@ -4464,6 +4509,24 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://fr.audiofanzine.com/ampli-sono-4-canaux/lab-gruppen/FP-10000Q/"
+   }
+  ]
+ },
+ "lab-plm12k44": {
+  "photo": "https://cdn-media.empowertribe.com/c47d93a6450d4d0996fee25caec9e21c/Image_LG_0107-AAA_PLM-12K44-SP_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.labgruppen.com/en/products/0107-AAA"
+   }
+  ]
+ },
+ "lab-plm20k44": {
+  "photo": "https://cdn-media.empowertribe.com/49653f3d312747bf9c40c21a5bdddd0a/Image_LG_0107-AAH_PLM-20K44-SP_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.labgruppen.com/en/products/0107-AAH"
    }
   ]
  },
