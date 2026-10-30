@@ -8197,6 +8197,15 @@
    }
   ]
  },
+ "shure-mxa310": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/26b/326/c5-/setcard/ca276b0a18c1ecb4345b98b4f86b6226.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-EU/products/microphones/mxa320"
+   }
+  ]
+ },
  "shure-mxa710": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/346/990/ab-/setcard/bf7e18b3ce001021b237c9d98342c8a4.jpeg",
   "docs": [
@@ -9496,6 +9505,15 @@
    }
   ]
  },
+ "yam-dsp-rx": {
+  "photo": "https://usa.yamaha.com/files/01-dsp-rx-front_bf1e5517c8575b0758757a4ec10b3d81.jpg?impolicy=resize&imwid=735&imhei=735",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/rivage_pm/components.html"
+   }
+  ]
+ },
  "yam-dxr10": {
   "photo": "https://usa.yamaha.com/files/dxr10mkii_index_735x735_533bcb01ed12bbef812d0e98b83e58de.png",
   "docs": [
@@ -9700,6 +9718,24 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://usa.yamaha.com/products/proaudio/interfaces/r_series_adda_3/index.html"
+   }
+  ]
+ },
+ "yam-rpio222": {
+  "photo": "https://usa.yamaha.com/files/RPio222_Front_6f57e7b3d64ec55fc90f1c2efc471f29.jpg?impolicy=resize&imwid=735&imhei=735",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/rivage_pm/components.html"
+   }
+  ]
+ },
+ "yam-rpio622": {
+  "photo": "https://usa.yamaha.com/files/RPio622_Front_55ce6597154f079a4ab572645aa77907.jpg?impolicy=resize&imwid=735&imhei=735",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/rivage_pm/components.html"
    }
   ]
  },
