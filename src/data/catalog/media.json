@@ -7735,9 +7735,198 @@
    }
   ]
  },
+ "yam-cl1": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_mixer_CL1_overhead_25fe1ff331c01a235d1b95738b337192.jpg?impolicy=resize&imwid=800&imhei=787",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/cl_series/index.html"
+   }
+  ]
+ },
+ "yam-cl3": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_mixer_CL3_overhead_7bdc7636d78ae1ad8783cf338542a27e.jpg?impolicy=resize&imwid=800&imhei=619",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/cl_series/index.html"
+   }
+  ]
+ },
+ "yam-cl5": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_mixer_CL5_overhead_6dd77df65971530323f2fea90857a858.jpg?impolicy=resize&imwid=800&imhei=530",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/cl_series/index.html"
+   }
+  ]
+ },
+ "yam-czr10": {
+  "photo": "https://usa.yamaha.com/files/czr10_qtr_right_8f9b64f4ae3f87699829fcd253a1680b.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/czr_cxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-czr12": {
+  "photo": "https://usa.yamaha.com/files/czr12_qtr_right_66ebdad21fd8ad1ed9cfbdd0fb43147e.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/czr_cxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-czr15": {
+  "photo": "https://usa.yamaha.com/files/czr15_qtr_right_d3b2fcff8585458e7194e2f022996d77.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/czr_cxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-dhr12m": {
+  "photo": "https://usa.yamaha.com/files/DHR12M-front01-_348f2be77b91a3c621a3496f6faccd49.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dhr/index.html"
+   }
+  ]
+ },
+ "yam-dm3": {
+  "photo": "https://usa.yamaha.com/files/DM3-front_29bc6b6fc410b3240c8a10c0e847e66e.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/interfaces/tio1608-d2/index.html"
+   }
+  ]
+ },
+ "yam-dm3s": {
+  "photo": "https://usa.yamaha.com/files/DM3-Standard-front_b09fdface9171b449e8042b8330d9d9e.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/dm3/index.html"
+   }
+  ]
+ },
  "yam-dm7": {
   "photo": "https://mds-audio.com/media/djcatalog2/images/item/0/dm7_f.png",
   "docs": []
+ },
+ "yam-dm7c": {
+  "photo": "https://usa.yamaha.com/files/DM7-Compact-front-4000_b93800d6e0e7a992e87d9afe5d0bc040.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/dm7/index.html"
+   }
+  ]
+ },
+ "yam-dme7": {
+  "photo": "https://usa.yamaha.com/files/DME7-front01_d36d77b97d64b8e7f62b2f275b7358ef.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/processors/dme7/index.html"
+   }
+  ]
+ },
+ "yam-dxr10": {
+  "photo": "https://usa.yamaha.com/files/dxr10mkii_index_735x735_533bcb01ed12bbef812d0e98b83e58de.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dxr/index.html"
+   }
+  ]
+ },
+ "yam-dxr12": {
+  "photo": "https://usa.yamaha.com/files/dxr12mkii_index_735x735_d6db4ba8d89a71e7c2b74e45338b308a.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dxr/index.html"
+   }
+  ]
+ },
+ "yam-dxr15": {
+  "photo": "https://usa.yamaha.com/files/dxr15mkii_index_735x735_91425829b3b9ee0df9a981a207267a2f.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dxr/index.html"
+   }
+  ]
+ },
+ "yam-dxs15": {
+  "photo": "https://usa.yamaha.com/files/dxs15mkii_front_6836c139351f153c83bf9ba24145fd39.jpg?impolicy=resize&imwid=800&imhei=1014",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dxs/index.html"
+   }
+  ]
+ },
+ "yam-dxs18": {
+  "photo": "https://usa.yamaha.com/files/dxs18xlf_qtr_right_78a999d804c7b258bd0c613a5dbb1a1d.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dzr_dxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-dxs18xlf-d": {
+  "photo": "https://usa.yamaha.com/files/dxs18xlf-d_qtr_right_1a07b9b35b0a7df1e42c7f49e7fc68a6.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dzr_dxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-dzr10": {
+  "photo": "https://usa.yamaha.com/files/dzr10_qtr_right_85220a7eaa935b30d373fd707e65fc61.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dzr_dxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-dzr12": {
+  "photo": "https://usa.yamaha.com/files/dzr12_qtr_right_810e9c4bded19da45c227cbc32f99173.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dzr_dxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-dzr15": {
+  "photo": "https://usa.yamaha.com/files/dzr15_qtr_right_f41ec4721117b2a5f169113c9ec88915.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dzr_dxs_xlf/index.html"
+   }
+  ]
+ },
+ "yam-dzr315": {
+  "photo": "https://usa.yamaha.com/files/dzr315_qtr_right_de11a1103e9dcd1a759f77c778430444.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/speakers/dzr_dxs_xlf/index.html"
+   }
+  ]
  },
  "yam-mg10xu": {
   "photo": "https://shop.sg.yamaha.com/media/catalog/product/f/r/front_15.png?optimize=high&fit=bounds&height=&width=&canvas=:&format=jpeg",
@@ -7754,6 +7943,42 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://shop.sg.yamaha.com/products/professional-audio/mixers/mg16xu.html"
+   }
+  ]
+ },
+ "yam-mrx7d": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_processors__mrx7d_front_l_91fabaf747d72abbb1c2f3a537ddbc7a.jpg?impolicy=resize&imwid=800&imhei=265",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/processors/mrx7-d/index.html"
+   }
+  ]
+ },
+ "yam-pc412d": {
+  "photo": "https://usa.yamaha.com/files/pc412-di_index_735x735_1d5e7501091f1a3560583c5cfb0e1142.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/power_amps/pc-d_di/index.html"
+   }
+  ]
+ },
+ "yam-px10": {
+  "photo": "https://usa.yamaha.com/files/px10_front01_ae231d26c8d6ce2132b5f5b44b9cc10c.jpg?impolicy=resize&imwid=800&imhei=147",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/power_amps/px_series/index.html"
+   }
+  ]
+ },
+ "yam-px8": {
+  "photo": "https://usa.yamaha.com/files/px8_front01_431de035678d0e205f9e32647699f8f8.jpg?impolicy=resize&imwid=800&imhei=147",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/power_amps/px_series/index.html"
    }
   ]
  },
@@ -7779,9 +8004,27 @@
    }
   ]
  },
+ "yam-rio1608-d3": {
+  "photo": "https://usa.yamaha.com/files/Rio1608-D3-front01_7726b7500d8a60129408e379c674b27c.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/interfaces/r_series_adda_3/index.html"
+   }
+  ]
+ },
  "yam-rio3224": {
   "photo": "https://etha.de/media/uploads/yamaha-rio3224-d2-angle.webp",
   "docs": []
+ },
+ "yam-rio3224-d3": {
+  "photo": "https://usa.yamaha.com/files/Rio3224-D3-front01_67356837a336463f36a279742c74011e.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/interfaces/r_series_adda_3/index.html"
+   }
+  ]
  },
  "yam-rsio64": {
   "photo": "https://fr.yamaha.com/fr/files/photoviewer_interfaces_rsio64-d_left_tcm122-1651336.jpg",
@@ -7789,6 +8032,87 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://fr.yamaha.com/fr/business/audio/products/mixers/ql-series/"
+   }
+  ]
+ },
+ "yam-swp1-16mmf": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_interface_swp1-16mmf_front02_418574f3c7b91c07ac891d5addb50291.jpg?impolicy=resize&imwid=800&imhei=137",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/network_switches/swp1/index.html"
+   }
+  ]
+ },
+ "yam-swp1-8mmf": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_interface_swp1-8mmf_front02_a0a1e10fd8312e385848b5cf5ccf152a.jpg?impolicy=resize&imwid=800&imhei=137",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/network_switches/swp1/index.html"
+   }
+  ]
+ },
+ "yam-swr2310-10g": {
+  "photo": "https://usa.yamaha.com/files/00-swr2310-10g-front02-catalog_4c3f32df541fd2703fe97c0920556104.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/network_switches/swr2310/index.html"
+   }
+  ]
+ },
+ "yam-swr2311p-10g": {
+  "photo": "https://usa.yamaha.com/files/swr2311p-10g_front_01_93b71f348b0c73620b0844f866735d8c.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/network_switches/swr2311p/index.html"
+   }
+  ]
+ },
+ "yam-tf1": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_mixer_tf1_over_316c9fdd5a622e840b79231d4fe0ceb1.jpg?impolicy=resize&imwid=800&imhei=967",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/tf/index.html"
+   }
+  ]
+ },
+ "yam-tf3": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_mixer_tf3_over_87a5ab3dc4c710f9ce3d241fdaf3fb02.jpg?impolicy=resize&imwid=800&imhei=686",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/tf/index.html"
+   }
+  ]
+ },
+ "yam-tf5": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_mixer_tf5_over_e78a26f284d1d790c16d40780513eb7e.jpg?impolicy=resize&imwid=800&imhei=565",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/mixers/tf/index.html"
+   }
+  ]
+ },
+ "yam-tio1608-d2": {
+  "photo": "https://usa.yamaha.com/files/Tio1608-D2-front01_4e579ff2244f8e59c0e0b8c279fdb5d3.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/interfaces/tio1608-d2/index.html"
+   }
+  ]
+ },
+ "yam-xmv4280": {
+  "photo": "https://usa.yamaha.com/files/photoviewer_poweramplifer_xmv4280-d_front_5d4455cce14d7229117ae0115d0b41ac.jpg?impolicy=resize&imwid=800&imhei=264",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://usa.yamaha.com/products/proaudio/power_amps/xmv/index.html"
    }
   ]
  }
