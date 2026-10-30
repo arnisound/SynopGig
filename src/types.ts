@@ -81,6 +81,15 @@ export interface Port {
   pair?: string
   /** Side of the device box chosen by the user (else: inputs left, outputs right). */
   side?: 'left' | 'right'
+  /** Id of the optional card this port belongs to. */
+  option?: string
+}
+
+/** An optional card or module of a product (a Dante card in a slot...): its ports appear once it is fitted. */
+export type DeviceOption = {
+  id: string
+  label: string
+  ports: Port[]
 }
 
 /** One D-series hole of a patch panel. */
@@ -152,6 +161,8 @@ export interface DeviceTemplate extends ProductInfo {
   /** Weight in kg, used for flight case packing. */
   weight?: number
   ports: Port[]
+  /** Cards and modules that can be fitted. */
+  options?: DeviceOption[]
   panel?: PanelSpec
   /** Product photo: a small data URL, or the USER library's address for it. */
   image?: string
@@ -174,6 +185,9 @@ export type DeviceData = ProductInfo & {
   rackU?: number
   weight?: number
   ports: Port[]
+  /** Cards the product can take, and the ones fitted on this device. */
+  options?: DeviceOption[]
+  fitted?: string[]
   config: DeviceConfig
   brand?: string
   panel?: PanelSpec

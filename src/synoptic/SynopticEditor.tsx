@@ -482,7 +482,16 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
         ipIssues={selectedNode ? ips.get(selectedNode.id) : undefined}
         cable={selectedEdge ? cableByEdge.get(selectedEdge.id) : undefined}
         onNode={(id, patch) =>
-          setProject((p) => ({ ...p, nodes: p.nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...patch } } : n)) }))
+          setProject((p) => {
+            // A port taken away (deleted, or its card removed) takes its cable with it.
+            const ports = patch.ports && new Set(patch.ports.map((x) => x.id))
+            const gone = (node: string, handle?: string | null) => !!ports && node === id && !ports.has(handle ?? '')
+            return {
+              ...p,
+              nodes: p.nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...patch } } : n)),
+              edges: ports ? p.edges.filter((e) => !gone(e.source, e.sourceHandle) && !gone(e.target, e.targetHandle)) : p.edges,
+            }
+          })
         }
         onCable={(id, patch) =>
           setProject((p) => ({

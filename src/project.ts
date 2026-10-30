@@ -4,6 +4,7 @@ import { panelPorts } from './data/panels'
 import type {
   Banner,
   CableEdge,
+  DeviceData,
   DeviceNode,
   DeviceTemplate,
   FlightCase,
@@ -15,6 +16,17 @@ import type {
 const STORAGE_KEY = 'synopgig.project'
 
 export const uid = () => Math.random().toString(36).slice(2, 10)
+
+/** Fits or removes an optional card: its ports are added after the others, or taken away. */
+export function setOption(d: DeviceData, optionId: string, on: boolean): Partial<DeviceData> {
+  const opt = d.options?.find((o) => o.id === optionId)
+  if (!opt) return {}
+  const fitted = new Set(d.fitted ?? [])
+  if (on) fitted.add(optionId)
+  else fitted.delete(optionId)
+  const ports = d.ports.filter((p) => p.option !== optionId)
+  return { fitted: [...fitted], ports: on ? [...ports, ...opt.ports.map((p) => ({ ...p, id: `${optionId}.${p.id}`, option: optionId }))] : ports }
+}
 
 export function createDevice(
   template: DeviceTemplate,
@@ -37,6 +49,7 @@ export function createDevice(
       rackU: template.rackU,
       weight: template.weight,
       ports: structuredClone(template.ports),
+      ...(template.options?.length ? { options: structuredClone(template.options) } : {}),
       config: {},
       brand: template.brand,
       panel: template.panel && structuredClone(template.panel),

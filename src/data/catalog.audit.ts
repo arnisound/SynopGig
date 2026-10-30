@@ -31,7 +31,8 @@ export function auditTemplate(t: DeviceTemplate): string[] {
     if (main.length !== 2 || main.some((p) => p.connector !== 'xlr3')) out.push('sortie principale stéréo XLR (Main L / Main R) manquante')
   }
   const power = t.ports.filter((p) => p.signal === 'power' && p.dir === 'in')
-  if (!t.panel && power.length > 1 && !power.every((p) => /\d|redond|secours|A$|B$/i.test(p.label))) out.push('plusieurs entrées secteur non nommées')
+  // A second mains inlet is the redundant one, or numbered.
+  if (!t.panel && power.length > 1 && !power.slice(1).every((p) => /\d|redond|secours|extern|A$|B$/i.test(p.label))) out.push('plusieurs entrées secteur non nommées')
   const active = t.ports.some((p) => p.signal !== 'speaker' && p.signal !== 'rf' && p.signal !== 'power' && (p.dir === 'out' || p.dir === 'io') && p.signal !== 'audio-analog')
   if (!t.panel && power.length === 0 && active && !t.ports.some((p) => FED.test(p.label)) && !NO_MAINS.test(`${t.model} ${t.family ?? ''}`)) out.push('aucune alimentation')
   return out

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { ZONES } from '../data/library'
-import type { ResolvedCable } from '../project'
+import { setOption, type ResolvedCable } from '../project'
 import PanelEditor from '../racks/PanelEditor'
 import DeviceArt from '../ui/DeviceArt'
 import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
@@ -188,6 +188,17 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
         ) : (
           <>
             <p className="muted small">Comme sur la boîte du synoptique : glissez un port pour changer sa place ou son côté, ⇆ l’envoie en face. « Enregistrer comme modèle » garde ces réglages pour la suite.</p>
+            {!!d.options?.length && (
+              <section className="options">
+                <h4>Options</h4>
+                {d.options.map((o) => (
+                  <label key={o.id} className="check">
+                    <input type="checkbox" checked={!!d.fitted?.includes(o.id)} onChange={(e) => set(setOption(d, o.id, e.target.checked))} />
+                    {o.label} <small className="muted">· {o.ports.length} port{o.ports.length > 1 ? 's' : ''}</small>
+                  </label>
+                ))}
+              </section>
+            )}
             <PortsEditor key={node.id} ports={d.ports} onChange={(ports) => set({ ports })} />
           </>
         ))}

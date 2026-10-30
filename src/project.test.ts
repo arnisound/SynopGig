@@ -169,3 +169,16 @@ describe('combo inputs', () => {
     expect(checkLink(rca, combo).map((i) => i.message)).toEqual(['Adaptateur nécessaire : RCA (cinch) → Combo XLR / jack'])
   })
 })
+
+describe('optional cards', async () => {
+  const { createDevice, setOption } = await import('./project')
+  it('adds the card ports when fitted and removes them again', () => {
+    const t = { id: 't', model: 'TF1', category: 'Son' as const, ports: [{ id: 'in1', label: 'In 1', connector: 'xlr3' as const, signal: 'audio-analog' as const, dir: 'in' as const }], options: [{ id: 'ny64', label: 'Carte NY64-D (Dante)', ports: [{ id: 'pri', label: 'Dante primaire', connector: 'ethercon' as const, signal: 'dante' as const, dir: 'io' as const }] }] }
+    const d = createDevice(t, { x: 0, y: 0 }, []).data
+    const on = { ...d, ...setOption(d, 'ny64', true) }
+    expect(on.ports.map((p) => p.id)).toEqual(['in1', 'ny64.pri'])
+    expect(on.fitted).toEqual(['ny64'])
+    const off = { ...on, ...setOption(on, 'ny64', false) }
+    expect(off.ports.map((p) => p.id)).toEqual(['in1'])
+  })
+})

@@ -1,4 +1,4 @@
-import type { Category, ConnectorType, DeviceTemplate, Port, PortDirection, SignalType } from '../types'
+import type { Category, ConnectorType, DeviceOption, DeviceTemplate, Port, PortDirection, SignalType, Spec } from '../types'
 import { port, series } from './ports'
 
 /* Shorthands shared by the brand catalogue files. */
@@ -65,16 +65,62 @@ export const dc = (label = 'Alim DC') => port('pwr', label, 'dc', PWR, 'in')
 export const lineIn = () => [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out')]
 export const hpIn = (c: ConnectorType = 'speakon') => [port('in', 'Entrée HP', c, HP, 'in'), port('link', 'Link HP', c, HP, 'out')]
 
-export function dev(
-  id: string,
-  brand: string,
-  model: string,
-  category: Category,
-  spec: { u?: number; kg?: number; w?: number },
-  ports: Port[],
-): DeviceTemplate {
-  return { id, brand, model, category, rackU: spec.u, weight: spec.kg, ports, ...(spec.w ? { watts: spec.w } : {}) }
+/**
+ * A product sheet, as the AI reading builds it: what it is, then its
+ * characteristics grouped "Physique", "Alimentation", then by trade.
+ */
+export interface Sheet {
+  u?: number
+  kg?: number
+  /** Power drawn from the mains, in watts (also the power budget). */
+  w?: number
+  /** H × L × P, in mm. */
+  dim?: string
+  /** Mains voltage, e.g. "100-240 V". */
+  v?: string
+  /** One or two sentences, in French: what it is, what it is for. */
+  d?: string
+  /** Other characteristics: [group, label, value, unit?]. */
+  x?: [string, string, string, string?][]
+  /** Cards and modules that can be fitted. */
+  opt?: DeviceOption[]
+  url?: string
 }
+
+export function dev(id: string, brand: string, model: string, category: Category, sheet: Sheet, ports: Port[]): DeviceTemplate {
+  const specs: Spec[] = [
+    ...(sheet.dim ? [{ group: 'Physique', label: 'Dimensions (H × L × P)', value: sheet.dim, unit: 'mm' }] : []),
+    ...(sheet.kg ? [{ group: 'Physique', label: 'Poids', value: String(sheet.kg).replace('.', ','), unit: 'kg' }] : []),
+    ...(sheet.u ? [{ group: 'Physique', label: 'Format rack', value: String(sheet.u), unit: 'U' }] : []),
+    ...(sheet.v ? [{ group: 'Alimentation', label: 'Tension', value: sheet.v }] : []),
+    ...(sheet.w ? [{ group: 'Alimentation', label: 'Consommation', value: String(sheet.w), unit: 'W' }] : []),
+    ...(sheet.x ?? []).map(([group, label, value, unit]) => ({ group, label, value, ...(unit ? { unit } : {}) })),
+  ]
+  return {
+    id,
+    brand,
+    model,
+    category,
+    rackU: sheet.u,
+    weight: sheet.kg,
+    ports,
+    ...(sheet.w ? { watts: sheet.w } : {}),
+    ...(sheet.d ? { description: sheet.d } : {}),
+    ...(sheet.url ? { url: sheet.url } : {}),
+    ...(specs.length ? { specs } : {}),
+    ...(sheet.opt?.length ? { options: sheet.opt } : {}),
+  }
+}
+
+/** An optional card: its ports appear on the device once fitted. */
+export const opt = (id: string, label: string, ports: Port[]): DeviceOption => ({ id, label, ports })
 
 /** Tags each model of a list with its family. */
 export const family = (name: string, list: DeviceTemplate[]) => list.map((t) => ({ ...t, family: name }))
+
+/** A run of identical sockets numbered from `start`: "Mic 9", "Mic 10"... */
+export const run = (id: string, label: string, n: number, c: ConnectorType, s: SignalType, d: PortDirection, start = 1): Port[] =>
+  Array.from({ length: n }, (_, i) => ({ id: `${id}${i + start}`, label: `${label} ${i + start}`, connector: c, signal: s, dir: d }))
+/** A footswitch socket: one jack carrying a contact. */
+export const footswitch = () => port('fs', 'Footswitch', 'jack', CTRL, 'in')
+export const lamp = () => port('lamp', 'Lampe', 'xlr4', PWR, 'out')

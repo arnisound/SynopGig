@@ -1,5 +1,6 @@
 import type { DeviceTemplate } from '../types'
-import { A, AES, HP, DMX, NET, V, PWR, RF, CTRL, LINK, AVB, ARTNET, SYNC, ins, outs, pair, dante, link, ctl, mainLR, phones, talkback, aesIn, aesOut, madi, wclk, midi, usbAudio, gpio, stereoIns, stereoOuts, net, iec, t1, t1Link, pc32, dmxInOut, dmxOuts, antIn, cascade, antOut, dc, lineIn, hpIn, dev, family, port, series } from './catalogKit'
+import { A, AES, HP, DMX, NET, V, PWR, RF, CTRL, LINK, ARTNET, SYNC, ins, outs, pair, dante, ctl, aesOut, net, iec, t1, t1Link, pc32, dmxInOut, dmxOuts, antIn, cascade, antOut, dc, lineIn, hpIn, dev, family, port, series } from './catalogKit'
+import { CONSOLES } from './catalog/consoles'
 import { SHURE } from './brands/shure'
 import { SENNHEISER } from './brands/sennheiser'
 import { FOHHN } from './brands/fohhn'
@@ -17,104 +18,8 @@ import { NEXO } from './brands/nexo'
  * Models are grouped by family, the sub-group shown in the palette.
  */
 
-/** The X32 / M32 family: local I/O, aux, AES50 A/B, Ultranet, MIDI, remote, USB card. */
-const xIo = (mic: number, out: number) => [
-  ...ins(mic),
-  ...outs(out),
-  ...ins(6, 'Aux in', 'jack').map((p) => ({ ...p, id: p.id.replace('in', 'auxin') })),
-  ...outs(6, 'Aux out', 'jack').map((p) => ({ ...p, id: p.id.replace('out', 'auxout') })),
-  ...aesOut(1),
-  ...link('aes50', 'AES50', 2),
-  port('ultranet', 'Ultranet (P16)', 'rj45', LINK, 'out'),
-  ...midi(),
-  ctl('Remote'),
-  usbAudio('USB audio (carte X-USB)'),
-]
-/** Yamaha CL: 8 Omni in/out, 2TR digital, Dante, word clock, GPI. */
-const clIo = () => [...ins(8, 'Omni in'), ...outs(8, 'Omni out'), port('2trIn', '2TR in (coax)', 'rca', AES, 'in'), port('2trOut', '2TR out (coax)', 'rca', AES, 'out'), talkback(), phones(), ...dante(), ...wclk(), gpio(), ctl('Réseau')]
-const qlIo = () => [port('2trIn', '2TR in (coax)', 'rca', AES, 'in'), port('2trOut', '2TR out (coax)', 'rca', AES, 'out'), talkback(), phones(), ...dante(), ...wclk(), gpio(), ctl('Réseau')]
-
 const SON: DeviceTemplate[] = [
-  ...family('Consoles', [
-    dev('ah-avantis', 'Allen & Heath', 'Avantis', 'Son', { kg: 30 }, [...ins(12), ...outs(12), ...aesIn(1), ...aesOut(2), ...link('slink', 'SLink'), ctl('Réseau'), iec()]),
-    dev('ah-avantis-solo', 'Allen & Heath', 'Avantis Solo', 'Son', { kg: 22 }, [...ins(6), ...outs(6), ...aesIn(1), ...aesOut(1), ...wclk(), ...link('slink', 'SLink'), ctl('Réseau'), iec()]),
-    dev('ah-cq12t', 'Allen & Heath', 'CQ-12T', 'Son', { kg: 3 }, [...ins(5), ...series('combo', 'In', 5, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 6}` })), ...stereoIns(1), ...mainLR(), ...outs(6, 'Out', 'jack'), phones(), ctl('Réseau'), port('usb', 'USB (enregistrement)', 'usb', AES, 'io'), dc('Alim externe 12 V')]),
-    dev('ah-cq18t', 'Allen & Heath', 'CQ-18T', 'Son', { kg: 4 }, [...ins(8), ...series('combo', 'In', 8, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 9}` })), ...stereoIns(1), ...mainLR(), ...outs(6, 'Out', 'jack'), phones(), ctl('Réseau'), port('usb', 'USB audio', 'usb', AES, 'io'), dc('Alim externe 12 V')]),
-    dev('ah-cq20b', 'Allen & Heath', 'CQ-20B', 'Son', { kg: 3 }, [...ins(8), ...series('combo', 'In', 8, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 9}` })), ...stereoIns(2), ...mainLR(), ...outs(6), ...stereoOuts(1, 'Alt out'), phones(), ctl('Réseau'), port('usb', 'USB audio', 'usb', AES, 'io'), iec()]),
-    dev('ah-dlive-c1500', 'Allen & Heath', 'dLive C1500', 'Son', { kg: 14 }, [...ins(6), ...outs(6), ...aesIn(1), ...aesOut(1), ...link('gigaace', 'gigaACE (MixRack)'), ctl('Réseau'), iec()]),
-    dev('ah-dlive-c2500', 'Allen & Heath', 'dLive C2500', 'Son', { kg: 18 }, [...ins(6), ...outs(6), ...aesIn(1), ...aesOut(1), ...link('gigaace', 'gigaACE (MixRack)'), ctl('Réseau'), iec()]),
-    dev('ah-dlive-c3500', 'Allen & Heath', 'dLive C3500', 'Son', { kg: 25 }, [...ins(6), ...outs(6), ...aesIn(1), ...aesOut(1), ...link('gigaace', 'gigaACE (MixRack)'), ctl('Réseau'), iec()]),
-    dev('ah-dlive-s5000', 'Allen & Heath', 'dLive S5000', 'Son', { kg: 33 }, [...ins(8), ...outs(8), ...aesIn(2), ...aesOut(3), ...link('gigaace', 'gigaACE (MixRack)', 2), ctl('Réseau'), iec()]),
-    dev('ah-dlive-s7000', 'Allen & Heath', 'dLive S7000', 'Son', { kg: 43 }, [...ins(8), ...outs(8), ...aesIn(2), ...aesOut(3), ...link('gigaace', 'gigaACE (MixRack)', 2), ctl('Réseau'), iec()]),
-    dev('ah-qu16', 'Allen & Heath', 'Qu-16', 'Son', { kg: 12 }, [...ins(16), ...stereoIns(2), talkback(), ...mainLR(), ...outs(10, 'Mix'), ...stereoOuts(1, 'Alt out'), ...aesOut(1), phones(), ...link('dsnake', 'dSNAKE'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('ah-qu24', 'Allen & Heath', 'Qu-24', 'Son', { kg: 16 }, [...ins(24), ...stereoIns(2), talkback(), ...mainLR(), ...outs(10, 'Mix'), ...stereoOuts(2, 'Matrix', 'xlr3', 'mtx'), ...stereoOuts(1, 'Alt out'), ...aesOut(1), phones(), ...link('dsnake', 'dSNAKE'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('ah-sq5', 'Allen & Heath', 'SQ-5', 'Son', { kg: 12 }, [...ins(16), talkback(), ...outs(12), ...aesOut(1), phones(), ...link('slink', 'SLink'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('ah-sq6', 'Allen & Heath', 'SQ-6', 'Son', { kg: 16 }, [...ins(24), talkback(), ...outs(14), ...aesOut(1), phones(), ...link('slink', 'SLink'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('ah-sq7', 'Allen & Heath', 'SQ-7', 'Son', { kg: 20 }, [...ins(32), talkback(), ...outs(16), ...aesOut(1), phones(), ...link('slink', 'SLink'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('ah-zed22fx', 'Allen & Heath', 'ZED-22FX (analogique)', 'Son', { kg: 8 }, [...ins(16), ...stereoIns(3), ...mainLR(), ...outs(4, 'Group', 'jack'), ...outs(4, 'Aux', 'jack').map((p) => ({ ...p, id: p.id.replace('out', 'aux') })), phones(), usbAudio(), iec()]),
-    dev('avid-s6l-24c', 'Avid', 'VENUE S6L-24C (surface)', 'Son', { kg: 44 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...pair('avb', 'AVB (moteur E6L)', 'ethercon', AVB), ctl('ECx', 'ethercon'), phones(), iec()]),
-    dev('avid-s6l-32d', 'Avid', 'VENUE S6L-32D (surface)', 'Son', { kg: 60 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...pair('avb', 'AVB (moteur E6L)', 'ethercon', AVB), ctl('ECx', 'ethercon'), phones(), iec()]),
-    dev('avid-s6l-48d', 'Avid', 'VENUE S6L-48D (surface)', 'Son', { kg: 80 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...pair('avb', 'AVB (moteur E6L)', 'ethercon', AVB), ctl('ECx', 'ethercon'), phones(), iec()]),
-    dev('beh-wing', 'Behringer', 'Wing', 'Son', { kg: 21 }, [...ins(8), ...outs(8), ...ins(8, 'Aux in', 'jack').map((p) => ({ ...p, id: p.id.replace('in', 'auxin') })), ...outs(8, 'Aux out', 'jack').map((p) => ({ ...p, id: p.id.replace('out', 'auxout') })), ...aesIn(1), ...aesOut(1), ...link('aes50', 'AES50', 3), port('stagec', 'StageConnect', 'xlr3', LINK, 'io'), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), usbAudio(), ctl('Réseau'), iec()]),
-    dev('beh-wing-compact', 'Behringer', 'Wing Compact', 'Son', { kg: 17 }, [...ins(24), ...outs(8), ...ins(8, 'Aux in', 'jack').map((p) => ({ ...p, id: p.id.replace('in', 'auxin') })), ...outs(8, 'Aux out', 'jack').map((p) => ({ ...p, id: p.id.replace('out', 'auxout') })), ...aesIn(1), ...aesOut(1), ...link('aes50', 'AES50', 3), port('stagec', 'StageConnect', 'xlr3', LINK, 'io'), talkback(), phones(), usbAudio(), ctl('Réseau'), iec()]),
-    dev('beh-wing-rack', 'Behringer', 'Wing Rack', 'Son', { u: 4, kg: 8 }, [...ins(24), ...outs(8), ...ins(8, 'Aux in', 'jack').map((p) => ({ ...p, id: p.id.replace('in', 'auxin') })), ...outs(8, 'Aux out', 'jack').map((p) => ({ ...p, id: p.id.replace('out', 'auxout') })), ...aesIn(1), ...aesOut(1), ...link('aes50', 'AES50', 3), port('stagec', 'StageConnect', 'xlr3', LINK, 'io'), phones(), usbAudio(), ctl('Réseau'), iec()]),
-    dev('beh-x32', 'Behringer', 'X32', 'Son', { kg: 20 }, [...xIo(32, 16), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), iec()]),
-    dev('beh-x32-compact', 'Behringer', 'X32 Compact', 'Son', { kg: 15 }, [...xIo(16, 8), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), iec()]),
-    dev('beh-x32-producer', 'Behringer', 'X32 Producer', 'Son', { kg: 11 }, [...xIo(16, 8), talkback(), phones(), iec()]),
-    dev('beh-x32-rack', 'Behringer', 'X32 Rack', 'Son', { u: 3, kg: 6 }, [...xIo(16, 8), phones(), iec()]),
-    dev('beh-xr12', 'Behringer', 'XR12 (rack)', 'Son', { kg: 2 }, [...ins(4, 'In', 'xlr-combo'), ...ins(8, 'Line', 'jack').map((p, i) => ({ ...p, id: `line${i + 5}`, label: `Line ${i + 5}` })), ...mainLR(), ...outs(2, 'Aux', 'jack'), phones(), ctl('Réseau'), iec()]),
-    dev('beh-xr16', 'Behringer', 'XR16 (rack)', 'Son', { kg: 2 }, [...ins(8, 'In', 'xlr-combo'), ...ins(8, 'Line', 'jack').map((p, i) => ({ ...p, id: `line${i + 9}`, label: `Line ${i + 9}` })), ...mainLR(), ...outs(4, 'Aux'), phones(), ctl('Réseau'), iec()]),
-    dev('beh-xr18', 'Behringer', 'XR18 (rack)', 'Son', { kg: 2 }, [...ins(12), ...series('combo', 'In', 4, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 13}` })), ...ins(2, 'Aux in', 'jack').map((p) => ({ ...p, id: p.id.replace('in', 'auxin') })), ...mainLR(), ...outs(6, 'Aux'), phones(), port('ultranet', 'Ultranet', 'rj45', LINK, 'out'), usbAudio(), ctl('Réseau'), iec()]),
-    dev('digico-q225', 'DiGiCo', 'Quantum 225', 'Son', { kg: 25 }, [...ins(8), ...outs(8), ...aesIn(2), ...aesOut(2), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-q338', 'DiGiCo', 'Quantum 338', 'Son', { kg: 50 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...madi('sdi', 'C'), ...link('fibre', 'Optocore (option)', 2, 'opticalcon'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-q852', 'DiGiCo', 'Quantum 852', 'Son', { kg: 90 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...link('fibre', 'Optocore', 2, 'opticalcon'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-s21', 'DiGiCo', 'S21', 'Son', { kg: 22 }, [...ins(24), ...outs(12), ...aesIn(1), ...aesOut(1), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-s31', 'DiGiCo', 'S31', 'Son', { kg: 25 }, [...ins(24), ...outs(12), ...aesIn(1), ...aesOut(1), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-sd10', 'DiGiCo', 'SD10', 'Son', { kg: 47 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...link('fibre', 'Optocore', 2, 'opticalcon'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-sd12', 'DiGiCo', 'SD12', 'Son', { kg: 40 }, [...ins(12), ...outs(12), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-sd5', 'DiGiCo', 'SD5', 'Son', { kg: 75 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...link('fibre', 'Optocore', 2, 'opticalcon'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-sd7q', 'DiGiCo', 'SD7 Quantum', 'Son', { kg: 110 }, [...ins(8), ...outs(8), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...link('fibre', 'Optocore', 2, 'opticalcon'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('digico-sd9', 'DiGiCo', 'SD9', 'Son', { kg: 25 }, [...ins(8), ...outs(8), ...aesIn(2), ...aesOut(2), ...madi('sdi'), ...wclk(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('midas-hd96', 'Midas', 'HD96-24', 'Son', { kg: 50 }, [...ins(8), ...outs(8), ...aesIn(2), ...aesOut(2), ...link('snake', 'Snake (HyperMAC)', 2), ctl('Réseau'), iec()]),
-    dev('midas-m32', 'Midas', 'M32', 'Son', { kg: 25 }, [...xIo(32, 16), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), iec()]),
-    dev('midas-m32-live', 'Midas', 'M32 Live', 'Son', { kg: 25 }, [...xIo(32, 16), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), iec()]),
-    dev('midas-m32r', 'Midas', 'M32R Live', 'Son', { kg: 17 }, [...xIo(16, 8), talkback(), phones(), iec()]),
-    dev('midas-mr12', 'Midas', 'MR12 (rack)', 'Son', { kg: 2 }, [...ins(4, 'In', 'xlr-combo'), ...ins(2, 'Line', 'jack').map((p, i) => ({ ...p, id: `line${i + 5}`, label: `Line ${i + 5}` })), ...mainLR(), ...outs(2, 'Aux', 'jack'), phones(), ctl('Réseau'), iec()]),
-    dev('midas-mr18', 'Midas', 'MR18 (rack)', 'Son', { u: 3, kg: 4 }, [...ins(12), ...series('combo', 'In', 4, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 13}` })), ...ins(2, 'Aux in', 'jack').map((p) => ({ ...p, id: p.id.replace('in', 'auxin') })), ...mainLR(), ...outs(6, 'Aux'), phones(), port('ultranet', 'Ultranet', 'rj45', LINK, 'out'), usbAudio(), ctl('Réseau'), iec()]),
-    dev('midas-pro2', 'Midas', 'PRO2', 'Son', { kg: 46 }, [...ins(8), ...outs(16), ...aesIn(2), ...aesOut(3), ...series('aes50', 'AES50', 6, 'ethercon', LINK, 'io'), ctl('Réseau'), iec()]),
-    dev('presonus-16iii', 'PreSonus', 'StudioLive 16 Series III', 'Son', { kg: 9 }, [...ins(16), talkback(), ...mainLR(), ...outs(8, 'FlexMix'), ...aesOut(1), phones(), port('avb', 'AVB', 'ethercon', AVB, 'io'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('presonus-24iii', 'PreSonus', 'StudioLive 24 Series III', 'Son', { kg: 13 }, [...ins(24), talkback(), ...mainLR(), ...outs(16, 'FlexMix'), ...aesOut(1), phones(), port('avb', 'AVB', 'ethercon', AVB, 'io'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('presonus-32r', 'PreSonus', 'StudioLive 32R (rack)', 'Son', { u: 3, kg: 7 }, [...ins(32), ...stereoIns(1, 'Tape in', 'rca'), ...mainLR(), ...outs(16, 'FlexMix', 'jack'), phones(), port('avb', 'AVB', 'ethercon', AVB, 'io'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('presonus-32sx', 'PreSonus', 'StudioLive 32SX', 'Son', { kg: 13 }, [...ins(32), talkback(), ...stereoIns(1, 'Tape in', 'rca'), ...mainLR(), ...outs(12, 'FlexMix'), ...outs(4, 'FlexMix', 'jack').map((p, i) => ({ ...p, id: `flexj${i + 13}`, label: `FlexMix ${i + 13}` })), ...aesOut(1), phones(), port('avb', 'AVB', 'ethercon', AVB, 'io'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('ssl-l100', 'Solid State Logic', 'Live L100 Plus', 'Son', { kg: 30 }, [...ins(12), ...outs(12), talkback(), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...dante(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ctl('Réseau'), iec()]),
-    dev('ssl-l200', 'Solid State Logic', 'Live L200 Plus', 'Son', { kg: 40 }, [...ins(12), ...outs(12), talkback(), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...dante(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ctl('Réseau'), iec()]),
-    dev('ssl-l350', 'Solid State Logic', 'Live L350 Plus', 'Son', { kg: 60 }, [...ins(16), ...outs(16), talkback(), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...madi('sdi', 'C'), port('madiOpt', 'MADI optique', 'opticalcon', AES, 'io'), ...dante(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ctl('Réseau'), iec()]),
-    dev('ssl-l550', 'Solid State Logic', 'Live L550 Plus', 'Son', { kg: 75 }, [...ins(16), ...outs(16), talkback(), ...aesIn(4), ...aesOut(4), ...madi('sdi', 'A'), ...madi('sdi', 'B'), ...madi('sdi', 'C'), port('madiOpt', 'MADI optique', 'opticalcon', AES, 'io'), ...dante(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ctl('Réseau'), iec()]),
-    dev('sc-si-expr3', 'Soundcraft', 'Si Expression 3', 'Son', { kg: 20 }, [...ins(32), ...ins(4, 'Line', 'jack').map((p, i) => ({ ...p, id: `line${i + 1}` })), ...outs(16), ...aesOut(1), phones(), ctl('Réseau'), iec()]),
-    dev('sc-si-impact', 'Soundcraft', 'Si Impact', 'Son', { kg: 18 }, [...ins(32), ...series('combo', 'Line', 8, 'xlr-combo', A, 'in'), ...outs(16), ...aesOut(1), port('wcOut', 'Word clock out', 'sdi', SYNC, 'out'), port('madi', 'MADI CAT5 (stagebox)', 'ethercon', AES, 'io'), usbAudio(), phones(), ctl('Réseau'), iec()]),
-    dev('sc-sig22', 'Soundcraft', 'Signature 22 MTK (analogique)', 'Son', { kg: 10 }, [...ins(16), ...stereoIns(3), ...mainLR(), ...outs(4, 'Aux', 'jack'), ...stereoOuts(1, 'Mon'), phones(), port('usb', 'USB multipiste', 'usb', AES, 'io'), iec()]),
-    dev('sc-ui16', 'Soundcraft', 'Ui16 (rack)', 'Son', { kg: 2 }, [...ins(8, 'In', 'xlr-combo'), ...ins(4).map((p, i) => ({ ...p, id: `in${i + 9}`, label: `In ${i + 9}` })), ...stereoIns(1), ...mainLR(), ...outs(4, 'Aux'), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ctl('Réseau'), dc('Alim externe')]),
-    dev('sc-ui24r', 'Soundcraft', 'Ui24R (rack)', 'Son', { u: 3, kg: 5 }, [...ins(10), ...series('combo', 'In', 10, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 11}` })), ...stereoIns(1), ...mainLR(), ...outs(8, 'Aux'), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), usbAudio(), ctl('Réseau'), iec()]),
-    dev('sc-vi1000', 'Soundcraft', 'Vi1000', 'Son', { kg: 27 }, [...ins(16), ...outs(16), ...aesOut(1), ...madi(), phones(), ctl('Réseau'), iec()]),
-    dev('sc-vi3000', 'Soundcraft', 'Vi3000', 'Son', { kg: 48 }, [...ins(16), ...outs(16), ...aesOut(1), ...madi(), phones(), ctl('Réseau'), iec()]),
-    dev('yam-cl1', 'Yamaha', 'CL1', 'Son', { kg: 20 }, [...clIo(), iec()]),
-    dev('yam-cl3', 'Yamaha', 'CL3', 'Son', { kg: 30 }, [...clIo(), iec()]),
-    dev('yam-cl5', 'Yamaha', 'CL5', 'Son', { kg: 36 }, [...clIo(), iec()]),
-    dev('yam-dm3', 'Yamaha', 'DM3', 'Son', { kg: 7 }, [...ins(12), ...series('combo', 'In', 4, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 13}` })), ...outs(8), phones(), ...dante('rj45'), ctl('Réseau'), usbAudio(), iec()]),
-    dev('yam-dm3s', 'Yamaha', 'DM3 Standard', 'Son', { kg: 7 }, [...ins(12), ...series('combo', 'In', 4, 'xlr-combo', A, 'in').map((p, i) => ({ ...p, label: `In ${i + 13}` })), ...outs(8), phones(), ctl('Réseau'), usbAudio(), iec()]),
-    dev('yam-dm7', 'Yamaha', 'DM7', 'Son', { kg: 30 }, [...ins(32), ...outs(16), ...aesOut(1), talkback(), phones(), ...dante(), ctl('Réseau'), usbAudio(), iec()]),
-    dev('yam-dm7c', 'Yamaha', 'DM7 Compact', 'Son', { kg: 21 }, [...ins(16), ...outs(16), ...aesOut(1), talkback(), phones(), ...dante(), ctl('Réseau'), usbAudio(), iec()]),
-    dev('yam-mg10xu', 'Yamaha', 'MG10XU (analogique)', 'Son', { kg: 2 }, [...ins(4, 'In', 'xlr-combo'), ...stereoIns(3), ...mainLR(), port('mon', 'Monitor out', 'jack', A, 'out'), port('fx', 'FX send', 'jack', A, 'out'), phones(), port('usb', 'USB audio', 'usb', AES, 'io'), dc('Alim externe (PA-10)')]),
-    dev('yam-mg16xu', 'Yamaha', 'MG16XU (analogique)', 'Son', { kg: 6 }, [...ins(10, 'In', 'xlr-combo'), ...stereoIns(4), ...mainLR(), ...outs(4, 'Group', 'jack'), ...outs(4, 'Aux', 'jack').map((p) => ({ ...p, id: p.id.replace('out', 'aux') })), port('mon', 'Monitor out', 'jack', A, 'out'), phones(), port('usb', 'USB audio', 'usb', AES, 'io'), dc('Alim externe (PA-30)')]),
-    dev('yam-ql1', 'Yamaha', 'QL1', 'Son', { kg: 15 }, [...ins(16), ...outs(8), ...qlIo(), iec()]),
-    dev('yam-ql5', 'Yamaha', 'QL5', 'Son', { kg: 30 }, [...ins(32), ...outs(16), ...qlIo(), iec()]),
-    dev('yam-pm10', 'Yamaha', 'RIVAGE PM10 (surface CS-R10)', 'Son', { kg: 75 }, [...ins(8, 'Omni in'), ...outs(8, 'Omni out'), ...aesIn(4), ...aesOut(4), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ...link('twin', 'TWINLANe', 2, 'opticalcon'), ctl('Réseau', 'ethercon'), iec()]),
-    dev('yam-pm3', 'Yamaha', 'RIVAGE PM3 (surface CS-R3)', 'Son', { kg: 38 }, [...ins(8, 'Omni in'), ...outs(8, 'Omni out'), talkback(), phones(), ...link('twin', 'TWINLANe', 2, 'opticalcon'), ...dante(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('yam-pm5', 'Yamaha', 'RIVAGE PM5 (surface CS-R5)', 'Son', { kg: 42 }, [...ins(8, 'Omni in'), ...outs(8, 'Omni out'), ...aesIn(4), ...aesOut(4), talkback(), phones('jack', 'phones1', 'Casque 1'), phones('jack', 'phones2', 'Casque 2'), ...link('twin', 'TWINLANe', 2, 'opticalcon'), ...dante(), ctl('Réseau', 'ethercon'), iec()]),
-    dev('yam-tf1', 'Yamaha', 'TF1', 'Son', { kg: 13 }, [...ins(16, 'In', 'xlr-combo'), ...stereoIns(2, 'ST in', 'rca'), ...outs(16, 'Omni out'), phones(), ctl('Réseau'), usbAudio(), iec()]),
-    dev('yam-tf3', 'Yamaha', 'TF3', 'Son', { kg: 17 }, [...ins(24, 'In', 'xlr-combo'), ...stereoIns(2, 'ST in', 'rca'), ...outs(16, 'Omni out'), phones(), ctl('Réseau'), usbAudio(), iec()]),
-    dev('yam-tf5', 'Yamaha', 'TF5', 'Son', { kg: 21 }, [...ins(32, 'In', 'xlr-combo'), ...stereoIns(2, 'ST in', 'rca'), ...outs(16, 'Omni out'), phones(), ctl('Réseau'), usbAudio(), iec()]),
-  ]),
+  ...CONSOLES,
   ...family('Stageboxes & moteurs', [
     dev('ah-ab168', 'Allen & Heath', 'AB168', 'Son', { u: 3, kg: 6 }, [...ins(16), ...outs(8), port('slink', 'SLink', 'ethercon', AES, 'io'), iec()]),
     dev('ah-ar2412', 'Allen & Heath', 'AR2412 (stagebox)', 'Son', { u: 6, kg: 10 }, [...ins(24), ...outs(12), port('dsnake', 'dSNAKE', 'ethercon', AES, 'io'), iec()]),
