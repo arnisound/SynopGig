@@ -3047,6 +3047,10 @@
  "ev-qrx-115-75": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-qrx-115-75-274139.jpg"
  },
+ "ev-qrx-218s": {
+  "photo": "https://tmppro.com/images/products/23224/26913/600x600/QRX-218S-BLK.jpg",
+  "docs": []
+ },
  "ev-r300-rx": {
   "photo": "https://keenfinity.cdn-norce.tech/5308aed5-ef82-47ae-9bc6-2f2a4a37d128",
   "docs": [
@@ -3220,6 +3224,10 @@
  },
  "ev-xlc127dvx": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-xlc-127dvx-182833.jpg"
+ },
+ "ev-xlc215": {
+  "photo": "https://cdn.g-vt.de/use/xlc215.png",
+  "docs": []
  },
  "ev-xld281": {
   "photo": "https://keenfinity.cdn-norce.tech/cb80b3bc-3061-4a7e-979a-bd90a6a6197c",
@@ -4892,6 +4900,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.nexo-sa.com/products/geo-m1025/"
+   }
+  ]
+ },
+ "nexo-geo-m12": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/SM-GEOM1210_iso.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.nexo-sa.com/systems/geo-m12/modules/"
    }
   ]
  },
