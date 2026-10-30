@@ -584,6 +584,15 @@
    }
   ]
  },
+ "avo-titan-mobile": {
+  "photo": "https://www.avolites.com/app/uploads/intervention/cache/Titan-Mobile-Wing-Avolites-Product-30-10-131704png3-2125255467.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.avolites.com/product/titan-mobile-wing/"
+   }
+  ]
+ },
  "ayrton-cobra": {
   "photo": "https://www.ayrton.eu/wp-content/uploads/2022/04/cobra-960x960.jpg",
   "docs": [
@@ -752,6 +761,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.blackmagicdesign.com/products/atemcameracontrolpanel"
+   }
+  ]
+ },
+ "brompton-sx40": {
+  "photo": "https://www.bromptontech.com/wp-content/uploads/2026/03/Brompton_Products_SX40_Angled-1536x864.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.bromptontech.com/about-us/"
    }
   ]
  },
@@ -1709,6 +1727,15 @@
    }
   ]
  },
+ "dpa-4018vl": {
+  "photo": "https://www.dpamicrophones.com/media/coxhbsdt/4018-vl-b-dpa-dfacto-4018vl-mic-wired-dpa-handle-supercardioid-linear-black.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.dpamicrophones.com/microphones/handheld/4018vl/"
+   }
+  ]
+ },
  "dpa-4088": {
   "photo": "https://www.dpamicrophones.com/media/0vuphufe/4088-dc-a-b-lh-dfine-core-4088-directional-headset-mic-black.jpg",
   "docs": [
@@ -2618,6 +2645,24 @@
    }
   ]
  },
+ "furman-m8x2": {
+  "photo": "http://furmanpower.com/cdn/shop/files/15A-Standard-Power-Conditioner-_M-8X2_-Furman-Pro-6319886.png?v=1729628772",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://furmanpower.com/products/m-8x2"
+   }
+  ]
+ },
+ "furman-p1800ar": {
+  "photo": "http://furmanpower.com/cdn/shop/files/15A-Prestige-Voltage-Regulator_-120V-_P-1800-AR_-Furman-Pro-6324865.png?v=1729628924",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://furmanpower.com/products/p-1800-ar"
+   }
+  ]
+ },
  "furman-pl8c": {
   "photo": "https://furmanpower.com/cdn/shop/files/Lights_-230V-_PL-8C-E_-Furman-Pro-6320229.png?v=1729628784",
   "docs": [
@@ -3113,6 +3158,15 @@
    }
   ]
  },
+ "lectro-hhd": {
+  "photo": "https://lectrosonics.com/wp-content/uploads/2024/05/hha.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://lectrosonics.com/product/hha/"
+   }
+  ]
+ },
  "lectro-ssm": {
   "photo": "https://lectrosonics.com/wp-content/uploads/2024/05/SSM.jpg",
   "docs": [
@@ -3272,6 +3326,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.martin.com/en-US/products/rush-mh-6-wash"
+   }
+  ]
+ },
+ "martin-vc-strip": {
+  "photo": "https://adn.harmanpro.com/productattachment/5273/product_attachment/x_large-fcb88f4b3993988735adc63e1269ca63.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.martin.com/en-US/products/vc-strip"
    }
   ]
  },
@@ -3815,6 +3878,15 @@
    }
   ]
  },
+ "ptzoptics-link4k": {
+  "photo": "https://cdn.prod.website-files.com/69a5a9fd0bfb9a26219eba91/6a67bdddf84a8dd463aeb9f0_Product-Photo-PT20X-LINK-4K-GY-Cutout-Accessory.avif",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://ptzoptics.com/ptz-cameras/link-4k-12x"
+   }
+  ]
+ },
  "ptzoptics-move4k": {
   "photo": "https://cdn.prod.website-files.com/69a5a9fd0bfb9a26219eba91/6a67c15a5a1d37bef3e23b4f_PT12X-4K-WH-G3-Cutout-Accessory_edit.avif",
   "docs": [
@@ -4031,12 +4103,30 @@
    }
   ]
  },
+ "rfvenue-cp-beam": {
+  "photo": "https://www.rfvenue.com/hs-fs/hubfs/wavetower-landing-page/CPB1-B.png?width=2400&height=1698&name=CPB1-B.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rfvenue.com/all-products/cp-beam"
+   }
+  ]
+ },
  "rfvenue-distro4": {
   "photo": "https://www.rfvenue.com/hs-fs/hubfs/Marketing%20Packet/Product%20Photos/DISTRO4/Distro4_Front.png?width=800&height=566&name=Distro4_Front.png",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.rfvenue.com/all-products/distro4"
+   }
+  ]
+ },
+ "rfvenue-fin": {
+  "photo": "https://www.rfvenue.com/hs-fs/hubfs/GoBig%20DFin%20Doesnt%20Drop%20Out/Dfin.png?width=2400&height=1698&name=Dfin.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rfvenue.com/all-products/diversity-fin"
    }
   ]
  },
@@ -4064,6 +4154,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.robertjuliat.com/followspots/Merlin.html"
+   }
+  ]
+ },
+ "rj-tibo": {
+  "photo": "https://www.robertjuliat.com/images/PhotosHD_Products/PhotoWeb_500_BLACK_TIBO.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.robertjuliat.com/profilespots/TIBO503.html"
    }
   ]
  },
@@ -4208,6 +4307,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://proav.roland.com/global/products/v-160hd/"
+   }
+  ]
+ },
+ "sc-mini-stagebox32": {
+  "photo": "https://adn.harmanpro.com/productattachment/4682/product_attachment/x_large-663c14bcce250c0e72c9f46f7faee1ca.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.soundcraft.com/en-US/products/mini-stagebox-32i-16i"
    }
   ]
  },
@@ -6692,6 +6800,33 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://wisycom.com/mpr50-iem/"
+   }
+  ]
+ },
+ "wisy-mrk960": {
+  "photo": "https://wisycom.com/app/uploads/2024/01/MRK960-2.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://wisycom.com/product/mrk960/"
+   }
+  ]
+ },
+ "wisy-mrk980": {
+  "photo": "https://wisycom.com/app/uploads/MRK980.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://wisycom.com/product/mrk980/"
+   }
+  ]
+ },
+ "wisy-mth410": {
+  "photo": "https://wisycom.com/app/uploads/MTH410.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://wisycom.com/product/mth410/"
    }
   ]
  },
