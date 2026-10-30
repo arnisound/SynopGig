@@ -25,7 +25,7 @@ function Load({ value }: { value?: number }) {
 export default function PowerPage({ project, setProject }: Props) {
   const b = useMemo(() => powerBudget(project), [project])
   const setWatts = (n: DeviceNode, watts?: number) =>
-    setProject((p) => ({ ...p, nodes: p.nodes.map((x) => (x.id === n.id ? { ...x, data: { ...x.data, watts } } : x)) }))
+    setProject((p) => ({ ...p, nodes: p.nodes.map((x) => (x.id === n.id ? { ...x, data: { ...x.data, watts, wattsEstimated: undefined } } : x)) }))
   const setPhase = (key: string, phase: Phase) => setProject((p) => ({ ...p, power: { ...p.power, phases: { ...p.power?.phases, [key]: phase } } }))
 
   const wattsInput = (n: DeviceNode) => (
@@ -39,6 +39,7 @@ export default function PowerPage({ project, setProject }: Props) {
       onChange={(e) => setWatts(n, e.target.value ? Number(e.target.value) : undefined)}
     />
   )
+  const estimated = project.nodes.filter((n) => n.data.wattsEstimated && !n.data.panel)
   // Distributions draw nothing worth counting.
   const missing = project.nodes.filter((n) => !n.data.panel && n.data.category !== 'Énergie' && n.data.ports.some((p) => p.signal === 'power' && p.dir === 'in') && wattsOf(n.data) === undefined)
 
@@ -55,6 +56,12 @@ export default function PowerPage({ project, setProject }: Props) {
         <button className="no-print" onClick={() => window.print()}>Imprimer / PDF</button>
       </header>
 
+      {estimated.length > 0 && (
+        <p className="muted small">
+          ≈ : consommation estimée pour {estimated.length} appareil{estimated.length > 1 ? 's' : ''} ({estimated.slice(0, 6).map((n) => n.data.name).join(', ')}
+          {estimated.length > 6 ? '…' : ''}). Remplacez-la par la valeur du fabricant pour un bilan exact.
+        </p>
+      )}
       {b.alerts.length > 0 && (
         <section className="power-alerts">
           {b.alerts.map((a) => <div key={a} className="issue danger">{a}</div>)}
@@ -117,7 +124,7 @@ export default function PowerPage({ project, setProject }: Props) {
                     {o.fed.map((n) => (
                       <span key={n.id} className="fed">
                         {n.data.name}
-                        {wattsOf(n.data) === undefined ? wattsInput(n) : <small className="muted"> {wattsOf(n.data)} W</small>}
+                        {wattsOf(n.data) === undefined ? wattsInput(n) : <small className="muted" title={n.data.wattsEstimated ? 'Consommation estimée' : undefined}> {n.data.wattsEstimated ? '≈ ' : ''}{wattsOf(n.data)} W</small>}
                       </span>
                     ))}
                   </td>

@@ -145,6 +145,8 @@ export type ProductInfo = {
   docs?: ProductDoc[]
   /** Power drawn from the mains, in watts (for the power budget). */
   watts?: number
+  /** The consumption is an estimate, not the maker's figure. */
+  wattsEstimated?: boolean
 }
 
 export interface DeviceTemplate extends ProductInfo {

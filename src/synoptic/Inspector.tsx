@@ -154,7 +154,8 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
             <input value={d.url ?? ''} placeholder="https://…" onChange={(e) => set({ url: e.target.value || undefined })} />
           </Field>
           <Field label="Consommation (W)">
-            <input type="number" min={0} value={d.watts ?? ''} placeholder={wattsOf(d) ? `${wattsOf(d)} (lu dans ses caractéristiques)` : 'pour le bilan électrique'} onChange={(e) => set({ watts: e.target.value ? Number(e.target.value) : undefined })} />
+            <input type="number" min={0} value={d.watts ?? ''} placeholder={wattsOf(d) ? `${wattsOf(d)} (lu dans ses caractéristiques)` : 'pour le bilan électrique'} onChange={(e) => set({ watts: e.target.value ? Number(e.target.value) : undefined, wattsEstimated: undefined })} />
+            {d.wattsEstimated && <small className="muted">Estimation : remplacez-la par la valeur de la fiche si vous l’avez.</small>}
           </Field>
           {d.url && /^https?:\/\//.test(d.url) && (
             <a className="small" href={d.url} target="_blank" rel="noopener noreferrer">Ouvrir la page du fabricant ↗</a>

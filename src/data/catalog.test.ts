@@ -28,6 +28,11 @@ describe('catalogue', () => {
     expect(LIBRARY.filter((t) => t.options?.length && !t.slots).map((t) => t.id)).toEqual([])
   })
 
+  it('gives every mains-powered model a consumption for the power budget', () => {
+    const mains = LIBRARY.filter((t) => !t.panel && t.category !== 'Énergie' && t.ports.some((p) => p.signal === 'power' && p.dir === 'in'))
+    expect(mains.filter((t) => !t.watts).map((t) => t.id)).toEqual([])
+  })
+
   it('has unique model ids', () => {
     const ids = LIBRARY.map((t) => t.id)
     expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([])
