@@ -11,6 +11,7 @@ import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
 import LabelsDialog from './labels/LabelsDialog'
 import { projectChanges } from './share/changes'
+import { savedDocs, savedPhotos } from './library/photos'
 import { cachedShared, fetchShared, saveSharedProgress, sharedIdFromHash, sharedTargetFromHash, sharedProgress } from './share/share'
 import ShareDialog, { ChangeList } from './share/ShareDialog'
 import StagePage from './stage/StagePage'
@@ -145,7 +146,13 @@ export default function App() {
   }, [undo])
 
   const userLibrary = useUserLibrary()
-  const templates = useMemo(() => [...LIBRARY, ...userLibrary.templates, ...project.customTemplates], [userLibrary.templates, project.customTemplates])
+  // Photos and documents found for base models in this browser join them.
+  const base = useMemo(() => {
+    const photos = savedPhotos()
+    const docs = savedDocs()
+    return LIBRARY.map((t) => (photos[t.id] || docs[t.id] ? { ...t, ...(photos[t.id] ? { image: photos[t.id] } : {}), ...(docs[t.id] ? { docs: docs[t.id] } : {}) } : t))
+  }, [])
+  const templates = useMemo(() => [...base, ...userLibrary.templates, ...project.customTemplates], [base, userLibrary.templates, project.customTemplates])
 
   // The personal library follows the user from one project to the next.
   const replace = (incoming: Project) => {

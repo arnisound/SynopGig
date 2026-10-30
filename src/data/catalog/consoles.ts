@@ -195,7 +195,7 @@ export const CONSOLES: DeviceTemplate[] = family('Consoles', [
   ),
   // ---- Yamaha
   ...([['cl1', 'CL1', 48, 20], ['cl3', 'CL3', 64, 26], ['cl5', 'CL5', 72, 34]] as const).map(([id, m, ch, kg]) =>
-    dev(`yam-${id}`, 'Yamaha', m, 'Son', { kg, v: '100-240 V', w: 260, d: `Console numérique Yamaha série CL (${ch} voies mono), I/O de scène Rio en Dante, trois slots MY.`, x: mix(`${ch} mono + 8 st`, '24 mix + 8 mtx'), opt: MY_CARDS }, [
+    dev(`yam-${id}`, 'Yamaha', m, 'Son', { kg, v: '100-240 V', w: 170, d: `Console numérique Yamaha série CL (${ch} voies mono), I/O de scène Rio en Dante, trois slots MY.`, x: mix(`${ch} mono + 8 st`, '24 mix + 8 mtx'), opt: MY_CARDS }, [
       ...mic(8, 1, 'xlr3', 'Omni in'), ...out(8, 'Omni out'), port('2trIn', '2TR in (coax)', 'rca', AES, 'in'), port('2trOut', '2TR out (coax)', 'rca', AES, 'out'), ...wclk(), gpio(), ...dante(), ctl('Réseau'), port('pwr', 'Secteur', 'iec', 'power', 'in'), port('pwrExt', 'Alim externe PW800W (redondance)', 'xlr5', 'power', 'in'), talkback(), phones(),
     ]),
   ),

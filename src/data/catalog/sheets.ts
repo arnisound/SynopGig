@@ -1,4 +1,4 @@
-import type { DeviceTemplate, Spec } from '../../types'
+import type { DeviceTemplate, ProductDoc, Spec } from '../../types'
 
 /*
  * Product sheets of the models whose description is not in their own
@@ -191,8 +191,95 @@ const SHEETS: Record<string, { d: string; x: Extra[] }> = {
   'rack-brush-1u': s('Passe-câbles à brosse 1U.'),
 }
 
+/** The makers' own sites, to look a model up on them. */
+const SITES: Record<string, string> = {
+  APC: 'apc.com', Adamson: 'adamsonsystems.com', Agora: 'agora-switch.com', 'Allen & Heath': 'allen-heath.com', 'Analog Way': 'analogway.com', Antari: 'antari.com', Astera: 'astera-led.com',
+  'Audio-Technica': 'audio-technica.com', Avid: 'avid.com', Avolites: 'avolites.com', 'Axiom Pro Audio': 'axiomproaudio.com', Ayrton: 'ayrton.eu', Barco: 'barco.com', Behringer: 'behringer.com',
+  BirdDog: 'birddog.tv', 'Blackmagic Design': 'blackmagicdesign.com', Brompton: 'bromptontech.com', Canon: 'canon.com', ChamSys: 'chamsys.co.uk', 'Chauvet Professional': 'chauvetprofessional.com',
+  Cisco: 'cisco.com', Claypaky: 'claypaky.it', DMXking: 'dmxking.com', DPA: 'dpamicrophones.com', Decimator: 'decimator.com', DiGiCo: 'digico.biz', ETC: 'etcconnect.com', Eaton: 'eaton.com',
+  'Electro-Voice': 'electrovoice.com', Elation: 'elationlighting.com', Epson: 'epson.com', Fohhn: 'fohhn.com', Furman: 'furmanpower.com', GLP: 'glp.de', Klotz: 'klotz-ais.com', 'L-Acoustics': 'l-acoustics.com',
+  'Lab.gruppen': 'labgruppen.com', Lake: 'labgruppen.com', Lectrosonics: 'lectrosonics.com', 'Look Solutions': 'looksolutions.com', Luminex: 'luminex.be', 'MA Lighting': 'malighting.com', MDG: 'mdgfog.com',
+  Martin: 'martin.com', Midas: 'midasconsoles.com', NEXO: 'nexo-sa.com', Netgear: 'netgear.com', Neumann: 'neumann.com', NovaStar: 'novastar.tech', PTZOptics: 'ptzoptics.com', Panasonic: 'pro-av.panasonic.net',
+  Powersoft: 'powersoft.com', PreSonus: 'presonus.com', QSC: 'qsc.com', RCF: 'rcf.it', 'RF Venue': 'rfvenue.com', Radial: 'radialeng.com', Robe: 'robe.cz', 'Robert Juliat': 'robertjuliat.com', Roland: 'proav.roland.com',
+  SKAARHOJ: 'skaarhoj.com', Sennheiser: 'sennheiser.com', Shure: 'shure.com', 'Solid State Logic': 'solidstatelogic.com', Sony: 'pro.sony', Soundcraft: 'soundcraft.com', Swisson: 'swisson.com', 'TP-Link': 'tp-link.com',
+  Ubiquiti: 'ui.com', Wisycom: 'wisycom.com', Xilica: 'xilica.com', Yamaha: 'yamaha.com', 'd&b audiotechnik': 'dbaudio.com',
+}
+
+const search = (q: string) => `https://duckduckgo.com/?q=${encodeURIComponent(q)}`
+
+/** Links that always lead somewhere: the user guide searched on the web, and the model on its maker's site. */
+export function docLinks(t: Pick<DeviceTemplate, 'brand' | 'model'>): ProductDoc[] {
+  if (!t.brand || t.brand === 'Générique') return []
+  const name = `${t.brand} ${t.model.replace(/\s*\(.*\)$/, '')}`
+  const site = SITES[t.brand]
+  return [
+    { title: 'Mode d’emploi (PDF) — recherche web', url: search(`${name} user manual pdf`) },
+    { title: 'Fiche technique — recherche web', url: search(`${name} datasheet specifications`) },
+    ...(site ? [{ title: `Sur le site ${site}`, url: search(`site:${site} ${t.model.replace(/\s*\(.*\)$/, '')}`) }] : []),
+  ]
+}
+
+/**
+ * Mains consumption from the makers' sheets and manuals, with how it is
+ * measured: amplifiers and powered speakers at 1/8 of their power (pink
+ * noise, the usual figure for sizing a supply), projectors in normal mode.
+ */
+const WATTS: Record<string, [number, string]> = {
+  'la-la12x': [1850, '1/8 puissance, 4 Ω'],
+  'la-la4x': [690, '1/8 puissance (≈ 3 A sous 230 V)'],
+  'la-larak2': [5550, '3 × LA12X à 1/8 puissance, 4 Ω'],
+  'la-larak2avb': [5550, '3 × LA12X à 1/8 puissance, 4 Ω'],
+  'nexo-nxamp4x1': [1100, '1/8 puissance'],
+  'nexo-nxamp4x4': [3000, '1/8 puissance'],
+  'nexo-nxamp4x4mk2': [2400, '1/8 puissance, 4 Ω'],
+  'nexo-nxamp4x2mk2': [1890, '1/8 puissance, 2 Ω (8,2 A sous 230 V)'],
+  'nexo-nxamp4x1mk2': [1130, '1/8 puissance, 2 Ω (4,9 A sous 230 V)'],
+  'ps-t604': [230, '1/8 puissance, 8 Ω (≈ 1 A)'],
+  'qsc-k82': [250, '1/8 puissance (1,1 A sous 230 V)'],
+  'qsc-k102': [250, '1/8 puissance (1,1 A sous 230 V)'],
+  'qsc-k122': [250, '1/8 puissance (1,1 A sous 230 V)'],
+  'qsc-ks118': [400, '1/8 puissance (1,7 A sous 240 V)'],
+  'qsc-cp12': [75, '1/8 puissance'],
+  'yam-dxr10': [110, '1/8 puissance'],
+  'yam-dxr12': [110, '1/8 puissance'],
+  'yam-dxr15': [110, '1/8 puissance'],
+  'yam-dzr10': [150, '1/8 puissance'],
+  'yam-dzr12': [150, '1/8 puissance'],
+  'yam-dzr15': [150, '1/8 puissance'],
+  'yam-dzr315': [150, '1/8 puissance'],
+  'yam-dxs15': [100, '1/8 puissance'],
+  'yam-dxs18': [150, '1/8 puissance'],
+  'yam-dxs18xlf-d': [150, '1/8 puissance'],
+  'barco-udx4k32': [2900, 'nominale (3100 W max)'],
+  'epson-eb-pu2010': [535, 'typique (452 W en mode éco)'],
+  'pana-rz120': [1100, 'maximale (730 W en mode normal)'],
+  'yam-ql5': [200, 'nominale'],
+  'yam-ql1': [135, 'nominale'],
+  'db-d80': [3600, 'base de dimensionnement du constructeur (crête 7000 W, repos 180 W)'],
+  'ps-x8': [4300, '1/8 puissance, 4 Ω (18 A sous 240 V)'],
+  'ma3-light': [300, 'maximale (300 VA)'],
+  'ma3-full': [300, 'maximale (300 VA)'],
+  'ma3-compact': [250, 'maximale (250 VA)'],
+  'ma3-cmd-wing': [50, 'maximale (50 VA)'],
+  'ma-xport-node': [12, 'nominale (PoE)'],
+  'ma2-light': [280, 'nominale'],
+  'yam-rio1608': [72, 'nominale'],
+  'yam-rio3224': [120, 'nominale'],
+}
+
+/** Ids given a sheet or a consumption here (checked by the tests). */
+export const sheetIds = () => [...Object.keys(SHEETS), ...Object.keys(WATTS)]
+
 /** Adds the sheet written here to a model that lacks it. */
 export function withSheet(t: DeviceTemplate): DeviceTemplate {
+  const docs = t.docs?.length ? t.docs : docLinks(t)
+  if (docs.length) t = { ...t, docs }
+  const measured = WATTS[t.id]
+  if (measured) {
+    const [w, how] = measured
+    const specs = [...(t.specs ?? []).filter((x) => x.label !== 'Consommation'), { group: 'Alimentation', label: `Consommation (${how})`, value: String(w), unit: 'W' }]
+    t = { ...t, watts: w, specs }
+  }
   const sheet = SHEETS[t.id]
   if (!sheet) return t
   const extra: Spec[] = sheet.x.map(([group, label, value, unit]) => ({ group, label, value, ...(unit ? { unit } : {}) }))

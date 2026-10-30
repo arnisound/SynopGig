@@ -6,6 +6,8 @@ import DeviceArt from '../ui/DeviceArt'
 import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
 import type { CableData, Category, DeviceData, DeviceNode, PanelSpec } from '../types'
 import PortsEditor from './PortsEditor'
+import PanelView from '../ui/PanelView'
+import { FindDocsButton, PhotoPicker } from './ProductMedia'
 import { wattsOf } from '../power/power'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Câblage', 'Autre']
@@ -109,6 +111,14 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
 
       {tab === 'fiche' && (
         <>
+          {!d.panel && (
+            <>
+              <h4>Photo</h4>
+              <PhotoPicker d={d} onChange={(image) => set({ image })} />
+              <h4>Connexions</h4>
+              <PanelView ports={d.ports} rackU={d.rackU} />
+            </>
+          )}
           <h4>Produit</h4>
           <div className="row">
             <Field label="Marque">
@@ -204,7 +214,12 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
         ))}
 
       {tab === 'specs' && <SpecsEditor specs={d.specs} onChange={(specs) => set({ specs })} />}
-      {tab === 'docs' && <DocsEditor docs={d.docs} onChange={(docs) => set({ docs })} />}
+      {tab === 'docs' && (
+        <>
+          <FindDocsButton d={d} onChange={(docs) => set({ docs })} />
+          <DocsEditor docs={d.docs} onChange={(docs) => set({ docs })} />
+        </>
+      )}
 
       <div className="actions">
         <button onClick={() => onSaveTemplate(node)}>Enregistrer comme modèle</button>

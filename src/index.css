@@ -810,3 +810,15 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
   .case-body > div { display: flex; flex-direction: column; gap: 1.5mm; }
   .case-body .qr { flex: none; width: 36mm; height: 36mm; }
 }
+
+/* Connection panel drawn from the ports */
+.panel-view { display: block; margin: 6px 0 10px; }
+.panel-view .panel-face { fill: #1f2125; stroke: #3a3d44; }
+.panel-view .panel-ear { fill: #2a2d33; stroke: #3a3d44; }
+.panel-view .panel-hole { fill: var(--bg); }
+.panel-view .panel-label { font: 7px system-ui, sans-serif; fill: #d4d4d8; }
+.photo-picker { display: flex; gap: 10px; align-items: flex-start; }
+.photo-picker .grow { flex: 1; min-width: 0; }
+.photo-picker .actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.photo-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.find-docs { margin-bottom: 8px; }
