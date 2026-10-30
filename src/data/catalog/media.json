@@ -2672,6 +2672,33 @@
    }
   ]
  },
+ "fohhn-dli130": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/2/csm_DLI-130__Festinstallation__1343_mainimage_16aed47e6e.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/dli-130-fixed-installation"
+   }
+  ]
+ },
+ "fohhn-dli230": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/6/6/csm_DLI-230__Festinstallation__1344_mainimage_f3d63cdf94.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/dli-230-fixed-installation"
+   }
+  ]
+ },
+ "fohhn-dli230m": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/9/7/csm_DLI-230__mobil__1348_mainimage_2623614ccc.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/dli-230-mobile"
+   }
+  ]
+ },
  "fohhn-fs110": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/1/8/csm_FS-110_1352_mainimage_7f13d67a3f.jpg",
   "docs": [
@@ -2735,6 +2762,15 @@
    }
   ]
  },
+ "fohhn-lx60": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/c/csm_LX-60_ASX_1707_mainimage_ddcf135bcb.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/lx-60-asx"
+   }
+  ]
+ },
  "fohhn-ma4100": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/0/b/csm_MA-4.100_6030_mainimage_a7fd9fb474.jpg",
   "docs": [
@@ -2789,12 +2825,39 @@
    }
   ]
  },
+ "fohhn-xs10": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/7/0/csm_XS-10_passive_4117_mainimage_119f437c28.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xs-10-passive"
+   }
+  ]
+ },
+ "fohhn-xs22": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/3/c/csm_XS-22_passive_4116_mainimage_3278afdd50.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xs-22-passive"
+   }
+  ]
+ },
  "fohhn-xs22p": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/3/c/csm_XS-22_passive_4116_mainimage_3278afdd50.jpg",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.fohhn.com/en/catalog/xs-22-passive"
+   }
+  ]
+ },
+ "fohhn-xs30": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/c/e/csm_XS-30_passive_4110_mainimage_65a0a1e926.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.fohhn.com/en/catalog/xs-30-passive"
    }
   ]
  },
