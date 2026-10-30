@@ -1380,12 +1380,57 @@
   "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_61/619991/20482583_800.jpg",
   "docs": []
  },
+ "chamsys-mq250": {
+  "photo": "https://chamsyslighting.com/wp-content/uploads/2023/11/MQ250M-FRONT-1.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chamsyslighting.com/product/magicq-mq250m-stadium-console/"
+   }
+  ]
+ },
+ "chamsys-mq50": {
+  "photo": "https://uk.chamsyslighting.com/wp-content/uploads/2024/03/MQ50-FRONT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chamsyslighting.com/product/magicq-mq50-compact-console/"
+   }
+  ]
+ },
  "chamsys-mq500m": {
   "photo": "https://uk.chamsyslighting.com/wp-content/uploads/2023/11/MQ500M-WING-FRONT.png",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://chamsyslighting.com/product/magicq-mq500m-stadium-wing/"
+   }
+  ]
+ },
+ "chamsys-mq70": {
+  "photo": "https://uk.chamsyslighting.com/wp-content/uploads/2024/03/MQ70-FRONT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chamsyslighting.com/product/magicq-mq70-compact-console/"
+   }
+  ]
+ },
+ "chamsys-mq80": {
+  "photo": "https://chamsyslighting.com/wp-content/uploads/2024/07/MQ-80-FRONT-2.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chamsyslighting.com/product/magicq-mq80-compact-console/"
+   }
+  ]
+ },
+ "chamsys-stadium-wing": {
+  "photo": "https://chamsyslighting.com/wp-content/uploads/2020/07/STADIUM-WING-FRONT.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://chamsyslighting.com/product/magicq-mq500-stadium-wing/"
    }
   ]
  },
@@ -3918,9 +3963,72 @@
    }
   ]
  },
+ "ma3-cmd-wing": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/098588ef-8713-4035-868f-90389adebcef/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-onpc-command-wing-4010511/"
+   }
+  ]
+ },
  "ma3-compact": {
   "photo": "https://www.urakataya.com/data/urakataya/product/consoles/MAlighting/grandMA3_compact_03.jpeg",
   "docs": []
+ },
+ "ma3-compact-xt": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/1a59f11f-de27-4b67-ab4e-0313e6f2dd42/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-compact-xt-4010505/"
+   }
+  ]
+ },
+ "ma3-fader-wing": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/13f7fac9-9572-483a-a0c1-7bb59df0bb8b/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-onpc-fader-wing-4023575/"
+   }
+  ]
+ },
+ "ma3-full": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/10717899-577a-4b2f-b2a3-761398815d54/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-full-size-4010500/"
+   }
+  ]
+ },
+ "ma3-light": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/9da13935-b0ba-4270-8507-acd9dcc804a1/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-light-4010502/"
+   }
+  ]
+ },
+ "ma3-pu-l": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/12d4196f-8f76-4ca2-b3d0-888a8286e34c/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-processing-unit-l-4010509/"
+   }
+  ]
+ },
+ "ma3-pu-m": {
+  "photo": "https://xom.malighting.com/xom-rest/assets/667cf1c0-ac7f-4cf3-8a6b-00ad3c8c3bee/preview?mimeType=image%2Fpng&width=1170&height=700",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.malighting.com/product/grandma3-processing-unit-m-4010510/"
+   }
+  ]
  },
  "martin-atomic3000": {
   "photo": "https://adn.harmanpro.com/productattachment/4860/product_attachment/x_large-caf850ea44d97429eed343aac7c22f9e.webp",
@@ -4508,6 +4616,33 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.nexo-sa.com/systems/stm/products/"
+   }
+  ]
+ },
+ "presonus-32r": {
+  "photo": "https://www.presonus.com/cdn/shop/files/2779200203_pre_aud_frt_1_nr.png?width=1000",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.presonus.com/products/studiolive-32r-digital-rack-mixer"
+   }
+  ]
+ },
+ "presonus-32sx": {
+  "photo": "https://www.presonus.com/cdn/shop/files/2779200403_pre_aud_frt_1_nr.png?width=1000",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.presonus.com/products/studiolive-32sx-digital-console-mixer"
+   }
+  ]
+ },
+ "presonus-nsb-16-8": {
+  "photo": "https://www.presonus.com/cdn/shop/files/2779300201_pre_aud_frt_1_nr.png?width=1000",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.presonus.com/products/nsb-168-networked-stage-box"
    }
   ]
  },
