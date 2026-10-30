@@ -27,13 +27,6 @@ export async function shrink(blob: Blob, max = MAX): Promise<string> {
   return webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', 0.85)
 }
 
-/** A photo from another site, through the relay (browsers cannot read other sites' images). */
-export async function fetchImage(url: string): Promise<string> {
-  const got = await readUrl(url)
-  if (!('file' in got) || !got.type.startsWith('image/')) throw new Error('ce lien n’est pas une image')
-  return shrink(got.file)
-}
-
 /** The product photos of a page, through the relay. */
 export async function pageImages(url: string, model: string): Promise<string[]> {
   try {

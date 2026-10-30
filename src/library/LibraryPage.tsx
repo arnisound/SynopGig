@@ -9,8 +9,10 @@ import { parseDatasheet } from './parseDatasheet'
 import { expandGroups, groupPorts, type PortGroup } from './portGroups'
 import { encodeShared } from './userLibrary'
 import { research, type FoundDoc } from './finder'
-import { fetchImage, pageImages, shrink } from './images'
+import { pageImages, shrink } from './images'
+import { loads } from './photos'
 import DeviceArt from '../ui/DeviceArt'
+import CatalogFiller from './CatalogFiller'
 import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
 import type { UserLibrary } from './useUserLibrary'
 import type { NewProductRequest } from './newProduct'
@@ -203,7 +205,10 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
   const loadPhotos = async (urls: string[]) => {
     if (urls.length === 0) return setPhotoStatus('Aucune photo trouvée : le symbole de son type est utilisé, ou importez une image.')
     setPhotoStatus('Récupération des photos…')
-    const got = (await Promise.allSettled(urls.slice(0, 4).map(fetchImage))).flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+    // Shown from the maker's site (not copied): only the addresses that load are offered.
+    const list = urls.filter((u) => /^https:\/\//.test(u)).slice(0, 6)
+    const ok = await Promise.all(list.map((u) => loads(u)))
+    const got = list.filter((_, i) => ok[i])
     setPhotos(got)
     setPhotoStatus(got.length ? 'Choisissez la photo d’illustration (ou gardez le symbole).' : 'Photos inaccessibles : le symbole de son type est utilisé, ou importez une image.')
     // The first photo is taken unless the user already chose one.
@@ -591,6 +596,8 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
           <button onClick={() => importRef.current?.click()}>Importer une bibliothèque</button>
           <input ref={importRef} type="file" accept=".json,application/json" hidden onChange={(e) => { importLibrary(e.target.files?.[0]); e.target.value = '' }} />
         </div>
+
+        {!embedded && <CatalogFiller templates={LIBRARY} />}
 
         <h4>Bibliothèque USER <small className="muted">({userLibrary.templates.length}{userLibrary.status === 'offline' ? ', hors ligne' : ''})</small></h4>
         <p className="muted small">Matériel partagé par les utilisateurs, disponible pour tous dans la palette.</p>

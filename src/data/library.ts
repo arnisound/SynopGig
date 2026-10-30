@@ -4,6 +4,7 @@ import { refineSignal } from './connectors'
 import { PANEL_TEMPLATES } from './panels'
 import { withSheet } from './catalog/sheets'
 import { withEstimate } from './catalog/estimate'
+import { withMedia } from './catalog/media'
 import { port, series } from './ports'
 
 const POWER_IN = port('pwr', 'Secteur', 'powercon-true1', 'power', 'in')
@@ -354,6 +355,7 @@ export const LIBRARY: DeviceTemplate[] = [
   .map(refined)
   .map(withSheet)
   .map(withEstimate)
+  .map(withMedia)
 
 export const CATEGORY_COLORS: Record<string, string> = {
   Son: '#e5484d',

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { LIBRARY } from './library'
 import { auditCatalog } from './catalog.audit'
 import { sheetIds } from './catalog/sheets'
+import { mediaIds } from './catalog/media'
 import { symbolKey } from './symbolKey'
 
 describe('catalogue', () => {
@@ -12,12 +13,16 @@ describe('catalogue', () => {
 
   it('has no sheet or consumption written for a model that does not exist', () => {
     const ids = new Set(LIBRARY.map((t) => t.id))
-    expect(sheetIds().filter((id) => !ids.has(id))).toEqual([])
+    expect([...sheetIds(), ...mediaIds()].filter((id) => !ids.has(id))).toEqual([])
   })
 
   it('gives every brand model its documentation links', () => {
     expect(LIBRARY.filter((t) => t.brand && t.brand !== 'Générique' && !t.docs?.length).map((t) => t.id)).toEqual([])
-    for (const t of LIBRARY) for (const d of t.docs ?? []) expect(d.url).toMatch(/^https:\/\//)
+    for (const t of LIBRARY) for (const d of t.docs ?? []) {
+      expect(d.url).toMatch(/^https:\/\//)
+      // Direct links only: never a search page.
+      expect(d.url).not.toMatch(/duckduckgo|google\.|bing\.|\?q=/)
+    }
   })
 
   it('draws every model with a symbol of its kind', () => {

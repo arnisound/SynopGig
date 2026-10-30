@@ -1,4 +1,4 @@
-import type { DeviceTemplate, ProductDoc, Spec } from '../../types'
+import type { DeviceTemplate, Spec } from '../../types'
 
 /*
  * Product sheets of the models whose description is not in their own
@@ -191,34 +191,6 @@ const SHEETS: Record<string, { d: string; x: Extra[] }> = {
   'rack-brush-1u': s('Passe-câbles à brosse 1U.'),
 }
 
-/** The makers' own sites, to look a model up on them. */
-const SITES: Record<string, string> = {
-  APC: 'apc.com', Adamson: 'adamsonsystems.com', Agora: 'agora-switch.com', 'Allen & Heath': 'allen-heath.com', 'Analog Way': 'analogway.com', Antari: 'antari.com', Astera: 'astera-led.com',
-  'Audio-Technica': 'audio-technica.com', Avid: 'avid.com', Avolites: 'avolites.com', 'Axiom Pro Audio': 'axiomproaudio.com', Ayrton: 'ayrton.eu', Barco: 'barco.com', Behringer: 'behringer.com',
-  BirdDog: 'birddog.tv', 'Blackmagic Design': 'blackmagicdesign.com', Brompton: 'bromptontech.com', Canon: 'canon.com', ChamSys: 'chamsys.co.uk', 'Chauvet Professional': 'chauvetprofessional.com',
-  Cisco: 'cisco.com', Claypaky: 'claypaky.it', DMXking: 'dmxking.com', DPA: 'dpamicrophones.com', Decimator: 'decimator.com', DiGiCo: 'digico.biz', ETC: 'etcconnect.com', Eaton: 'eaton.com',
-  'Electro-Voice': 'electrovoice.com', Elation: 'elationlighting.com', Epson: 'epson.com', Fohhn: 'fohhn.com', Furman: 'furmanpower.com', GLP: 'glp.de', Klotz: 'klotz-ais.com', 'L-Acoustics': 'l-acoustics.com',
-  'Lab.gruppen': 'labgruppen.com', Lake: 'labgruppen.com', Lectrosonics: 'lectrosonics.com', 'Look Solutions': 'looksolutions.com', Luminex: 'luminex.be', 'MA Lighting': 'malighting.com', MDG: 'mdgfog.com',
-  Martin: 'martin.com', Midas: 'midasconsoles.com', NEXO: 'nexo-sa.com', Netgear: 'netgear.com', Neumann: 'neumann.com', NovaStar: 'novastar.tech', PTZOptics: 'ptzoptics.com', Panasonic: 'pro-av.panasonic.net',
-  Powersoft: 'powersoft.com', PreSonus: 'presonus.com', QSC: 'qsc.com', RCF: 'rcf.it', 'RF Venue': 'rfvenue.com', Radial: 'radialeng.com', Robe: 'robe.cz', 'Robert Juliat': 'robertjuliat.com', Roland: 'proav.roland.com',
-  SKAARHOJ: 'skaarhoj.com', Sennheiser: 'sennheiser.com', Shure: 'shure.com', 'Solid State Logic': 'solidstatelogic.com', Sony: 'pro.sony', Soundcraft: 'soundcraft.com', Swisson: 'swisson.com', 'TP-Link': 'tp-link.com',
-  Ubiquiti: 'ui.com', Wisycom: 'wisycom.com', Xilica: 'xilica.com', Yamaha: 'yamaha.com', 'd&b audiotechnik': 'dbaudio.com',
-}
-
-const search = (q: string) => `https://duckduckgo.com/?q=${encodeURIComponent(q)}`
-
-/** Links that always lead somewhere: the user guide searched on the web, and the model on its maker's site. */
-export function docLinks(t: Pick<DeviceTemplate, 'brand' | 'model'>): ProductDoc[] {
-  if (!t.brand || t.brand === 'Générique') return []
-  const name = `${t.brand} ${t.model.replace(/\s*\(.*\)$/, '')}`
-  const site = SITES[t.brand]
-  return [
-    { title: 'Mode d’emploi (PDF) — recherche web', url: search(`${name} user manual pdf`) },
-    { title: 'Fiche technique — recherche web', url: search(`${name} datasheet specifications`) },
-    ...(site ? [{ title: `Sur le site ${site}`, url: search(`site:${site} ${t.model.replace(/\s*\(.*\)$/, '')}`) }] : []),
-  ]
-}
-
 /**
  * Mains consumption from the makers' sheets and manuals, with how it is
  * measured: amplifiers and powered speakers at 1/8 of their power (pink
@@ -272,8 +244,6 @@ export const sheetIds = () => [...Object.keys(SHEETS), ...Object.keys(WATTS)]
 
 /** Adds the sheet written here to a model that lacks it. */
 export function withSheet(t: DeviceTemplate): DeviceTemplate {
-  const docs = t.docs?.length ? t.docs : docLinks(t)
-  if (docs.length) t = { ...t, docs }
   const measured = WATTS[t.id]
   if (measured) {
     const [w, how] = measured

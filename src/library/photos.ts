@@ -1,6 +1,6 @@
 import type { ProductDoc } from '../types'
 import { findDocs, type FoundDoc } from './finder'
-import { fetchImage, pageImages } from './images'
+import { pageImages } from './images'
 
 /*
  * Photos and documents found for a model, kept in this browser by model id:
@@ -42,19 +42,36 @@ export function saveDocs(templateId: string, docs: ProductDoc[]) {
 /** The maker's pages first, those naming this very model first. */
 const rank = (d: FoundDoc) => (d.official ? 0 : 2) + (d.exact ? 0 : 1)
 
-/** Candidate photos from the maker's product pages, as small thumbnails. */
-export async function findPhotos(brand: string, model: string): Promise<string[]> {
-  const pages = (await findDocs(brand, model)).filter((d) => d.kind === 'page').sort((a, b) => rank(a) - rank(b)).slice(0, 3)
-  const urls = [...new Set((await Promise.all(pages.map((p) => pageImages(p.url, model)))).flat())].slice(0, 8)
-  const got = await Promise.allSettled(urls.map(fetchImage))
-  return got.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+/** Does this picture load here, from its own address? (hotlinked, never copied) */
+export function loads(url: string, timeout = 8000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.referrerPolicy = 'no-referrer'
+    const done = (ok: boolean) => {
+      clearTimeout(timer)
+      resolve(ok && img.naturalWidth >= 120)
+    }
+    const timer = setTimeout(() => done(false), timeout)
+    img.onload = () => done(true)
+    img.onerror = () => done(false)
+    img.src = url
+  })
+}
+
+/** Candidate photos: their addresses on the maker's product pages (shown from there, not copied). */
+export async function findPhotos(brand: string, model: string, found?: FoundDoc[]): Promise<string[]> {
+  const pages = (found ?? (await findDocs(brand, model))).filter((d) => d.kind === 'page').sort((a, b) => rank(a) - rank(b)).slice(0, 3)
+  const urls = [...new Set((await Promise.all(pages.map((p) => pageImages(p.url, model)))).flat())].filter((u) => /^https:\/\//.test(u)).slice(0, 8)
+  const ok = await Promise.all(urls.map(loads))
+  return urls.filter((_, i) => ok[i])
 }
 
 const DOC_NAME: Record<NonNullable<FoundDoc['doc']>, string> = { manual: 'Mode d’emploi', datasheet: 'Fiche technique', quickstart: 'Guide de démarrage' }
 
 /** The model's documents found on the web: user guide, data sheet, product page. */
-export async function findDocuments(brand: string, model: string): Promise<ProductDoc[]> {
-  const found = (await findDocs(brand, model)).filter((d) => d.exact !== false).sort((a, b) => rank(a) - rank(b))
+export async function findDocuments(brand: string, model: string, all?: FoundDoc[]): Promise<ProductDoc[]> {
+  // Direct links only: the maker's documents, or pages naming this very model.
+  const found = (all ?? (await findDocs(brand, model))).filter((d) => d.exact !== false && (d.official || d.kind === 'pdf')).sort((a, b) => rank(a) - rank(b))
   const out: ProductDoc[] = []
   for (const d of found) {
     const title = d.doc ? `${DOC_NAME[d.doc]} (${d.host})` : d.kind === 'pdf' ? `Document PDF (${d.host})` : `${d.official ? 'Page du fabricant' : 'Page produit'} (${d.host})`

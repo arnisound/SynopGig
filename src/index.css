@@ -829,3 +829,6 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .options .card-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; padding: 3px 0; border-top: 1px solid var(--border); font-size: 12px; }
 .options .card-row.fitted { font-weight: 600; }
 .options .card-row .small-btn { white-space: nowrap; flex: none; }
+.catalog-filler { margin: 12px 0; }
+.catalog-filler .actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.filler-log { max-height: 160px; overflow: auto; padding-left: 16px; }
