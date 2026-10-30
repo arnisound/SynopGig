@@ -1076,6 +1076,10 @@
  "beh-p16d": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/behringer-powerplay-p16-d-150533.jpg"
  },
+ "beh-p16m": {
+  "photo": "https://cdn.shopify.com/s/files/1/0658/8848/5479/files/behringer-p16-m_30503_1_f6bd8038-1cc5-4e5a-893f-209788bb6f39.jpg?v=1787094162",
+  "docs": []
+ },
  "beh-s16": {
   "photo": "https://cdn-media.empowertribe.com/52dc39cc65ed466492e899b4acd1ff2e/Image_BE_0606-ABC_S16_Front_XL.png",
   "docs": [
@@ -1466,8 +1470,16 @@
  "canon-crx300": {
   "photo": "https://cdn.shopify.com/s/files/1/0864/5859/7655/files/CANCRX300.jpg?v=1764627241"
  },
+ "canon-rc-ip100": {
+  "photo": "https://cdn.shopify.com/s/files/1/0864/5859/7655/files/CAN5231C004.jpg?v=1764623865",
+  "docs": []
+ },
  "canon-rc-ip1000": {
   "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_61/619991/20482583_800.jpg"
+ },
+ "canon-xf605": {
+  "photo": "https://cdn.shopify.com/s/files/1/0567/9779/0374/products/XF605_1.jpg?v=1655399907",
+  "docs": []
  },
  "chamsys-mq250": {
   "photo": "https://chamsyslighting.com/wp-content/uploads/2023/11/MQ250M-FRONT-1.png",
@@ -1579,6 +1591,10 @@
     "url": "https://chauvetprofessional.com/product/strike-array-4/"
    }
   ]
+ },
+ "chauvet-strike-m": {
+  "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/COLORSTRIKEM.jpg?v=1707396284",
+  "docs": []
  },
  "chauvet-strike4": {
   "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/STRIKE-4-FRONT-FEAT-1024x1024.png",
@@ -1919,6 +1935,10 @@
     "url": "https://www.dbaudio.com/global/en/products/amplifiers/d80/"
    }
   ]
+ },
+ "db-d80-touring-rack": {
+  "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/Z5571-551.jpg?v=1715084204",
+  "docs": []
  },
  "db-d90": {
   "photo": "https://www.dbaudio.com/assets/products/_processed_/1/0/csm_dbaudio-products-d90-isometric_7b228fe061.png",
@@ -4118,6 +4138,10 @@
  "la-mtd108a": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/a24deb6d40b077f0a2cdca617ab257c6.jpg?v=1619617607"
  },
+ "la-mtd112b": {
+  "photo": "https://cdn.shopify.com/s/files/1/0156/1241/products/77087806_xlarge.jpg?v=1499188579",
+  "docs": []
+ },
  "la-mtd115b": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/l-acoustics-mtd115-15818.jpg"
  },
@@ -5347,6 +5371,10 @@
     "url": "https://connect.na.panasonic.com/av/video/ptz/aw-ue150a-4k-integrated-ptz-camera"
    }
   ]
+ },
+ "pana-ue160": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/download-2024-05-21T134902.838.webp?v=1775836155",
+  "docs": []
  },
  "pana-ue20": {
   "photo": "https://cdn.shopify.com/s/files/1/0595/2487/4349/files/PanasonicAW-UE20WP4K3G-SDIHDMIIPUSBPTZCamerawith12xOpticalZoom_White.jpg?v=1790869546"
@@ -6916,6 +6944,10 @@
     "url": "https://www.sennheiser.com/en-gb/catalog/products/microphones/me-4/me-4-508936"
    }
   ]
+ },
+ "senn-me66": {
+  "photo": "https://cdn.shopify.com/s/files/1/0658/8848/5479/files/sennheiser-me66-k6p-1_d8d7bc93-b4da-4e30-be0e-420b40dcf806.jpg?v=1787091058",
+  "docs": []
  },
  "senn-mk4": {
   "photo": "https://assets.sennheiser.com/assets/MK_4_Product_shot_cutout_solo.png.png/Zz1hZWJjZWJkOGU3YWYxMWYwYWE5OGVhNTViNWQyZmI4Ng==",
@@ -9246,6 +9278,10 @@
     "url": "https://www.skaarhoj.com/product/ptz-pro"
    }
   ]
+ },
+ "sony-brc-am7": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/brcam7b.jpg?v=1783620739",
+  "docs": []
  },
  "sony-brc-x1000": {
   "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/products/sony-brc-x1000-4k-pan-tilt-zoom-camera-with-1-type-exmor-r-cmos-sensor-brc-x10001-creation-networks-50458.jpg?v=1757894291"
