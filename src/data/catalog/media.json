@@ -440,6 +440,114 @@
    }
   ]
  },
+ "beh-s16": {
+  "photo": "https://cdn-media.empowertribe.com/52dc39cc65ed466492e899b4acd1ff2e/Image_BE_0606-ABC_S16_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0606-ABC"
+   }
+  ]
+ },
+ "beh-s32": {
+  "photo": "https://cdn-media.empowertribe.com/6e6bdb5e9c0a0e684156666f07fac56c/BE_0606-ACQ_S32_IMG_Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0606-ACQ"
+   }
+  ]
+ },
+ "beh-sd8": {
+  "photo": "https://cdn-media.empowertribe.com/1428e2ef7a2e3235330f667683af2694/BE_0606-ACP_SD8_IMG_Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0606-ACP"
+   }
+  ]
+ },
+ "beh-wing-compact": {
+  "photo": "https://cdn-media.empowertribe.com/74cdbb1658166e891c386b418c231116/Image_BE_0603-AEV_WING-COMPACT_Media-Top.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0603-AEV"
+   }
+  ]
+ },
+ "beh-wing-rack": {
+  "photo": "https://cdn-media.empowertribe.com/cdn-cgi/image/trim=border,width=768,height=768,fit=scale-down,background=white,format=webp,quality=82/ffa208737935253e05edcd1ff66c092f/Image_BE_0604-AAE_WING-RACK_Media-Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products"
+   }
+  ]
+ },
+ "beh-x32": {
+  "photo": "https://cdn-media.empowertribe.com/e5ba63fb0e6f4e69a1626c5811115e16/Image_BE_0603-ACE_X32_Top_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0603-ACE"
+   }
+  ]
+ },
+ "beh-x32-compact": {
+  "photo": "https://cdn-media.empowertribe.com/cdn-cgi/image/trim=border,width=768,height=768,fit=scale-down,background=white,format=webp,quality=82/ee191263e8e544e2bda9f1b9ef8ccac8/Image_BE_0603-AAB_X32-COMPACT_Top_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products"
+   }
+  ]
+ },
+ "beh-x32-producer": {
+  "photo": "https://cdn-media.empowertribe.com/cdn-cgi/image/trim=border,width=768,height=768,fit=scale-down,background=white,format=webp,quality=82/215497f578b046baa9154b3f115e39c7/Image_BE_0603-ADP_X32-PRODUCER_Top_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products"
+   }
+  ]
+ },
+ "beh-x32-rack": {
+  "photo": "https://cdn-media.empowertribe.com/58140a591498bca8a2bba3f81bfd30a3/Image_BE_0604-AAA_X32-RACK_Media-Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://behringer.com/en/products/0604-AAA"
+   }
+  ]
+ },
+ "beh-xr12": {
+  "photo": "https://cdn-media.empowertribe.com/cc60d8ae82d3fae6df1afc6577625bd1/Image_BE_0605-AAB_XR12_Media-Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0605-AAB"
+   }
+  ]
+ },
+ "beh-xr16": {
+  "photo": "https://cdn-media.empowertribe.com/c4f5ef354bf815d23cc14e0382746b91/Image_BE_0605-AAC_XR16_Media-Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products/0605-AAC"
+   }
+  ]
+ },
+ "beh-xr18": {
+  "photo": "https://cdn-media.empowertribe.com/cdn-cgi/image/trim=border,width=768,height=768,fit=scale-down,background=white,format=webp,quality=82/499c524b397f63bcad0c9a2c5959f14e/Image_BE_0605-AAD_XR18_Media-Front.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.behringer.com/en/products"
+   }
+  ]
+ },
  "bmd-atem-camera-control": {
   "photo": "https://images.blackmagicdesign.com/images/products/atemcameracontrolpanel/product-grid/atem-camera-control-panel.jpg?_v=1527724161",
   "docs": [
@@ -1256,6 +1364,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://digico.biz/racks/d2-rack/"
+   }
+  ]
+ },
+ "digico-q338": {
+  "photo": "https://digico.biz/wp-content/uploads/2022/03/DiGiCo_Quantum338-600x369.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://digico.biz/consoles/quantum112/"
    }
   ]
  },
@@ -2762,6 +2879,33 @@
    }
   ]
  },
+ "midas-dl16": {
+  "photo": "https://cdn-media.empowertribe.com/7835f00c8ce143fe9d5cea3d9ef7ab71/Image_MI_0606-ACJ_DL16_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0606-ACJ"
+   }
+  ]
+ },
+ "midas-dl32": {
+  "photo": "https://cdn-media.empowertribe.com/0c7e0812fc06409da9fc787b48922def/Image_MI_0606-ACR_DL32_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0606-ACR"
+   }
+  ]
+ },
+ "midas-m32": {
+  "photo": "https://cdn-media.empowertribe.com/2ec241f460b6433b93fbf6a39abf319a/Image_MI_0603-ADX_M32_Front_XL.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.midasconsoles.com/en/products/0603-ADX"
+   }
+  ]
+ },
  "netgear-gs108": {
   "photo": "https://assets.netgear.com/transform/f16868fd-1a5e-4ec9-9706-9c5e8ed002c1/B3_gs108_32",
   "docs": [
@@ -2777,6 +2921,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs308pp/"
+   }
+  ]
+ },
+ "netgear-m4250": {
+  "photo": "https://assets.netgear.com/transform/8e3091de-e4b8-4be6-aca8-757871bd9a54/GSM4210PD_firstCarousel_Latest",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4212p/"
    }
   ]
  },
@@ -3140,6 +3293,15 @@
    }
   ]
  },
+ "ptzoptics-move4k": {
+  "photo": "https://cdn.prod.website-files.com/69a5a9fd0bfb9a26219eba91/6a67c15a5a1d37bef3e23b4f_PT12X-4K-WH-G3-Cutout-Accessory_edit.avif",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://ptzoptics.com/ptz-cameras/move-4k-12x"
+   }
+  ]
+ },
  "ptzoptics-superjoy": {
   "photo": "https://cdn.prod.website-files.com/69a5a9fd0bfb9a26219eba91/6a67b80db66968f708967d03_Product-Photo-PT-SUPERJOY-G1-Cutout-Front.avif",
   "docs": [
@@ -3212,6 +3374,33 @@
    }
   ]
  },
+ "rcf-art912": {
+  "photo": "https://www.rcf.it/documents/20128/825567/000_ART-912-A-3_4-left.png/6a5f9128-d3db-72b6-287a-10f24f058b38?version=1.1&t=1635950238364&imagePreview=1",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rcf.it/en/products/product-detail/art-912-a"
+   }
+  ]
+ },
+ "rcf-evox12": {
+  "photo": "https://www.rcf.it/documents/20128/825679/000_EVOX+12+balck+and+white.png/cf5751e9-cbcf-f905-8794-3d1762b8c3a6?version=1.0&t=1687421033066&imagePreview=1",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rcf.it/en/products/product-detail/evox-12"
+   }
+  ]
+ },
+ "rcf-sub8006": {
+  "photo": "https://www.rcf.it/documents/20128/824421/000_SUB-8006-AS-LEFT-GRILL_gallery.png/d526a021-e243-e411-a00a-acf918f3ac59?version=1.1&t=1636016462185&imagePreview=1",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.rcf.it/en/products/product-detail/sub-8006-as"
+   }
+  ]
+ },
  "rfvenue-combine4": {
   "photo": "https://www.rfvenue.com/hs-fs/hubfs/Marketing%20Packet/Product%20Photos/COMBINE4/Comb4_front.png?width=800&height=566&name=Comb4_front.png",
   "docs": [
@@ -3254,6 +3443,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.robertjuliat.com/followspots/Merlin.html"
+   }
+  ]
+ },
+ "roland-v160hd": {
+  "photo": "https://static.roland.com/assets/images/products/main/v-160hd_top_main.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://proav.roland.com/global/products/v-160hd/"
    }
   ]
  },
@@ -4688,6 +4886,15 @@
    }
   ]
  },
+ "shure-mxw2": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/1a3/37b/11-/setcard/8c7b22905dc416072245354bc2d65560.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/microflex_wireless/mxw2-sm58-handheld-transmitter"
+   }
+  ]
+ },
  "shure-mxw6": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/7ab/14a/8b-/setcard/69372315895290b83cdc90c77417458d.jpeg",
   "docs": [
@@ -4703,6 +4910,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/wireless-systems/microflex-wireless-next/mxw8x"
+   }
+  ]
+ },
+ "shure-mxwapt4": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/3fc/8b0/29-/setcard/c01c2c2ca91b9078b7c31264b6a6ef19.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/microflex_wireless/mxwapt4-access-point-transceivers"
    }
   ]
  },
@@ -4730,6 +4946,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/in-ear-monitoring/psm1000/p10rp"
+   }
+  ]
+ },
+ "shure-p300": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ac5/3f5/ab-/setcard/ab602af36c63c4f46fba70eb06fa7c2c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/p300"
    }
   ]
  },
@@ -5048,6 +5273,15 @@
    }
   ]
  },
+ "shure-ua860": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/738/6c8/ca-/setcard/466e119a550ed8a09b0d7adb276a14be.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/accessories/UA860SWB"
+   }
+  ]
+ },
  "shure-ulxd1": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/a0a/c6b/28-/setcard/73167ef4f4c40e32e7b2acec5bd46931.jpeg",
   "docs": [
@@ -5174,6 +5408,24 @@
    }
   ]
  },
+ "ubnt-usw-pro-24-poe": {
+  "photo": "https://cdn.ecomm.ui.com/products/5b69cdb5-e7ea-44e6-ae16-8714339038fb/18d39964-78e7-45f9-874d-e331f1408730.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://store.ui.com/us/en/products/usw-pro-24-poe"
+   }
+  ]
+ },
+ "ubnt-usw-pro-max-16-poe": {
+  "photo": "https://cdn.ecomm.ui.com/products/0694226c-9791-4d7e-9fb1-d98c91fe3fda/7b73b27e-e77a-4771-b6bf-0aed35b4a16e.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://store.ui.com/us/en/products/usw-pro-max-16-poe"
+   }
+  ]
+ },
  "wisy-mpr50": {
   "photo": "https://wisycom.com/app/uploads/2017/12/MPR50-IEM-400x400.jpg",
   "docs": [
@@ -5198,6 +5450,24 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://wisycom.com/correlations/mtp60/"
+   }
+  ]
+ },
+ "yam-mg10xu": {
+  "photo": "https://shop.sg.yamaha.com/media/catalog/product/f/r/front_15.png?optimize=high&fit=bounds&height=&width=&canvas=:&format=jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://shop.sg.yamaha.com/products/professional-audio/mixers/mg10xu.html"
+   }
+  ]
+ },
+ "yam-mg16xu": {
+  "photo": "https://shop.sg.yamaha.com/media/catalog/product/t/o/top_1_1.png?optimize=high&fit=bounds&height=&width=&canvas=:&format=jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://shop.sg.yamaha.com/products/professional-audio/mixers/mg16xu.html"
    }
   ]
  }
