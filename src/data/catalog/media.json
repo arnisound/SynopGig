@@ -2649,6 +2649,24 @@
    }
   ]
  },
+ "etc-eos-apex": {
+  "photo": "https://www.etcconnect.com/uploadedImages/Main_Site/Images/Products/Consoles/Eos_Revamp_Images/Apex10_600x245.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.etcconnect.com/Products/Consoles/Eos-Consoles/Apex/Features.aspx"
+   }
+  ]
+ },
+ "etc-ion-xe": {
+  "photo": "https://www.etcconnect.com/uploadedImages/Main_Site/Images/Products/Consoles/Eos_Revamp_Images/Eos_IonXe_center.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.etcconnect.com/Products/Consoles/Eos-Consoles/Ion-Xe/Features.aspx"
+   }
+  ]
+ },
  "ev-635a": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-635a-31138.jpg",
   "docs": [
@@ -4886,6 +4904,51 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4212p/"
+   }
+  ]
+ },
+ "netgear-m4250-10g2xf": {
+  "photo": "https://assets.netgear.com/transform/54cc2224-6143-4ebf-bc4d-f12b7e1d6d5b/B6_gsm4212px_32",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4212px/"
+   }
+  ]
+ },
+ "netgear-m4250-12m2xf": {
+  "photo": "https://assets.netgear.com/transform/30ce6cec-2eb5-473b-82b3-06c0ef02cc75/B6_M4250_12M2XF_MSM4214X_32",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/msm4214x/"
+   }
+  ]
+ },
+ "netgear-m4250-26g4f": {
+  "photo": "https://assets.netgear.com/transform/7e74430a-799c-4bc1-af5d-7dfb29651616/B5_gsm4230p_32",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4230p/"
+   }
+  ]
+ },
+ "netgear-m4250-40g8f": {
+  "photo": "https://assets.netgear.com/transform/a23ad1f4-bb12-434c-8bb8-7e8dee6bb848/B6_gsm4248p_32",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4248p/"
+   }
+  ]
+ },
+ "netgear-m4250-8g2xf": {
+  "photo": "https://assets.netgear.com/transform/f167aa72-e4f7-45a2-af74-53c1dc5269f9/GSM4210PX_flange_F_Tipoff_NS",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4210px/"
    }
   ]
  },
