@@ -152,6 +152,15 @@
    }
   ]
  },
+ "adamson-metrix": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/adamson-metrix-t-80892.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/line-array/adamson/Metrix-t/"
+   }
+  ]
+ },
  "adamson-s10": {
   "photo": "https://adamson.ai/_next/image?url=https%3A%2F%2Fadamson-media-storage-prod.tor1.cdn.digitaloceanspaces.com%2Fmedia%2FS10.webp&w=3840&q=90",
   "docs": [
@@ -188,6 +197,24 @@
    }
   ]
  },
+ "adamson-spektrix": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/adamson-spektrix-24112.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/enceinte-sono-full-range/adamson/Spektrix/"
+   }
+  ]
+ },
+ "adamson-t21": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/adamson-t-21-sub-33916.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/subwoofer/adamson/T-21-Sub/"
+   }
+  ]
+ },
  "ah-ab168": {
   "photo": "https://www.allen-heath.com/content/uploads/2023/01/AB-168-Front_570x284.jpg",
   "docs": [
@@ -218,6 +245,15 @@
  "ah-avantis": {
   "photo": "https://cdn11.bigcommerce.com/s-dd19b/images/stencil/original/products/19611/90224/371041__66967.1631206013.jpg?c=2",
   "docs": []
+ },
+ "ah-avantis-solo": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/allen-heath-avantis-solo-342345.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/console-numerique/allen-heath/avantis-solo/"
+   }
+  ]
  },
  "ah-cdm32": {
   "photo": "https://store.miroc.co.jp/client_info/ROCKON/itemimage/1072123/1072123_2.jpg",
@@ -379,6 +415,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.allen-heath.com/hardware/sq/sq-7/"
+   }
+  ]
+ },
+ "ah-zed22fx": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/allen-heath-zed-22fx-123996.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/console-fw-usb-mlan/allen-heath/zed-22fx/"
    }
   ]
  },
@@ -603,6 +648,24 @@
  "avid-s6l-24c": {
   "photo": "https://images.tcdn.com.br/img/img_prod/1468331/mesa_de_som_ao_vivo_digital_avid_venue_s6l_24c_4_20260511144723_ef35980d5b01.jpg",
   "docs": []
+ },
+ "avid-s6l-32d": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/avid-venue-s6l-32d-236364.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/console-numerique/avid/venue-s6l-32d/"
+   }
+  ]
+ },
+ "avid-s6l-48d": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/avid-venue-s6l-48d-269988.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/console-numerique/avid/venue-s6l-48d/"
+   }
+  ]
  },
  "avo-arena": {
   "photo": "https://www.avolites.com/app/uploads/intervention/cache/arena-e1536747792693-1257699191.png",
@@ -1019,6 +1082,15 @@
    }
   ]
  },
+ "ayrton-magicblade": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/ayrton-lighting-magicblade-r-230502.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/lyre/ayrton-lighting/magicblade-r/"
+   }
+  ]
+ },
  "ayrton-perseo": {
   "photo": "https://www.ayrton.eu/wp-content/uploads/2019/03/ayrton_plus_vignettes_Perseo-profile-819x630.jpg",
   "docs": [
@@ -1031,6 +1103,15 @@
  "barco-e2": {
   "photo": "https://www.avendor.com/cdn/shop/files/1720175474_IMG_2279964_800x.jpg?v=1746505206",
   "docs": []
+ },
+ "beh-p16d": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/behringer-powerplay-p16-d-150533.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/mixeur-de-retour-de-scene-individuel/behringer/powerplay-p16-d/"
+   }
+  ]
  },
  "beh-s16": {
   "photo": "https://cdn-media.empowertribe.com/52dc39cc65ed466492e899b4acd1ff2e/Image_BE_0606-ABC_S16_Front_XL.png",
@@ -1050,12 +1131,30 @@
    }
   ]
  },
+ "beh-sd16": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/behringer-sd16-231422.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/patch/behringer/sd16/"
+   }
+  ]
+ },
  "beh-sd8": {
   "photo": "https://cdn-media.empowertribe.com/1428e2ef7a2e3235330f667683af2694/BE_0606-ACP_SD8_IMG_Front.webp",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.behringer.com/en/products/0606-ACP"
+   }
+  ]
+ },
+ "beh-wing": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/behringer-wing-282392.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/console-numerique/behringer/wing/"
    }
   ]
  },
@@ -1346,6 +1445,15 @@
    }
   ]
  },
+ "bmd-web-presenter": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/blackmagic-design-web-presenter-4k-340829.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/materiel-video-divers/blackmagic-design/web-presenter-4k/"
+   }
+  ]
+ },
  "brompton-s8": {
   "photo": "https://panavidgear.com/cdn/shop/files/Brompton_Tessera_S8_Processor_Back.jpg?v=1702337122&width=1400",
   "docs": []
@@ -1470,6 +1578,15 @@
    }
   ]
  },
+ "chauvet-r1-spot": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/chauvet-rogue-r1-spot-353342.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/lyre/chauvet/rogue-r1-spot/"
+   }
+  ]
+ },
  "chauvet-r2wash": {
   "photo": "https://chauvetprofessional.com/wp-content/uploads/2025/10/ROGUE_R2_WASH-FRONT-FEAT.png",
   "docs": [
@@ -1494,6 +1611,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://chauvetprofessional.com/product/strike-4/"
+   }
+  ]
+ },
+ "cp-mythos2": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/claypaky-mythos-2-265319.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/lyre/claypaky/mythos-2/"
    }
   ]
  },
@@ -2379,6 +2505,15 @@
    }
   ]
  },
+ "dpa-4061": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/dpa-microphones-4061-169460.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/micros-cravate/dpa-microphones/4061/"
+   }
+  ]
+ },
  "dpa-4088": {
   "photo": "https://www.dpamicrophones.com/media/0vuphufe/4088-dc-a-b-lh-dfine-core-4088-directional-headset-mic-black.jpg",
   "docs": [
@@ -2475,6 +2610,96 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.elationlighting.com/products/smarty-hybrid"
+   }
+  ]
+ },
+ "etc-colorsource40": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/etc-colorsource-40-av-266892.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/console-eclairage-mixte/etc/colorsource-40-av/"
+   }
+  ]
+ },
+ "ev-635a": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-635a-31138.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/microphone-dynamique/electro-voice/635A/"
+   }
+  ]
+ },
+ "ev-cp2200": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cp2200-47033.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/CP2200/"
+   }
+  ]
+ },
+ "ev-cp3000s": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cp3000s-50621.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/CP3000S/"
+   }
+  ]
+ },
+ "ev-cp4000s": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cp4000s-84654.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/CP4000S/"
+   }
+  ]
+ },
+ "ev-cps2-4": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cps2-4-51719.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/cps2-4/"
+   }
+  ]
+ },
+ "ev-cps4-10": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cps4-10-124947.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-4-canaux/electro-voice/cps4-10/"
+   }
+  ]
+ },
+ "ev-dc-one": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-dc-one-83950.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/processeur-sono/electro-voice/DC-One/"
+   }
+  ]
+ },
+ "ev-dx38": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-dx-38-9145.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/processeur-sono/electro-voice/DX-38/"
+   }
+  ]
+ },
+ "ev-dx46": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-dx-46-104745.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/filtre-sono/electro-voice/dx-46/"
    }
   ]
  },
@@ -2748,6 +2973,15 @@
    }
   ]
  },
+ "ev-nd468": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-n-d468-7313.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/microphone-dynamique/electro-voice/N-D468/"
+   }
+  ]
+ },
  "ev-nd66": {
   "photo": "https://keenfinity.cdn-norce.tech/b4824105-efc7-41a5-bfa5-1b8545f547af",
   "docs": [
@@ -2766,6 +3000,15 @@
    }
   ]
  },
+ "ev-nd767a": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-n-d767a-18046.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/microphone-dynamique/electro-voice/N-D767a/"
+   }
+  ]
+ },
  "ev-nd76s": {
   "photo": "https://keenfinity.cdn-norce.tech/f3dcf743-490d-4cb4-9aa1-a48029955d93",
   "docs": [
@@ -2781,6 +3024,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.electrovoice.com/product/nd86"
+   }
+  ]
+ },
+ "ev-nd868": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-n-d868-18047.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/microphone-dynamique/electro-voice/N-D868/"
    }
   ]
  },
@@ -2820,12 +3072,66 @@
    }
   ]
  },
+ "ev-q1212": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-q1212-91242.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/autre-ampli-de-puissance/electro-voice/Q1212/"
+   }
+  ]
+ },
+ "ev-q44": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-q44-43347.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/Q44/"
+   }
+  ]
+ },
+ "ev-q66": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-q66-17588.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/Q66/"
+   }
+  ]
+ },
+ "ev-q99": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-q99-101429.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/ampli-sono-2-canaux/electro-voice/q99/"
+   }
+  ]
+ },
+ "ev-qrx-115-75": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-qrx-115-75-274139.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/enceinte-sono-full-range/electro-voice/qrx-115-75/"
+   }
+  ]
+ },
  "ev-r300-rx": {
   "photo": "https://keenfinity.cdn-norce.tech/5308aed5-ef82-47ae-9bc6-2f2a4a37d128",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.electrovoice.com/product/r300-e"
+   }
+  ]
+ },
+ "ev-re16": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-re16-54495.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/microphone-dynamique/electro-voice/re16/"
    }
   ]
  },
@@ -2838,12 +3144,30 @@
    }
   ]
  },
+ "ev-re200": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-re200-66886.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/micro-statique-a-transistors-a-petite-membrane/electro-voice/RE200/"
+   }
+  ]
+ },
  "ev-re27nd": {
   "photo": "https://keenfinity.cdn-norce.tech/8dcb6741-df29-4a3e-b803-8d67be92b59f",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.electrovoice.com/product/re27n-d"
+   }
+  ]
+ },
+ "ev-re3-rx": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-re3-rx-316170.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/emetteur-ou-recepteur/electro-voice/re3/"
    }
   ]
  },
@@ -2856,12 +3180,39 @@
    }
   ]
  },
+ "ev-re410": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-re410-66887.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/micro-statique-a-transistors-a-petite-membrane/electro-voice/RE410/"
+   }
+  ]
+ },
+ "ev-re510": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-re510-66888.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/micro-statique-a-transistors-a-petite-membrane/electro-voice/RE510/"
+   }
+  ]
+ },
  "ev-re520": {
   "photo": "https://keenfinity.cdn-norce.tech/1990365a-a1d1-43bc-a4b9-5804c87d936c",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.electrovoice.com/product/re520"
+   }
+  ]
+ },
+ "ev-sx300": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-sx300-10828.jpg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://fr.audiofanzine.com/enceinte-sono-full-range/electro-voice/sx-300/"
    }
   ]
  },
