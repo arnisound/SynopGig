@@ -301,6 +301,14 @@
   "photo": "https://www.allen-heath.com/content/uploads/2023/02/dLive-S7000-800x600-1.jpg.webp",
   "docs": []
  },
+ "ah-dm32": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/allen-and-heath-ah-dlive-dm32-dlive-s-class-mixrack-32x16-io-128-x-64-fpga-3-option-io-me-1-port-dual-dx-expander-link-hot-swap-psu-creation-networks-34734.webp?v=1757938389",
+  "docs": []
+ },
+ "ah-dm64": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/allen-and-heath-ah-dlive-dm64-dlive-s-class-mixrack-64x32-io-128-x-64-fpga-3-option-io-me-1-port-dual-dx-expander-link-hot-swap-psu-creation-networks-83686.webp?v=1757938394",
+  "docs": []
+ },
  "ah-dt168": {
   "photo": "https://www.allen-heath.com/content/uploads/2023/01/DT168-Front_570x284.jpg",
   "docs": [
@@ -645,6 +653,10 @@
    }
   ]
  },
+ "avid-e6l": {
+  "photo": "https://cdn.shopify.com/s/files/1/0658/8848/5479/files/avid-venue-el6-144_111675_1_0a761ad8-5f6b-4dfe-b474-f471c6bd428a.jpg?v=1787093947",
+  "docs": []
+ },
  "avid-s6l-24c": {
   "photo": "https://images.tcdn.com.br/img/img_prod/1468331/mesa_de_som_ao_vivo_digital_avid_venue_s6l_24c_4_20260511144723_ef35980d5b01.jpg",
   "docs": []
@@ -666,6 +678,10 @@
     "url": "https://fr.audiofanzine.com/console-numerique/avid/venue-s6l-48d/"
    }
   ]
+ },
+ "avid-stage64": {
+  "photo": "https://cdn.shopify.com/s/files/1/0658/8848/5479/files/avid-venue-stage-64_111681_1_8e54fe3b-7900-4af4-bba0-5afaa20a4581.jpg?v=1787093946",
+  "docs": []
  },
  "avo-arena": {
   "photo": "https://www.avolites.com/app/uploads/intervention/cache/arena-e1536747792693-1257699191.png",
@@ -1104,6 +1120,22 @@
   "photo": "https://www.avendor.com/cdn/shop/files/1720175474_IMG_2279964_800x.jpg?v=1746505206",
   "docs": []
  },
+ "barco-g62-w11": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/barco-g62-w11-11-000-lumens-wuxga-dlp-laser-phosphor-projector-white-us-white-r90102662-creation-networks-27636.jpg?v=1757932252",
+  "docs": []
+ },
+ "barco-s3": {
+  "photo": "https://cdn.shopify.com/s/files/1/0567/9779/0374/products/BarcoR9004757.jpg?v=1655775550",
+  "docs": []
+ },
+ "barco-udx-4k40": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/barco-r9408949-b-udx-4k40-40-40000-lumen-laser-projector-body-only-creation-networks-28384.webp?v=1757915690",
+  "docs": []
+ },
+ "barco-udx4k32": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/barco-r9408982-fc-udx-4k32-comm-frm-fc-body-gsm-wifi-man-frame-fcase-creation-networks-17074.webp?v=1757915733",
+  "docs": []
+ },
  "beh-p16d": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/behringer-powerplay-p16-d-150533.jpg",
   "docs": [
@@ -1520,6 +1552,14 @@
   "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_62/626008/20479006_800.jpg",
   "docs": []
  },
+ "canon-crn700": {
+  "photo": "https://cdn.shopify.com/s/files/1/0864/5859/7655/files/CAN6022C001.jpg?v=1764621496",
+  "docs": []
+ },
+ "canon-crx300": {
+  "photo": "https://cdn.shopify.com/s/files/1/0864/5859/7655/files/CANCRX300.jpg?v=1764627241",
+  "docs": []
+ },
  "canon-rc-ip1000": {
   "photo": "https://thumbs.static-thomann.de/thumb/padthumb600x600/pics/bdb/_61/619991/20482583_800.jpg",
   "docs": []
@@ -1649,6 +1689,14 @@
     "url": "https://chauvetprofessional.com/product/strike-4/"
    }
   ]
+ },
+ "cisco-cbs350-24fp": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/I7948267_c32de885-cb4c-4d02-8cfa-54aa7b155441.jpg?v=1757954900",
+  "docs": []
+ },
+ "cisco-sg350-10": {
+  "photo": "https://cdn.shopify.com/s/files/1/0658/8848/5479/files/cisco-sg350-10p_135660_1_29561ee8-8400-4140-ab30-0c406a112698.jpg?v=1787094749",
+  "docs": []
  },
  "cp-mythos2": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/claypaky-mythos-2-265319.jpg",
@@ -3468,6 +3516,10 @@
    }
   ]
  },
+ "ev-zx1-90": {
+  "photo": "https://cdn.shopify.com/s/files/1/0614/8122/2322/products/zxa1-90.jpg?v=1665643340",
+  "docs": []
+ },
  "ev-zx1-sub": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-zx1-sub-167265.jpg",
   "docs": [
@@ -4749,6 +4801,10 @@
     "url": "https://www.malighting.com/product/grandma3-processing-unit-m-4010510/"
    }
   ]
+ },
+ "martin-atomic-bold": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/x_large-f9a55d272c7cf6cc88d794b09ca5c019.webp?v=1793046604",
+  "docs": []
  },
  "martin-atomic3000": {
   "photo": "https://adn.harmanpro.com/productattachment/4860/product_attachment/x_large-caf850ea44d97429eed343aac7c22f9e.webp",
