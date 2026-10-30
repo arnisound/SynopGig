@@ -59,7 +59,7 @@ const PROCESSORS: DeviceTemplate[] = family('Processeurs', [
   dev('xilica-solaro', 'Xilica', 'Solaro FR1 (processeur)', 'Son', { u: 1, kg: 4, v: '100-240 V', d: 'Processeur audio Xilica 8 entrées / 8 sorties avec Dante.' }, [...phoenixIn(8), ...phoenixOut(8), ...dante('rj45'), ctl('Contrôle'), gpio(), iec()]),
   dev('xilica-solaro-qr1', 'Xilica', 'Solaro QR1 (processeur)', 'Son', { u: 1, kg: 4, v: '100-240 V', d: 'Processeur Xilica tout réseau (Dante), sans I/O analogique.' }, [...dante('rj45'), ctl('Contrôle'), gpio(), iec()]),
   dev('yam-dme7', 'Yamaha', 'DME7 (processeur)', 'Son', { u: 1, kg: 4, v: '100-240 V', d: 'Moteur de traitement audio Yamaha tout Dante, pour l’installation.' }, [...dante(), ctl('Contrôle'), gpio(), iec()]),
-  dev('yam-mrx7d', 'Yamaha', 'MRX7-D (processeur)', 'Son', { u: 1, kg: 4, v: '100-240 V', d: 'Processeur matriciel Yamaha 8 entrées micro/ligne, 2 entrées stéréo, 8 sorties, Dante et slot MY.', opt: MY_CARDS }, [
+  dev('yam-mrx7d', 'Yamaha', 'MRX7-D (processeur)', 'Son', { u: 1, kg: 4, v: '100-240 V', d: 'Processeur matriciel Yamaha 8 entrées micro/ligne, 2 entrées stéréo, 8 sorties, Dante et slot MY.', slots: 1, opt: MY_CARDS }, [
     ...phoenixIn(8), ...rcaPair('ST in 1'), ...phoenixOut(8), port('ydifIn', 'YDIF in', 'rj45', AES, 'in'), port('ydifOut', 'YDIF out', 'rj45', AES, 'out'), ...dante('rj45'), ctl('Réseau'), gpio(), iec(),
   ]),
 ])

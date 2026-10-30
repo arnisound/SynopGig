@@ -24,7 +24,7 @@ function PortRow({ port, side, used }: { port: Port; side: 'left' | 'right'; use
 }
 
 function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
-  const { used, compact, highlight, images } = useContext(ViewContext)
+  const { used, compact, highlight, images, onCards } = useContext(ViewContext)
   const usedHere = used.get(id) ?? new Set<string>()
   const visible = compact ? data.ports.filter((p) => usedHere.has(p.id)) : data.ports
   const { left: inputs, right: outputs } = portSides(data.ports, visible)
@@ -61,6 +61,19 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
         </div>
       </div>
       {hidden > 0 && <div className="device-hidden">+{hidden} ports libres masqués</div>}
+      {!!data.options?.length && onCards && (
+        <button
+          className="device-cards nodrag"
+          title="Cartes optionnelles"
+          onClick={(e) => {
+            e.stopPropagation()
+            onCards(id)
+          }}
+        >
+          + cartes{' '}
+          <span>{data.slots !== undefined ? `${(data.fitted ?? []).length}/${data.slots}` : (data.fitted ?? []).length || ''}</span>
+        </button>
+      )}
     </div>
   )
 }

@@ -84,6 +84,8 @@ export interface Sheet {
   x?: [string, string, string, string?][]
   /** Cards and modules that can be fitted. */
   opt?: DeviceOption[]
+  /** Card slots of the product. */
+  slots?: number
   url?: string
 }
 
@@ -116,7 +118,7 @@ export function dev(id: string, brand: string, model: string, category: Category
     ...(description ? { description } : {}),
     ...(sheet.url ? { url: sheet.url } : {}),
     ...(specs.length ? { specs } : {}),
-    ...(sheet.opt?.length ? { options: sheet.opt } : {}),
+    ...(sheet.opt?.length ? { options: sheet.opt, ...(sheet.slots ? { slots: sheet.slots } : {}) } : {}),
   }
 }
 

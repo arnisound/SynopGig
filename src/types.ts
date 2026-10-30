@@ -91,6 +91,8 @@ export type DeviceOption = {
   id: string
   label: string
   ports: Port[]
+  /** Built-in module that takes no slot (false); a card takes one (default). */
+  slot?: boolean
 }
 
 /** One D-series hole of a patch panel. */
@@ -164,6 +166,8 @@ export interface DeviceTemplate extends ProductInfo {
   ports: Port[]
   /** Cards and modules that can be fitted. */
   options?: DeviceOption[]
+  /** How many card slots the product has (no limit when absent). */
+  slots?: number
   panel?: PanelSpec
   /** Product photo: a small data URL, or the USER library's address for it. */
   image?: string
@@ -188,6 +192,8 @@ export type DeviceData = ProductInfo & {
   ports: Port[]
   /** Cards the product can take, and the ones fitted on this device. */
   options?: DeviceOption[]
+  slots?: number
+  /** Fitted cards, "optionId:n" (the same card can sit in several slots). */
   fitted?: string[]
   config: DeviceConfig
   brand?: string

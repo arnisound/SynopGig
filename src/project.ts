@@ -17,15 +17,31 @@ const STORAGE_KEY = 'synopgig.project'
 
 export const uid = () => Math.random().toString(36).slice(2, 10)
 
-/** Fits or removes an optional card: its ports are added after the others, or taken away. */
-export function setOption(d: DeviceData, optionId: string, on: boolean): Partial<DeviceData> {
+const optionOf = (d: DeviceData, key: string) => d.options?.find((o) => o.id === key.split(':')[0])
+
+/** Card slots still free on a device (Infinity when the product sets no limit). */
+export function slotsLeft(d: DeviceData) {
+  if (d.slots === undefined) return Infinity
+  return d.slots - (d.fitted ?? []).filter((k) => optionOf(d, k)?.slot !== false).length
+}
+
+/** Fits a card in a free slot: its ports join the device, named after the card when it is there twice. */
+export function addCard(d: DeviceData, optionId: string): Partial<DeviceData> {
   const opt = d.options?.find((o) => o.id === optionId)
-  if (!opt) return {}
-  const fitted = new Set(d.fitted ?? [])
-  if (on) fitted.add(optionId)
-  else fitted.delete(optionId)
-  const ports = d.ports.filter((p) => p.option !== optionId)
-  return { fitted: [...fitted], ports: on ? [...ports, ...opt.ports.map((p) => ({ ...p, id: `${optionId}.${p.id}`, option: optionId }))] : ports }
+  if (!opt || (opt.slot !== false && slotsLeft(d) <= 0)) return {}
+  const same = (d.fitted ?? []).filter((k) => k.split(':')[0] === optionId)
+  const n = same.length ? Math.max(...same.map((k) => Number(k.split(':')[1]) || 1)) + 1 : 1
+  const key = `${optionId}:${n}`
+  const tag = n > 1 ? ` (carte ${n})` : ''
+  return {
+    fitted: [...(d.fitted ?? []), key],
+    ports: [...d.ports, ...opt.ports.map((p) => ({ ...p, id: `${key}.${p.id}`, label: `${p.label}${tag}`, option: key }))],
+  }
+}
+
+/** Takes a card out: its ports go, and their cables with them (see the editor). */
+export function removeCard(d: DeviceData, key: string): Partial<DeviceData> {
+  return { fitted: (d.fitted ?? []).filter((k) => k !== key), ports: d.ports.filter((p) => p.option !== key) }
 }
 
 export function createDevice(
@@ -49,7 +65,7 @@ export function createDevice(
       rackU: template.rackU,
       weight: template.weight,
       ports: structuredClone(template.ports),
-      ...(template.options?.length ? { options: structuredClone(template.options) } : {}),
+      ...(template.options?.length ? { options: structuredClone(template.options), ...(template.slots ? { slots: template.slots } : {}) } : {}),
       config: {},
       brand: template.brand,
       panel: template.panel && structuredClone(template.panel),

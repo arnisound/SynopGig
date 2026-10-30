@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { ZONES } from '../data/library'
-import { setOption, type ResolvedCable } from '../project'
+import type { ResolvedCable } from '../project'
+import CardsPanel from './CardsPanel'
 import PanelEditor from '../racks/PanelEditor'
 import DeviceArt from '../ui/DeviceArt'
 import { DocsEditor, SpecsEditor } from '../ui/ProductSheet'
@@ -22,6 +23,8 @@ interface Props {
   onDelete: () => void
   /** What is wrong with the selected device's IP address. */
   ipIssues?: string[]
+  /** Changes when the user asks for the cards of the selected device (the + cartes of its box). */
+  cardsRequest?: number
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -35,9 +38,15 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 type Tab = 'fiche' | 'ports' | 'specs' | 'docs'
 
-export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete, ipIssues }: Props) {
+export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete, ipIssues, cardsRequest }: Props) {
   const [holes, setHoles] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<Tab>('fiche')
+  const [lastRequest, setLastRequest] = useState(cardsRequest)
+  if (cardsRequest !== lastRequest) {
+    setLastRequest(cardsRequest)
+    setTab('ports')
+    requestAnimationFrame(() => document.getElementById('cards-panel')?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+  }
 
   if (cable) {
     const d = cable.edge.data ?? { cableId: '' }
@@ -198,17 +207,7 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
         ) : (
           <>
             <p className="muted small">Comme sur la boîte du synoptique : glissez un port pour changer sa place ou son côté, ⇆ l’envoie en face. « Enregistrer comme modèle » garde ces réglages pour la suite.</p>
-            {!!d.options?.length && (
-              <section className="options">
-                <h4>Options</h4>
-                {d.options.map((o) => (
-                  <label key={o.id} className="check">
-                    <input type="checkbox" checked={!!d.fitted?.includes(o.id)} onChange={(e) => set(setOption(d, o.id, e.target.checked))} />
-                    {o.label} <small className="muted">· {o.ports.length} port{o.ports.length > 1 ? 's' : ''}</small>
-                  </label>
-                ))}
-              </section>
-            )}
+            <CardsPanel d={d} onChange={set} />
             <PortsEditor key={node.id} ports={d.ports} onChange={(ports) => set({ ports })} />
           </>
         ))}

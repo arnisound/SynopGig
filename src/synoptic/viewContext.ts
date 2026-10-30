@@ -7,6 +7,8 @@ export interface ViewOptions {
   highlight: Set<string>
   /** Photo or symbol in the device header. */
   images?: boolean
+  /** Opens the cards of a device (its + cartes button). */
+  onCards?: (nodeId: string) => void
 }
 
 export const ViewContext = createContext<ViewOptions>({

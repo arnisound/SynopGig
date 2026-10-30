@@ -24,6 +24,10 @@ describe('catalogue', () => {
     expect(LIBRARY.filter((t) => !t.panel && symbolKey(t) === 'box').map((t) => t.id)).toEqual([])
   })
 
+  it('says how many cards each product takes', () => {
+    expect(LIBRARY.filter((t) => t.options?.length && !t.slots).map((t) => t.id)).toEqual([])
+  })
+
   it('has unique model ids', () => {
     const ids = LIBRARY.map((t) => t.id)
     expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([])

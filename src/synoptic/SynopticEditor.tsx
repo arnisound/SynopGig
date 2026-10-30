@@ -259,6 +259,20 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     return () => window.removeEventListener('keydown', onKey)
   }, [setProject])
 
+  // The + cartes of a box: select it and open its cards in the inspector.
+  const [cardsRequest, setCardsRequest] = useState(0)
+  const onCards = useCallback(
+    (nodeId: string) => {
+      setProject((p) => ({
+        ...p,
+        nodes: p.nodes.map((n) => (n.id === nodeId ? { ...n, selected: true } : n.selected ? { ...n, selected: false } : n)),
+        edges: p.edges.map((e) => (e.selected ? { ...e, selected: false } : e)),
+      }))
+      setCardsRequest((n) => n + 1)
+    },
+    [setProject],
+  )
+
   const selectedNode = nodes.find((n) => n.selected)
   const selectedEdge = edges.find((e) => e.selected)
 
@@ -434,7 +448,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
             <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser l’affichage</button>
           </div>
         )}
-        <ViewContext.Provider value={{ used, compact, highlight, images: view.images }}>
+        <ViewContext.Provider value={{ used, compact, highlight, images: view.images, onCards }}>
           <ReactFlow
             nodes={[...frames, ...viewNodes] as FlowNode[]}
             edges={viewEdges}
@@ -480,6 +494,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       <Inspector
         node={selectedNode}
         ipIssues={selectedNode ? ips.get(selectedNode.id) : undefined}
+        cardsRequest={cardsRequest}
         cable={selectedEdge ? cableByEdge.get(selectedEdge.id) : undefined}
         onNode={(id, patch) =>
           setProject((p) => {

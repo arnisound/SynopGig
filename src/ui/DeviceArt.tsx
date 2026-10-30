@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { CATEGORY_COLORS, LIBRARY } from '../data/library'
 import { symbolKey } from '../data/symbolKey'
 import type { Category } from '../types'
@@ -21,7 +22,24 @@ export default function DeviceArt({
   category: Category
   size?: number
 }) {
-  if (image) return <img className="device-art photo" src={image} alt="" width={size} height={size} loading="lazy" crossOrigin="anonymous" />
+  // A photo given by its address on another site: when the link is dead, the symbol comes back.
+  const [broken, setBroken] = useState<string>()
+  if (image && image !== broken) {
+    const remote = /^https?:/.test(image)
+    return (
+      <img
+        className="device-art photo"
+        src={image}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        {...(remote ? {} : { crossOrigin: 'anonymous' as const })}
+        onError={() => setBroken(image)}
+      />
+    )
+  }
   const name = symbolKey({ family: family ?? (templateId ? FAMILY.get(templateId) : undefined), templateId, model, category })
   return (
     <span className="device-art symbol" style={{ width: size, height: size, color: CATEGORY_COLORS[category] }}>

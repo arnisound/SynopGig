@@ -32,18 +32,18 @@ const NX_CARDS_MK2 = [opt('nxdt104mk2', 'Carte NXDT104mk2 (Dante)', dante()), NX
 
 export const NEXO: DeviceTemplate[] = [
   ...family('Amplis', [
-    dev('nexo-nxamp4x1', 'NEXO', 'NXAMP4x1 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 19, opt: NX_CARDS }, nxamp()),
-    dev('nexo-nxamp4x2', 'NEXO', 'NXAMP4x2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 30, opt: NX_CARDS }, nxamp()),
-    dev('nexo-nxamp4x4', 'NEXO', 'NXAMP4x4 (contrôleur amplifié 4 × 4000 W)', 'Son', { u: 4, kg: 33, opt: NX_CARDS }, nxamp()),
-    dev('nexo-nxamp4x1mk2', 'NEXO', 'NXAMP4x1mk2 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 18, opt: NX_CARDS_MK2 }, nxamp()),
-    dev('nexo-nxamp4x2mk2', 'NEXO', 'NXAMP4x2mk2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 29, opt: NX_CARDS_MK2 }, nxamp()),
-    dev('nexo-nxamp4x4mk2', 'NEXO', 'NXAMP4x4mk2 (contrôleur amplifié 4 × 4500 W)', 'Son', { u: 4, kg: 31, opt: NX_CARDS_MK2 }, nxamp()),
+    dev('nexo-nxamp4x1', 'NEXO', 'NXAMP4x1 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 19, slots: 1, opt: NX_CARDS }, nxamp()),
+    dev('nexo-nxamp4x2', 'NEXO', 'NXAMP4x2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 30, slots: 1, opt: NX_CARDS }, nxamp()),
+    dev('nexo-nxamp4x4', 'NEXO', 'NXAMP4x4 (contrôleur amplifié 4 × 4000 W)', 'Son', { u: 4, kg: 33, slots: 1, opt: NX_CARDS }, nxamp()),
+    dev('nexo-nxamp4x1mk2', 'NEXO', 'NXAMP4x1mk2 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 18, slots: 1, opt: NX_CARDS_MK2 }, nxamp()),
+    dev('nexo-nxamp4x2mk2', 'NEXO', 'NXAMP4x2mk2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 29, slots: 1, opt: NX_CARDS_MK2 }, nxamp()),
+    dev('nexo-nxamp4x4mk2', 'NEXO', 'NXAMP4x4mk2 (contrôleur amplifié 4 × 4500 W)', 'Son', { u: 4, kg: 31, slots: 1, opt: NX_CARDS_MK2 }, nxamp()),
     dev('nexo-dtdamp4x07', 'NEXO', 'DTDAMP4x0.7 (ampli contrôleur 4 × 700 W)', 'Son', { u: 1, kg: 6 }, dtdamp()),
     dev('nexo-dtdamp4x13', 'NEXO', 'DTDAMP4x1.3 (ampli contrôleur 4 × 1300 W)', 'Son', { u: 1, kg: 6 }, dtdamp()),
   ]),
   ...family('Processeurs', [
     dev('nexo-dtd', 'NEXO', 'DTD Controller (contrôleur numérique)', 'Son', { u: 1, kg: 2 }, [...ins(2, 'Entrée'), ...outs(2, 'Sortie'), port('sub', 'Sortie sub', 'xlr3', A, 'out'), iec()]),
-    dev('nexo-nx242', 'NEXO', 'NX242 (TDcontroller numérique, legacy)', 'Son', { u: 1, kg: 5, opt: NX_CARDS }, [...ins(2, 'Entrée'), port('aes', 'Entrée AES/EBU', 'xlr3', AES, 'in'), ...outs(4, 'Sortie'), iec()]),
+    dev('nexo-nx242', 'NEXO', 'NX242 (TDcontroller numérique, legacy)', 'Son', { u: 1, kg: 5, slots: 1, opt: NX_CARDS }, [...ins(2, 'Entrée'), port('aes', 'Entrée AES/EBU', 'xlr3', AES, 'in'), ...outs(4, 'Sortie'), iec()]),
     dev('nexo-ps8td', 'NEXO', 'PS8 TDcontroller (analogique, legacy)', 'Son', { u: 1, kg: 3 }, tdController()),
     dev('nexo-ps10td', 'NEXO', 'PS10 TDcontroller (analogique, legacy)', 'Son', { u: 1, kg: 3 }, tdController()),
     dev('nexo-ps15td', 'NEXO', 'PS15 TDcontroller (analogique, legacy)', 'Son', { u: 1, kg: 3 }, tdController()),
