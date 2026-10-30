@@ -1,7 +1,8 @@
 import type { DeviceTemplate } from '../types'
-import { A, AES, HP, DMX, NET, V, PWR, CTRL, ARTNET, SYNC, ins, outs, pair, dante, ctl, net, iec, t1, t1Link, pc32, dmxInOut, dmxOuts, dc, lineIn, hpIn, dev, family, port, series } from './catalogKit'
+import { A, DMX, NET, V, PWR, CTRL, ARTNET, SYNC, ins, pair, ctl, net, iec, t1, t1Link, dmxInOut, dmxOuts, dc, dev, family, port, series } from './catalogKit'
 import { CONSOLES } from './catalog/consoles'
 import { STAGE } from './catalog/stage'
+import { SOUND } from './catalog/sound'
 import { SHURE } from './brands/shure'
 import { SENNHEISER } from './brands/sennheiser'
 import { FOHHN } from './brands/fohhn'
@@ -22,79 +23,7 @@ import { NEXO } from './brands/nexo'
 const SON: DeviceTemplate[] = [
   ...CONSOLES,
   ...STAGE,
-  ...family('Amplis', [
-    dev('lab-d120-4l', 'Lab.gruppen', 'D 120:4L', 'Son', { u: 2, kg: 9 }, [...ins(4), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('lab-fp10000q', 'Lab.gruppen', 'FP 10000Q', 'Son', { u: 2, kg: 12 }, [...ins(4), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('lab-plm12k44', 'Lab.gruppen', 'PLM 12K44', 'Son', { u: 2, kg: 14 }, [...ins(4, 'In analog'), port('aes', 'AES in', 'xlr3', AES, 'in'), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('lab-plm20k44', 'Lab.gruppen', 'PLM 20K44', 'Son', { u: 2, kg: 15 }, [...ins(4, 'In analog'), port('aes', 'AES in', 'xlr3', AES, 'in'), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('ps-quattrocanali', 'Powersoft', 'Quattrocanali 4804 DSP+D', 'Son', { u: 1, kg: 7 }, [...ins(4), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), iec()]),
-    dev('ps-t604', 'Powersoft', 'T604', 'Son', { u: 1, kg: 9 }, [...ins(4), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('ps-x4', 'Powersoft', 'X4', 'Son', { u: 1, kg: 12 }, [...ins(4, 'In analog/AES'), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('ps-x8', 'Powersoft', 'X8', 'Son', { u: 1, kg: 13 }, [...ins(8, 'In analog/AES'), ...dante(), ...series('hp', 'Sortie HP', 8, 'speakon', HP, 'out'), pc32()]),
-    dev('qsc-cxq4k4', 'QSC', 'CX-Q 4K4 (ampli Q-SYS)', 'Son', { u: 2, kg: 9 }, [...pair('lan', 'Q-LAN', 'rj45', NET), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), iec()]),
-    dev('qsc-gxd4', 'QSC', 'GXD 4', 'Son', { u: 2, kg: 8 }, [...ins(2), ...series('hp', 'Sortie HP', 2, 'speakon', HP, 'out'), iec()]),
-    dev('qsc-pld45', 'QSC', 'PLD4.5', 'Son', { u: 2, kg: 10 }, [...ins(4), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), net('Réseau', 'rj45'), pc32()]),
-    dev('yam-pc412d', 'Yamaha', 'PC412-DI (ampli Dante)', 'Son', { u: 2, kg: 14 }, [...ins(4), ...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), pc32()]),
-    dev('yam-px10', 'Yamaha', 'PX10 (ampli)', 'Son', { u: 2, kg: 9 }, [...ins(2), ...series('hp', 'Sortie HP', 2, 'speakon', HP, 'out'), iec()]),
-    dev('yam-px8', 'Yamaha', 'PX8 (ampli)', 'Son', { u: 2, kg: 9 }, [...ins(2), ...series('hp', 'Sortie HP', 2, 'speakon', HP, 'out'), iec()]),
-    dev('yam-xmv4280', 'Yamaha', 'XMV4280-D (ampli Dante)', 'Son', { u: 1, kg: 6 }, [...dante(), ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'), iec()]),
-  ]),
-  ...family('Processeurs', [
-    dev('lake-lm26', 'Lake', 'LM 26', 'Son', { u: 1, kg: 4 }, [...ins(2), ...outs(6), ...dante(), iec()]),
-    dev('lake-lm44', 'Lake', 'LM 44', 'Son', { u: 1, kg: 4 }, [...ins(4), ...outs(4), ...dante(), iec()]),
-    dev('qsc-core110f', 'QSC', 'Q-SYS Core 110f', 'Son', { u: 1, kg: 4 }, [...ins(8), ...outs(8), ...pair('lan', 'Q-LAN', 'rj45', NET), iec()]),
-    dev('qsc-core8flex', 'QSC', 'Q-SYS Core 8 Flex', 'Son', { u: 1, kg: 3 }, [...ins(8), ...outs(8), ...pair('lan', 'Q-LAN', 'rj45', NET), iec()]),
-    dev('xilica-solaro', 'Xilica', 'Solaro FR1 (processeur)', 'Son', { u: 1, kg: 4 }, [...ins(8), ...outs(8), ...dante(), net('Contrôle', 'rj45'), iec()]),
-    dev('xilica-solaro-qr1', 'Xilica', 'Solaro QR1 (processeur)', 'Son', { u: 1, kg: 4 }, [...dante(), net('Contrôle', 'rj45'), iec()]),
-    dev('yam-dme7', 'Yamaha', 'DME7 (processeur)', 'Son', { u: 1, kg: 4 }, [...dante(), net('Contrôle', 'rj45'), iec()]),
-    dev('yam-mrx7d', 'Yamaha', 'MRX7-D (processeur)', 'Son', { u: 1, kg: 4 }, [...ins(8), ...outs(8), ...dante(), net('Réseau', 'rj45'), iec()]),
-  ]),
-  ...family('Line arrays & colonnes', [
-    dev('qsc-kla12', 'QSC', 'KLA12 (line array amplifié)', 'Son', { kg: 30 }, [...lineIn(), iec()]),
-    dev('rcf-evox12', 'RCF', 'EVOX 12 (colonne amplifiée)', 'Son', { kg: 33 }, [...lineIn(), iec()]),
-    dev('rcf-hdl20a', 'RCF', 'HDL 20-A (line array amplifié)', 'Son', { kg: 23 }, [...lineIn(), ...t1Link()]),
-    dev('rcf-hdl30a', 'RCF', 'HDL 30-A (line array amplifié)', 'Son', { kg: 40 }, [...lineIn(), ...t1Link()]),
-    dev('rcf-hdl6a', 'RCF', 'HDL 6-A (line array amplifié)', 'Son', { kg: 18 }, [...lineIn(), ...t1Link()]),
-    dev('yam-vxl1', 'Yamaha', 'VXL1-16 (colonne)', 'Son', { kg: 4 }, hpIn()),
-  ]),
-  ...family('Enceintes', [
-    dev('qsc-cp12', 'QSC', 'CP12 (amplifiée)', 'Son', { kg: 12 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
-    dev('qsc-k102', 'QSC', 'K10.2 (amplifiée)', 'Son', { kg: 15 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
-    dev('qsc-k122', 'QSC', 'K12.2 (amplifiée)', 'Son', { kg: 18 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), iec()]),
-    dev('qsc-k82', 'QSC', 'K8.2 (amplifiée)', 'Son', { kg: 12 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
-    dev('qsc-kw152', 'QSC', 'KW152 (amplifiée)', 'Son', { kg: 28 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
-    dev('rcf-art910', 'RCF', 'ART 910-A (amplifiée)', 'Son', { kg: 15 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('rcf-art912', 'RCF', 'ART 912-A (amplifiée)', 'Son', { kg: 18 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('rcf-art932', 'RCF', 'ART 932-A (amplifiée)', 'Son', { kg: 20 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), ...t1Link()]),
-    dev('rcf-nx12sma', 'RCF', 'NX 12-SMA (retour / façade amplifié)', 'Son', { kg: 18 }, [...lineIn(), ...t1Link()]),
-    dev('rcf-nx32a', 'RCF', 'NX 32-A (amplifiée)', 'Son', { kg: 22 }, [...lineIn(), ...t1Link()]),
-    dev('rcf-tt25', 'RCF', 'TT+ 25-A (amplifiée)', 'Son', { kg: 19 }, [...lineIn(), ...t1Link()]),
-    dev('yam-czr10', 'Yamaha', 'CZR10 (passive)', 'Son', { kg: 15 }, hpIn()),
-    dev('yam-czr12', 'Yamaha', 'CZR12 (passive)', 'Son', { kg: 19 }, hpIn()),
-    dev('yam-czr15', 'Yamaha', 'CZR15 (passive)', 'Son', { kg: 24 }, hpIn()),
-    dev('yam-dxr10', 'Yamaha', 'DXR10 mkII (amplifiée)', 'Son', { kg: 15 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
-    dev('yam-dxr12', 'Yamaha', 'DXR12 mkII (amplifiée)', 'Son', { kg: 20 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), iec()]),
-    dev('yam-dxr15', 'Yamaha', 'DXR15 mkII (amplifiée)', 'Son', { kg: 24 }, [port('in', 'Entrée', 'xlr-combo', A, 'in'), port('thru', 'Link', 'xlr3', A, 'out'), iec()]),
-    dev('yam-dzr10', 'Yamaha', 'DZR10 (amplifiée)', 'Son', { kg: 18 }, [...lineIn(), iec()]),
-    dev('yam-dzr12', 'Yamaha', 'DZR12 (amplifiée)', 'Son', { kg: 23 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), iec()]),
-    dev('yam-dzr15', 'Yamaha', 'DZR15 (amplifiée)', 'Son', { kg: 26 }, [...lineIn(), iec()]),
-    dev('yam-dzr315', 'Yamaha', 'DZR315 (amplifiée 3 voies)', 'Son', { kg: 33 }, [port('in', 'Entrée', 'xlr3', A, 'in'), port('thru', 'Thru', 'xlr3', A, 'out'), iec()]),
-  ]),
-  ...family('Subs', [
-    dev('qsc-kla181', 'QSC', 'KLA181 (sub amplifié)', 'Son', { kg: 47 }, [...lineIn(), iec()]),
-    dev('qsc-ks118', 'QSC', 'KS118 (sub amplifié)', 'Son', { kg: 46 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), iec()]),
-    dev('qsc-ks212c', 'QSC', 'KS212C (sub amplifié cardio)', 'Son', { kg: 52 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), iec()]),
-    dev('rcf-sub8006', 'RCF', 'SUB 8006-AS (sub amplifié 2×18")', 'Son', { kg: 98 }, [...lineIn(), ...t1Link()]),
-    dev('rcf-sub9004', 'RCF', 'SUB 9004-AS (sub amplifié 21")', 'Son', { kg: 80 }, [...lineIn(), ...t1Link()]),
-    dev('rcf-sub905', 'RCF', 'SUB 905-AS II (sub amplifié)', 'Son', { kg: 42 }, [...lineIn(), ...t1Link()]),
-    dev('yam-dxs15', 'Yamaha', 'DXS15mkII (sub amplifié)', 'Son', { kg: 40 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), iec()]),
-    dev('yam-dxs18', 'Yamaha', 'DXS18XLF (sub amplifié)', 'Son', { kg: 49 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...series('thru', 'Thru', 2, 'xlr3', A, 'out'), iec()]),
-    dev('yam-dxs18xlf-d', 'Yamaha', 'DXS18XLF-D (sub amplifié Dante)', 'Son', { kg: 49 }, [...series('in', 'Entrée', 2, 'xlr3', A, 'in'), ...dante(), iec()]),
-  ]),
-  ...family('Retours', [
-    dev('rcf-nx15sma', 'RCF', 'NX 15-SMA (retour amplifié)', 'Son', { kg: 23 }, [...lineIn(), ...t1Link()]),
-    dev('yam-dhr12m', 'Yamaha', 'DHR12M (retour amplifié)', 'Son', { kg: 19 }, [...lineIn(), iec()]),
-  ]),
+  ...SOUND,
 ]
 
 const LUMIERE: DeviceTemplate[] = [
