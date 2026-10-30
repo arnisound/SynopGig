@@ -7312,6 +7312,15 @@
    }
   ]
  },
+ "senn-xswd-inst-tx": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_INSTRUMENT_TX_01.png/Zz1lMWUzZjNkMGU3YzMxMWYwYWZkMWVhNTViNWQyZmI4Ng==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-instrument-tx-508496"
+   }
+  ]
+ },
  "senn-xswd-mj-rx": {
   "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_MINI_JACK_RX_01.png/Zz1lMmM0NGIyNGU3YzMxMWYwYmNlN2JlYjQzYzY2MTIyYQ==?width=730&format=webp&quality=80",
   "docs": [
@@ -7321,12 +7330,30 @@
    }
   ]
  },
+ "senn-xswd-mj-tx": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_MINI_JACK_TX_01.png/Zz1lNDkyMzUyZWU3YzMxMWYwYjViMzc2OGVlOGU5N2FlYQ==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-mini-jack-tx-508495"
+   }
+  ]
+ },
  "senn-xswd-pedal-rx": {
   "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_PEDALBOARD_RX_01.png/Zz0zYTY0YzYzNmU3Y2IxMWYwYTg2NmNlM2Q3NWM0MGYwNw==?width=730&format=webp&quality=80",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-pedalboard-rx-508499"
+   }
+  ]
+ },
+ "senn-xswd-xlr-rx": {
+  "photo": "https://assets.sennheiser.com/assets/Sennheiser_XSW_Series_accessory_XSW-D_MALE_RX_01.png/Zz1lMmZiMTFlMGU3YzMxMWYwOTdlYWVhNTViNWQyZmI4Ng==?width=730&format=webp&quality=80",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.sennheiser.com/en-us/catalog/products/wireless-systems/xsw-digital-components/xsw-d-xlr-male-rx-508497"
    }
   ]
  },
