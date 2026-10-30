@@ -271,6 +271,7 @@ const GENERIC: DeviceTemplate[] = [
     ports: [
       port('net', 'Ethernet', 'rj45', 'network', 'io'),
       port('hdmi', 'HDMI out', 'hdmi', 'video', 'out'),
+      port('pwr', 'Alim (bloc USB-C)', 'usb-c', 'power', 'in'),
     ],
   },
   // ---- Énergie

@@ -1,5 +1,5 @@
 import type { DeviceTemplate, Port } from '../../types'
-import { A, AES, NET, PWR, RF, ins, outs, dante, net, iec, antIn, cascade, antOut, dc, dev, port, series, family } from '../catalogKit'
+import { A, AES, LINK, NET, PWR, RF, ins, outs, dante, net, iec, antIn, cascade, antOut, dc, dev, port, series, family } from '../catalogKit'
 
 /* Sennheiser: indicative connectors, check the manufacturer's data sheet. */
 
@@ -224,7 +224,7 @@ export const SENNHEISER: DeviceTemplate[] = [
     dev('senn-adn-cu1', S, 'ADN CU1 (unité centrale conférence)', 'Son', { u: 2, kg: 5 }, [
       ...series('adn', 'Ligne ADN', 2, 'rj45', NET, 'io'), ...outs(2, 'Sortie XLR'), ...ins(2, 'Entrée XLR'), net('Ethernet', 'rj45'), iec(),
     ]),
-    dev('senn-adn-c1', S, 'ADN C1 (pupitre président)', 'Son', { kg: 1 }, [port('in', 'ADN in', 'rj45', NET, 'in'), port('thru', 'ADN out', 'rj45', NET, 'out'), port('mic', 'Col de cygne XLR', 'xlr3', A, 'in')]),
-    dev('senn-adn-d1', S, 'ADN D1 (pupitre délégué)', 'Son', { kg: 1 }, [port('in', 'ADN in', 'rj45', NET, 'in'), port('thru', 'ADN out', 'rj45', NET, 'out'), port('mic', 'Col de cygne XLR', 'xlr3', A, 'in')]),
+    dev('senn-adn-c1', S, 'ADN C1 (pupitre président)', 'Son', { kg: 1 }, [port('in', 'ADN in (alimenté par le câble)', 'rj45', LINK, 'in'), port('thru', 'ADN out', 'rj45', LINK, 'out'), port('mic', 'Col de cygne XLR', 'xlr3', A, 'in')]),
+    dev('senn-adn-d1', S, 'ADN D1 (pupitre délégué)', 'Son', { kg: 1 }, [port('in', 'ADN in (alimenté par le câble)', 'rj45', LINK, 'in'), port('thru', 'ADN out', 'rj45', LINK, 'out'), port('mic', 'Col de cygne XLR', 'xlr3', A, 'in')]),
   ]),
 ]

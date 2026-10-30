@@ -1,5 +1,5 @@
 import type { DeviceTemplate } from '../../types'
-import { A, AES, HP, NET, PWR, ins, pair, dante, net, iec, pc32, hpIn, dev, port, series, family } from '../catalogKit'
+import { CTRL, A, AES, HP, NET, PWR, ins, pair, dante, net, iec, pc32, hpIn, dev, port, series, family } from '../catalogKit'
 
 /* d&b audiotechnik: indicative connectors, check the manufacturer's data sheet. */
 
@@ -47,7 +47,7 @@ export const DB: DeviceTemplate[] = [
     dev('db-ds20', 'd&b audiotechnik', 'DS20 (pont audio réseau Dante / Milan)', 'Son', { u: 1, kg: 3 }, [...dante(), ...pair('milan', 'Milan / AVB', 'ethercon', NET), ...series('aesIn', 'AES in', 4, 'xlr3', AES, 'in'), ...series('aes', 'AES out', 4, 'xlr3', AES, 'out'), iec()]),
     dev('db-ds100', 'd&b audiotechnik', 'DS100 (Signal Engine Soundscape)', 'Son', { u: 2, kg: 6 }, [...dante(), net('Contrôle OCA', 'ethercon'), iec()]),
     dev('db-r70', 'd&b audiotechnik', 'R70 (interface Ethernet / CAN)', 'Son', { kg: 1 }, [net('Ethernet', 'rj45'), port('can', 'CAN-Bus', 'rj45', NET, 'io'), port('pwr', 'Alim DC', 'dc', PWR, 'in')]),
-    dev('db-r60', 'd&b audiotechnik', 'R60 (interface USB / CAN)', 'Son', { kg: 0.3 }, [port('usb', 'USB', 'usb', NET, 'io'), port('can', 'CAN-Bus', 'rj45', NET, 'io')]),
+    dev('db-r60', 'd&b audiotechnik', 'R60 (interface USB / CAN)', 'Son', { kg: 0.3 }, [port('usb', 'USB (PC, alimentation)', 'usb', CTRL, 'io'), port('can', 'CAN-Bus', 'rj45', CTRL, 'io')]),
   ]),
   ...family('Line arrays & colonnes', [
     dev('db-gsl8', 'd&b audiotechnik', 'GSL8 (line array 80°)', 'Son', { kg: 128 }, hpIn('speakon8')),

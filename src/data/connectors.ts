@@ -62,7 +62,7 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   ethercon: 'etherCON',
   opticalcon: 'opticalCON',
   hdmi: 'HDMI',
-  sdi: 'BNC SDI',
+  sdi: 'BNC 75 Ω (SDI, MADI, word clock)',
   powercon: 'powerCON',
   'powercon-true1': 'powerCON TRUE1',
   schuko: 'Schuko 16A',
