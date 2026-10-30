@@ -5850,6 +5850,15 @@
    }
   ]
  },
+ "shure-ad2-n8c": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ed9/f4a/08-/setcard/4e8fae985e79cc5df77993f2e42f312c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_n8c"
+   }
+  ]
+ },
  "shure-ad2-sm58": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9d8/b5e/ae-/setcard/414fb0b0adc5bcb51e2323c30e1071d6.jpeg",
   "docs": [
@@ -5899,6 +5908,24 @@
    }
   ]
  },
+ "shure-adtd": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/212/4d3/91-/setcard/94bc8d63e3143958731d37771e278a8c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/adpsm/adtd"
+   }
+  ]
+ },
+ "shure-adtq": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/c2b/a36/06-/setcard/1e44cf249410fe494d182b40c1ca3864.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/adpsm/adtq"
+   }
+  ]
+ },
  "shure-adx1": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/180/0fa/08-/setcard/b7d32d450abec9172df66402b718a32d.jpeg",
   "docs": [
@@ -5926,6 +5953,15 @@
    }
   ]
  },
+ "shure-adx2-ksm8": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/e43/dc5/ec-/setcard/0ab0ebcdb1577409574c7a826ef1353c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx2_k8"
+   }
+  ]
+ },
  "shure-adx2-sm58": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4c5/fbd/53-/setcard/65ae4ee6ccdb2c43e8158f5a801f6057.jpeg",
   "docs": [
@@ -5941,6 +5977,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx2fd_b58"
+   }
+  ]
+ },
+ "shure-adx2fd-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/fc4/372/cd-/setcard/aba0f9cba8dcfb49209f4596e1ad5908.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/adx2fd_k9"
    }
   ]
  },
@@ -5962,6 +6007,69 @@
    }
   ]
  },
+ "shure-adxr": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/de2/ff3/ca-/setcard/478c2a4f4427b17a86fdab6df964b5fc.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/in-ear-monitoring/adpsm/adxr"
+   }
+  ]
+ },
+ "shure-ani22-block": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2b1/bd5/65-/setcard/4d478005790c80b98e93aec7699b5819.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/ani22?variant=ANI22-BLOCK"
+   }
+  ]
+ },
+ "shure-ani22-xlr": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/2b1/bd5/65-/setcard/4d478005790c80b98e93aec7699b5819.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/ani22?variant=ANI22-XLR"
+   }
+  ]
+ },
+ "shure-ani4in-block": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/757/28c/c4-/setcard/27c801a5d7d70bc17429a6b930a2e823.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/ani4in?variant=ANI4IN-BLOCK"
+   }
+  ]
+ },
+ "shure-ani4in-xlr": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/757/28c/c4-/setcard/27c801a5d7d70bc17429a6b930a2e823.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/ani4in?variant=ANI4IN-XLR"
+   }
+  ]
+ },
+ "shure-ani4out-block": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ad7/f1c/e1-/setcard/a85b84e3ab37505a21292e60367b0e7e.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/ani4out?variant=ANI4OUT-BLOCK"
+   }
+  ]
+ },
+ "shure-ani4out-xlr": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ad7/f1c/e1-/setcard/a85b84e3ab37505a21292e60367b0e7e.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/mixers/ani4out?variant=ANI4OUT-XLR"
+   }
+  ]
+ },
  "shure-aniusb": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/413/e2d/d7-/setcard/62c83f05f7eb4f316b1a4338e58eb1a3.jpeg",
   "docs": [
@@ -5980,12 +6088,57 @@
    }
   ]
  },
+ "shure-axt200-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/368/eb8/2b-/setcard/34a427cc0a1b362ff7dda68a6fedf815.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_wireless_management_network/axt200_beta58a"
+   }
+  ]
+ },
+ "shure-axt200-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ef3/816/8f-/setcard/c85995847bdafaaf24bcf68500514884.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/axient_wireless_management_network/axt200_ksm9"
+   }
+  ]
+ },
  "shure-axt400": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/049/ac7/d8-/setcard/52e0d69465432e07544da22fed501ff7.jpeg",
   "docs": [
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/wireless-systems/axient_wireless_management_network/axt400"
+   }
+  ]
+ },
+ "shure-axt600": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/4b0/ed8/48-/setcard/22656ca0e6861722cf3297d54b63519f.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/accessories/axt600"
+   }
+  ]
+ },
+ "shure-axt610": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/73a/a30/23-/setcard/65c6b984e4732ebc2cf28dda2b6dea9f.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-EU/products/accessories/axt610"
+   }
+  ]
+ },
+ "shure-axt620": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/215/ed2/2d-/setcard/59ca5cd7a7d94ce4a56ab8b5c73a88a2.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/accessories/axt620"
    }
   ]
  },
@@ -6017,6 +6170,24 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/microphones/beta_52a"
+   }
+  ]
+ },
+ "shure-beta53": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/6a3/504/71-/setcard/3b595c357e9a8354f6f7f2eac6d0c982.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/beta_53"
+   }
+  ]
+ },
+ "shure-beta54": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/085/72b/df-/setcard/c621c11d9ad87b2d9c00b58a8dc295e7.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/beta_54"
    }
   ]
  },
@@ -6167,6 +6338,15 @@
    }
   ]
  },
+ "shure-fp33": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9a8/29b/11-/setcard/f63f2f7270fbd69b5bbe83cfe0f4fc45.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/mixers/fp33"
+   }
+  ]
+ },
  "shure-glxd1": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/9f9/73c/38-/setcard/370871175f2dc3e2df73449a40326e24.jpeg",
   "docs": [
@@ -6182,6 +6362,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d_plus/glxd1p"
+   }
+  ]
+ },
+ "shure-glxd2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/92d/c50/76-/setcard/faf6faf05adf63473506dbf7714b61fa.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/glx-d-advanced/sm58-glxd2"
    }
   ]
  },
@@ -6356,6 +6545,15 @@
    }
   ]
  },
+ "shure-mx150": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/d20/e1b/98-/setcard/b4f6bbde7d364c15cba84bebe8cc1e5b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/mx150"
+   }
+  ]
+ },
  "shure-mx153": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/f38/003/7e-/setcard/37757431b555b8709f5de4dbafb8836c.jpeg",
   "docs": [
@@ -6437,6 +6635,15 @@
    }
   ]
  },
+ "shure-mxa910": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/769/8f3/58-/setcard/f6e6ef8ef6495e6faf4d286bcf3e44cf.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/mxa910"
+   }
+  ]
+ },
  "shure-mxa920": {
   "photo": "https://cdn11.bigcommerce.com/s-tt1cdl8d7a/images/stencil/1280x1280/products/1487/7119/image__80158.1650483531.png?c=2%3Fimbypass%3Don",
   "docs": []
@@ -6501,6 +6708,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/accessories/mxwncs8"
+   }
+  ]
+ },
+ "shure-nexadyne8s": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/e66/c40/75-/setcard/bd79ac51bf462df00aaff161cc3699d7.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/fr-FR/produits/microphones/nexadyne8"
    }
   ]
  },
@@ -6616,6 +6832,15 @@
    }
   ]
  },
+ "shure-pga27": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/e7f/f62/ce-/setcard/5211b4e1bc77c13b17ee0537f23cf0df.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/pga27"
+   }
+  ]
+ },
  "shure-pga48": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/1c5/da7/76-/setcard/f656e7cd4b327a1d9164d649cb5b5dc6.jpeg",
   "docs": [
@@ -6685,6 +6910,24 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd1"
+   }
+  ]
+ },
+ "shure-qlxd2-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/c5f/bac/92-/setcard/eb22fb750c52c34d58c82492cce87518.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd2_beta58a"
+   }
+  ]
+ },
+ "shure-qlxd2-b87": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/be7/f9b/fd-/setcard/731c0285f0a34a2d7a1e0f659dea54a8.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/qlx-d_digital_wireless/qlxd2_beta87a"
    }
   ]
  },
@@ -6796,6 +7039,15 @@
    }
   ]
  },
+ "shure-scm820": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/262/3a7/4c-/setcard/2d8ea41d203ca73aa34f3594cb9d6e42.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/mixers/scm820"
+   }
+  ]
+ },
  "shure-se215": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/29c/688/c0-/setcard/d1a9cd04693b7ff4acc8a760b41b2331.jpeg",
   "docs": [
@@ -6845,6 +7097,33 @@
   "photo": "https://cdn.rubbermonkey.com/ProductImage/Huge/194183.jpg/shure-slxd2-b58-digital-wireless-handheld-microphone-transmitter-with-beta-58-capsule.jpg",
   "docs": []
  },
+ "shure-slxd2-b87a": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/8bb/ab1/a7-/setcard/f5418228835eaafc196a54094b7f4524.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/slxd-plus/slxd2plus-b87a"
+   }
+  ]
+ },
+ "shure-slxd2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/60b/e3a/79-/setcard/d762e5f92b9aeeb66f8dbb9333ddb615.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/slxd-plus/slxd2plus-58"
+   }
+  ]
+ },
+ "shure-slxd2-sm86": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/8b8/177/d2-/setcard/664fbcab1ad9d412fc3e2ffcf59cb85a.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-ASIA/products/wireless-systems/slxd-plus/slxd2plus-sm86"
+   }
+  ]
+ },
  "shure-slxd3": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/86e/a8e/66-/setcard/3fd97ea0d96dac69dfa946cf657b0d92.jpeg",
   "docs": [
@@ -6887,6 +7166,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/microphones/sm137"
+   }
+  ]
+ },
+ "shure-sm27": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/171/7b9/7b-/setcard/7e47940f2d95d3e00d6c1db77406f88b.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/sm27"
    }
   ]
  },
@@ -6968,6 +7256,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/microphones/sm86"
+   }
+  ]
+ },
+ "shure-sm87a": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/088/70c/f9-/setcard/467405ebf517e54d980b616fe9a0a1f6.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/sm87a"
    }
   ]
  },
@@ -7083,6 +7380,42 @@
    }
   ]
  },
+ "shure-ulxd2-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/5f0/bf7/b6-/setcard/21f64fc1083c70ea7c7f935e9346e799.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_beta58a"
+   }
+  ]
+ },
+ "shure-ulxd2-b87c": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/6b7/bb7/d7-/setcard/f0e223eace1aa393d6e5d808e6039a5a.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_beta_87c"
+   }
+  ]
+ },
+ "shure-ulxd2-beta87": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/789/0e3/cb-/setcard/8ffa3b5e2885876add7f5dcbfbfe7917.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_beta_87a"
+   }
+  ]
+ },
+ "shure-ulxd2-ksm8": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/d85/268/1d-/setcard/cec223c641bd64c604f318694b63f50c.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/ulx-d_digital_wireless/ulxd2_k8"
+   }
+  ]
+ },
  "shure-ulxd2-ksm9": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/b48/96d/cd-/setcard/fe4e1404fa789de278c62e853c455d11.jpeg",
   "docs": [
@@ -7182,6 +7515,42 @@
    }
   ]
  },
+ "shure-ur2-b58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/79a/825/ff-/setcard/11e54215058b2ac2250b15df7c667896.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/uhf-r_wireless/ur2_beta_58a"
+   }
+  ]
+ },
+ "shure-ur2-b87a": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/580/c3e/21-/setcard/7df11c4415665c2d93734c4c26ee6701.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/uhf-r_wireless/ur2_beta_87a"
+   }
+  ]
+ },
+ "shure-ur2-ksm9": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/50c/945/99-/setcard/063e11de8a15391e7f2b0fb1a7540a73.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/uhf-r_wireless/ur2_ksm9"
+   }
+  ]
+ },
+ "shure-ur2-sm58": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/311/418/32-/setcard/c6e45d5d3b0b875353b814e319f172c5.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-US/products/wireless-systems/uhf-r_wireless/ur2_sm58"
+   }
+  ]
+ },
  "shure-ur3": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/5ca/7d6/fc-/setcard/6b4b03284ef259189b94addcdf9948f2.jpeg",
   "docs": [
@@ -7206,6 +7575,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.shure.com/en-US/products/wireless-systems/uhf-r_wireless/ur4sp"
+   }
+  ]
+ },
+ "shure-wl183": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/131/165/42-/setcard/6f5e76795d7e51e20bb5d4f3b18a6a8a.jpeg",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.shure.com/en-MEA/products/microphones/wl183"
    }
   ]
  },
