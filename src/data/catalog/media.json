@@ -1494,6 +1494,15 @@
    }
   ]
  },
+ "brompton-xd": {
+  "photo": "https://www.bromptontech.com/wp-content/uploads/2025/07/XD-Product-Image_Desktop_Tablet_w1920px-1536x344.webp",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.bromptontech.com/product/xd/"
+   }
+  ]
+ },
  "bss-ar133": {
   "photo": "https://adn.harmanpro.com/productattachment/1848/product_attachment/x_large-54732f12781cfbef0665babd87212c6b.webp",
   "docs": [
@@ -4831,6 +4840,24 @@
    }
   ]
  },
+ "mdg-atme": {
+  "photo": "https://mdgfog.s3.ca-central-1.amazonaws.com/uploads/img/ATMe-B.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.mdgfog.com/en/atme"
+   }
+  ]
+ },
+ "mdg-theone": {
+  "photo": "https://mdgfog.s3.amazonaws.com/uploads/img/theone-5.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.mdgfog.com/en/theone"
+   }
+  ]
+ },
  "midas-dl151": {
   "photo": "https://cdn-media.empowertribe.com/bc56b9d6eebf465091c010e5fb4cb65c/Image_MI_0606-ABO_DL151_Front_XL.png",
   "docs": [
@@ -6092,6 +6119,15 @@
    {
     "title": "Page produit (fabricant)",
     "url": "https://www.robertjuliat.com/followspots/cyrano.html"
+   }
+  ]
+ },
+ "rj-dalis860": {
+  "photo": "https://www.robertjuliat.com/images/PhotosHD_Products/PhotoWeb_DALIS_860.png",
+  "docs": [
+   {
+    "title": "Page produit (fabricant)",
+    "url": "https://www.robertjuliat.com/ambiance_lighting/dalis.html"
    }
   ]
  },
