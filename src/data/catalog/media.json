@@ -2424,6 +2424,10 @@
    }
   ]
  },
+ "digico-q852": {
+  "photo": "https://sharetribe.imgix.net/653f6985-d80a-45ef-b0d6-9412d2305b81/69aee315-90f9-489f-b18b-7cd9136e60ec?auto=format&crop=edges&fit=crop&h=753&w=800&s=a2b19962b0d39b1cd1c1eb7f5de5dec0",
+  "docs": []
+ },
  "digico-s21": {
   "photo": "https://digico.biz/wp-content/uploads/2018/11/S21_intro-1200x750.jpg",
   "docs": [
@@ -4394,6 +4398,10 @@
  "luminex-gc12": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/e325fd7264b49969d9513dbc72e379d7.jpg?v=1619622024"
  },
+ "luminex-gc16rfo": {
+  "photo": "https://acamericas.com/wp-content/uploads/2025/05/bc91aa6db0a50a1d9d90f7ce8938.jpeg",
+  "docs": []
+ },
  "luminex-gc16xt": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/478b2c375777485bfea4acdddfecbccb.jpg?v=1621258653"
  },
@@ -4405,6 +4413,10 @@
     "url": "https://www.luminex.be/products/gigacore/gigacore-18t/"
    }
   ]
+ },
+ "luminex-gc26i": {
+  "photo": "https://acamericas.com/wp-content/uploads/2025/05/5953679635d9649951b0a5ebef23.jpeg",
+  "docs": []
  },
  "luminex-gc30i": {
   "photo": "https://www.luminex.be/wp-content/uploads/2025/02/GigaCore-30i-Front-Cam-Straight.jpg",
