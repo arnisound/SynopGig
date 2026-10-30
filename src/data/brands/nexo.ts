@@ -1,12 +1,11 @@
 import type { DeviceTemplate } from '../../types'
-import { A, AES, HP, NET, ins, outs, dante, iec, pc32, hpIn, dev, port, series, family } from '../catalogKit'
+import { A, AES, HP, LINK, ins, outs, dante, iec, opt, pc32, hpIn, dev, port, series, family } from '../catalogKit'
 
 /* NEXO: indicative connectors, check the manufacturer's data sheet. */
 
-/** NXAMP: 4 XLR inputs, 4 NL4 + 1 NL8 outputs, optional network card. */
-const nxamp = (card = false) => [
+/** NXAMP: 4 XLR inputs, 4 NL4 + 1 NL8 outputs; a network card goes in its slot. */
+const nxamp = () => [
   ...ins(4, 'Entrée'),
-  ...(card ? dante() : []),
   ...series('hp', 'Sortie HP', 4, 'speakon', HP, 'out'),
   port('hp8', 'Sortie NL8 (4 canaux)', 'speakon8', HP, 'out'),
   pc32(),
@@ -23,32 +22,31 @@ const dtdamp = () => [
 /** Analog TDcontroller: 2 XLR in, 2 full-range out + sub out. */
 const tdController = () => [...ins(2, 'Entrée'), ...outs(2, 'Sortie'), port('sub', 'Sortie sub', 'xlr3', A, 'out'), iec()]
 
-/** Network card for NXAMP / NX242. */
-const card = (extra: ReturnType<typeof port>[]) => [port('bus', 'Connexion carte (slot NXAMP)', 'rj45', NET, 'io'), ...extra]
+/** Cards of the NXAMP / NX242 slot. */
+const NX_CARDS = [
+  opt('nxdt104', 'Carte NXDT104 (Dante)', dante()),
+  opt('nxes104', 'Carte NXES104 (EtherSound)', [port('esIn', 'EtherSound in', 'ethercon', LINK, 'in'), port('esOut', 'EtherSound out', 'ethercon', LINK, 'out')]),
+  opt('nxae104', 'Carte NXAE104 (AES/EBU)', [port('aesIn', 'Entrée AES 1-2', 'xlr3', AES, 'in'), port('aesIn2', 'Entrée AES 3-4', 'xlr3', AES, 'in')]),
+]
+const NX_CARDS_MK2 = [opt('nxdt104mk2', 'Carte NXDT104mk2 (Dante)', dante()), NX_CARDS[2]]
 
 export const NEXO: DeviceTemplate[] = [
   ...family('Amplis', [
-    dev('nexo-nxamp4x1', 'NEXO', 'NXAMP4x1 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 19 }, nxamp()),
-    dev('nexo-nxamp4x2', 'NEXO', 'NXAMP4x2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 30 }, nxamp()),
-    dev('nexo-nxamp4x4', 'NEXO', 'NXAMP4x4 (contrôleur amplifié 4 × 4000 W)', 'Son', { u: 4, kg: 33 }, nxamp()),
-    dev('nexo-nxamp4x1mk2', 'NEXO', 'NXAMP4x1mk2 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 18 }, nxamp(true)),
-    dev('nexo-nxamp4x2mk2', 'NEXO', 'NXAMP4x2mk2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 29 }, nxamp(true)),
-    dev('nexo-nxamp4x4mk2', 'NEXO', 'NXAMP4x4mk2 (contrôleur amplifié 4 × 4500 W)', 'Son', { u: 4, kg: 31 }, nxamp(true)),
+    dev('nexo-nxamp4x1', 'NEXO', 'NXAMP4x1 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 19, opt: NX_CARDS }, nxamp()),
+    dev('nexo-nxamp4x2', 'NEXO', 'NXAMP4x2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 30, opt: NX_CARDS }, nxamp()),
+    dev('nexo-nxamp4x4', 'NEXO', 'NXAMP4x4 (contrôleur amplifié 4 × 4000 W)', 'Son', { u: 4, kg: 33, opt: NX_CARDS }, nxamp()),
+    dev('nexo-nxamp4x1mk2', 'NEXO', 'NXAMP4x1mk2 (contrôleur amplifié 4 × 1300 W)', 'Son', { u: 2, kg: 18, opt: NX_CARDS_MK2 }, nxamp()),
+    dev('nexo-nxamp4x2mk2', 'NEXO', 'NXAMP4x2mk2 (contrôleur amplifié 4 × 2000 W)', 'Son', { u: 4, kg: 29, opt: NX_CARDS_MK2 }, nxamp()),
+    dev('nexo-nxamp4x4mk2', 'NEXO', 'NXAMP4x4mk2 (contrôleur amplifié 4 × 4500 W)', 'Son', { u: 4, kg: 31, opt: NX_CARDS_MK2 }, nxamp()),
     dev('nexo-dtdamp4x07', 'NEXO', 'DTDAMP4x0.7 (ampli contrôleur 4 × 700 W)', 'Son', { u: 1, kg: 6 }, dtdamp()),
     dev('nexo-dtdamp4x13', 'NEXO', 'DTDAMP4x1.3 (ampli contrôleur 4 × 1300 W)', 'Son', { u: 1, kg: 6 }, dtdamp()),
   ]),
   ...family('Processeurs', [
     dev('nexo-dtd', 'NEXO', 'DTD Controller (contrôleur numérique)', 'Son', { u: 1, kg: 2 }, [...ins(2, 'Entrée'), ...outs(2, 'Sortie'), port('sub', 'Sortie sub', 'xlr3', A, 'out'), iec()]),
-    dev('nexo-nx242', 'NEXO', 'NX242 (TDcontroller numérique, legacy)', 'Son', { u: 1, kg: 5 }, [...ins(2, 'Entrée'), port('aes', 'Entrée AES/EBU', 'xlr3', AES, 'in'), ...outs(4, 'Sortie'), iec()]),
+    dev('nexo-nx242', 'NEXO', 'NX242 (TDcontroller numérique, legacy)', 'Son', { u: 1, kg: 5, opt: NX_CARDS }, [...ins(2, 'Entrée'), port('aes', 'Entrée AES/EBU', 'xlr3', AES, 'in'), ...outs(4, 'Sortie'), iec()]),
     dev('nexo-ps8td', 'NEXO', 'PS8 TDcontroller (analogique, legacy)', 'Son', { u: 1, kg: 3 }, tdController()),
     dev('nexo-ps10td', 'NEXO', 'PS10 TDcontroller (analogique, legacy)', 'Son', { u: 1, kg: 3 }, tdController()),
     dev('nexo-ps15td', 'NEXO', 'PS15 TDcontroller (analogique, legacy)', 'Son', { u: 1, kg: 3 }, tdController()),
-  ]),
-  ...family('Cartes réseau', [
-    dev('nexo-nxdt104', 'NEXO', 'NXDT104 (carte Dante pour NXAMP)', 'Son', { kg: 0.3 }, card(dante())),
-    dev('nexo-nxdt104mk2', 'NEXO', 'NXDT104mk2 (carte Dante pour NXAMP mk2)', 'Son', { kg: 0.3 }, card(dante())),
-    dev('nexo-nxes104', 'NEXO', 'NXES104 (carte EtherSound pour NXAMP)', 'Son', { kg: 0.3 }, card([port('esIn', 'EtherSound in', 'ethercon', NET, 'in'), port('esOut', 'EtherSound out', 'ethercon', NET, 'out')])),
-    dev('nexo-nxae104', 'NEXO', 'NXAE104 (carte AES/EBU pour NXAMP)', 'Son', { kg: 0.3 }, card([port('aesIn', 'Entrée AES 1-2', 'xlr3', AES, 'in'), port('aesIn2', 'Entrée AES 3-4', 'xlr3', AES, 'in')])),
   ]),
   ...family('Line arrays & colonnes', [
     dev('nexo-stm-m46', 'NEXO', 'STM M46 (module principal)', 'Son', { kg: 84 }, hpIn('speakon8')),

@@ -87,7 +87,15 @@ export interface Sheet {
   url?: string
 }
 
+/** The words in brackets of a model name ("D-2.750 (ampli DSP 2 × 750 W)"), as a sentence. */
+function aboutOf(brand: string, model: string) {
+  const m = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(model)
+  if (!m) return undefined
+  return `${m[2][0].toUpperCase()}${m[2].slice(1)} ${brand} ${m[1]}.`.replace(/\s+/g, ' ')
+}
+
 export function dev(id: string, brand: string, model: string, category: Category, sheet: Sheet, ports: Port[]): DeviceTemplate {
+  const description = sheet.d ?? aboutOf(brand, model)
   const specs: Spec[] = [
     ...(sheet.dim ? [{ group: 'Physique', label: 'Dimensions (H × L × P)', value: sheet.dim, unit: 'mm' }] : []),
     ...(sheet.kg ? [{ group: 'Physique', label: 'Poids', value: String(sheet.kg).replace('.', ','), unit: 'kg' }] : []),
@@ -105,7 +113,7 @@ export function dev(id: string, brand: string, model: string, category: Category
     weight: sheet.kg,
     ports,
     ...(sheet.w ? { watts: sheet.w } : {}),
-    ...(sheet.d ? { description: sheet.d } : {}),
+    ...(description ? { description } : {}),
     ...(sheet.url ? { url: sheet.url } : {}),
     ...(specs.length ? { specs } : {}),
     ...(sheet.opt?.length ? { options: sheet.opt } : {}),

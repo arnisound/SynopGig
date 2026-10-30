@@ -35,6 +35,9 @@ export function auditTemplate(t: DeviceTemplate): string[] {
   if (!t.panel && power.length > 1 && !power.slice(1).every((p) => /\d|redond|secours|extern|A$|B$/i.test(p.label))) out.push('plusieurs entrées secteur non nommées')
   const active = t.ports.some((p) => p.signal !== 'speaker' && p.signal !== 'rf' && p.signal !== 'power' && (p.dir === 'out' || p.dir === 'io') && p.signal !== 'audio-analog')
   if (!t.panel && power.length === 0 && active && !t.ports.some((p) => FED.test(p.label)) && !NO_MAINS.test(`${t.model} ${t.family ?? ''}`)) out.push('aucune alimentation')
+  // The product sheet, as the AI reading builds it.
+  if (!t.panel && !t.description) out.push('pas de description')
+  if (!t.panel && !t.specs?.length) out.push('pas de caractéristiques')
   return out
 }
 
