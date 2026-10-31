@@ -215,6 +215,14 @@
  "adamson-y18": {
   "photo": "https://cdn.shopify.com/s/files/1/0156/1241/products/12748636_xlarge.jpg?v=1499222347"
  },
+ "agora-ghost-g2": {
+  "photo": "https://cdn.sanity.io/images/10k2qtfe/production/9c2326c539821cb6bf1d824d5f6cdc9c52826b2d-1000x1000.webp?rect=0,238,1000,525&w=1200&h=630&fm=jpg&q=80&fit=crop",
+  "docs": []
+ },
+ "agora-ghost-g2-s": {
+  "photo": "https://cdn.sanity.io/images/10k2qtfe/production/9c2326c539821cb6bf1d824d5f6cdc9c52826b2d-1000x1000.webp?rect=0,238,1000,525&w=1200&h=630&fm=jpg&q=80&fit=crop",
+  "docs": []
+ },
  "ah-ab168": {
   "photo": "https://www.allen-heath.com/content/uploads/2023/01/AB-168-Front_570x284.jpg",
   "docs": [
@@ -6110,6 +6118,10 @@
    }
   ]
  },
+ "rmp54-fanout-12-4": {
+  "photo": "https://shop.klotz-ais.com/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/k/m/kmy1204-m1.png",
+  "docs": []
+ },
  "robe-bmfl-blade": {
   "photo": "https://cdn.aws.robe.cz/v1/image/resize/1ca93714d4f1af28aaf570958b2d99598c31aa94?width=904&height=904&fit=cover&withoutEnlargement=false",
   "docs": [
@@ -9597,6 +9609,10 @@
    }
   ]
  },
+ "skaarhoj-rcp": {
+  "photo": "https://www.trm.fr/wp-content/uploads/2020/11/Skaarhoj-RCPv2-avec-Joystick.jpg",
+  "docs": []
+ },
  "sony-brc-am7": {
   "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/brcam7b.jpg?v=1783620739",
   "docs": []
@@ -9661,6 +9677,10 @@
     "url": "https://solidstatelogic.com/products/l550"
    }
   ]
+ },
+ "ssl-ml3232": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Solid_State_Logic_logo.svg/500px-Solid_State_Logic_logo.svg.png",
+  "docs": []
  },
  "swisson-xmt350": {
   "photo": "https://www.swisson.com/site/assets/files/1162/xmt-350_6-1.500x0.png",
