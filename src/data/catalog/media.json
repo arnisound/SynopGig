@@ -1,7 +1,8 @@
 {
  "adamson-cs-amp": {
   "photo": "https://adamson.ai/logo-with-text.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "adamson-cs10": {
   "photo": "https://adamson.ai/_next/image?url=https%3A%2F%2Fadamson-media-storage-prod.tor1.cdn.digitaloceanspaces.com%2Fmedia%2FCS10.webp&w=3840&q=90",
@@ -161,11 +162,13 @@
  },
  "adamson-point12": {
   "photo": "https://adamson.ai/logo-with-text.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "adamson-point8": {
   "photo": "https://adamson.ai/logo-with-text.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "adamson-s10": {
   "photo": "https://adamson.ai/_next/image?url=https%3A%2F%2Fadamson-media-storage-prod.tor1.cdn.digitaloceanspaces.com%2Fmedia%2FS10.webp&w=3840&q=90",
@@ -2285,11 +2288,13 @@
  },
  "db-r60": {
   "photo": "https://www.dbaudio.com/_assets/7bc42ebed84e5185d75075dc3d9cd3c9/Images/db-logo-black-med.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "db-r70": {
   "photo": "https://www.dbaudio.com/_assets/7bc42ebed84e5185d75075dc3d9cd3c9/Images/db-logo-black-med.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "db-slgsub": {
   "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/sl-series/thumbs-teaserlist-640x640/dbaudio-sl-gsub-subwoofer-th.png",
@@ -2455,11 +2460,13 @@
  },
  "decimator-md-hx": {
   "photo": "https://decimator.com/rw_common/images/Decimator_Logo_website_red.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "decimator-md-lx": {
   "photo": "https://decimator.com/rw_common/images/Decimator_Logo_website_red.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "digico-d2-rack": {
   "photo": "https://digico.biz/wp-content/uploads/2018/11/D2_rack_BNC_AES-1-1200x750.jpg",
@@ -2645,11 +2652,13 @@
  },
  "eaton-5px1500": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Eaton_Corporation_Logo.svg/500px-Eaton_Corporation_Logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "eaton-9px3000": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Eaton_Corporation_Logo.svg/500px-Eaton_Corporation_Logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "elation-fuze-profile": {
   "photo": "https://www.elationlighting.com/cdn/shop/files/eab60b015c7475520c06b849001b88e84423bb5b_FUZ495__IMG__002__775b825c0bea.jpg?v=1776815026&width=2048",
@@ -2773,7 +2782,8 @@
  },
  "etc-response-4": {
   "photo": "https://www.etcconnect.com/Content/Images/logo-header.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "etc-s4-750": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/S4LEDS3D-0_1.jpg?v=1680900343",
@@ -3143,7 +3153,8 @@
  },
  "ev-p3000rl": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Electro-Voice_logo.svg/500px-Electro-Voice_logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "ev-pl33": {
   "photo": "https://keenfinity.cdn-norce.tech/c056fa89-640f-4173-ac5a-4a43ce3e6ab1",
@@ -3374,7 +3385,8 @@
  },
  "ev-x2-218": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Electro-Voice_logo.svg/500px-Electro-Voice_logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "ev-xlc118": {
   "photo": "https://cdn.shopify.com/s/files/1/0156/1241/products/main_86246840_large398.jpg?v=1499228685"
@@ -3424,7 +3436,8 @@
  },
  "ev-xw12a": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Electro-Voice_logo.svg/500px-Electro-Voice_logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "ev-zlx-12": {
   "photo": "https://keenfinity.cdn-norce.tech/c238b811-cf95-43d1-ba17-22308fdbf2e6",
@@ -4695,15 +4708,18 @@
  },
  "ma-8port": {
   "photo": "https://www.malighting.com/_assets/7b3ba8bb3871137dffa4d9cccacf730f/Malighting/Images/logo.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "ma-net-switch": {
   "photo": "https://www.malighting.com/_assets/7b3ba8bb3871137dffa4d9cccacf730f/Malighting/Images/logo.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "ma-xport-node": {
   "photo": "https://www.malighting.com/_assets/7b3ba8bb3871137dffa4d9cccacf730f/Malighting/Images/logo.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "ma2-light": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/ma-lighting-grandma2-light-80770.jpg"
@@ -5569,7 +5585,8 @@
  },
  "novastar-h2": {
   "photo": "https://www.novastar.tech/static/img/01index/logo01.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "novastar-mctrl4k": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/MCTRL4K.jpg?v=1701774881"
@@ -6585,7 +6602,8 @@
  },
  "senn-awm-uhf": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Sennheiser-Logo.svg/500px-Sennheiser-Logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "senn-e602": {
   "photo": "https://assets.sennheiser.com/assets/e_602_II_Product_shot_cutout_Logo.png.png/Zz03N2VlZTRlMGU3YWUxMWYwYjViMzc2OGVlOGU5N2FlYQ==?width=730&format=webp&quality=80",
@@ -6594,7 +6612,8 @@
     "title": "Page produit (fabricant)",
     "url": "https://www.sennheiser.com/en-us/catalog/products/microphones/e-602-ii/e-602-ii-500797"
    }
-  ]
+  ],
+  "logo": true
  },
  "senn-e604": {
   "photo": "https://assets.sennheiser.com/assets/e604_product_shot_cutout_shot_side_view.png.png/Zz1mNzI2NzY4NGU3YWQxMWYwYWUzMDdhZWFhOWMzNzY0YQ==",
@@ -7518,7 +7537,8 @@
  },
  "senn-skp300g4": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Sennheiser-Logo.svg/500px-Sennheiser-Logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "senn-skp500g4": {
   "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKP_500_detail.png/Zz01YmZiMzRjMmU3YmUxMWYwYTM1NGVhNTViNWQyZmI4Ng==",
@@ -7549,7 +7569,8 @@
  },
  "senn-sl-di4": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Sennheiser-Logo.svg/500px-Sennheiser-Logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "senn-sl-headmic1": {
   "photo": "https://assets.sennheiser.com/assets/Speechline_Digital_Wireless_Product_shot_cutout_SL_Headmic_1-4_BE.png/Zz0zMGRiZjlhMmU3YmUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
@@ -9688,7 +9709,8 @@
  },
  "ssl-ml3232": {
   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Solid_State_Logic_logo.svg/500px-Solid_State_Logic_logo.svg.png",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "swisson-xmt350": {
   "photo": "https://www.swisson.com/site/assets/files/1162/xmt-350_6-1.500x0.png",
@@ -9822,7 +9844,8 @@
  },
  "xilica-solaro": {
   "photo": "https://www.xilica.com/wp-content/uploads/2021/06/XilicaLogo_2020_NewX_RGB_Black.svg",
-  "docs": []
+  "docs": [],
+  "logo": true
  },
  "xilica-solaro-qr1": {
   "photo": "https://www.getdante.com/wp-content/uploads/2024/01/Xilica_Solaro_QR1.jpg",

@@ -9,7 +9,8 @@ import FOUND from './media.json'
  * and a dead link brings the symbol back.
  */
 
-type Media = { docs?: ProductDoc[]; photo?: string }
+// logo: the photo is the maker's logo, shown beside the symbol rather than in its place.
+type Media = { docs?: ProductDoc[]; photo?: string; logo?: boolean }
 const page = (url: string): ProductDoc => ({ title: 'Page produit (fabricant)', url })
 const sheet = (url: string): ProductDoc => ({ title: 'Fiche technique (PDF)', url })
 const guide = (url: string, title = 'Mode d’emploi'): ProductDoc => ({ title, url })
@@ -95,6 +96,9 @@ export function withMedia(t: DeviceTemplate): DeviceTemplate {
 
 /** Ids given links or a photo here (checked by the tests). */
 export const mediaIds = () => [...Object.keys(CHECKED), ...Object.keys(found)]
+
+/** Images that are a maker's logo, not a photo of the product. */
+export const LOGOS = new Set(Object.values(found).filter((m) => m.logo && m.photo).map((m) => m.photo as string))
 
 /** Models whose photo comes from here. */
 export const photoIds = () => [...Object.keys(CHECKED), ...Object.keys(found)].filter((id) => CHECKED[id]?.photo ?? found[id]?.photo)

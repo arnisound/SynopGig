@@ -211,6 +211,9 @@ main { flex: 1; min-height: 0; overflow: auto; }
 .device-head.with-art > :not(.device-art) { grid-column: 2; }
 .device-art { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; border-radius: 6px; background: color-mix(in srgb, currentColor 10%, var(--panel)); }
 .device-art.photo { object-fit: contain; background: #fff; border: 1px solid var(--border); padding: 2px; }
+.device-art.with-logo { position: relative; background: none; }
+.device-art.with-logo .symbol { width: 100%; height: 100%; }
+.device-logo { position: absolute; right: -2px; bottom: -2px; max-width: 60%; max-height: 40%; object-fit: contain; background: #fff; border: 1px solid var(--border); border-radius: 3px; padding: 1px; }
 .device-name { font-weight: 700; font-size: 13px; }
 .device-meta { color: var(--muted); }
 .device-addr { font-family: ui-monospace, monospace; color: var(--accent); margin-top: 2px; }

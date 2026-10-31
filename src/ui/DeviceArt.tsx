@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LOGOS } from '../data/catalog/media'
 import { CATEGORY_COLORS, LIBRARY } from '../data/library'
 import { symbolKey } from '../data/symbolKey'
 import { useModelPhoto } from '../library/modelPhotos'
@@ -28,6 +29,21 @@ export default function DeviceArt({
   const [broken, setBroken] = useState<string>()
   const ofModel = useModelPhoto(image === undefined ? templateId : undefined)
   image ??= ofModel
+  const name = symbolKey({ family: family ?? (templateId ? FAMILY.get(templateId) : undefined), templateId, model, category })
+  const symbol = (
+    <span className="device-art symbol" style={{ width: size, height: size, color: CATEGORY_COLORS[category] }}>
+      <DeviceSymbol name={name} size={Math.round(size * 0.8)} />
+    </span>
+  )
+  // The maker's logo, not a photo of the product: the symbol, with the logo in its corner.
+  if (image && image !== broken && LOGOS.has(image)) {
+    return (
+      <span className="device-art with-logo" style={{ width: size, height: size }}>
+        {symbol}
+        <img className="device-logo" src={image} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setBroken(image)} />
+      </span>
+    )
+  }
   if (image && image !== broken) {
     const remote = /^https?:/.test(image)
     return (
@@ -44,10 +60,5 @@ export default function DeviceArt({
       />
     )
   }
-  const name = symbolKey({ family: family ?? (templateId ? FAMILY.get(templateId) : undefined), templateId, model, category })
-  return (
-    <span className="device-art symbol" style={{ width: size, height: size, color: CATEGORY_COLORS[category] }}>
-      <DeviceSymbol name={name} size={Math.round(size * 0.8)} />
-    </span>
-  )
+  return symbol
 }
