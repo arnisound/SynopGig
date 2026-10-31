@@ -1,9 +1,10 @@
-import { MarkerType, useStore, type ReactFlowState } from '@xyflow/react'
+import { getSmoothStepPath, MarkerType, Position, useStore, type ReactFlowState } from '@xyflow/react'
 import { useCallback, useMemo } from 'react'
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { resolveCables } from '../project'
 import type { Project } from '../types'
 import type { CableFlowEdge } from './CableEdgeView'
+import { corners, findBridges, type Pt } from './bridges'
 import { allocateLanes, type CableEnds } from './lanes'
 import type { FrameNode } from './RackFrameView'
 import { cableColor, viewOf, visibleParts } from './view'
@@ -43,11 +44,15 @@ export function useCanvasModel(project: Project, highlight: Set<string>, hoverEd
       (s: ReactFlowState) =>
         edges
           .map((e) => {
+            // Where React Flow ends the cable: the middle of the handle's outer side.
             const at = (node: string, handle?: string | null) => {
               const n = s.nodeLookup.get(node)
-              const h = n?.internals.handleBounds?.source?.find((x) => x.id === handle)
+              const b = n?.internals.handleBounds
+              const h = b?.source?.find((x) => x.id === handle) ?? b?.target?.find((x) => x.id === handle)
               if (!n || !h) return undefined
-              return [Math.round(n.internals.positionAbsolute.x + h.x + h.width / 2), Math.round(n.internals.positionAbsolute.y + h.y + h.height / 2), h.position]
+              const dx = h.position === 'left' ? 0 : h.position === 'right' ? h.width : h.width / 2
+              const dy = h.position === 'top' ? 0 : h.position === 'bottom' ? h.height : h.height / 2
+              return [Math.round(n.internals.positionAbsolute.x + h.x + dx), Math.round(n.internals.positionAbsolute.y + h.y + dy), h.position]
             }
             const a = at(e.source, e.sourceHandle)
             const b = at(e.target, e.targetHandle)
@@ -57,16 +62,44 @@ export function useCanvasModel(project: Project, highlight: Set<string>, hoverEd
       [edges],
     ),
   )
-  const lanes = useMemo(() => {
-    const ends: CableEnds[] = endsKey
-      .split(';')
-      .filter(Boolean)
-      .map((r) => {
-        const [id, sx, sy, sp, tx, ty, tp] = r.split(',')
-        return { id, sx: +sx, sy: +sy, sp: sp as CableEnds['sp'], tx: +tx, ty: +ty, tp: tp as CableEnds['tp'] }
+  const ends = useMemo(
+    (): CableEnds[] =>
+      endsKey
+        .split(';')
+        .filter(Boolean)
+        .map((r) => {
+          const [id, sx, sy, sp, tx, ty, tp] = r.split(',')
+          return { id, sx: +sx, sy: +sy, sp: sp as CableEnds['sp'], tx: +tx, ty: +ty, tp: tp as CableEnds['tp'] }
+        }),
+    [endsKey],
+  )
+  const lanes = useMemo(() => allocateLanes(ends, view.laneGap), [ends, view.laneGap])
+
+  // Crossing bridges: the corners of every visible right-angle cable, then where they cross.
+  const orthogonal = view.edgeStyle === 'smoothstep' || view.edgeStyle === 'step'
+  const radius = view.edgeStyle === 'step' ? 0 : 6
+  const hop = Math.round(4 + view.thickness)
+  const bridges = useMemo(() => {
+    if (!view.bridges || !orthogonal) return undefined
+    const paths = new Map<string, Pt[]>()
+    for (const c of ends) {
+      if (!parts.edgeIds.has(c.id)) continue
+      const lane = view.lanes ? lanes.get(c.id) : undefined
+      const [d] = getSmoothStepPath({
+        sourceX: c.sx,
+        sourceY: c.sy,
+        targetX: c.tx,
+        targetY: c.ty,
+        sourcePosition: c.sp as Position,
+        targetPosition: c.tp as Position,
+        borderRadius: 0,
+        offset: lane?.offset ?? 20,
+        centerX: lane?.centerX,
       })
-    return allocateLanes(ends, view.laneGap)
-  }, [endsKey, view.laneGap])
+      paths.set(c.id, corners(d))
+    }
+    return { paths, hops: findBridges(paths, hop, radius + 2) }
+  }, [ends, lanes, parts, view.bridges, view.lanes, orthogonal, hop, radius])
 
   const cables = useMemo(() => resolveCables(nodes, edges), [nodes, edges])
   const cableByEdge = useMemo(() => new Map(cables.map((c) => [c.edge.id, c])), [cables])
@@ -125,6 +158,7 @@ export function useCanvasModel(project: Project, highlight: Set<string>, hoverEd
             endTags: view.endTags,
             title,
             faded,
+            ...(bridges?.paths.has(e.id) ? { points: bridges.paths.get(e.id), hops: bridges.hops.get(e.id), hop, radius } : {}),
           },
           style: {
             stroke: color,
@@ -135,7 +169,7 @@ export function useCanvasModel(project: Project, highlight: Set<string>, hoverEd
           },
         }
       }),
-    [edges, cableByEdge, highlight, hoverEdge, view.edgeStyle, view.labels, view.thickness, view.flow, view.colorMode, view.lanes, view.endTags, lanes, parts, isolated],
+    [edges, cableByEdge, highlight, hoverEdge, view.edgeStyle, view.labels, view.thickness, view.flow, view.colorMode, view.lanes, view.endTags, lanes, parts, isolated, bridges, hop, radius],
   )
 
   const viewNodes = useMemo(

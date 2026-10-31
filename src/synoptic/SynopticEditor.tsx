@@ -19,7 +19,8 @@ import { SIGNAL_OPTIONS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { loadBlocks, makeBlock, placeBlock, saveBlocks, type Block } from '../blocks/blocks'
 import { ipIssues } from '../network/network'
-import { connectPorts, createCase, createDevice, setPanel, slug, uid } from '../project'
+import { connectPorts, createCase, createDevice, renameCablesByNature, setPanel, slug, tagFollowsNature, uid } from '../project'
+import { FAMILIES, FAMILY_ORDER, familyOf, signalsOf, type CableFamily } from '../data/cableFamily'
 import type { CableEdge, Category, DeviceNode, DeviceTemplate, Project, SignalType, SynopticView } from '../types'
 import CableEdgeView from './CableEdgeView'
 import { THEME_LABELS, type Theme } from '../theme'
@@ -333,6 +334,40 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   }
 
   const issueCount = cables.filter((c) => c.issues.length > 0).length
+  // The warning badge walks through the cables to check, one per click.
+  const issueAt = useRef(0)
+  const nextIssue = () => {
+    const bad = cables.filter((c) => c.issues.length > 0)
+    if (!bad.length) return
+    const c = bad[issueAt.current++ % bad.length]
+    findCable(c.edge.data?.cableId ?? '')
+  }
+
+  // Layers: one per nature of cable in the project, shown or hidden as a whole.
+  const layers = useMemo(() => {
+    const hidden = new Set(view.hiddenSignals)
+    const count = new Map<CableFamily, number>()
+    for (const c of cables) {
+      const f = familyOf(c.fromPort?.signal ?? c.toPort?.signal)
+      if (f) count.set(f, (count.get(f) ?? 0) + 1)
+    }
+    return FAMILY_ORDER.filter((f) => count.has(f)).map((family) => {
+      const sigs = signalsOf(family).filter((x) => usedSignals.has(x))
+      const off = sigs.filter((x) => hidden.has(x)).length
+      return { family, count: count.get(family)!, state: off === 0 ? 'on' : off === sigs.length ? 'off' : 'part' }
+    })
+  }, [cables, usedSignals, view.hiddenSignals])
+  const toggleLayer = (f: CableFamily, state: string) => {
+    const sigs = signalsOf(f)
+    setView({ hiddenSignals: state === 'off' ? view.hiddenSignals.filter((x) => !sigs.includes(x)) : [...new Set([...view.hiddenSignals, ...sigs])] })
+  }
+  const soloLayer = (f: CableFamily) => setView({ hiddenSignals: SIGNAL_OPTIONS.filter((x) => !signalsOf(f).includes(x)) })
+
+  const misnamed = cables.filter((c) => !tagFollowsNature(c.edge.data?.cableId ?? '', c.fromPort?.signal ?? c.toPort?.signal)).length
+  const renameByNature = () => {
+    if (confirm(`Renommer ${misnamed} câble(s) selon leur nature (AUD-001, LUM-001, RES-001…) ?\nLes étiquettes déjà imprimées ne correspondront plus.`)) setProject(renameCablesByNature)
+  }
+  const selectedCount = nodes.filter((n) => n.selected).length
 
   return (
     <div className={`synoptic ${drawer ? `show-${drawer}` : ''}`} style={{ '--inspector-w': `${inspectorW}px` } as CSSProperties}>
@@ -361,58 +396,42 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       </div>
       <div className="canvas" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
         <div className="canvas-toolbar">
-          <button className="mobile-only" onClick={() => setDrawer(drawer === 'palette' ? undefined : 'palette')}>+ Matériel</button>
-          <button className="mobile-only" onClick={() => setDrawer(drawer === 'inspector' ? undefined : 'inspector')}>Inspecteur</button>
-          <button className="mobile-only" onClick={() => setDrawer(drawer === 'legend' ? undefined : 'legend')}>Légende</button>
-          <label className="toggle">
-            <input type="checkbox" checked={compact} onChange={(e) => setView({ compact: e.target.checked })} />
-            Masquer les ports libres
-          </label>
-          <button className={viewPanel ? 'active' : ''} onClick={() => setViewPanel((v) => !v)} aria-expanded={viewPanel}>
-            Affichage ▾
-          </button>
-          <span className={issueCount ? 'badge warn' : 'badge ok'}>
-            {issueCount ? `${issueCount} liaison(s) à vérifier` : 'Toutes les liaisons sont conformes'}
-          </span>
-          {nodes.some((n) => n.selected) && (
-            <>
-              <button onClick={duplicate} title="Dupliquer la sélection avec ses câbles (Ctrl+D)">Dupliquer</button>
-              <button onClick={createRackFromSelection}>Créer un rack avec la sélection</button>
-              <button onClick={saveBlock} title="Garder ces équipements et leurs câbles pour les reposer dans un autre projet">Enregistrer en bloc</button>
-            </>
-          )}
-          <input ref={findInput} className="cable-find" list="cable-ids" title="Ctrl+F" placeholder="Trouver un câble (C012)…" value={find} onChange={(e) => findCable(e.target.value)} />
+          <button className="mobile-only primary" onClick={() => setDrawer(drawer === 'palette' ? undefined : 'palette')}>+ Matériel</button>
+          <input ref={findInput} className="cable-find" list="cable-ids" title="Trouver un câble par son repère (Ctrl+F)" placeholder="Câble…" value={find} onChange={(e) => findCable(e.target.value)} />
           <datalist id="cable-ids">
             {cables.map((c) => (
               <option key={c.edge.id} value={c.edge.data?.cableId}>{`${c.from?.data.name ?? '?'} → ${c.to?.data.name ?? '?'}`}</option>
             ))}
           </datalist>
-          <button onClick={exportPng}>Exporter PNG</button>
-          <button onClick={() => fitView({ duration: 400 })}>Tout voir</button>
+          {issueCount ? (
+            <button className="badge warn" onClick={nextIssue} title="Montrer la liaison suivante à vérifier">⚠ {issueCount}<span className="wide-only"> à vérifier</span></button>
+          ) : (
+            <span className="badge ok" title="Toutes les liaisons sont conformes">✓<span className="wide-only"> Conforme</span></span>
+          )}
+          <span className="toolbar-gap" />
+          <button className="mobile-only icon-only" onClick={() => fitView({ duration: 400 })} title="Tout voir" aria-label="Tout voir">⤢</button>
+          <button className={viewPanel ? 'active' : ''} onClick={() => setViewPanel((v) => !v)} aria-expanded={viewPanel} aria-label="Affichage" title="Affichage">
+            <span aria-hidden="true">⚙</span><span className="wide-only"> Affichage</span>
+          </button>
         </div>
         {viewPanel && (
           <div className="view-panel">
+            <div className="section-head">
+              <h4>Affichage</h4>
+              <button className="icon" onClick={() => setViewPanel(false)} aria-label="Fermer">✕</button>
+            </div>
+            <h5>Câbles</h5>
             <label className="field">
-              <span>Thème (fond)</span>
-              <select value={theme} onChange={(e) => onTheme(e.target.value as Theme)}>
-                {(Object.keys(THEME_LABELS) as Theme[]).map((t) => <option key={t} value={t}>{THEME_LABELS[t]}</option>)}
-              </select>
-            </label>
-            <label className="field">
-              <span>Département</span>
-              <select value={view.department} onChange={(e) => setView({ department: e.target.value as Category | 'all' })}>
-                <option value="all">Tout le projet</option>
-                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d} seulement</option>)}
-              </select>
-            </label>
-            <label className="field">
-              <span>Tracé des câbles</span>
+              <span>Tracé</span>
               <select value={view.edgeStyle} onChange={(e) => setView({ edgeStyle: e.target.value as SynopticView['edgeStyle'] })}>
                 <option value="smoothstep">Angles arrondis</option>
                 <option value="step">Angles droits</option>
                 <option value="default">Courbes</option>
                 <option value="straight">Lignes droites</option>
               </select>
+            </label>
+            <label className="toggle" title={view.edgeStyle === 'smoothstep' || view.edgeStyle === 'step' ? '' : 'Avec un tracé à angles droits seulement'}>
+              <input type="checkbox" checked={view.bridges} disabled={view.edgeStyle !== 'smoothstep' && view.edgeStyle !== 'step'} onChange={(e) => setView({ bridges: e.target.checked })} /> Ponts aux croisements
             </label>
             <label className="field">
               <span>Étiquettes</span>
@@ -423,29 +442,64 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
               </select>
             </label>
             <label className="field">
-              <span>Épaisseur des câbles</span>
-              <input type="range" min={1} max={6} step={0.5} value={view.thickness} onChange={(e) => setView({ thickness: Number(e.target.value) })} />
-            </label>
-            <label className="field">
-              <span>Couleur des câbles</span>
+              <span>Couleur</span>
               <select value={view.colorMode} onChange={(e) => setView({ colorMode: e.target.value as SynopticView['colorMode'] })}>
                 <option value="signal">Selon le signal</option>
                 <option value="cable">Une couleur par câble</option>
               </select>
             </label>
-            <label className="toggle"><input type="checkbox" checked={view.lanes} onChange={(e) => setView({ lanes: e.target.checked })} /> Séparer les tracés (aucun segment commun)</label>
+            <label className="field">
+              <span>Épaisseur</span>
+              <input type="range" min={1} max={6} step={0.5} value={view.thickness} onChange={(e) => setView({ thickness: Number(e.target.value) })} />
+            </label>
+            <label className="toggle"><input type="checkbox" checked={view.lanes} onChange={(e) => setView({ lanes: e.target.checked })} /> Séparer les tracés</label>
             {view.lanes && (
               <label className="field">
                 <span>Écart entre les câbles : {view.laneGap} px</span>
                 <input type="range" min={6} max={40} step={2} value={view.laneGap} onChange={(e) => setView({ laneGap: Number(e.target.value) })} />
               </label>
             )}
-            <label className="toggle"><input type="checkbox" checked={view.images} onChange={(e) => setView({ images: e.target.checked })} /> Photo ou symbole des appareils</label>
             <label className="toggle"><input type="checkbox" checked={view.endTags} onChange={(e) => setView({ endTags: e.target.checked })} /> Repère aux deux extrémités</label>
-            <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler la sélection (appareil ou câble)</label>
             <label className="toggle"><input type="checkbox" checked={view.flow} onChange={(e) => setView({ flow: e.target.checked })} /> Animer le sens du signal</label>
-            <p className="muted small">Survolez un câble pour l’isoler et lire où il va. Cliquez sur un signal de la légende pour masquer ou afficher ses câbles.</p>
-            <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser l’affichage</button>
+            {misnamed > 0 && (
+              <button onClick={renameByNature} title="AUD-001, LUM-001, RES-001… selon ce que transporte chaque câble">
+                Renommer {misnamed} câble{misnamed > 1 ? 's' : ''} selon leur nature
+              </button>
+            )}
+            <h5>Appareils</h5>
+            <label className="toggle"><input type="checkbox" checked={compact} onChange={(e) => setView({ compact: e.target.checked })} /> Masquer les ports libres</label>
+            <label className="toggle"><input type="checkbox" checked={view.images} onChange={(e) => setView({ images: e.target.checked })} /> Photo ou symbole</label>
+            <label className="toggle"><input type="checkbox" checked={view.focusSelection} onChange={(e) => setView({ focusSelection: e.target.checked })} /> Isoler la sélection</label>
+            <label className="field">
+              <span>Département</span>
+              <select value={view.department} onChange={(e) => setView({ department: e.target.value as Category | 'all' })}>
+                <option value="all">Tout le projet</option>
+                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d} seulement</option>)}
+              </select>
+            </label>
+            <h5>Signaux</h5>
+            <div className="signal-list">
+              {SIGNAL_OPTIONS.filter((k) => usedSignals.has(k) || view.hiddenSignals.includes(k)).map((k) => {
+                const off = view.hiddenSignals.includes(k)
+                return (
+                  <button key={k} className={off ? 'off' : ''} onClick={() => setView({ hiddenSignals: off ? view.hiddenSignals.filter((x) => x !== k) : [...view.hiddenSignals, k] })}>
+                    <i style={{ background: SIGNALS[k].color }} />
+                    {SIGNALS[k].label}
+                  </button>
+                )
+              })}
+            </div>
+            <h5>Général</h5>
+            <label className="field">
+              <span>Thème (fond)</span>
+              <select value={theme} onChange={(e) => onTheme(e.target.value as Theme)}>
+                {(Object.keys(THEME_LABELS) as Theme[]).map((t) => <option key={t} value={t}>{THEME_LABELS[t]}</option>)}
+              </select>
+            </label>
+            <div className="actions">
+              <button onClick={exportPng}>Exporter en PNG</button>
+              <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser</button>
+            </div>
           </div>
         )}
         <ViewContext.Provider value={{ used, compact, highlight, images: view.images, onCards }}>
@@ -467,27 +521,39 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
             minZoom={0.1}
           >
             <Background gap={20} />
-            <Controls />
+            <Controls showInteractive={false} />
             <MiniMap pannable zoomable nodeColor={(n) => (n.type === 'rackFrame' ? 'transparent' : CATEGORY_COLORS[(n as DeviceNode).data.category] ?? '#888')} />
           </ReactFlow>
         </ViewContext.Provider>
-        <div className="legend">
-          {SIGNAL_OPTIONS.filter((k) => usedSignals.has(k) || view.hiddenSignals.includes(k)).map((k) => {
-            const s = SIGNALS[k]
-            const off = view.hiddenSignals.includes(k)
-            return (
+        {selectedCount > 0 && (
+          <div className="selection-bar">
+            <span>{selectedCount} sélectionné{selectedCount > 1 ? 's' : ''}</span>
+            <button className="mobile-only" onClick={() => setDrawer('inspector')}>Détails</button>
+            <button onClick={duplicate} title="Dupliquer la sélection avec ses câbles (Ctrl+D)">Dupliquer</button>
+            <button onClick={createRackFromSelection}>Mettre en rack</button>
+            <button onClick={saveBlock} title="Garder ces équipements et leurs câbles pour les reposer dans un autre projet">Enregistrer en bloc</button>
+            <button className="danger" onClick={deleteSelection}>Supprimer</button>
+          </div>
+        )}
+        {layers.length > 0 && (
+          <div className="layers" role="group" aria-label="Calques de câblage">
+            {layers.map(({ family, count, state }) => (
               <button
-                key={k}
-                className={off ? 'off' : ''}
-                title={off ? 'Afficher ces câbles' : 'Masquer ces câbles'}
-                onClick={() => setView({ hiddenSignals: off ? view.hiddenSignals.filter((x) => x !== k) : [...view.hiddenSignals, k] })}
+                key={family}
+                className={`layer ${state}`}
+                aria-pressed={state !== 'off'}
+                title={`${state === 'off' ? 'Afficher' : 'Masquer'} les câbles ${FAMILIES[family].label.toLowerCase()} — double-clic : ce calque seul`}
+                onClick={() => toggleLayer(family, state)}
+                onDoubleClick={() => soloLayer(family)}
               >
-                <i style={{ background: s.color }} />
-                {s.label}
+                <i style={{ background: FAMILIES[family].color }} />
+                {FAMILIES[family].label}
+                <small>{count}</small>
               </button>
-            )
-          })}
-        </div>
+            ))}
+            {view.hiddenSignals.length > 0 && <button className="layer all" onClick={() => setView({ hiddenSignals: [] })}>Tout</button>}
+          </div>
+        )}
       </div>
       <div className="inspector-wrap">
       <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>

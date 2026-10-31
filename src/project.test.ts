@@ -9,6 +9,7 @@ import {
   emptyProject,
   internalRack,
   rackOfNode,
+  renameCablesByNature,
   resolveCables,
   setPanel,
   throughPanels,
@@ -66,6 +67,26 @@ describe('cabling', () => {
     const sb = createDevice(tpl('yam-rio1608'), { x: 0, y: 0 }, [])
     const p = connectPorts({ ...emptyProject(), nodes: [mic, sb] }, { node: sb.id, port: 'in1' }, { node: mic.id, port: 'out' })!
     expect(p.edges[0]).toMatchObject({ source: mic.id, target: sb.id })
+  })
+
+  it('names each cable after its nature, numbered per nature', () => {
+    const mic = createDevice(tpl('shure-sm58'), { x: 0, y: 0 }, [])
+    const mic2 = createDevice(tpl('shure-sm58'), { x: 0, y: 0 }, [mic])
+    const sb = createDevice(tpl('yam-rio1608'), { x: 0, y: 0 }, [])
+    let p = connectPorts({ ...emptyProject(), nodes: [mic, mic2, sb] }, { node: mic.id, port: 'out' }, { node: sb.id, port: 'in1' })!
+    p = connectPorts(p, { node: mic2.id, port: 'out' }, { node: sb.id, port: 'in2' })!
+    expect(p.edges.map((e) => e.data?.cableId)).toEqual(['AUD-001', 'AUD-002'])
+    const demo = demoProject()
+    expect(demo.edges.every((e) => /^(AUD|LUM|RES|ELE|VID|CTL)-\d{3}$/.test(e.data?.cableId ?? ''))).toBe(true)
+    expect(new Set(demo.edges.map((e) => e.data?.cableId)).size).toBe(demo.edges.length)
+  })
+
+  it('renames the cables of an older project after their nature', () => {
+    const mic = createDevice(tpl('shure-sm58'), { x: 0, y: 0 }, [])
+    const sb = createDevice(tpl('yam-rio1608'), { x: 0, y: 0 }, [])
+    const p = connectPorts({ ...emptyProject(), nodes: [mic, sb] }, { node: mic.id, port: 'out' }, { node: sb.id, port: 'in1' })!
+    const old = { ...p, edges: p.edges.map((e) => ({ ...e, data: { ...e.data, cableId: 'C007' } })) }
+    expect(renameCablesByNature(old).edges[0].data?.cableId).toBe('AUD-001')
   })
 
   it('refuses a busy port unless asked to replace', () => {

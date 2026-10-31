@@ -1,3 +1,4 @@
+import { prefixOf } from './data/cableFamily'
 import { checkLink, type Issue } from './data/connectors'
 import { LIBRARY } from './data/library'
 import { panelPorts } from './data/panels'
@@ -11,6 +12,7 @@ import type {
   PanelSpec,
   Port,
   Project,
+  SignalType,
 } from './types'
 
 const STORAGE_KEY = 'synopgig.project'
@@ -81,12 +83,35 @@ export function createDevice(
   }
 }
 
-export function nextCableId(edges: CableEdge[]) {
+/** The next free tag for a cable of this signal: AUD-001, LUM-002… numbered per nature. */
+export function nextCableId(edges: CableEdge[], signal?: SignalType) {
+  const prefix = prefixOf(signal)
   const max = edges.reduce((m, e) => {
-    const n = Number(e.data?.cableId?.replace(/\D/g, ''))
-    return Number.isFinite(n) && n > m ? n : m
+    const hit = new RegExp(`^${prefix}-(\\d+)$`).exec(e.data?.cableId ?? '')
+    return hit && Number(hit[1]) > m ? Number(hit[1]) : m
   }, 0)
-  return `C${String(max + 1).padStart(3, '0')}`
+  return `${prefix}-${String(max + 1).padStart(3, '0')}`
+}
+
+/** A cable's tag follows its nature: AUD-, VID-, LUM-, RES-, ELE-, CTL-. */
+export const tagFollowsNature = (id: string, signal?: SignalType) => id.startsWith(`${prefixOf(signal)}-`)
+
+/**
+ * Renames every cable after its nature (AUD-001…), keeping their order;
+ * a cable already named that way keeps its tag.
+ */
+export function renameCablesByNature(p: Project): Project {
+  const signalOf = (e: CableEdge) => findPort(p.nodes, { node: e.source, port: e.sourceHandle ?? '' })?.signal ?? findPort(p.nodes, { node: e.target, port: e.targetHandle ?? '' })?.signal
+  const keep = p.edges.filter((e) => tagFollowsNature(e.data?.cableId ?? '', signalOf(e)))
+  const done: CableEdge[] = [...keep]
+  const byOld = (a: CableEdge, b: CableEdge) => (a.data?.cableId ?? '').localeCompare(b.data?.cableId ?? '', 'fr', { numeric: true })
+  const renamed = new Map<string, string>()
+  for (const e of p.edges.filter((x) => !keep.includes(x)).sort(byOld)) {
+    const id = nextCableId(done, signalOf(e))
+    renamed.set(e.id, id)
+    done.push({ ...e, data: { ...e.data, cableId: id } })
+  }
+  return { ...p, edges: p.edges.map((e) => (renamed.has(e.id) ? { ...e, data: { ...e.data, cableId: renamed.get(e.id)! } } : e)) }
 }
 
 export interface PortRef {
@@ -130,7 +155,7 @@ export function connectPorts(p: Project, a: PortRef, b: PortRef, replace = false
     sourceHandle: src.port,
     target: tgt.node,
     targetHandle: tgt.port,
-    data: { cableId: nextCableId(p.edges) },
+    data: { cableId: nextCableId(p.edges, (src === a ? pa : pb)?.signal ?? (src === a ? pb : pa)?.signal) },
   }
   return { ...p, edges: [...edges, edge] }
 }
@@ -281,7 +306,7 @@ export function demoProject(): Project {
       sourceHandle: ap,
       target: b.id,
       targetHandle: bp,
-      data: { cableId: nextCableId(edges), length },
+      data: { cableId: nextCableId(edges, a.data.ports.find((x) => x.id === ap)?.signal), length },
     })
   }
   // Inside the rack (wired in the workshop)

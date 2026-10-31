@@ -1,6 +1,7 @@
 import { EdgeLabelRenderer, getBezierPath, getSmoothStepPath, getStraightPath, Position, type Edge, type EdgeProps } from '@xyflow/react'
 import { memo } from 'react'
 import type { CableData, SynopticView } from '../types'
+import { bridgedPath, type Pt } from './bridges'
 
 /** What the synoptic adds to a cable for drawing it; never saved in the project. */
 export type CableView = CableData & {
@@ -17,6 +18,12 @@ export type CableView = CableData & {
   endTags: boolean
   title: string
   faded: boolean
+  /** Corners of the path, computed with every other cable to bridge the crossings. */
+  points?: Pt[]
+  /** Per segment, the x of each bridge. */
+  hops?: number[][]
+  hop?: number
+  radius?: number
 }
 
 export type CableFlowEdge = Edge<CableView, 'cable'>
@@ -44,7 +51,8 @@ function EndTag({ x, y, side, text, color }: { x: number; y: number; side: Posit
 /** One cable: its own route, tags at both ends, a tooltip with where it goes. */
 function CableEdgeView(p: EdgeProps<CableFlowEdge>) {
   const d = p.data!
-  const [d0, labelX, labelY] = path(p)
+  const [plain, labelX, labelY] = path(p)
+  const d0 = d.points ? bridgedPath(d.points, d.radius ?? 6, d.hops, d.hop ?? 5) : plain
   const width = Number(p.style?.strokeWidth ?? 2)
   return (
     <>

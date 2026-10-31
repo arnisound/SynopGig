@@ -13,6 +13,7 @@ export const DEFAULT_VIEW: SynopticView = {
   lanes: true,
   laneGap: 12,
   endTags: false,
+  bridges: true,
   colorMode: 'signal',
   images: true,
 }

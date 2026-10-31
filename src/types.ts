@@ -279,6 +279,8 @@ export interface SynopticView {
   laneGap: number
   /** Cable tag repeated next to both ports. */
   endTags: boolean
+  /** A small arc where a cable crosses another one (right-angle paths). */
+  bridges: boolean
   /** Colour by signal, or one colour per cable. */
   colorMode: 'signal' | 'cable'
   /** Product photo or symbol in each device's header. */

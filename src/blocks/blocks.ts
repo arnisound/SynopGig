@@ -76,7 +76,8 @@ export function placeBlock(project: Project, block: Block, at: { x: number; y: n
     const source = ids.get(e.source)
     const target = ids.get(e.target)
     if (!source || !target) continue
-    edges.push({ ...e, id: `e-${uid()}`, source, target, data: { ...e.data, cableId: nextCableId(edges) } })
+    const signal = block.nodes.find((n) => n.id === e.source)?.data.ports.find((x) => x.id === e.sourceHandle)?.signal
+    edges.push({ ...e, id: `e-${uid()}`, source, target, data: { ...e.data, cableId: nextCableId(edges, signal) } })
   }
   return {
     ...project,
