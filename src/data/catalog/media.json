@@ -3414,6 +3414,18 @@
    }
   ]
  },
+ "fohhn-abx3": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/2/2/csm_ABX-2_1716_mainimage_4ed0697404.jpg",
+  "docs": []
+ },
+ "fohhn-abx4": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/2/2/csm_ABX-2_1716_mainimage_4ed0697404.jpg",
+  "docs": []
+ },
+ "fohhn-abx5": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/2/2/csm_ABX-2_1716_mainimage_4ed0697404.jpg",
+  "docs": []
+ },
  "fohhn-abx6": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/6/1/csm_ABX-6_1721_mainimage_1755244806.jpg",
   "docs": [
@@ -3490,6 +3502,10 @@
   "photo": "https://www.10kused.com/wp-content/uploads/2020/07/FOHHN-Audio-D-2.1500.jpg",
   "docs": []
  },
+ "fohhn-d2750": {
+  "photo": "https://www.10kused.com/wp-content/uploads/2022/07/Fohhn-Audio-D-4.750.jpg",
+  "docs": []
+ },
  "fohhn-d41200": {
   "photo": "https://cdn.g-vt.de/use/IMAGE_3a1aec6c-3956-4022-9b0d-068a4578e08f%20%281%29.jpg",
   "docs": []
@@ -3561,6 +3577,30 @@
    }
   ]
  },
+ "fohhn-fm100": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/d/8/csm_DFM-100_1340_mainimage_018e0d1442.webp",
+  "docs": []
+ },
+ "fohhn-fm110": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/f/5/csm_DFM-110_1341_mainimage_2fce1d9f82.jpg",
+  "docs": []
+ },
+ "fohhn-fm400": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/e/7/csm_DFM-400_1342_mainimage_427eebdf87.jpg",
+  "docs": []
+ },
+ "fohhn-fmi100": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/d/8/csm_DFM-100_1340_mainimage_018e0d1442.webp",
+  "docs": []
+ },
+ "fohhn-fmi110": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/f/5/csm_DFM-110_1341_mainimage_2fce1d9f82.jpg",
+  "docs": []
+ },
+ "fohhn-fmi400": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/e/7/csm_DFM-400_1342_mainimage_427eebdf87.jpg",
+  "docs": []
+ },
  "fohhn-fs110": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/1/8/csm_FS-110_1352_mainimage_7f13d67a3f.jpg",
   "docs": [
@@ -3615,6 +3655,22 @@
    }
   ]
  },
+ "fohhn-lfi120": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/2/csm_DLI-130__Festinstallation__1343_mainimage_16aed47e6e.jpg",
+  "docs": []
+ },
+ "fohhn-lfi220": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/6/6/csm_DLI-230__Festinstallation__1344_mainimage_f3d63cdf94.jpg",
+  "docs": []
+ },
+ "fohhn-lfi350": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/3/0/csm_DLI-330__Festinstallation__1345_mainimage_0949b353a0.jpg",
+  "docs": []
+ },
+ "fohhn-lfi450": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/2/6/csm_DLI-430__Festinstallation__1346_mainimage_15a012df67.jpg",
+  "docs": []
+ },
  "fohhn-lx10": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/e/6/csm_LX-10_ASX_1701_mainimage_56d1224aa0.jpg",
   "docs": [
@@ -3624,6 +3680,18 @@
    }
   ]
  },
+ "fohhn-lx100": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/d/7/csm_LXP-100_1217_mainimage_65262e61ef.jpg",
+  "docs": []
+ },
+ "fohhn-lx150": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/c/9/csm_LXP-150_1218_mainimage_6dc748c6ef.jpg",
+  "docs": []
+ },
+ "fohhn-lx220": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/b/6/csm_LXP-220_1219_mainimage_15780737f8.jpg",
+  "docs": []
+ },
  "fohhn-lx60": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/4/c/csm_LX-60_ASX_1707_mainimage_ddcf135bcb.jpg",
   "docs": [
@@ -3632,6 +3700,10 @@
     "url": "https://www.fohhn.com/en/catalog/lx-60-asx"
    }
   ]
+ },
+ "fohhn-lx61": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/c/csm_LX-60_ASX_1707_mainimage_ddcf135bcb.jpg",
+  "docs": []
  },
  "fohhn-ma4100": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/0/b/csm_MA-4.100_6030_mainimage_a7fd9fb474.jpg",
@@ -3659,6 +3731,18 @@
     "url": "https://www.fohhn.com/en/catalog/na-11"
    }
   ]
+ },
+ "fohhn-na3": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/e/b/csm_NA-4_6122_mainimage_f05fa8aecd.jpg",
+  "docs": []
+ },
+ "fohhn-ps400": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/6/e/csm_PS-800_4209_mainimage_3fec4254c9.jpg",
+  "docs": []
+ },
+ "fohhn-ps450": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/4/5/csm_PS-850_4208_mainimage_44b0cb019b.jpg",
+  "docs": []
  },
  "fohhn-ps800": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/6/e/csm_PS-800_4209_mainimage_3fec4254c9.jpg",
@@ -3695,6 +3779,10 @@
     "url": "https://www.fohhn.com/en/catalog/xs-10-passive"
    }
   ]
+ },
+ "fohhn-xs20": {
+  "photo": "https://www.fohhn.com/fileadmin/_processed_/3/c/csm_XS-22_passive_4116_mainimage_3278afdd50.jpg",
+  "docs": []
  },
  "fohhn-xs22": {
   "photo": "https://www.fohhn.com/fileadmin/_processed_/3/c/csm_XS-22_passive_4116_mainimage_3278afdd50.jpg",
