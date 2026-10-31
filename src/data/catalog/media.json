@@ -1,4 +1,8 @@
 {
+ "adamson-cs-amp": {
+  "photo": "https://adamson.ai/logo-with-text.svg",
+  "docs": []
+ },
  "adamson-cs10": {
   "photo": "https://adamson.ai/_next/image?url=https%3A%2F%2Fadamson-media-storage-prod.tor1.cdn.digitaloceanspaces.com%2Fmedia%2FCS10.webp&w=3840&q=90",
   "docs": [
@@ -154,6 +158,14 @@
  },
  "adamson-metrix": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/adamson-metrix-t-80892.jpg"
+ },
+ "adamson-point12": {
+  "photo": "https://adamson.ai/logo-with-text.svg",
+  "docs": []
+ },
+ "adamson-point8": {
+  "photo": "https://adamson.ai/logo-with-text.svg",
+  "docs": []
  },
  "adamson-s10": {
   "photo": "https://adamson.ai/_next/image?url=https%3A%2F%2Fadamson-media-storage-prod.tor1.cdn.digitaloceanspaces.com%2Fmedia%2FS10.webp&w=3840&q=90",
@@ -442,6 +454,10 @@
  },
  "apc-smt3000": {
   "photo": "https://cdn11.bigcommerce.com/s-hltjsp5jm3/images/stencil/1280x1280/products/1732/4515/media__00458.1769214162.jpg?c=1"
+ },
+ "apc-smt750": {
+  "photo": "https://download.se.com/files?default_image=DefaultProductImage.png&p_Doc_Ref=APC-SLIE-89AKU9_00&p_File_Type=rendition_369_jpg",
+  "docs": []
  },
  "astera-art7": {
   "photo": "https://media.astera-led.com/wp-content/uploads/astera-art7-cse-protective-transportation-case-for-art7.png",
@@ -867,6 +883,14 @@
    }
   ]
  },
+ "axiom-ed65p": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED60P_34_DX-500x500.jpg",
+  "docs": []
+ },
+ "axiom-ed80a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED80P_34_DX-500x500.jpg",
+  "docs": []
+ },
  "axiom-ed80p": {
   "photo": "https://www.axiomproaudio.com/image/cache/data/proel/ED80P_34_DX-500x500.jpg",
   "docs": [
@@ -893,6 +917,10 @@
     "url": "https://www.axiomproaudio.com/index.php?route=product/product&product_id=17159"
    }
   ]
+ },
+ "axiom-sw118a": {
+  "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW18A_34_DX-500x500.jpg",
+  "docs": []
  },
  "axiom-sw1800a": {
   "photo": "https://www.axiomproaudio.com/image/cache/data/proel/SW1800A_ver-500x500.JPG",
@@ -1616,8 +1644,16 @@
   "photo": "https://fgtechstore.com/wp-content/uploads/2025/09/1-13.jpg",
   "docs": []
  },
+ "cisco-cbs250-8t": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/I7948267_c32de885-cb4c-4d02-8cfa-54aa7b155441.jpg?v=1757954900",
+  "docs": []
+ },
  "cisco-cbs350-24fp": {
   "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/I7948267_c32de885-cb4c-4d02-8cfa-54aa7b155441.jpg?v=1757954900"
+ },
+ "cisco-cbs350-8fp": {
+  "photo": "https://cdn.shopify.com/s/files/1/0603/7982/4364/files/I7948267_c32de885-cb4c-4d02-8cfa-54aa7b155441.jpg?v=1757954900",
+  "docs": []
  },
  "cisco-sg350-10": {
   "photo": "https://cdn.shopify.com/s/files/1/0658/8848/5479/files/cisco-sg350-10p_135660_1_29561ee8-8400-4140-ab30-0c406a112698.jpg?v=1787094749"
@@ -2010,6 +2046,10 @@
    }
   ]
  },
+ "db-e18sub": {
+  "photo": "https://www.dbaudio.com/assets/products/images/loudspeakers/e-series/thumbs-teaserlist-640x640/dbaudio-e15x-subwoofer-front-th.png",
+  "docs": []
+ },
  "db-e3": {
   "photo": "https://www.dbaudio.com/assets/products/_processed_/4/f/csm_dbaudio-e3-loudspeaker_31688ddd5a.png",
   "docs": [
@@ -2397,6 +2437,14 @@
    }
   ]
  },
+ "decimator-md-hx": {
+  "photo": "https://decimator.com/rw_common/images/Decimator_Logo_website_red.png",
+  "docs": []
+ },
+ "decimator-md-lx": {
+  "photo": "https://decimator.com/rw_common/images/Decimator_Logo_website_red.png",
+  "docs": []
+ },
  "digico-d2-rack": {
   "photo": "https://digico.biz/wp-content/uploads/2018/11/D2_rack_BNC_AES-1-1200x750.jpg",
   "docs": [
@@ -2509,6 +2557,10 @@
    }
   ]
  },
+ "dmxking-edmx4": {
+  "photo": "https://shop.dmxking.com/assets/images/0113-10-3_front.jpg",
+  "docs": []
+ },
  "dmxking-ultradmx": {
   "photo": "https://shop.dmxking.com/assets/images/0113-10-3_front.jpg",
   "docs": [
@@ -2574,6 +2626,14 @@
     "url": "https://www.dpamicrophones.com/microphones/headset-and-earset/6066/"
    }
   ]
+ },
+ "eaton-5px1500": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Eaton_Corporation_Logo.svg/500px-Eaton_Corporation_Logo.svg.png",
+  "docs": []
+ },
+ "eaton-9px3000": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Eaton_Corporation_Logo.svg/500px-Eaton_Corporation_Logo.svg.png",
+  "docs": []
  },
  "elation-fuze-profile": {
   "photo": "https://www.elationlighting.com/cdn/shop/files/eab60b015c7475520c06b849001b88e84423bb5b_FUZ495__IMG__002__775b825c0bea.jpg?v=1776815026&width=2048",
@@ -2695,11 +2755,23 @@
    }
   ]
  },
+ "etc-response-4": {
+  "photo": "https://www.etcconnect.com/Content/Images/logo-header.png",
+  "docs": []
+ },
+ "etc-s4-750": {
+  "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/S4LEDS3D-0_1.jpg?v=1680900343",
+  "docs": []
+ },
  "etc-s4-led3": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/S4LEDS3D-0_1.jpg?v=1680900343"
  },
  "ev-635a": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-635a-31138.jpg"
+ },
+ "ev-cp1800s": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cp2200-47033.jpg",
+  "docs": []
  },
  "ev-cp2200": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-cp2200-47033.jpg"
@@ -3053,6 +3125,10 @@
    }
   ]
  },
+ "ev-p3000rl": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Electro-Voice_logo.svg/500px-Electro-Voice_logo.svg.png",
+  "docs": []
+ },
  "ev-pl33": {
   "photo": "https://keenfinity.cdn-norce.tech/c056fa89-640f-4173-ac5a-4a43ce3e6ab1",
   "docs": [
@@ -3098,6 +3174,14 @@
  },
  "ev-qrx-218s": {
   "photo": "https://tmppro.com/images/products/23224/26913/600x600/QRX-218S-BLK.jpg",
+  "docs": []
+ },
+ "ev-r300-bp": {
+  "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/RE3-BPT-5L.jpg?v=1584811379",
+  "docs": []
+ },
+ "ev-r300-ht": {
+  "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/products/RE3-HHT96-5L.jpg?v=1584810054",
   "docs": []
  },
  "ev-r300-rx": {
@@ -3272,6 +3356,10 @@
    }
   ]
  },
+ "ev-x2-218": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Electro-Voice_logo.svg/500px-Electro-Voice_logo.svg.png",
+  "docs": []
+ },
  "ev-xlc118": {
   "photo": "https://cdn.shopify.com/s/files/1/0156/1241/products/main_86246840_large398.jpg?v=1499228685"
  },
@@ -3317,6 +3405,10 @@
     "url": "https://www.electrovoice.com/product/xle191-fgw-2-way-very-compact-line-array-element"
    }
   ]
+ },
+ "ev-xw12a": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Electro-Voice_logo.svg/500px-Electro-Voice_logo.svg.png",
+  "docs": []
  },
  "ev-zlx-12": {
   "photo": "https://keenfinity.cdn-norce.tech/c238b811-cf95-43d1-ba17-22308fdbf2e6",
@@ -3392,6 +3484,10 @@
  },
  "ev-zx5-90": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-zx5-90-51017.jpg"
+ },
+ "ev-zxa1-90": {
+  "photo": "https://cdn.shopify.com/s/files/1/0614/8122/2322/products/zxa1-90.jpg?v=1665643340",
+  "docs": []
  },
  "ev-zxa1-sub": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/electro-voice-zxa1-sub-139276.jpeg"
@@ -3904,6 +4000,10 @@
  "glp-x4l": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/IMPRESSION-X4-L-RGBY.jpg?v=1712043884"
  },
+ "glp-x4s": {
+  "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/IMPRESSION-X4-L-RGBY.jpg?v=1712043884",
+  "docs": []
+ },
  "la-112p": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/l-acoustics-112p-53106.jpg"
  },
@@ -4376,6 +4476,10 @@
    }
   ]
  },
+ "la-x20": {
+  "photo": "https://www.l-acoustics.com/wp-content/uploads/2020/12/3DR_X12_3_4_Avant_Catalogue_01.png",
+  "docs": []
+ },
  "la-x4i": {
   "photo": "https://www.l-acoustics.com/wp-content/uploads/2024/01/x4i-pan.png",
   "docs": [
@@ -4411,6 +4515,10 @@
     "url": "https://www.l-acoustics.com/products/x8i/"
    }
   ]
+ },
+ "lab-d120-4l": {
+  "photo": "https://cdn-media.empowertribe.com/c47d93a6450d4d0996fee25caec9e21c/Image_LG_0107-AAA_PLM-12K44-SP_Front_XL.png",
+  "docs": []
  },
  "lab-fp10000q": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/lab-gruppen-fp-10000q-66816.jpg"
@@ -4568,6 +4676,18 @@
     "url": "https://www.luminex.be/products/lumisplit/lumisplit-2-10/"
    }
   ]
+ },
+ "ma-8port": {
+  "photo": "https://www.malighting.com/_assets/7b3ba8bb3871137dffa4d9cccacf730f/Malighting/Images/logo.svg",
+  "docs": []
+ },
+ "ma-net-switch": {
+  "photo": "https://www.malighting.com/_assets/7b3ba8bb3871137dffa4d9cccacf730f/Malighting/Images/logo.svg",
+  "docs": []
+ },
+ "ma-xport-node": {
+  "photo": "https://www.malighting.com/_assets/7b3ba8bb3871137dffa4d9cccacf730f/Malighting/Images/logo.svg",
+  "docs": []
  },
  "ma2-light": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/ma-lighting-grandma2-light-80770.jpg"
@@ -4968,6 +5088,14 @@
    }
   ]
  },
+ "nexo-alpha-b115": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-alpha-s2-26134.jpg",
+  "docs": []
+ },
+ "nexo-alpha-m3": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-alpha-s2-26134.jpg",
+  "docs": []
+ },
  "nexo-alpha-s2": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-alpha-s2-26134.jpg"
  },
@@ -5070,6 +5198,10 @@
    }
   ]
  },
+ "nexo-geo-m610": {
+  "photo": "https://www.nexo-sa.com/wp-content/uploads/geo-m620.jpg",
+  "docs": []
+ },
  "nexo-geo-m620": {
   "photo": "https://www.nexo-sa.com/wp-content/uploads/geo-m620.jpg",
   "docs": [
@@ -5099,6 +5231,14 @@
  },
  "nexo-geo-s805": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-geo-s805-42575.jpg"
+ },
+ "nexo-geo-s830": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-geo-s805-42575.jpg",
+  "docs": []
+ },
+ "nexo-geo-t2815": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-geo-t4805-45661.jpg",
+  "docs": []
  },
  "nexo-geo-t4805": {
   "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-geo-t4805-45661.jpg"
@@ -5331,6 +5471,10 @@
    }
   ]
  },
+ "nexo-ps10td": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-ps8-td-201824.jpg",
+  "docs": []
+ },
  "nexo-ps15r2": {
   "photo": "https://www.nexo-sa.com/wp-content/uploads/ps15-pair.jpeg",
   "docs": [
@@ -5339,6 +5483,10 @@
     "url": "https://www.nexo-sa.com/products/ps15-r2/"
    }
   ]
+ },
+ "nexo-ps15td": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/nexo-ps8-td-201824.jpg",
+  "docs": []
  },
  "nexo-ps8": {
   "photo": "https://www.nexo-sa.com/wp-content/uploads/ps8-1200x1732.jpg",
@@ -5402,6 +5550,10 @@
  },
  "novastar-cvt10": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/CVT10PROS-RIGHT.png?v=1792513646"
+ },
+ "novastar-h2": {
+  "photo": "https://www.novastar.tech/static/img/01index/logo01.png",
+  "docs": []
  },
  "novastar-mctrl4k": {
   "photo": "https://cdn.shopify.com/s/files/1/0277/2631/5568/files/MCTRL4K.jpg?v=1701774881"
@@ -6411,6 +6563,10 @@
    }
   ]
  },
+ "senn-awm-uhf": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Sennheiser-Logo.svg/500px-Sennheiser-Logo.svg.png",
+  "docs": []
+ },
  "senn-e602": {
   "photo": "https://assets.sennheiser.com/assets/e_602_II_Product_shot_cutout_Logo.png.png/Zz03N2VlZTRlMGU3YWUxMWYwYjViMzc2OGVlOGU5N2FlYQ==?width=730&format=webp&quality=80",
   "docs": [
@@ -7240,6 +7396,10 @@
    }
   ]
  },
+ "senn-sk9000": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/sennheiser-sk500-g3-129212.jpeg",
+  "docs": []
+ },
  "senn-skm-avx": {
   "photo": "https://assets.sennheiser.com/assets/AVX_SKM_product_shot_cutout_with_switch_CMYK.png.png/Zz1lMWQ4MGE3Y2U3YWQxMWYwYWZkMWVhNTViNWQyZmI4Ng==",
   "docs": [
@@ -7248,6 +7408,14 @@
     "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-avx/skm-avx-4-wo-capsule-507187"
    }
   ]
+ },
+ "senn-skm-xsw": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/sennheiser-skm-5200-ii-348568.jpg",
+  "docs": []
+ },
+ "senn-skm100g3": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/sennheiser-skm-5200-ii-348568.jpg",
+  "docs": []
  },
  "senn-skm100g4": {
   "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKM_100_display.png.png/Zz01YjAzOTk5OGU3YWUxMWYwODhkYjc2OGVlOGU5N2FlYQ==",
@@ -7275,6 +7443,10 @@
     "url": "https://www.sennheiser.com/en-gb/catalog/products/wireless-systems/skm-300-g4/skm-300-g4-s-jb-509841"
    }
   ]
+ },
+ "senn-skm500g3": {
+  "photo": "https://img.audiofanzine.com/images/u/product/normal/sennheiser-skm-5200-ii-348568.jpg",
+  "docs": []
  },
  "senn-skm500g4": {
   "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKM_500_display.png.png/Zz01YzEyYWY0YWU3YWUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
@@ -7324,6 +7496,10 @@
    }
   ]
  },
+ "senn-skp300g4": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Sennheiser-Logo.svg/500px-Sennheiser-Logo.svg.png",
+  "docs": []
+ },
  "senn-skp500g4": {
   "photo": "https://assets.sennheiser.com/assets/evolution_wireless_G4_product_shot_cutout_SKP_500_detail.png/Zz01YmZiMzRjMmU3YmUxMWYwYTM1NGVhNTViNWQyZmI4Ng==",
   "docs": [
@@ -7350,6 +7526,10 @@
     "url": "https://www.sennheiser.com/en-us/catalog/products/accessories/sl-dw-bodypack/sl-bodypack-dw-4-us-505900"
    }
   ]
+ },
+ "senn-sl-di4": {
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Sennheiser-Logo.svg/500px-Sennheiser-Logo.svg.png",
+  "docs": []
  },
  "senn-sl-headmic1": {
   "photo": "https://assets.sennheiser.com/assets/Speechline_Digital_Wireless_Product_shot_cutout_SL_Headmic_1-4_BE.png/Zz0zMGRiZjlhMmU3YmUxMWYwYTg2NmNlM2Q3NWM0MGYwNw==",
@@ -7629,6 +7809,10 @@
     "url": "https://www.shure.com/en-US/products/wireless-systems/axient_digital/ad2_sm58"
    }
   ]
+ },
+ "shure-ad2-sm86": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/ed9/f4a/08-/setcard/4e8fae985e79cc5df77993f2e42f312c.jpeg",
+  "docs": []
  },
  "shure-ad3": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/599/b6d/72-/setcard/34d0f58d40139e5a03ffc4f2c551ec4e.jpeg",
@@ -8358,6 +8542,10 @@
     "url": "https://www.shure.com/en-US/products/microphones/mx412"
    }
   ]
+ },
+ "shure-mx412d": {
+  "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/419/eaa/75-/setcard/63cd170d4b991ea512180eabaa11036d.jpeg",
+  "docs": []
  },
  "shure-mx418": {
   "photo": "https://products.shureweb.eu/shure_product_db/product_main_images/files/95c/0be/80-/setcard/7a0d43b8f52361576df757e5dc85dc75.jpeg",
@@ -9546,6 +9734,10 @@
    }
   ]
  },
+ "ups-1500": {
+  "photo": "https://download.se.com/files?default_image=DefaultProductImage.png&p_Doc_Ref=APC-SLIE-89AKU9_00&p_File_Type=rendition_369_jpg",
+  "docs": []
+ },
  "wisy-mpr50": {
   "photo": "https://wisycom.com/app/uploads/2017/12/MPR50-IEM-400x400.jpg",
   "docs": [
@@ -9599,6 +9791,10 @@
     "url": "https://wisycom.com/correlations/mtp60/"
    }
   ]
+ },
+ "xilica-solaro": {
+  "photo": "https://www.xilica.com/wp-content/uploads/2021/06/XilicaLogo_2020_NewX_RGB_Black.svg",
+  "docs": []
  },
  "xilica-solaro-qr1": {
   "photo": "https://www.getdante.com/wp-content/uploads/2024/01/Xilica_Solaro_QR1.jpg",
@@ -9987,6 +10183,10 @@
     "url": "https://usa.yamaha.com/products/proaudio/network_switches/swr2311p/index.html"
    }
   ]
+ },
+ "yam-swr2311p-28g": {
+  "photo": "https://usa.yamaha.com/files/swr2311p-10g_front_01_93b71f348b0c73620b0844f866735d8c.jpg?impolicy=resize&imwid=800&imhei=800",
+  "docs": []
  },
  "yam-tf1": {
   "photo": "https://usa.yamaha.com/files/photoviewer_mixer_tf1_over_316c9fdd5a622e840b79231d4fe0ceb1.jpg?impolicy=resize&imwid=800&imhei=967",
