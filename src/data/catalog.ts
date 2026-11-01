@@ -388,7 +388,33 @@ const RESEAU: DeviceTemplate[] = [
   ]),
 ]
 
+// A supply point of the venue: what the show plugs into (wall box, fairground cabinet, generator output).
+const supply = (id: string, label: string, c: Parameters<typeof port>[2], amps: number, tri: boolean) =>
+  dev(id, 'Générique', `Source ${label}`, 'Énergie', {
+    d: `Arrivée électrique du site en ${label} : le point de départ du bilan électrique. Posez-la, puis reliez sa sortie à une armoire ou aux appareils.`,
+    x: [['Alimentation', 'Calibre', String(amps), 'A'], ['Alimentation', 'Réseau', tri ? 'Triphasé 400 V (3P + N + T)' : 'Monophasé 230 V (P + N + T)']],
+  }, [port('out', `Sortie ${label}`, c, PWR, 'out')])
+
 const ENERGIE: DeviceTemplate[] = [
+  ...family('Sources électriques', [
+    supply('src-16-mono', '16A mono', 'p17-16a', 16, false),
+    supply('src-32-mono', '32A mono', 'p17-32a-mono', 32, false),
+    supply('src-16-tri', '16A tri', 'p17-16a-tri', 16, true),
+    supply('src-32-tri', '32A tri', 'p17-32a', 32, true),
+    supply('src-63-tri', '63A tri', 'p17-63a', 63, true),
+    supply('src-125-tri', '125A tri', 'p17-125a', 125, true),
+    dev('src-wall-16', 'Générique', 'Prise murale 16A (Schuko)', 'Énergie', { d: 'Prise de courant du lieu, 230 V 16 A : pour les petites installations.', x: [['Alimentation', 'Calibre', '16', 'A'], ['Alimentation', 'Réseau', 'Monophasé 230 V (P + N + T)']] }, [port('out', 'Prise 16A', 'schuko', PWR, 'out')]),
+  ]),
+  ...family('Armoires de conversion', [
+    dev('conv-125-63x2', 'Générique', 'Armoire 125A tri → 2 × 63A tri', 'Énergie', { kg: 55, d: 'Divise une arrivée 125 A triphasée en deux départs 63 A triphasés protégés.' }, [port('in', 'Arrivée P17 125A', 'p17-125a', PWR, 'in'), ...series('p63', 'P17 63A tri', 2, 'p17-63a', PWR, 'out')]),
+    dev('conv-63-32tri', 'Générique', 'Armoire 63A tri → 2 × 32A tri + 3 × 16A mono', 'Énergie', { kg: 30, d: 'Arrivée 63 A triphasée vers deux départs 32 A tri et trois prises 16 A, une par phase.' }, [port('in', 'Arrivée P17 63A', 'p17-63a', PWR, 'in'), ...series('p32', 'P17 32A tri', 2, 'p17-32a', PWR, 'out'), ...series('p16', 'P17 16A mono', 3, 'p17-16a', PWR, 'out')]),
+    dev('conv-63-32mono', 'Générique', 'Armoire 63A tri → 3 × 32A mono + 3 × 16A mono', 'Énergie', { kg: 28, d: 'Convertit le triphasé 63 A en départs monophasés : un 32 A et un 16 A sur chaque phase.' }, [port('in', 'Arrivée P17 63A', 'p17-63a', PWR, 'in'), ...series('p32m', 'P17 32A mono', 3, 'p17-32a-mono', PWR, 'out'), ...series('p16', 'P17 16A mono', 3, 'p17-16a', PWR, 'out')]),
+    dev('conv-32-32mono', 'Générique', 'Boîtier 32A tri → 3 × 32A mono', 'Énergie', { kg: 12, d: 'Éclate une arrivée 32 A triphasée en trois départs 32 A monophasés, un par phase (racks d’amplis).' }, [port('in', 'Arrivée P17 32A', 'p17-32a', PWR, 'in'), ...series('p32m', 'P17 32A mono', 3, 'p17-32a-mono', PWR, 'out')]),
+    dev('conv-32-16', 'Générique', 'Boîtier 32A tri → 16A tri + 6 × 16A mono', 'Énergie', { kg: 14, d: 'Arrivée 32 A triphasée vers un départ 16 A tri et six prises 16 A, deux par phase.' }, [port('in', 'Arrivée P17 32A', 'p17-32a', PWR, 'in'), port('p16t', 'P17 16A tri', 'p17-16a-tri', PWR, 'out'), ...series('p16', 'P17 16A mono', 6, 'p17-16a', PWR, 'out')]),
+    dev('conv-16tri-16mono', 'Générique', 'Boîtier 16A tri → 3 × 16A mono', 'Énergie', { kg: 6, d: 'Éclate une arrivée 16 A triphasée en trois prises 16 A monophasées, une par phase.' }, [port('in', 'Arrivée P17 16A tri', 'p17-16a-tri', PWR, 'in'), ...series('p16', 'P17 16A mono', 3, 'p17-16a', PWR, 'out')]),
+    dev('conv-32mono-16', 'Générique', 'Boîtier 32A mono → 2 × 16A mono + 4 Schuko', 'Énergie', { kg: 5, d: 'Divise une arrivée 32 A monophasée en deux prises P17 16 A et quatre prises Schuko protégées.' }, [port('in', 'Arrivée P17 32A mono', 'p17-32a-mono', PWR, 'in'), ...series('p16', 'P17 16A mono', 2, 'p17-16a', PWR, 'out'), ...series('sch', 'Schuko', 4, 'schuko', PWR, 'out')]),
+    dev('conv-16-schuko', 'Générique', 'Boîtier 16A mono → 6 Schuko', 'Énergie', { kg: 3, d: 'Répartit une prise P17 16 A sur six prises Schuko (multiprise de scène).' }, [port('in', 'Arrivée P17 16A', 'p17-16a', PWR, 'in'), ...series('sch', 'Schuko', 6, 'schuko', PWR, 'out')]),
+  ]),
   ...family('Distribution', [
     dev('distro-125', 'Générique', 'Armoire 125A tri', 'Énergie', { kg: 60 }, [port('in', 'Arrivée P17 125A', 'p17-125a', PWR, 'in'), ...series('p63', 'P17 63A', 2, 'p17-63a', PWR, 'out'), ...series('p32', 'P17 32A', 4, 'p17-32a', PWR, 'out')]),
     dev('distro-63', 'Générique', 'Armoire 63A tri', 'Énergie', { kg: 35 }, [port('in', 'Arrivée P17 63A', 'p17-63a', PWR, 'in'), ...series('p32', 'P17 32A', 2, 'p17-32a', PWR, 'out'), ...series('p16', 'P17 16A', 6, 'p17-16a', PWR, 'out')]),

@@ -113,6 +113,9 @@ export default function ConnectorIcon({ connector, signal, size = 24, wired, tit
     case 'p17-32a-mono':
       face = <>{pins(3, 5)}<circle cx={12} cy={12} r={8} fill="none" stroke="#3e7bfa" strokeWidth={1.5} /></>
       break
+    case 'p17-16a-tri':
+      face = <>{pins(5, 5)}<circle cx={12} cy={12} r={8} fill="none" stroke="#e5484d" strokeWidth={1.5} /></>
+      break
     case 'jack':
     case 'minijack':
       face = <circle cx={12} cy={12} r={3} fill="#111" stroke="#c9ccd1" strokeWidth={1.5} />

@@ -19,13 +19,14 @@ export const RATING: Partial<Record<ConnectorType, number>> = {
   iec: 10,
   'p17-32a': 32,
   'p17-32a-mono': 32,
+  'p17-16a-tri': 16,
   'p17-63a': 63,
   'p17-125a': 125,
   socapex: 16,
 }
 
 /** Three-phase inlets: their outlets are spread on L1, L2, L3. */
-const THREE_PHASE = new Set<ConnectorType>(['p17-32a', 'p17-63a', 'p17-125a'])
+export const THREE_PHASE = new Set<ConnectorType>(['p17-16a-tri', 'p17-32a', 'p17-63a', 'p17-125a'])
 
 /** The device's consumption: its own figure, else the one written in its characteristics. */
 export function wattsOf(d: DeviceData): number | undefined {
@@ -47,6 +48,8 @@ export interface Outlet {
   node: DeviceNode
   port: Port
   phase: Phase
+  /** A three-phase outlet (its current is that of its most loaded phase). */
+  threePhase?: boolean
   /** Devices plugged in, directly or further down (through their power links). */
   fed: DeviceNode[]
   watts: number
@@ -67,6 +70,8 @@ export interface Source {
   /** (max − min) / max of the phase currents, for three-phase sources. */
   imbalance?: number
   inletRating?: number
+  /** The board feeding this one, when it is not a supply point. */
+  parent?: DeviceNode
 }
 
 export interface PowerBudget {
@@ -123,46 +128,105 @@ export function powerBudget(project: Project): PowerBudget {
   }
 
   const phases = project.power?.phases ?? {}
-  const sources: Source[] = nodes
-    .filter((n) => !fedBy.has(n.id) && outletsOf(n).some((p) => feeds.has(outletKey(n.id, p.id))))
-    .map((node) => {
-      const inlet = node.data.ports.find((p) => isPower(p) && p.dir === 'in')
-      const threePhase = !!inlet && THREE_PHASE.has(inlet.connector)
-      const ring: Phase[] = ['L1', 'L2', 'L3']
-      const outlets = outletsOf(node)
-        .filter((port) => feeds.has(outletKey(node.id, port.id)))
-        .map((port, i): Outlet => {
-          const fed = (feeds.get(outletKey(node.id, port.id)) ?? []).flatMap((f) => below(f.to, new Set([node.id])))
-          const watts = fed.reduce((s, d) => s + (wattsOf(d.data) ?? 0), 0)
-          const rating = RATING[port.connector]
-          const amps = watts / VOLTS
-          return {
-            node,
-            port,
-            // Three-phase: the outlets go round the phases unless the user set one.
-            phase: threePhase ? (phases[outletKey(node.id, port.id)] ?? ring[i % 3]) : 'L1',
-            fed,
-            watts,
-            unknown: fed.filter((d) => wattsOf(d.data) === undefined && needsPower(d) && d.data.category !== 'Énergie'),
-            amps,
-            rating,
-            load: rating ? amps / rating : undefined,
-          }
-        })
-      const perPhase: Record<Phase, number> = { L1: 0, L2: 0, L3: 0 }
-      for (const o of outlets) perPhase[o.phase] += o.amps
-      const currents = Object.values(perPhase)
-      const top = Math.max(...currents)
+  const ring: Phase[] = ['L1', 'L2', 'L3']
+  const zero = (): Record<Phase, number> => ({ L1: 0, L2: 0, L3: 0 })
+  const fedOutlets = (n: DeviceNode) => outletsOf(n).filter((p) => feeds.has(outletKey(n.id, p.id)))
+  const inletOf = (n: DeviceNode) => n.data.ports.find((p) => isPower(p) && p.dir === 'in')
+  /** A board is three-phase by its inlet; a supply point (no inlet), by its own outlet. */
+  const isThree = (n: DeviceNode) => {
+    const inlet = inletOf(n)
+    return inlet ? THREE_PHASE.has(inlet.connector) : outletsOf(n).some((p) => THREE_PHASE.has(p.connector))
+  }
+  const supplyRating = (n: DeviceNode) => {
+    const inlet = inletOf(n)
+    if (inlet) return RATING[inlet.connector]
+    const own = outletsOf(n).map((p) => RATING[p.connector] ?? 0)
+    return own.length ? Math.max(...own) || undefined : undefined
+  }
+  const totalWatts = (n: DeviceNode) => below(n, new Set()).reduce((s, d) => s + (wattsOf(d.data) ?? 0), 0)
+
+  /** Current per phase drawn through a three-phase board, from what each of its outlets carries. */
+  const boardLoad = new Map<string, Record<Phase, number>>()
+  const outletLoad = (n: DeviceNode, port: Port, phase: Phase): Record<Phase, number> => {
+    const v = zero()
+    for (const f of feeds.get(outletKey(n.id, port.id)) ?? []) {
+      if (THREE_PHASE.has(port.connector) && isThree(f.to) && fedOutlets(f.to).length) {
+        const sub = loadOf(f.to)
+        for (const ph of ring) v[ph] += sub[ph]
+      } else if (THREE_PHASE.has(port.connector)) {
+        // Single-phase gear on a three-phase line: shared out evenly.
+        for (const ph of ring) v[ph] += totalWatts(f.to) / VOLTS / 3
+      } else v[phase] += totalWatts(f.to) / VOLTS
+    }
+    return v
+  }
+  const phaseOf = (n: DeviceNode, port: Port) => {
+    const mono = outletsOf(n).filter((p) => !THREE_PHASE.has(p.connector) && feeds.has(outletKey(n.id, p.id)))
+    // Single-phase outlets go round the phases unless the user set one.
+    return phases[outletKey(n.id, port.id)] ?? ring[Math.max(0, mono.indexOf(port)) % 3]
+  }
+  function loadOf(n: DeviceNode): Record<Phase, number> {
+    const known = boardLoad.get(n.id)
+    if (known) return known
+    const v = zero()
+    boardLoad.set(n.id, v)
+    for (const port of fedOutlets(n)) {
+      const o = outletLoad(n, port, isThree(n) ? phaseOf(n, port) : 'L1')
+      for (const ph of ring) v[ph] += o[ph]
+    }
+    return v
+  }
+
+  // Every board (a supply point, a cabinet, a distribution) gets its own budget; supply points first, then what they feed.
+  // A device passing power on (an amplifier's link output) is not a board: what it feeds counts on its outlet.
+  const boards = nodes.filter((n) => !n.data.panel && fedOutlets(n).length > 0 && (n.data.category === 'Énergie' || !inletOf(n) || !fedBy.has(n.id)))
+  const order: DeviceNode[] = []
+  const visit = (n: DeviceNode) => {
+    if (order.includes(n)) return
+    order.push(n)
+    for (const port of fedOutlets(n)) for (const f of feeds.get(outletKey(n.id, port.id)) ?? []) if (boards.includes(f.to)) visit(f.to)
+  }
+  boards.filter((n) => !fedBy.has(n.id)).forEach(visit)
+  boards.forEach(visit)
+
+  const sources: Source[] = order.map((node) => {
+    const threePhase = isThree(node)
+    const outlets = fedOutlets(node).map((port): Outlet => {
+      const fed = (feeds.get(outletKey(node.id, port.id)) ?? []).flatMap((f) => below(f.to, new Set([node.id])))
+      const watts = fed.reduce((s, d) => s + (wattsOf(d.data) ?? 0), 0)
+      const rating = RATING[port.connector]
+      const phase = threePhase ? phaseOf(node, port) : 'L1'
+      const three = THREE_PHASE.has(port.connector)
+      // A three-phase outlet is rated per phase: its most loaded one counts.
+      const amps = three ? Math.max(...Object.values(outletLoad(node, port, phase))) : watts / VOLTS
       return {
         node,
-        threePhase,
-        outlets,
-        watts: outlets.reduce((s, o) => s + o.watts, 0),
-        phases: perPhase,
-        imbalance: threePhase && top > 0 ? (top - Math.min(...currents)) / top : undefined,
-        inletRating: inlet ? RATING[inlet.connector] : undefined,
+        port,
+        phase,
+        threePhase: three,
+        fed,
+        watts,
+        unknown: fed.filter((d) => wattsOf(d.data) === undefined && needsPower(d) && d.data.category !== 'Énergie'),
+        amps,
+        rating,
+        load: rating ? amps / rating : undefined,
       }
     })
+    const perPhase = threePhase ? loadOf(node) : { L1: outlets.reduce((s, o) => s + o.amps, 0), L2: 0, L3: 0 }
+    const currents = Object.values(perPhase)
+    const top = Math.max(...currents)
+    const parent = fedBy.get(node.id)
+    return {
+      node,
+      threePhase,
+      outlets,
+      watts: outlets.reduce((s, o) => s + o.watts, 0),
+      phases: perPhase,
+      imbalance: threePhase && top > 0 ? (top - Math.min(...currents)) / top : undefined,
+      inletRating: supplyRating(node),
+      ...(parent ? { parent } : {}),
+    }
+  })
 
   const unpowered = nodes.filter((n) => needsPower(n) && !fedBy.has(n.id) && !sources.some((s) => s.node.id === n.id))
   const alerts: string[] = []
@@ -172,7 +236,7 @@ export function powerBudget(project: Project): PowerBudget {
       else if (o.load !== undefined && o.load > 0.8) alerts.push(`${s.node.data.name} · ${o.port.label} : ${Math.round(o.load * 100)} % du départ, peu de marge`)
     }
     const worst = Math.max(...Object.values(s.phases))
-    if (s.inletRating && worst > s.inletRating) alerts.push(`${s.node.data.name} : ${worst.toFixed(1)} A sur une phase pour une arrivée de ${s.inletRating} A`)
+    if (s.inletRating && worst > s.inletRating) alerts.push(`${s.node.data.name} : ${worst.toFixed(1)} A ${s.threePhase ? 'sur une phase ' : ''}pour une arrivée de ${s.inletRating} A`)
     if (s.imbalance !== undefined && s.imbalance > 0.3 && worst > 5) alerts.push(`${s.node.data.name} : phases déséquilibrées (${Math.round(s.imbalance * 100)} %), répartissez les départs`)
   }
   return { sources, unpowered, alerts }

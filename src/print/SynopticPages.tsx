@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { SIGNALS } from '../data/connectors'
 import Page from './PrintPage'
 import type { Shot } from './SynopticShooter'
@@ -7,10 +8,10 @@ export type SynopticMode = 'fit' | 'tiles'
 type Box = { w: number; h: number }
 type Region = { x: number; y: number; w: number; h: number }
 
-// A4 printable area with the file's 12 mm margins, minus the title and the legend.
+// A4 printable area with the file's 12 mm margins, minus the title, the legend and the title block.
 // Wide drawings are turned a quarter on the sheet (262 × 186 mm once turned).
-const PORTRAIT: Box = { w: 186, h: 236 }
-const LANDSCAPE: Box = { w: 262, h: 160 }
+const PORTRAIT: Box = { w: 186, h: 222 }
+const LANDSCAPE: Box = { w: 262, h: 146 }
 /** Sheets print at a readable scale: 0.22 mm per screen pixel. */
 const TILE_SCALE = 0.22
 const OVERLAP = 30
@@ -56,7 +57,7 @@ function Picture({ shot, box, region, grid }: { shot: Shot; box: Box; region?: R
  * on one page (turned like a plan if wide), or an overview with a grid and
  * one sheet per grid cell, printed big enough to read every port.
  */
-export default function SynopticPages({ title, shot, mode }: { title: string; shot?: Shot; mode: SynopticMode }) {
+export default function SynopticPages({ title, shot, mode, block }: { title: string; shot?: Shot; mode: SynopticMode; block?: ReactNode }) {
   if (!shot) {
     return (
       <section className="d-page">
@@ -90,6 +91,7 @@ export default function SynopticPages({ title, shot, mode }: { title: string; sh
         </h2>
         <Picture shot={shot} box={box} grid={tiled ? { cols, rows, tw, th } : undefined} />
         <Legend />
+        {block}
       </Page>
       {tiled &&
         Array.from({ length: rows }, (_, r) =>
@@ -100,6 +102,7 @@ export default function SynopticPages({ title, shot, mode }: { title: string; sh
               </h2>
               <Picture shot={shot} box={box} region={region(c, r)} />
               <Legend />
+              {block}
             </Page>
           )),
         )}

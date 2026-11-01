@@ -102,6 +102,7 @@ export const CONNECTORS: Record<ConnectorType, string> = {
   'ca-com': 'CA-COM 19 pts (L-Acoustics)',
   harting: 'Multibroche Harting',
   'p17-32a-mono': 'P17 32A mono',
+  'p17-16a-tri': 'P17 16A tri',
 }
 
 /** Connectors that physically mate together without an adapter. */

@@ -67,6 +67,7 @@ export type ConnectorType =
   | 'ca-com'
   | 'harting'
   | 'p17-32a-mono'
+  | 'p17-16a-tri'
 
 export type PortDirection = 'in' | 'out' | 'io'
 
@@ -336,6 +337,30 @@ export interface Project {
   share?: { id: string; updatedAt?: string }
   /** Power budget: the phase of each power outlet ("nodeId:portId" → L1, L2, L3). */
   power?: { phases?: Record<string, Phase> }
+  /** Project information: client, title block of the printed documents. */
+  info?: ProjectInfo
+}
+
+/** An organisation or a client: its name, address and logo (a small data URL). */
+export interface Party {
+  id: string
+  name: string
+  address?: string
+  logo?: string
+}
+
+export interface ProjectInfo {
+  description?: string
+  /** The client, copied in the project so it travels with the file and the shared link. */
+  client?: Party
+  /** Who makes the documents, copied from the settings. */
+  org?: Party
+  revision?: string
+  author?: string
+  docType?: string
+  status?: string
+  site?: string
+  room?: string
 }
 
 export type Phase = 'L1' | 'L2' | 'L3'

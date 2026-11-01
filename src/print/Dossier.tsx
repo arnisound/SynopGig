@@ -14,6 +14,8 @@ import { stageOf } from '../stage/stage'
 import StageSvg from '../stage/StageSvg'
 import Page from './PrintPage'
 import SynopticPages, { type SynopticMode } from './SynopticPages'
+import TitleBlock from './TitleBlock'
+import { orgOf } from '../settings/settings'
 import DeviceArt from '../ui/DeviceArt'
 
 const TABLE_OF: Partial<Record<SectionId, string | string[]>> = { cables: 'cables', bom: 'nomenclature', ip: ['ip', 'reseau'], dmx: 'dmx', panels: 'bandeaux', power: 'energie' }
@@ -96,8 +98,20 @@ export default function Dossier({
       <style>{`@page { size: A4; @bottom-left { content: "${cssString(project.name)}${project.venue ? ` — ${cssString(project.venue)}` : ''} · dossier technique"; font: 7pt Arial, sans-serif; color: #777; } @bottom-right { content: "SynopGig · Arnisound tools · arnisoundtools.com · page " counter(page) " / " counter(pages); font: 7pt Arial, sans-serif; color: #777; } }`}</style>
       {has('cover') && (
         <section className="d-page d-cover">
-          <img className="d-logo" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" />
+          {(() => {
+            const org = orgOf(project)
+            const client = project.info?.client
+            return org?.logo || client?.logo ? (
+              <div className="d-cover-logos">
+                {org?.logo && <img src={org.logo} alt={org.name} />}
+                {client?.logo && <img src={client.logo} alt={client.name} />}
+              </div>
+            ) : (
+              <img className="d-logo" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" />
+            )
+          })()}
           <h1>{project.name}</h1>
+          {project.info?.client?.name && <p className="d-sub">pour {project.info.client.name}</p>}
           <p className="d-sub">{[project.venue, date].filter(Boolean).join(' — ')}</p>
           <p className="d-kind">Dossier technique</p>
           <dl className="d-stats">
@@ -113,12 +127,13 @@ export default function Dossier({
           </ol>
           <p className="d-maker">SynopGig, une application <b>Arnisound tools</b> — arnisoundtools.com</p>
           <p className="d-foot">Édité le {printedOn}. Connectique indicative : vérifiez les fiches constructeur.</p>
+          <TitleBlock project={project} title="Dossier technique" />
         </section>
       )}
 
-      {has('synoptic') && <SynopticPages title="Synoptique" shot={shots.get('all')} mode={synopticMode} />}
+      {has('synoptic') && <SynopticPages title="Synoptique" shot={shots.get('all')} mode={synopticMode} block={<TitleBlock project={project} title="Synoptique" />} />}
 
-      {has('departments') && departmentsOf(project).map((d) => <SynopticPages key={d} title={`Synoptique — ${d}`} shot={shots.get(`dept:${d}`)} mode={synopticMode} />)}
+      {has('departments') && departmentsOf(project).map((d) => <SynopticPages key={d} title={`Synoptique — ${d}`} shot={shots.get(`dept:${d}`)} mode={synopticMode} block={<TitleBlock project={project} title={`Synoptique ${d}`} />} />)}
 
       {has('patch') && (() => {
         const { inputs, outputs } = buildPatch(project)

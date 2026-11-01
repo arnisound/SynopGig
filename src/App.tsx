@@ -10,6 +10,7 @@ import { useUserLibrary } from './library/useUserLibrary'
 import PatchPage from './patch/PatchPage'
 import DossierDialog from './print/DossierDialog'
 import LabelsDialog from './labels/LabelsDialog'
+import ProjectInfoDialog from './settings/ProjectInfoDialog'
 import { projectChanges } from './share/changes'
 import { savedDocs, savedPhotos } from './library/photos'
 import { addModelPhotos } from './library/modelPhotos'
@@ -60,6 +61,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>(TARGET?.kind === 'case' ? 'cases' : SHARED_ID && !TARGET && matchMedia('(max-width: 760px)').matches ? 'guide' : 'synoptic')
   const [dossier, setDossier] = useState(false)
   const [labels, setLabels] = useState(false)
+  const [info, setInfo] = useState(false)
   const [menu, setMenu] = useState(false)
   const [theme, setThemeState] = useState<Theme>(readTheme)
   const setTheme = (t: Theme) => {
@@ -187,18 +189,16 @@ export default function App() {
         <div className="brand">
           <img className="logo" src={`${import.meta.env.BASE_URL}icon.png`} alt="" width={28} height={28} />
           <span>
-            <img className="logo-long" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" height={30} />
-            <a className="maker" href="https://arnisoundtools.com" target="_blank" rel="noopener noreferrer">par Arnisound tools</a>
+            <img className="logo-long" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" height={24} />
+            <a className="maker" href="https://arnisoundtools.com" target="_blank" rel="noopener noreferrer">by arnisoundtools.com</a>
           </span>
         </div>
-        <input className="project-name" value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} aria-label="Nom du projet" />
+        <div className="project-title">
+          <input className="project-name" value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} aria-label="Nom du projet" title={[project.venue, project.date].filter(Boolean).join(' · ')} />
+          <button className="icon-only" onClick={() => setInfo(true)} title="Informations du projet, client, cartouche, organisation" aria-label="Informations du projet">⚙</button>
+        </div>
         <button className="icon-btn undo-mobile" onClick={undo} disabled={!canUndo} title="Annuler" aria-label="Annuler">↶</button>
         <button className="icon-btn menu-btn" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-label="Menu">{menu ? '✕' : '☰'}</button>
-        {/* On phones and tablets these sit in the ☰ menu; on a computer they flow in the bar as before. */}
-        <div className={`topbar-more ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).closest('button') && setMenu(false)}>
-          <input className="project-meta" placeholder="Lieu" value={project.venue} onChange={(e) => setProject((p) => ({ ...p, venue: e.target.value }))} aria-label="Lieu" />
-          <input className="project-meta" type="date" value={project.date} onChange={(e) => setProject((p) => ({ ...p, date: e.target.value }))} aria-label="Date" />
-        </div>
         <nav className="tabs">
           {TABS.filter((t) => !SHARED_ID || t.id !== 'library').map((t) => (
             <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => { setTab(t.id); setMenu(false) }}>
@@ -206,7 +206,8 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <div className={`file-actions topbar-more ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).closest('button') && setMenu(false)}>
+        {/* On phones and tablets these sit in the ☰ menu, menus opened flat. */}
+        <div className={`file-actions topbar-more ${menu ? 'open' : ''}`} onClick={(e) => (e.target as HTMLElement).closest('.menu-pop button, .file-actions > button') && setMenu(false)}>
           {SHARED_ID ? (
             <>
               <button onClick={loadShared} title="Recharger la dernière version partagée">Actualiser</button>
@@ -215,22 +216,30 @@ export default function App() {
             </>
           ) : (
             <>
-              <button onClick={undo} disabled={!canUndo} title="Annuler (Ctrl+Z)">↶ Annuler</button>
-              <button onClick={() => confirm('Créer un projet vide ? Pensez à exporter le projet actuel.') && replace(emptyProject())}>Nouveau</button>
-              <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Démo</button>
-              <button onClick={() => fileInput.current?.click()}>Ouvrir</button>
-              <button onClick={() => download(`${slug(project.name)}.synopgig.json`, JSON.stringify(project, null, 2), 'application/json')}>Enregistrer</button>
+              <button className="icon-only wide-undo" onClick={undo} disabled={!canUndo} title="Annuler (Ctrl+Z)" aria-label="Annuler">↶</button>
+              <Dropdown label="Fichier">
+                <button onClick={() => confirm('Créer un projet vide ? Pensez à exporter le projet actuel.') && replace(emptyProject())}>Nouveau</button>
+                <button onClick={() => fileInput.current?.click()}>Ouvrir…</button>
+                <button onClick={() => download(`${slug(project.name)}.synopgig.json`, JSON.stringify(project, null, 2), 'application/json')}>Enregistrer</button>
+                <button onClick={() => confirm('Charger le projet de démonstration ?') && replace(demoProject())}>Projet de démonstration</button>
+              </Dropdown>
               <button onClick={() => setSharing(true)} title="Lien en lecture seule pour l’équipe">Partager</button>
             </>
           )}
-          <button onClick={() => setDossier(true)} title="Dossier technique complet à imprimer ou en PDF">Dossier PDF</button>
-          <button onClick={() => setLabels(true)} title="Étiquettes de câbles, d’équipements et de flight cases, avec QR codes">Étiquettes</button>
-          <button onClick={() => setTheme(nextTheme[theme])} title={`Thème : ${THEME_LABELS[theme]} (cliquer pour changer)`}>
-            {theme === 'light' ? '☀ Clair' : theme === 'dark' ? '☾ Sombre' : '◐ Auto'}
+          <Dropdown label="Imprimer">
+            <button onClick={() => setDossier(true)} title="Dossier technique complet à imprimer ou en PDF">Dossier PDF</button>
+            <button onClick={() => setLabels(true)} title="Étiquettes de câbles, d’équipements et de flight cases, avec QR codes">Étiquettes</button>
+          </Dropdown>
+          <button className="icon-only" onClick={() => setTheme(nextTheme[theme])} title={`Thème : ${THEME_LABELS[theme]} (cliquer pour changer)`} aria-label={`Thème : ${THEME_LABELS[theme]}`}>
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              {theme === 'dark' ? <circle cx="8" cy="8" r="6.5" fill="currentColor" /> : theme === 'auto' ? <path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" /> : null}
+            </svg>
           </button>
           <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => { importFile(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </header>
+      {info && <ProjectInfoDialog project={project} setProject={setProject} onClose={() => setInfo(false)} />}
       {dossier && <DossierDialog project={project} onClose={() => setDossier(false)} />}
       {labels && <LabelsDialog project={project} onClose={() => setLabels(false)} onShare={SHARED_ID ? undefined : () => { setLabels(false); setSharing(true) }} />}
       {sharing && <ShareDialog project={project} setProject={setProject} onClose={() => setSharing(false)} />}
@@ -281,4 +290,22 @@ export default function App() {
 /** Project content without view-only state (selection, measured sizes). */
 function signature(p: Project) {
   return JSON.stringify(p, (k, v) => (k === 'selected' || k === 'measured' || k === 'dragging' ? undefined : v))
+}
+
+/** A menu of the top bar; on phones its items show flat in the ☰ menu. */
+function Dropdown({ label, children }: { label: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const away = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setOpen(false)
+    window.addEventListener('pointerdown', away)
+    return () => window.removeEventListener('pointerdown', away)
+  }, [open])
+  return (
+    <div className={`menu ${open ? 'open' : ''}`} ref={box}>
+      <button className="menu-trigger" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{label} ▾</button>
+      <div className="menu-pop" onClick={(e) => (e.target as HTMLElement).closest('button') && setOpen(false)}>{children}</div>
+    </div>
+  )
 }

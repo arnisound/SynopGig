@@ -48,6 +48,7 @@ function Socket({ c }: { c: ConnectorType }) {
     case 'p17-16a':
     case 'p17-32a':
     case 'p17-32a-mono':
+    case 'p17-16a-tri':
     case 'p17-63a':
     case 'p17-125a':
     case 'socapex':

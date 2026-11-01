@@ -70,15 +70,22 @@ export default function PowerPage({ project, setProject }: Props) {
 
       {b.sources.length === 0 && (
         <section className="card muted">
-          <p>Aucune distribution câblée pour l’instant. Posez une distribution (palette, Énergie) et reliez ses départs aux prises secteur de vos équipements sur le synoptique : le bilan se fait tout seul.</p>
+          <p>
+            Aucune alimentation câblée pour l’instant. Dans la palette, rubrique Énergie, posez une <b>source électrique</b> (16A mono, 32A mono, 16A, 32A, 63A ou 125A tri), au
+            besoin une <b>armoire de conversion</b>, puis reliez les départs aux prises secteur de vos équipements sur le synoptique : le bilan se fait tout seul, phase par phase.
+          </p>
         </section>
       )}
 
       {b.sources.map((s) => (
         <section key={s.node.id} className="card power-source">
           <div className="section-head">
-            <h3>{s.node.data.name}</h3>
+            <h3>
+              {s.node.data.name}
+              {!s.parent && <small className="power-kind"> source</small>}
+            </h3>
             <span className="muted small">
+              {s.parent ? `Alimenté par ${s.parent.data.name} · ` : ''}
               {s.threePhase ? 'Triphasé' : 'Monophasé'}
               {s.inletRating ? ` · arrivée ${s.inletRating} A` : ''} · {Math.round(s.watts)} W · {(s.watts / VOLTS).toFixed(1)} A au total
             </span>
@@ -115,9 +122,13 @@ export default function PowerPage({ project, setProject }: Props) {
                   </td>
                   {s.threePhase && (
                     <td>
-                      <select value={o.phase} onChange={(e) => setPhase(outletKey(s.node.id, o.port.id), e.target.value as Phase)}>
-                        {PHASES.map((ph) => <option key={ph}>{ph}</option>)}
-                      </select>
+                      {o.threePhase ? (
+                        <span className="muted" title="Départ triphasé : sa charge se répartit sur les trois phases">L1 L2 L3</span>
+                      ) : (
+                        <select value={o.phase} onChange={(e) => setPhase(outletKey(s.node.id, o.port.id), e.target.value as Phase)}>
+                          {PHASES.map((ph) => <option key={ph}>{ph}</option>)}
+                        </select>
+                      )}
                     </td>
                   )}
                   <td>
@@ -129,7 +140,7 @@ export default function PowerPage({ project, setProject }: Props) {
                     ))}
                   </td>
                   <td>{Math.round(o.watts)} W</td>
-                  <td>{o.amps.toFixed(1)} A</td>
+                  <td title={o.threePhase ? 'Sur la phase la plus chargée' : undefined}>{o.amps.toFixed(1)} A{o.threePhase ? ' / ph.' : ''}</td>
                   <td>{o.rating ? `${o.rating} A` : '—'}</td>
                   <td><Load value={o.load} /></td>
                 </tr>

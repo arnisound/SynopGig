@@ -49,6 +49,38 @@ describe('power budget', () => {
     expect(s.phases.L1).toBeCloseTo(17.4, 1)
   })
 
+  it('follows the phases from a supply point through a conversion cabinet', () => {
+    let p: Project = emptyProject()
+    const add = (t: DeviceTemplate) => {
+      const n = createDevice(t, { x: 0, y: 0 }, p.nodes)
+      p = { ...p, nodes: [...p.nodes, n] }
+      return n
+    }
+    const tpl = (id: string) => LIBRARY.find((t) => t.id === id)!
+    const src = add(tpl('src-63-tri'))
+    const box = add(tpl('conv-63-32mono'))
+    p = connectPorts(p, { node: src.id, port: 'out' }, { node: box.id, port: 'in' })!
+    // 3 kW on the first 32 A outlet (L1), 1.5 kW on the second one (L2).
+    const loads = [3000, 1500].map((w, i) => {
+      const a = add(amp(`Ampli ${i + 1}`, w))
+      p = connectPorts(p, { node: box.id, port: `p32m${i + 1}` }, { node: a.id, port: 'pwr' })!
+      return a
+    })
+    const b = powerBudget(p)
+    expect(b.sources.map((s) => s.node.id)).toEqual([src.id, box.id])
+    const [supply, cabinet] = b.sources
+    expect(supply.threePhase && cabinet.threePhase).toBe(true)
+    expect(supply.inletRating).toBe(63)
+    expect(cabinet.parent?.id).toBe(src.id)
+    expect(cabinet.outlets.map((o) => o.phase)).toEqual(['L1', 'L2'])
+    // The supply point sees the cabinet's phases, not an even split.
+    expect(supply.phases.L1).toBeCloseTo(3000 / 230, 1)
+    expect(supply.phases.L2).toBeCloseTo(1500 / 230, 1)
+    expect(supply.phases.L3).toBe(0)
+    expect(supply.outlets[0].amps).toBeCloseTo(3000 / 230, 1)
+    expect(loads).toHaveLength(2)
+  })
+
   it('reads the consumption written in the characteristics', () => {
     expect(wattsOf({ specs: [{ group: 'Alimentation', label: 'Consommation', value: '1,2', unit: 'kW' }] } as never)).toBe(1200)
     expect(wattsOf({ specs: [{ group: 'Alimentation', label: 'Power consumption', value: '45 W' }] } as never)).toBe(45)
