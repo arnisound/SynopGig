@@ -23,7 +23,7 @@ export interface CaseSpec {
   source?: string
 }
 
-const KINDS: CaseKind[] = ['rack', 'malle', 'valise', 'console']
+const KINDS: CaseKind[] = ['rack', 'malle', 'valise', 'console', 'tiroirs', 'palox', 'bac', 'roll', 'etagere', 'chariot', 'housse']
 
 const clamp = (v: unknown, min: number, max: number, int = false) => {
   if (v === undefined || v === null || v === '') return undefined
@@ -125,7 +125,21 @@ export function parseCaseText(text: string, title = ''): CaseSpec {
       ? 'console'
       : /valise|briefcase|koffer|attach[ée]/i.test(all)
         ? 'valise'
-        : 'malle'
+        : /palox|pallet ?box|caisse[- ]palette|gitterbox/i.test(all)
+          ? 'palox'
+          : /bac |crocodile|euronorm|euro ?box|plastic crate|caisse plastique/i.test(all)
+            ? 'bac'
+            : /roll ?container|rollbox|chariot grillag/i.test(all)
+              ? 'roll'
+              : /étagère|etagere|rayonnage|shelving|storage rack|schwerlastregal/i.test(all)
+                ? 'etagere'
+                : /tiroirs?|drawers?|schubladen/i.test(all)
+                  ? 'tiroirs'
+                  : /dolly|chariot|plateau roulant|transportroller/i.test(all)
+                    ? 'chariot'
+                    : /housse|sac |\bbag\b|cover|tasche/i.test(all)
+                      ? 'housse'
+                      : 'malle'
   // "Flyht Pro Rack 8U - Thomann" → "Flyht Pro Rack 8U".
   found.name = title.split(/\s+[|–—-]\s+/)[0]
   return cleanSpec(found)
@@ -134,7 +148,7 @@ export function parseCaseText(text: string, title = ''): CaseSpec {
 export const CASE_PROMPT = `You are a live sound, lighting and video technician. You receive the text of an online shop page for a flight case or a 19" rack case.
 Answer only with JSON describing the case itself (not the gear it is made for):
 - name: brand and model, short.
-- kind: "rack" for a 19" rack case, "console" for a mixing desk case, "valise" for a small briefcase, otherwise "malle".
+- kind: "rack" for a 19" rack case, "console" for a mixing desk case, "valise" for a small briefcase, "tiroirs" for a drawer case, "palox" for a pallet box, "bac" for a plastic crate (euro or crocodile-lid box), "roll" for a wire roll container, "etagere" for a metal storage rack or shelving, "chariot" for a dolly or wheeled platform, "housse" for a soft cover or bag, otherwise "malle".
 - rackU: rack units of a rack case (e.g. 8 for "8U" or "8 HE").
 - width, height, depth: OUTSIDE dimensions in centimetres (convert mm). Use inside sizes only if outside ones are missing.
 - weight: empty weight in kg. wheels: true if it has castors or a wheel board. handles: number of handles.

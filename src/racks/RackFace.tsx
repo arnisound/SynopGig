@@ -39,7 +39,7 @@ function useDestinations(nodes: DeviceNode[], edges: CableEdge[]) {
 }
 
 export default function RackFace({ fc, nodes, edges, side, selected, selectedHoles, onSelect, onHole, onDrop }: Props) {
-  const { mounted } = mountRack(fc, nodes)
+  const { mounted, onHost } = mountRack(fc, nodes)
   const dest = useDestinations(nodes, edges)
 
   const drop = (e: DragEvent, top: number) => {
@@ -109,6 +109,26 @@ export default function RackFace({ fc, nodes, edges, side, selected, selectedHol
                       </button>
                     )
                   })}
+                </div>
+              ) : side === 'front' && onHost.get(node.id)?.length ? (
+                // A shelf or an adapter: the devices it carries, side by side.
+                <div className="face-host">
+                  {onHost.get(node.id)!.map((c) => (
+                    <button
+                      key={c.id}
+                      className={`carried ${selected === c.id ? 'selected' : ''}`}
+                      style={{ ['--cat' as string]: CATEGORY_COLORS[c.data.category] }}
+                      title={`${c.data.name} — ${c.data.brand ? `${c.data.brand} ` : ''}${c.data.model}\nsur ${d.model}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelect?.(c.id)
+                      }}
+                    >
+                      <b>{c.data.name}</b>
+                      <small>{c.data.model}</small>
+                    </button>
+                  ))}
+                  <small className="host-name">{d.model}</small>
                 </div>
               ) : side === 'front' ? (
                 <div className="face-front">

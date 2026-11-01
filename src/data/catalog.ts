@@ -459,9 +459,9 @@ const ACCESSOIRES: DeviceTemplate[] = [
     dev('rack-drawer-3u', 'Générique', 'Tiroir de rack 3U', 'Autre', { u: 3, kg: 6 }, []),
     dev('rack-drawer-4u', 'Générique', 'Tiroir de rack 4U', 'Autre', { u: 4, kg: 8 }, []),
     dev('rack-drawer-lock-2u', 'Générique', 'Tiroir de rack 2U verrouillable', 'Autre', { u: 2, kg: 5.5 }, []),
-    dev('rack-shelf-1u', 'Générique', 'Tablette fixe 1U', 'Autre', { u: 1, kg: 2 }, []),
-    dev('rack-shelf-2u', 'Générique', 'Tablette fixe 2U', 'Autre', { u: 2, kg: 3 }, []),
-    dev('rack-shelf-slide-1u', 'Générique', 'Tablette coulissante 1U (clavier, ordinateur portable)', 'Autre', { u: 1, kg: 4 }, []),
+    dev('rack-shelf-1u', 'Générique', 'Tablette fixe 1U', 'Autre', { u: 1, kg: 2, holds: 2 }, []),
+    dev('rack-shelf-2u', 'Générique', 'Tablette fixe 2U', 'Autre', { u: 2, kg: 3, holds: 3 }, []),
+    dev('rack-shelf-slide-1u', 'Générique', 'Tablette coulissante 1U (clavier, ordinateur portable)', 'Autre', { u: 1, kg: 4, holds: 1 }, []),
     dev('rack-light-1u', 'Générique', 'Éclairage de rack 1U (2 lampes LED col de cygne)', 'Autre', { u: 1, kg: 1.5 }, [iec()]),
     dev('rack-light-led-1u', 'Générique', 'Éclairage de rack 1U (barre LED, variateur)', 'Autre', { u: 1, kg: 1 }, [iec()]),
     dev('lamp-xlr4', 'Générique', 'Lampe col de cygne XLR 4 pts (console)', 'Autre', { kg: 0.2 }, [port('pwr', 'Alim XLR 4', 'xlr4', PWR, 'in')]),
@@ -475,6 +475,20 @@ const ACCESSOIRES: DeviceTemplate[] = [
     dev('rack-cable-bar-1u', 'Générique', 'Barre de maintien de câbles 1U (arrière)', 'Autre', { u: 1, kg: 0.5 }, []),
     dev('rack-mic-holder-2u', 'Générique', 'Support micros HF 2U (8 micros)', 'Autre', { u: 2, kg: 1.5 }, []),
     dev('rack-docs-1u', 'Générique', 'Porte-documents 1U (feuille de patch)', 'Autre', { u: 1, kg: 0.6 }, []),
+  ]),
+  // Mounting what is not 19": half-rack adapters, shelves with straps or cable ties.
+  ...family('Fixations et adaptateurs', [
+    dev('rack-half-1u', 'Générique', 'Adaptateur 1U pour 2 appareils ½ rack', 'Autre', { u: 1, kg: 1.2, holds: 2, d: 'Plateau 1U qui reçoit côte à côte deux appareils demi-largeur (récepteurs HF, interfaces, petits switchs).' }, []),
+    dev('rack-half-ears-1u', 'Générique', 'Kit oreilles ½ rack (1 appareil + plaque pleine)', 'Autre', { u: 1, kg: 0.6, holds: 1, d: 'Une oreille longue et une plaque pleine : un appareil demi-largeur tenu sur une unité.' }, []),
+    dev('rack-half-2u', 'Générique', 'Adaptateur 2U pour 2 appareils ½ rack', 'Autre', { u: 2, kg: 1.8, holds: 2, d: 'Plateau 2U pour deux appareils demi-largeur de 2U (récepteurs, préamplis).' }, []),
+    dev('rack-third-1u', 'Générique', 'Plateau 1U pour 3 appareils ⅓ de rack', 'Autre', { u: 1, kg: 1.3, holds: 3, d: 'Plateau 1U à trois emplacements pour boîtiers tiers de rack (convertisseurs, splitters).' }, []),
+    dev('rack-shelf-velcro-1u', 'Générique', 'Tablette 1U avec sangles scratch', 'Autre', { u: 1, kg: 1.5, holds: 3, d: 'Tablette fixe percée de passants : les appareils non rackables y sont tenus par des sangles scratch.' }, []),
+    dev('rack-shelf-zip-2u', 'Générique', 'Tablette perforée 2U (fixation par colliers)', 'Autre', { u: 2, kg: 2.5, holds: 4, d: 'Tablette à fond perforé : alimentations, boîtiers et adaptateurs y sont fixés par colliers serre-câbles.' }, []),
+    dev('rack-shelf-deep-2u', 'Générique', 'Tablette ventilée profonde 2U', 'Autre', { u: 2, kg: 3.5, holds: 2, d: 'Tablette profonde et ventilée pour ordinateur, mini-PC ou console compacte non rackable.' }, []),
+    dev('rack-shelf-vent-3u', 'Générique', 'Tablette ventilée 3U (appareil haut)', 'Autre', { u: 3, kg: 4, holds: 2, d: 'Tablette avec la hauteur de 3U pour un appareil de table haut (mélangeur compact, récepteur).' }, []),
+    dev('velcro-straps', 'Générique', 'Sangles scratch (lot de 10)', 'Autre', { kg: 0.1, d: 'Sangles auto-agrippantes pour tenir un appareil sur une tablette de rack ou ranger les câbles.' }, []),
+    dev('zip-ties', 'Générique', 'Colliers serre-câbles plastique (sachet de 100)', 'Autre', { kg: 0.2, d: 'Colliers nylon pour fixer boîtiers et câbles sur une tablette perforée ou une barre de rack.' }, []),
+    dev('zip-mounts', 'Générique', 'Embases adhésives pour colliers (lot de 20)', 'Autre', { kg: 0.05, d: 'Embases à coller sous un appareil ou sur une tablette pour y passer des colliers serre-câbles.' }, []),
   ]),
 ]
 

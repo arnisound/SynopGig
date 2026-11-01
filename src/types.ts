@@ -164,6 +164,8 @@ export interface DeviceTemplate extends ProductInfo {
   reports?: { note: string; at: string }[]
   /** Height in rack units, if the device is rackable. */
   rackU?: number
+  /** Rack shelf or adapter: how many devices that are not 19" it carries. */
+  holds?: number
   /** Weight in kg, used for flight case packing. */
   weight?: number
   ports: Port[]
@@ -191,6 +193,8 @@ export type DeviceData = ProductInfo & {
   name: string
   zone: string
   rackU?: number
+  /** Rack shelf or adapter: how many devices that are not 19" it carries. */
+  holds?: number
   weight?: number
   ports: Port[]
   /** Cards the product can take, and the ones fitted on this device. */
@@ -216,7 +220,7 @@ export type CableData = {
 
 export type CableEdge = Edge<CableData>
 
-export type CaseKind = 'rack' | 'malle' | 'valise' | 'console'
+export type CaseKind = 'rack' | 'malle' | 'valise' | 'console' | 'tiroirs' | 'palox' | 'bac' | 'roll' | 'etagere' | 'chariot' | 'housse'
 
 export interface Banner {
   title: string
@@ -244,6 +248,8 @@ export interface FlightCase {
   devices: string[]
   /** Rack cases: top rack unit (1 = top) of each mounted device. */
   rackLayout?: Record<string, number>
+  /** Rack cases: devices that are not 19" set on a shelf or an adapter (device id → host id). */
+  held?: Record<string, string>
   /** Free items (cables, accessories...). */
   extras: string
   /** Weight of the empty case, kg. */

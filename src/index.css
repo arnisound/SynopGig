@@ -92,7 +92,11 @@ main { flex: 1; min-height: 0; overflow: auto; }
 .brand { font-weight: 800; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
 .logo { width: 28px; height: 28px; display: block; }
 /* The long logo replaces the round icon and the name, except on phones. */
-.brand .logo-long { height: 24px; width: auto; display: block; }
+.brand .logo-long { height: 32px; width: auto; display: block; margin: -3px 0; }
+.maker-corner { position: fixed; left: 8px; bottom: 3px; z-index: 30; font-size: 10px; color: var(--muted); text-decoration: none; opacity: 0.75; pointer-events: auto; }
+.maker-corner:hover { color: var(--accent); opacity: 1; }
+.menu-maker { display: none; }
+@media (max-width: 900px) { .maker-corner { display: none; } .file-actions.open .menu-maker { display: block; width: 100%; text-align: center; padding: 4px; } }
 .brand:has(.logo-long) > .logo { display: none; }
 .brand > span { display: flex; flex-direction: column; line-height: 1.05; }
 .maker { font-size: 9.5px; font-weight: 400; color: var(--muted); text-decoration: none; letter-spacing: 0.3px; margin-top: 1px; opacity: 0.85; }
@@ -932,3 +936,12 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .label-foot { display: flex; align-items: center; gap: 1.5mm; margin-top: 0.8mm; font-size: 6pt; color: #555; }
 .label-foot img { height: 4mm; max-width: 18mm; object-fit: contain; }
 .power-kind { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 6px; }
+/* Rack shelves and adapters carrying devices that are not 19" */
+.face-host { flex: 1; min-width: 0; display: flex; gap: 3px; align-items: stretch; padding: 2px 4px; position: relative; }
+.face-host .carried { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 1px 6px; border: 1px solid #ffffff33; border-left: 3px solid var(--cat); border-radius: 3px; background: #2b2d31; color: #f2f3f5; text-align: left; font-size: 10px; line-height: 1.1; overflow: hidden; }
+.face-host .carried b, .face-host .carried small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.face-host .carried small { opacity: 0.7; }
+.face-host .carried.selected { outline: 2px solid var(--accent); }
+.face-host .host-name { position: absolute; right: 6px; bottom: 0; font-size: 8px; opacity: 0.5; color: #fff; pointer-events: none; }
+.carry-row { display: flex; align-items: center; gap: 6px; padding: 4px 6px; }
+.carry-row select { max-width: 52%; font-size: 12px; }

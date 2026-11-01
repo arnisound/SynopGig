@@ -5,7 +5,7 @@ import CaseImport from '../cases/CaseImport'
 import { applySpec, type CaseSpec } from '../cases/caseImport'
 import { createCase, createDevice, internalRack, rackOfNode, resolveCables, setPanel } from '../project'
 import type { DeviceNode, DeviceTemplate, FlightCase, Project } from '../types'
-import { canPlace, firstFree, mountRack } from './layout'
+import { canPlace, firstFree, freeHosts, mountRack } from './layout'
 import PanelEditor from './PanelEditor'
 import PortWiring from './PortWiring'
 import RackFace, { RACK_DND } from './RackFace'
@@ -39,9 +39,16 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
 
   const fc = racks.find((r) => r.id === rackId) ?? racks[0]
   const layout = fc ? mountRack(fc, project.nodes) : undefined
-  const members = layout ? [...layout.mounted.map((m) => m.node), ...layout.loose, ...layout.overflow] : []
-  const node = members.find((m) => m.id === selected)
   const rackedElsewhere = rackOfNode(project.cases)
+  const carried = layout ? [...layout.onHost.values()].flat() : []
+  const members = layout ? [...layout.mounted.map((m) => m.node), ...carried, ...layout.loose, ...layout.overflow] : []
+  const hostOf = (id: string) => (layout ? layout.mounted.find((m) => layout.onHost.get(m.node.id)?.some((c) => c.id === id))?.node : undefined)
+  // Devices that are not 19": those of this rack not yet on a shelf, then the project's that sit in no case.
+  const inRack = layout?.loose ?? []
+  // Small gear only (≤ 10 kg): nobody straps a line array to a rack shelf.
+  const others = layout ? project.nodes.filter((n) => !((n.data.rackU ?? 0) > 0) && !n.data.panel && (n.data.weight ?? 0) <= 10 && !rackedElsewhere.has(n.id) && !project.cases.some((c) => c.devices.includes(n.id))) : []
+  const notRackable = [...inRack, ...others]
+  const node = members.find((m) => m.id === selected)
 
   const rackable = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -112,11 +119,23 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
     }
   }
 
+  /** Sets a device that is not 19" on a shelf or an adapter of this rack. */
+  const setOn = (nodeId: string, hostId: string) =>
+    setProject((p) => ({
+      ...p,
+      cases: p.cases.map((c) =>
+        c.id === fc.id
+          ? { ...c, devices: c.devices.includes(nodeId) ? c.devices : [...c.devices, nodeId], held: { ...c.held, [nodeId]: hostId } }
+          : { ...c, devices: c.devices.filter((d) => d !== nodeId) },
+      ),
+    }))
+
   const unmount = (nodeId: string) => {
     updateRack((c) => {
       const rackLayout = { ...c.rackLayout }
       delete rackLayout[nodeId]
-      return { ...c, devices: c.devices.filter((d) => d !== nodeId), rackLayout }
+      const held = Object.fromEntries(Object.entries(c.held ?? {}).filter(([id, host]) => id !== nodeId && host !== nodeId))
+      return { ...c, devices: c.devices.filter((d) => d !== nodeId), rackLayout, held }
     })
     setSelected(undefined)
   }
@@ -222,7 +241,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
               <div className="issue danger">Ne rentre pas : {layout.overflow.map((n) => n.data.name).join(', ')}. Agrandissez le rack.</div>
             )}
             {layout.loose.length > 0 && (
-              <p className="muted">Rangé dans le case (non rackable) : {layout.loose.map((n) => n.data.name).join(', ')}</p>
+              <p className="muted">Rangé dans le case, sans fixation : {layout.loose.map((n) => n.data.name).join(', ')}. Posez-les sur une tablette ou un adaptateur (à droite).</p>
             )}
             <dl className="specs">
               <div><dt>Occupation</dt><dd className={layout.usedU > fc.rackU ? 'bad' : ''}>{layout.usedU} / {fc.rackU} U</dd></div>
@@ -248,7 +267,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
                       onChange={(e) => setProject((p) => ({ ...p, nodes: p.nodes.map((n) => (n.id === node.id ? { ...n, data: { ...n.data, name: e.target.value } } : n)) }))}
                     />
                   </label>
-                  <label className="field narrow">
+                  {(node.data.rackU ?? 0) > 0 && <label className="field narrow">
                     <span>Position (U)</span>
                     <input
                       type="number"
@@ -257,10 +276,17 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
                       value={layout.mounted.find((m) => m.node.id === node.id)?.top ?? ''}
                       onChange={(e) => apply(mount(project, node.id, Number(e.target.value)))}
                     />
-                  </label>
+                  </label>}
                 </div>
+                {hostOf(node.id) && <p className="muted small">Posé sur : {hostOf(node.id)!.data.name}</p>}
+                {(node.data.holds ?? 0) > 0 && (
+                  <p className="muted small">
+                    Porte {layout.onHost.get(node.id)?.length ?? 0} / {node.data.holds} appareil(s)
+                    {layout.onHost.get(node.id)?.length ? ` : ${layout.onHost.get(node.id)!.map((c) => c.data.name).join(', ')}` : ''}.
+                  </p>
+                )}
                 <div className="actions">
-                  <button onClick={() => unmount(node.id)}>Démonter</button>
+                  <button onClick={() => unmount(node.id)}>{hostOf(node.id) ? 'Retirer de la tablette' : 'Démonter'}</button>
                   <button className="danger" onClick={() => remove(node.id)}>Supprimer</button>
                 </div>
                 {node.data.panel && (
@@ -296,6 +322,46 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
                   </div>
                   <p className="muted small">Le bandeau imprimé et les dimensions du flight case se règlent dans l’onglet Flight cases.</p>
                 </section>
+                {notRackable.length > 0 && (
+                  <section>
+                    <h4>Appareils non rackables</h4>
+                    {freeHosts(layout).length === 0 ? (
+                      <p className="muted small">
+                        Pour les fixer dans ce rack, ajoutez une tablette ou un adaptateur ½ rack (base : « tablette », « ½ rack », « scratch », « colliers »).
+                      </p>
+                    ) : (
+                      <p className="muted small">Posez-les sur une tablette ou un adaptateur du rack (scratch, colliers ou oreilles ½ rack).</p>
+                    )}
+                    {([['', inRack], ['Autres petits appareils du projet', others]] as const).map(([title, list]) =>
+                      list.length === 0 ? null : (
+                        <details key={title} open={!title}>
+                          {title ? <summary className="muted small">{title} ({list.length})</summary> : <summary className="muted small">Dans ce rack, sans fixation ({list.length})</summary>}
+                    <div className="pick-list">
+                      {list.map((n) => (
+                        <div key={n.id} className="carry-row">
+                          <span className="dot" style={{ background: CATEGORY_COLORS[n.data.category] }} />
+                          <span className="grow">
+                            {n.data.name}
+                            <small className="muted"> · {n.data.model}</small>
+                          </span>
+                          {freeHosts(layout).length > 0 && (
+                            <select value="" onChange={(e) => e.target.value && setOn(n.id, e.target.value)} aria-label={`Poser ${n.data.name} sur`}>
+                              <option value="">Poser sur…</option>
+                              {freeHosts(layout).map((m) => (
+                                <option key={m.node.id} value={m.node.id}>
+                                  {m.node.data.name} (U{m.top}, {(m.node.data.holds ?? 0) - (layout.onHost.get(m.node.id)?.length ?? 0)} place(s))
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                        </details>
+                      ),
+                    )}
+                  </section>
+                )}
                 {unmounted.length > 0 && (
                   <section>
                     <h4>Matériel du projet à monter</h4>

@@ -86,6 +86,8 @@ export interface Sheet {
   opt?: DeviceOption[]
   /** Card slots of the product. */
   slots?: number
+  /** Rack shelf or adapter: devices that are not 19" it carries. */
+  holds?: number
   url?: string
 }
 
@@ -115,6 +117,7 @@ export function dev(id: string, brand: string, model: string, category: Category
     weight: sheet.kg,
     ports,
     ...(sheet.w ? { watts: sheet.w } : {}),
+    ...(sheet.holds ? { holds: sheet.holds } : {}),
     ...(description ? { description } : {}),
     ...(sheet.url ? { url: sheet.url } : {}),
     ...(specs.length ? { specs } : {}),

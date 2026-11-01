@@ -40,7 +40,21 @@ export function mountRack(fc: FlightCase, nodes: DeviceNode[]) {
   }
   mounted.sort((a, b) => a.top - b.top)
   const usedU = mounted.reduce((s, m) => s + m.height, 0)
-  return { mounted, overflow, loose, usedU }
+  // Devices that are not 19", set on a mounted shelf or adapter (as many as it carries).
+  const onHost = new Map<string, DeviceNode[]>()
+  for (const n of loose) {
+    const host = fc.held?.[n.id]
+    const m = host ? mounted.find((x) => x.node.id === host) : undefined
+    if (!m || (onHost.get(host!)?.length ?? 0) >= (m.node.data.holds ?? 0)) continue
+    onHost.set(host!, [...(onHost.get(host!) ?? []), n])
+  }
+  const carried = new Set([...onHost.values()].flat().map((n) => n.id))
+  return { mounted, overflow, loose: loose.filter((n) => !carried.has(n.id)), onHost, usedU }
+}
+
+/** Shelves and adapters of the rack with room left, for a device that is not 19". */
+export function freeHosts(layout: { mounted: Mounted[]; onHost: Map<string, DeviceNode[]> }) {
+  return layout.mounted.filter((m) => (m.node.data.holds ?? 0) > (layout.onHost.get(m.node.id)?.length ?? 0))
 }
 
 export function firstFree(rackU: number, mounted: { top: number; height: number; node?: { id: string } }[], height: number, ignore?: string) {

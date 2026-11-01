@@ -189,8 +189,7 @@ export default function App() {
         <div className="brand">
           <img className="logo" src={`${import.meta.env.BASE_URL}icon.png`} alt="" width={28} height={28} />
           <span>
-            <img className="logo-long" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" height={24} />
-            <a className="maker" href="https://arnisoundtools.com" target="_blank" rel="noopener noreferrer">by arnisoundtools.com</a>
+            <img className="logo-long" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" height={32} />
           </span>
         </div>
         <div className="project-title">
@@ -236,9 +235,11 @@ export default function App() {
               {theme === 'dark' ? <circle cx="8" cy="8" r="6.5" fill="currentColor" /> : theme === 'auto' ? <path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" /> : null}
             </svg>
           </button>
+          <a className="maker menu-maker" href="https://arnisoundtools.com" target="_blank" rel="noopener noreferrer">by arnisoundtools.com</a>
           <input ref={fileInput} type="file" accept=".json,application/json" hidden onChange={(e) => { importFile(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </header>
+      <a className="maker-corner no-print" href="https://arnisoundtools.com" target="_blank" rel="noopener noreferrer">by arnisoundtools.com</a>
       {info && <ProjectInfoDialog project={project} setProject={setProject} onClose={() => setInfo(false)} />}
       {dossier && <DossierDialog project={project} onClose={() => setDossier(false)} />}
       {labels && <LabelsDialog project={project} onClose={() => setLabels(false)} onShare={SHARED_ID ? undefined : () => { setLabels(false); setSharing(true) }} />}

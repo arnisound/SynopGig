@@ -44,3 +44,18 @@ describe('mountRack', () => {
     expect(mountRack(fc, [a, b]).overflow.map((n) => n.id)).toEqual([b.id])
   })
 })
+
+describe('shelves and half-rack adapters', () => {
+  it('carries devices that are not 19", no more than the shelf takes', () => {
+    const shelf = createDevice(tpl('rack-half-1u'), { x: 0, y: 0 }, [])
+    const a = createDevice(tpl('mini-pc'), { x: 0, y: 0 }, [])
+    const b = createDevice(tpl('mini-pc'), { x: 0, y: 0 }, [a])
+    const c = createDevice(tpl('mini-pc'), { x: 0, y: 0 }, [a, b])
+    expect(shelf.data.holds).toBe(2)
+    const rack = { ...createCase([]), devices: [shelf.id, a.id, b.id, c.id], held: { [a.id]: shelf.id, [b.id]: shelf.id, [c.id]: shelf.id } }
+    const layout = mountRack(rack, [shelf, a, b, c])
+    expect(layout.onHost.get(shelf.id)?.map((n) => n.id)).toEqual([a.id, b.id])
+    // The third one does not fit: it stays loose in the case.
+    expect(layout.loose.map((n) => n.id)).toEqual([c.id])
+  })
+})

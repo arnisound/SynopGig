@@ -7,13 +7,8 @@ import CaseImport from './CaseImport'
 import { applySpec, type CaseSpec } from './caseImport'
 import { BannerArt, CaseFront } from './CaseSvg'
 import { bannerSize, caseHeightMm } from './geometry'
+import { applyModel, CASE_MODELS, KINDS } from './models'
 
-const KINDS: Record<CaseKind, string> = {
-  rack: 'Rack 19"',
-  malle: 'Malle',
-  valise: 'Valise',
-  console: 'Case console (capot)',
-}
 
 const FONTS = [
   { label: 'Impact', value: 'Impact, "Arial Black", sans-serif' },
@@ -175,6 +170,22 @@ export default function CaseEditor({ project, setProject, focusCase }: Props) {
               <Field label="N°"><input value={fc.number} onChange={(e) => update({ number: e.target.value })} /></Field>
               <Field label="Nom"><input value={fc.name} onChange={(e) => update({ name: e.target.value })} /></Field>
             </div>
+            <Field label="Partir d’un modèle">
+              <select
+                value=""
+                onChange={(e) => {
+                  const model = CASE_MODELS[Number(e.target.value)]
+                  if (model) setProject((p) => ({ ...p, cases: p.cases.map((c) => (c.id === fc.id ? applyModel(c, model) : c)) }))
+                }}
+              >
+                <option value="">Choisir : rack, malle, palox, bac, roll, étagère…</option>
+                {(Object.keys(KINDS) as CaseKind[]).map((k) => (
+                  <optgroup key={k} label={KINDS[k]}>
+                    {CASE_MODELS.map((mo, i) => (mo.kind === k ? <option key={i} value={i}>{mo.name}</option> : null))}
+                  </optgroup>
+                ))}
+              </select>
+            </Field>
             <Field label="Type">
               <select value={fc.kind} onChange={(e) => update({ kind: e.target.value as CaseKind })}>
                 {Object.entries(KINDS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
