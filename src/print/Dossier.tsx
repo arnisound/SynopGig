@@ -96,7 +96,7 @@ export default function Dossier({
       <style>{`@page { size: A4; @bottom-left { content: "${cssString(project.name)}${project.venue ? ` — ${cssString(project.venue)}` : ''} · dossier technique"; font: 7pt Arial, sans-serif; color: #777; } @bottom-right { content: "SynopGig · Arnisound tools · arnisoundtools.com · page " counter(page) " / " counter(pages); font: 7pt Arial, sans-serif; color: #777; } }`}</style>
       {has('cover') && (
         <section className="d-page d-cover">
-          <img src={`${import.meta.env.BASE_URL}icon.png`} alt="" width={90} height={90} />
+          <img className="d-logo" src={`${import.meta.env.BASE_URL}logo-long.png`} alt="SynopGig" />
           <h1>{project.name}</h1>
           <p className="d-sub">{[project.venue, date].filter(Boolean).join(' — ')}</p>
           <p className="d-kind">Dossier technique</p>

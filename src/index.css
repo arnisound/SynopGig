@@ -91,6 +91,9 @@ main { flex: 1; min-height: 0; overflow: auto; }
 }
 .brand { font-weight: 800; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
 .logo { width: 28px; height: 28px; display: block; }
+/* The long logo replaces the round icon and the name, except on phones. */
+.brand .logo-long { height: 30px; width: auto; display: block; margin: -2px 0 -1px; filter: drop-shadow(0 0 0.4px #000) drop-shadow(0 0 0.4px #000) drop-shadow(0 1px 1px #0005); }
+.brand:has(.logo-long) > .logo { display: none; }
 .brand > span { display: flex; flex-direction: column; line-height: 1.05; }
 .maker { font-size: 10px; font-weight: 600; color: var(--muted); text-decoration: none; letter-spacing: 0.2px; }
 .maker:hover { color: var(--accent); }
@@ -591,6 +594,7 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
   .dossier .d-config { margin: 0 0 2mm; color: #333; }
   .dossier .d-device-head { display: flex; align-items: center; gap: 3mm; }
   .d-cover { text-align: center; padding-top: 20mm; }
+  .d-cover .d-logo { width: 110mm; height: auto; margin: 0 auto 6mm; display: block; }
   .d-cover .d-sub { font-size: 14pt; color: #333; margin: 0; }
   .d-cover .d-kind { font-size: 12pt; letter-spacing: 3px; text-transform: uppercase; color: #c8892b; font-weight: 700; margin: 6mm 0 10mm; }
   .d-stats { display: flex; justify-content: center; gap: 8mm; margin: 0 0 12mm; }
@@ -721,6 +725,7 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 }
 @media (max-width: 480px) {
   .brand > span { display: none; }
+  .brand:has(.logo-long) > .logo { display: block; }
 }
 
 /* ---- Shared projects */
