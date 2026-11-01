@@ -96,6 +96,27 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
   }
+  // The library (left) and the inspector (right) fold away for room on the drawing, kept for the next visits.
+  const [panels, setPanels] = useState<{ left: boolean; right: boolean }>(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem('synopgig.panels') ?? 'null')
+      return { left: v?.left !== false, right: v?.right !== false }
+    } catch {
+      return { left: true, right: true }
+    }
+  })
+  const togglePanel = (side: 'left' | 'right') =>
+    setPanels((p) => {
+      const next = { ...p, [side]: !p[side] }
+      try {
+        localStorage.setItem('synopgig.panels', JSON.stringify(next))
+      } catch {
+        // Storage blocked: the choice lasts for this visit.
+      }
+      return next
+    })
+  // The drawing takes the room freed (or given back) once the grid has moved.
+  const fitSoon = () => setTimeout(() => fitView({ duration: 300 }), 80)
   // "Ajouter un nouveau produit": made in a window over the synoptic; the newest ones head the palette.
   const [newProduct, setNewProduct] = useState<NewProductRequest>()
   const [creating, setCreating] = useState(false)
@@ -393,7 +414,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
   }
 
   return (
-    <div className={`synoptic ${drawer ? `show-${drawer}` : ''}`} style={{ '--inspector-w': `${inspectorW}px` } as CSSProperties}>
+    <div className={`synoptic ${drawer ? `show-${drawer}` : ''} ${panels.left ? '' : 'no-palette'} ${panels.right ? '' : 'no-inspector'}`} style={{ '--inspector-w': `${inspectorW}px` } as CSSProperties}>
       {/* Drag to widen the inspector; a double click brings it back to its usual width. */}
       <div className="inspector-resize" title="Glisser pour élargir le panneau (double-clic : largeur d’origine)" onPointerDown={startResize} onDoubleClick={() => saveInspectorW(INSPECTOR_W)} />
       {/* Phones and tablets: the palette slides in from the left, the inspector rises from the bottom. */}
@@ -420,6 +441,9 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       <div className="canvas" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
         <div className="canvas-toolbar">
           <button className="mobile-only primary" onClick={() => setDrawer(drawer === 'palette' ? undefined : 'palette')}>+ Matériel</button>
+          <button className="desktop-only panel-toggle" onClick={() => { togglePanel('left'); fitSoon() }} aria-pressed={panels.left} title={panels.left ? 'Replier la bibliothèque' : 'Ouvrir la bibliothèque'}>
+            {panels.left ? '‹' : '›'} Bibliothèque
+          </button>
           <input ref={findInput} className="cable-find" list="cable-ids" title="Trouver un câble par son repère (Ctrl+F)" placeholder="Câble…" value={find} onChange={(e) => findCable(e.target.value)} />
           <datalist id="cable-ids">
             {cables.map((c) => (
@@ -435,6 +459,9 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
           <button className="mobile-only icon-only" onClick={() => fitView({ duration: 400 })} title="Tout voir" aria-label="Tout voir">⤢</button>
           <button className={viewPanel ? 'active' : ''} onClick={() => setViewPanel((v) => !v)} aria-expanded={viewPanel} aria-label="Affichage" title="Affichage">
             <span aria-hidden="true">⚙</span><span className="wide-only"> Affichage</span>
+          </button>
+          <button className="desktop-only panel-toggle" onClick={() => { togglePanel('right'); fitSoon() }} aria-pressed={panels.right} title={panels.right ? 'Replier l’inspecteur' : 'Ouvrir l’inspecteur'}>
+            Inspecteur {panels.right ? '›' : '‹'}
           </button>
         </div>
         {viewPanel && (

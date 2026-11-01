@@ -18,9 +18,9 @@ export default function TitleBlock({ project, title }: { project: Project; title
       <div className="tb-cells">
         {cell('Client', client?.name)}
         {cell('Document', info.docType)}
-        {cell('Indice', info.revision)}
-        {cell('Statut', info.status)}
-        {cell('Réalisé par', authorOf(project))}
+        {cell('Version', info.revision)}
+        {cell('État', info.status)}
+        {cell('Auteur', authorOf(project))}
         {cell('Date', date)}
       </div>
       {client?.logo && <div className="tb-logo"><img src={client.logo} alt="" /></div>}

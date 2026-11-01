@@ -138,6 +138,14 @@ button.icon-only { padding: 4px 8px; min-width: 32px; }
 
 /* ---- Synoptic */
 .synoptic { display: grid; grid-template-columns: 240px 1fr var(--inspector-w, 340px); height: 100%; position: relative; }
+/* Folded panels: the drawing takes their room. */
+@media (min-width: 901px) {
+  .synoptic.no-palette { grid-template-columns: 1fr var(--inspector-w, 340px); }
+  .synoptic.no-inspector { grid-template-columns: 240px 1fr; }
+  .synoptic.no-palette.no-inspector { grid-template-columns: 1fr; }
+  .synoptic.no-palette .palette, .synoptic.no-inspector .inspector, .synoptic.no-inspector .inspector-resize { display: none; }
+}
+.panel-toggle { font-size: 12px; white-space: nowrap; }
 .inspector-resize { position: absolute; top: 0; bottom: 0; right: calc(var(--inspector-w, 340px) - 3px); width: 7px; cursor: col-resize; z-index: 6; }
 .inspector-resize:hover, .inspector-resize:active { background: color-mix(in srgb, var(--accent) 35%, transparent); }
 .inspector { container-type: inline-size; }
@@ -391,6 +399,9 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
 
 @media (max-width: 1100px) {
   .synoptic { grid-template-columns: 200px 1fr; }
+  .synoptic.no-palette, .synoptic.no-palette.no-inspector { grid-template-columns: 1fr; }
+  .synoptic.no-palette .inspector { grid-column: auto; }
+  .synoptic.no-inspector { grid-template-columns: 200px 1fr; }
   .inspector-resize { display: none; }
   .synoptic .inspector { grid-column: span 2; max-height: 40vh; border-left: none; border-top: 1px solid var(--border); }
   .page.cases { grid-template-columns: 1fr; }
@@ -713,6 +724,7 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 /* ---- Phones and tablets */
 .palette-wrap, .inspector-wrap, .topbar-more:not(.file-actions) { display: contents; }
 .sheet-close, .mobile-only, .drawer-backdrop, .icon-btn { display: none; }
+@media (max-width: 900px) { .desktop-only { display: none !important; } }
 @media (pointer: coarse) {
   /* Fingers need bigger ports; touching a port then another one makes the cable. */
   .react-flow__handle { width: 14px; height: 14px; }

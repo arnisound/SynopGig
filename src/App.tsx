@@ -199,7 +199,7 @@ export default function App() {
         </div>
         <div className="project-title">
           <input className="project-name" value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} aria-label="Nom du projet" title={[project.venue, project.date].filter(Boolean).join(' · ')} />
-          <button className="icon-only" onClick={() => setInfo(true)} title="Informations du projet, client, cartouche, organisation" aria-label="Informations du projet">⚙</button>
+          <button className="icon-only" onClick={() => setInfo(true)} title="Fiche du spectacle : lieu, date, client, bas de page, ma structure" aria-label="Fiche du spectacle">⚙</button>
         </div>
         <button className="icon-btn undo-mobile" onClick={undo} disabled={!canUndo} title="Annuler" aria-label="Annuler">↶</button>
         <button className="icon-btn menu-btn" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-label="Menu">{menu ? '✕' : '☰'}</button>

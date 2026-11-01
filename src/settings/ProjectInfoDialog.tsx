@@ -79,28 +79,28 @@ export default function ProjectInfoDialog({ project, setProject, onClose, readOn
 
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal project-info" role="dialog" aria-label="Informations du projet">
+      <div className="modal project-info" role="dialog" aria-label="Fiche du spectacle">
         <div className="section-head">
-          <h3>{tab === 'project' ? 'Informations du projet' : 'Paramètres'}</h3>
+          <h3>{tab === 'project' ? 'Fiche du spectacle' : 'Ma structure et mes clients'}</h3>
           <button className="icon" onClick={onClose} aria-label="Fermer">✕</button>
         </div>
         {!readOnly && (
           <div className="seg">
-            <button className={tab === 'project' ? 'active' : ''} onClick={() => setTab('project')}>Projet</button>
-            <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>Organisation et clients</button>
+            <button className={tab === 'project' ? 'active' : ''} onClick={() => setTab('project')}>Spectacle</button>
+            <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>Ma structure et mes clients</button>
           </div>
         )}
 
         {tab === 'project' || readOnly ? (
           <fieldset className="info-form" disabled={readOnly}>
-            {readOnly && <p className="muted small">Projet partagé : informations en lecture seule.</p>}
+            {readOnly && <p className="muted small">Projet partagé : fiche consultable, non modifiable.</p>}
             <label className="field">
-              <span>Nom du projet</span>
+              <span>Titre du spectacle</span>
               <input value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} />
             </label>
             <label className="field">
-              <span>Description</span>
-              <textarea rows={3} value={info.description ?? ''} placeholder="Ajouter une description…" onChange={(e) => setInfo({ description: e.target.value })} />
+              <span>En quelques mots</span>
+              <textarea rows={3} value={info.description ?? ''} placeholder="Jauge, plateaux, particularités du lieu…" onChange={(e) => setInfo({ description: e.target.value })} />
             </label>
             <div className="grid2">
               <label className="field">
@@ -116,15 +116,15 @@ export default function ProjectInfoDialog({ project, setProject, onClose, readOn
             <label className="field">
               <span>Client</span>
               <select value={newClient !== undefined ? '__new' : (info.client?.id ?? '')} onChange={(e) => (e.target.value ? chooseClient(e.target.value) : setInfo({ client: undefined }))}>
-                <option value="">Aucun client</option>
+                <option value="">— pas de client —</option>
                 {settings.clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 {info.client && !settings.clients.some((c) => c.id === info.client?.id) && <option value={info.client.id}>{info.client.name}</option>}
-                <option value="__new">Nouveau client…</option>
+                <option value="__new">+ Créer un client…</option>
               </select>
             </label>
             {newClient !== undefined && (
               <div className="row">
-                <input autoFocus value={clientName} placeholder="Nom du client" onChange={(e) => setClientName(e.target.value)} />
+                <input autoFocus value={clientName} placeholder="Salle, festival, société…" onChange={(e) => setClientName(e.target.value)} />
                 <button
                   className="primary"
                   disabled={!clientName.trim()}
@@ -140,39 +140,39 @@ export default function ProjectInfoDialog({ project, setProject, onClose, readOn
               </div>
             )}
             <p className="muted small">
-              Son nom et son logo figurent dans le cartouche du dossier PDF et sur les étiquettes. Logo et adresse :{' '}
-              <button className="link" onClick={() => setTab('settings')}>Organisation et clients</button>.
+              Le client apparaît en couverture du dossier, en bas des pages et, si vous le voulez, sur les étiquettes. Son logo et son adresse se règlent dans{' '}
+              <button className="link" onClick={() => setTab('settings')}>Ma structure et mes clients</button>.
             </p>
 
-            <h4>Cartouche des documents</h4>
-            <p className="muted small">Repris sur chaque page du dossier PDF, sans ressaisie.</p>
+            <h4>Bas de page des documents imprimés</h4>
+            <p className="muted small">Imprimé en bas des pages du dossier : renseigné une fois, valable pour tout le dossier.</p>
             <div className="grid2">
-              {field('revision', 'Indice de révision', 'A')}
-              {field('author', 'Réalisé par', settings.org.author || 'Votre nom')}
-              {field('docType', 'Type de document', 'Synoptique AV')}
-              {field('status', 'Statut', 'Pour validation')}
-              {field('site', 'Site', 'Adresse ou bâtiment')}
-              {field('room', 'Salle', 'Salle 204')}
+              {field('revision', 'Version', 'v1')}
+              {field('author', 'Auteur', settings.org.author || 'Prénom Nom')}
+              {field('docType', 'Intitulé', 'Dossier technique')}
+              {field('status', 'État', 'Version de travail')}
+              {field('site', 'Adresse du lieu', 'Rue, ville')}
+              {field('room', 'Espace', 'Grande scène, chapiteau…')}
             </div>
           </fieldset>
         ) : (
           <div className="info-form">
-            <p className="muted small">Gardés dans ce navigateur, pour tous vos projets.</p>
-            <h4>Organisation</h4>
-            <LogoPicker logo={settings.org.logo} onChange={(logo) => setOrg({ logo })} label="Ajouter un logo" />
-            <p className="muted small">PNG, JPEG ou WebP, 2 Mo au plus. Affiché dans le cartouche et, au choix, sur les étiquettes.</p>
+            <p className="muted small">Enregistré dans ce navigateur et repris dans chaque nouveau projet.</p>
+            <h4>Ma structure</h4>
+            <LogoPicker logo={settings.org.logo} onChange={(logo) => setOrg({ logo })} label="Choisir un logo" />
+            <p className="muted small">Une image PNG, JPEG ou WebP (2 Mo maximum), réduite automatiquement. Elle figure sur le dossier et, si vous le voulez, sur les étiquettes.</p>
             <div className="grid2">
               <label className="field">
-                <span>Nom de l’organisation</span>
-                <input value={settings.org.name} placeholder="Votre société" onChange={(e) => setOrg({ name: e.target.value })} />
+                <span>Nom de la structure</span>
+                <input value={settings.org.name} placeholder="Compagnie, prestataire, salle…" onChange={(e) => setOrg({ name: e.target.value })} />
               </label>
               <label className="field">
-                <span>Réalisé par (par défaut)</span>
-                <input value={settings.org.author ?? ''} placeholder="Votre nom" onChange={(e) => setOrg({ author: e.target.value })} />
+                <span>Auteur des documents</span>
+                <input value={settings.org.author ?? ''} placeholder="Prénom Nom" onChange={(e) => setOrg({ author: e.target.value })} />
               </label>
             </div>
 
-            <h4>Clients</h4>
+            <h4>Mes clients</h4>
             <form
               className="row"
               onSubmit={(e) => {
@@ -180,20 +180,20 @@ export default function ProjectInfoDialog({ project, setProject, onClose, readOn
                 if (addClient(clientName)) setClientName('')
               }}
             >
-              <input value={clientName} placeholder="Ex : Mairie de Lyon" onChange={(e) => setClientName(e.target.value)} />
+              <input value={clientName} placeholder="Nom du client à ajouter" onChange={(e) => setClientName(e.target.value)} />
               <button type="submit" disabled={!clientName.trim()}>+ Ajouter</button>
             </form>
-            {settings.clients.length === 0 && <p className="muted small">Aucun client pour l’instant.</p>}
+            {settings.clients.length === 0 && <p className="muted small">Pas encore de client enregistré.</p>}
             {settings.clients.map((c) => (
               <div key={c.id} className="client-card">
-                <LogoPicker logo={c.logo} onChange={(logo) => setClient(c.id, { logo })} label="Ajouter un logo" />
+                <LogoPicker logo={c.logo} onChange={(logo) => setClient(c.id, { logo })} label="Choisir un logo" />
                 <label className="field">
                   <span>Nom</span>
                   <input value={c.name} onChange={(e) => setClient(c.id, { name: e.target.value })} />
                 </label>
                 <label className="field">
                   <span>Adresse</span>
-                  <input value={c.address ?? ''} placeholder="Ex : 1 place de la Comédie, 69001 Lyon" onChange={(e) => setClient(c.id, { address: e.target.value })} />
+                  <input value={c.address ?? ''} placeholder="Adresse postale" onChange={(e) => setClient(c.id, { address: e.target.value })} />
                 </label>
                 <button className="small-btn danger" onClick={() => confirm(`Supprimer le client « ${c.name} » ?`) && save({ ...settings, clients: settings.clients.filter((x) => x.id !== c.id) })}>
                   Supprimer
