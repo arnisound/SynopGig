@@ -3,7 +3,7 @@ import { CATEGORY_COLORS } from '../data/library'
 import { toggleHole } from '../data/panels'
 import CaseImport from '../cases/CaseImport'
 import { applySpec, type CaseSpec } from '../cases/caseImport'
-import { createCase, createDevice, internalRack, rackOfNode, resolveCables, setPanel } from '../project'
+import { createCase, createDevice, internalRack, rackOfNode, resolveCables, setPanel, weightOf } from '../project'
 import type { DeviceNode, DeviceTemplate, FlightCase, Project } from '../types'
 import { canPlace, firstFree, freeHosts, mountRack } from './layout'
 import PanelEditor from './PanelEditor'
@@ -171,7 +171,7 @@ export default function RackBuilder({ project, setProject, templates }: Props) {
   const cables = fc ? resolveCables(project.nodes, project.edges) : []
   const rackMap = rackOfNode(project.cases)
   const internal = cables.filter((c) => internalRack(rackMap, c.edge)?.id === fc?.id)
-  const weight = members.reduce((s, m) => s + (m.data.weight ?? 0), 0)
+  const weight = members.reduce((s, m) => s + weightOf(m.data), 0)
 
   return (
     <div className="page racks">

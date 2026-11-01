@@ -184,6 +184,15 @@ export interface DeviceConfig {
   dmxAddress?: string
   mode?: string
   notes?: string
+  /** Hanging point (motor, truss) the device hangs from. */
+  rigPoint?: string
+  /** Wireless: frequency (MHz) and the paired receiver or transmitter. */
+  freq?: string
+  pair?: string
+  /** Audio over IP: device name on the network, clock leader, subscriptions. */
+  danteName?: string
+  clockLeader?: boolean
+  subscriptions?: string
 }
 
 export type DeviceData = ProductInfo & {
@@ -203,6 +212,8 @@ export type DeviceData = ProductInfo & {
   /** Fitted cards, "optionId:n" (the same card can sit in several slots). */
   fitted?: string[]
   config: DeviceConfig
+  /** Identical units shown by this box (a line array of 12 cabinets): counted in weights, power and parts. */
+  qty?: number
   brand?: string
   panel?: PanelSpec
   family?: string
@@ -338,11 +349,15 @@ export interface Project {
   customTemplates: DeviceTemplate[]
   view?: Partial<SynopticView>
   patch?: { inputs?: Record<string, PatchEdit>; outputs?: Record<string, PatchEdit> }
+  /** Patch of each band (festival changeovers): the one in use is in `patch`, the others kept here by name. */
+  patchVariants?: Record<string, { inputs?: Record<string, PatchEdit>; outputs?: Record<string, PatchEdit> }>
+  /** Name of the patch in use (default: « Patch principal »). */
+  patchVariant?: string
   stage?: StagePlot
   /** Read-only link published from this project (its key stays in the browser). */
   share?: { id: string; updatedAt?: string }
   /** Power budget: the phase of each power outlet ("nodeId:portId" → L1, L2, L3). */
-  power?: { phases?: Record<string, Phase> }
+  power?: { phases?: Record<string, Phase>; cosPhi?: number }
   /** Project information: client, title block of the printed documents. */
   info?: ProjectInfo
 }

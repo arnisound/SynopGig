@@ -121,6 +121,33 @@ function mates(a: ConnectorType, b: ConnectorType) {
   return MATING.some((g) => g.includes(a) && g.includes(b))
 }
 
+/**
+ * Single-phase 16 A sockets and appliance inlets: a power cord joins any
+ * two of them (Schuko → IEC, TRUE1 → IEC, P17 16A → Schuko…), no adapter.
+ */
+const CORD = new Set<ConnectorType>(['schuko', 'p17-16a', 'powercon-true1', 'iec'])
+export const isCord = (from: Port, to: Port) => from.signal === 'power' && to.signal === 'power' && CORD.has(from.connector) && CORD.has(to.connector)
+
+/** The fastest SDI a port takes, read from its name ("12G-SDI in", "3G-SDI out"). */
+const sdiSpeed = (p: Port) => (p.connector === 'sdi' && p.signal === 'video' ? Number(/(\d+)G-SDI/i.exec(p.label)?.[1] ?? 0) : 0)
+
+/** Longest run, in metres, before a video signal needs a booster or a fibre. */
+const MAX_RUN: Partial<Record<ConnectorType, [number, string]>> = { hdmi: [15, 'HDMI'], displayport: [5, 'DisplayPort'], usb: [5, 'USB'], 'usb-c': [3, 'USB-C'] }
+
+/** Checks that depend on the cable itself: its length against what the signal carries. */
+export function checkRun(from: Port | undefined, to: Port | undefined, length?: number): Issue[] {
+  if (!from || !to || !length) return []
+  const issues: Issue[] = []
+  const run = MAX_RUN[from.connector] ?? MAX_RUN[to.connector]
+  if (run && length > run[0]) issues.push({ severity: 'warning', message: `${run[1]} sur ${length} m : au-delà de ${run[0]} m, prévoir un câble actif, un extendeur ou une fibre` })
+  const sdi = Math.max(sdiSpeed(from), sdiSpeed(to))
+  const reach = sdi >= 12 ? 70 : sdi >= 6 ? 100 : sdi >= 3 ? 120 : 0
+  if (from.connector === 'sdi' && from.signal === 'video' && reach && length > reach) issues.push({ severity: 'warning', message: `${sdi}G-SDI sur ${length} m : portée d’environ ${reach} m en coaxial, prévoir une fibre ou un répéteur` })
+  if (to.connector === 'ethercon' || to.connector === 'rj45' || from.connector === 'rj45' || from.connector === 'ethercon')
+    if (length > 100 && (from.signal !== 'video' || from.connector !== 'ethercon')) issues.push({ severity: 'warning', message: `Ethernet cuivre sur ${length} m : 100 m au plus, prévoir une fibre` })
+  return issues
+}
+
 export type Severity = 'danger' | 'warning'
 
 export interface Issue {
@@ -149,7 +176,11 @@ export function checkLink(from: Port | undefined, to: Port | undefined): Issue[]
     })
   }
 
-  if (!mates(from.connector, to.connector)) {
+  // SDI: a 12G output into a 3G input only passes if the source is set to 3G (1080p).
+  const [out, inn] = [sdiSpeed(from), sdiSpeed(to)]
+  if (out && inn && out > inn) issues.push({ severity: 'warning', message: `Sortie ${out}G-SDI vers une entrée ${inn}G-SDI : régler la source en ${inn}G (1080p au plus)` })
+
+  if (!mates(from.connector, to.connector) && !isCord(from, to)) {
     issues.push({
       severity: 'warning',
       message: `Adaptateur nécessaire : ${CONNECTORS[from.connector]} → ${CONNECTORS[to.connector]}`,

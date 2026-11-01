@@ -1,5 +1,6 @@
 import { applyModel, CASE_MODELS } from './cases/models'
 import { LIBRARY } from './data/library'
+import { balancePhases } from './power/power'
 import { createCase, createDevice, DEFAULT_BANNER, nextCableId, uid } from './project'
 import type { CableEdge, DeviceNode, FlightCase, Project, StageItem, StagePlot } from './types'
 
@@ -49,37 +50,45 @@ export function demoProject(): Project {
   const keys = add('radial-j48-st', 0, 560, 'Plateau', 'DI clavier')
   const antA = add('shure-ua874', 0, 820, 'Plateau', 'Antenne HF A')
   const antB = add('shure-ua874', 0, 930, 'Plateau', 'Antenne HF B')
-  add('shure-ulxd2-sm58', 0, 1050, 'Plateau', 'Micro HF chant 1')
-  add('shure-ulxd2-sm58', 0, 1150, 'Plateau', 'Micro HF chant 2')
+  const hh1 = add('shure-ulxd2-sm58', 0, 1050, 'Plateau', 'Micro HF chant 1', { freq: '606,125' })
+  const hh2 = add('shure-ulxd2-sm58', 0, 1150, 'Plateau', 'Micro HF chant 2', { freq: '607,250' })
 
   // Stage rack
   const ua844 = add('shure-ua844', 330, 820, 'Plateau', 'Distributeur antennes')
-  const hf = add('shure-ulxd4d', 330, 560, 'Plateau', 'Récepteur HF chant', { ip: '192.168.1.21', notes: 'Fréquences coordonnées avec le plan HF du site. Groupe 3, canaux 1 et 2.' })
-  const iem = add('senn-sr2050', 330, 1100, 'Plateau', 'Émetteur ears musiciens', { ip: '192.168.1.40', notes: 'Mix 1 : batteur, mix 2 : chant. Fréquences hors bande des micros HF.' })
-  const rio = add('yam-rio3224', 700, 0, 'Plateau', 'Stagebox plateau', { ip: '192.168.1.20', notes: 'ID Rio 1, gains pilotés depuis la console FOH.' })
+  const hf = add('shure-ulxd4d', 330, 560, 'Plateau', 'Récepteur HF chant', { ip: '192.168.1.21', freq: '606,125 / 607,250', danteName: 'HF-ULXD4D', notes: 'Fréquences coordonnées avec le plan HF du site. Groupe 3, canaux 1 et 2.' })
+  hh1.data.config.pair = hf.id
+  hh2.data.config.pair = hf.id
+  const iem = add('senn-sr2050', 330, 1100, 'Plateau', 'Émetteur ears musiciens', { ip: '192.168.1.40', freq: '518,200 / 520,400', notes: 'Mix 1 : batteur, mix 2 : chant. Fréquences hors bande des micros HF.' })
+  const ek1 = add('senn-ek-iem-g4', 0, 1250, 'Plateau', 'Ears batteur', { freq: '518,200', pair: iem.id })
+  const ek2 = add('senn-ek-iem-g4', 0, 1350, 'Plateau', 'Ears chant', { freq: '520,400', pair: iem.id })
+  const rio = add('yam-rio3224', 700, 0, 'Plateau', 'Stagebox plateau', { ip: '192.168.1.20', danteName: 'RIO-PLATEAU', subscriptions: 'CL5 Mix 1-8 → Rio Out 1-8', notes: 'ID Rio 1, gains pilotés depuis la console FOH.' })
   const swStage = add('luminex-gc10', 1060, 0, 'Plateau', 'Switch plateau', { ip: '192.168.1.2', mode: 'Profil Dante + Art-Net + contrôle' })
   const node = add('luminex-lumi4', 1060, 420, 'Plateau', 'Node DMX plateau', { ip: '2.0.0.20', mode: 'Art-Net, univers 1 à 4' })
   const rackPwr = add('rack-power-1u', 1060, 720, 'Plateau', 'Distribution rack plateau')
   const drawer = add('rack-drawer-2u', 1060, 1000, 'Plateau', 'Tiroir accessoires')
 
   /* ---------- Sound: amplifiers and system ---------- */
-  const la1 = add('la-la12x', 1450, 0, 'Façade', 'LA12X façade jardin', { ip: '192.168.1.50', mode: 'Preset K2_110 + KS28_60' })
-  const la2 = add('la-la12x', 1450, 430, 'Façade', 'LA12X façade cour', { ip: '192.168.1.51', mode: 'Preset K2_110 + KS28_60' })
-  const la3 = add('la-la12x', 1450, 860, 'Façade', 'LA12X subs', { ip: '192.168.1.52', mode: 'Preset KS28_60, cardioïde' })
-  const la4 = add('la-la4x', 1450, 1290, 'Retours', 'LA4X lipfills et retours', { ip: '192.168.1.53', mode: 'X8 (lipfills), X15_MO (retours)' })
+  const la1 = add('la-la12x', 1450, 0, 'Façade', 'LA12X façade jardin', { ip: '192.168.1.50', danteName: 'LA12X-J', mode: 'Preset K2_110 + KS28_60' })
+  const la2 = add('la-la12x', 1450, 430, 'Façade', 'LA12X façade cour', { ip: '192.168.1.51', danteName: 'LA12X-C', mode: 'Preset K2_110 + KS28_60' })
+  const la3 = add('la-la12x', 1450, 860, 'Façade', 'LA12X subs', { ip: '192.168.1.52', danteName: 'LA12X-SUB', mode: 'Preset KS28_60, cardioïde' })
+  const la4 = add('la-la4x', 1450, 1290, 'Retours', 'LA4X lipfills et retours', { ip: '192.168.1.53', danteName: 'LA4X-FILLS', mode: 'X8 (lipfills), X15_MO (retours)' })
   const ampPwr = add('distro-amp-32tri', 1450, 1710, 'Façade', 'Distribution amplis')
-  const k2L = add('la-k2', 1850, 0, 'Façade', 'K2 jardin (12 boîtes)')
-  const subL = add('la-ks28', 1850, 860, 'Façade', 'KS28 jardin (4 boîtes)')
-  const k2R = add('la-k2', 1850, 430, 'Façade', 'K2 cour (12 boîtes)')
-  const subR = add('la-ks28', 1850, 990, 'Façade', 'KS28 cour (4 boîtes)')
+  const k2L = add('la-k2', 1850, 0, 'Façade', 'K2 jardin', { rigPoint: 'Façade jardin' })
+  const subL = add('la-ks28', 1850, 860, 'Façade', 'KS28 jardin')
+  const k2R = add('la-k2', 1850, 430, 'Façade', 'K2 cour', { rigPoint: 'Façade cour' })
+  const subR = add('la-ks28', 1850, 990, 'Façade', 'KS28 cour')
+  k2L.data.qty = 12
+  k2R.data.qty = 12
+  subL.data.qty = 4
+  subR.data.qty = 4
   const fillL = add('la-x8', 1850, 1290, 'Façade', 'Lipfill jardin')
   const fillR = add('la-x8', 1850, 1400, 'Façade', 'Lipfill cour')
   const wedge1 = add('la-x15', 1850, 1510, 'Retours', 'Retour chant')
   const wedge2 = add('la-x15', 1850, 1620, 'Retours', 'Retour clavier')
 
   /* ---------- FOH: sound, lighting, video ---------- */
-  const desk = add('yam-cl5', 2350, 0, 'Régie FOH', 'Console son FOH', { ip: '192.168.1.10', notes: 'Show file « Festival 2026 ». Horloge Dante : la console est leader.' })
-  const playback = add('pc-rack-2u-dante', 2350, 620, 'Régie FOH', 'Playback et enregistrement', { ip: '192.168.1.30', notes: 'Enregistrement multipiste 32 voies via Dante Virtual Soundcard.' })
+  const desk = add('yam-cl5', 2350, 0, 'Régie FOH', 'Console son FOH', { ip: '192.168.1.10', danteName: 'FOH-CL5', clockLeader: true, subscriptions: 'Rio 1-32 → CL5 1-32\nULXD4D 1-2 → CL5 33-34\nPlayback 1-2 → CL5 35-36', notes: 'Show file « Festival 2026 ». Horloge Dante : la console est leader.' })
+  const playback = add('pc-rack-2u-dante', 2350, 620, 'Régie FOH', 'Playback et enregistrement', { ip: '192.168.1.30', danteName: 'PLAYBACK', subscriptions: 'CL5 Direct 1-32 → enregistrement 1-32', notes: 'Enregistrement multipiste 32 voies via Dante Virtual Soundcard.' })
   const swFoh = add('luminex-gc16xt', 2750, 0, 'Régie FOH', 'Switch régie', { ip: '192.168.1.3', mode: 'Profil Dante + Art-Net + contrôle' })
   const ma = add('ma3-compact-xt', 2750, 520, 'Régie FOH', 'Console lumière', { ip: '2.0.0.10', notes: 'Show « Festival 2026 », Art-Net univers 1 à 4 vers le node plateau.' })
   const atem = add('bmd-atem-1me-4k', 3150, 0, 'Régie FOH', 'Mélangeur vidéo', { ip: '192.168.2.10' })
@@ -92,8 +101,7 @@ export function demoProject(): Project {
   /* ---------- Video: stage ---------- */
   const camL = add('pana-ue150', 2350, 1100, 'Façade', 'Caméra PTZ jardin', { ip: '192.168.2.31' })
   const camR = add('pana-ue150', 2350, 1300, 'Façade', 'Caméra PTZ cour', { ip: '192.168.2.32' })
-  const psuL = add('psu-12v', 2050, 1100, 'Façade', 'Alim caméra jardin')
-  const psuR = add('psu-12v', 2050, 1300, 'Façade', 'Alim caméra cour')
+  const swVideo = add('netgear-m4250', 2750, 900, 'Régie FOH', 'Switch vidéo PoE', { ip: '192.168.2.2', mode: 'VLAN vidéo, PoE+ vers les caméras' })
   const proj = add('epson-eb-pu2220b', 3550, 820, 'Façade', 'Vidéoprojecteur écran latéral', { ip: '192.168.2.40', mode: 'Écran latéral 5 m, 20 000 lumens' })
   const tiles = Array.from({ length: 6 }, (_, i) => add('led-tile', 3950 + (i % 3) * 260, (i < 3 ? 0 : 320), 'Plateau', `Dalle LED ${i < 3 ? 'haut' : 'bas'} ${(i % 3) + 1}`))
 
@@ -114,7 +122,6 @@ export function demoProject(): Project {
   const brkA = add('soca-breakout', 1400, 2900, 'Grill', 'Éclaté Socapex A')
   const brkB = add('soca-breakout', 1400, 3100, 'Grill', 'Éclaté Socapex B')
   const box16Foh = add('distro-16-6', 1060, 3200, 'Régie FOH', 'Boîte 16A régie')
-  const camStrip = add('conv-16-schuko', 1400, 3300, 'Façade', 'Multiprise caméras')
 
   /* ---------- Cables: sound ---------- */
   link(kick, 'out', rio, 'in1', 10)
@@ -164,8 +171,9 @@ export function demoProject(): Project {
   link(atem, 'net', swFoh, 'p4', 1)
   link(deck, 'net', swFoh, 'p5', 1)
   link(ledProc, 'net', swFoh, 'p6', 1)
-  link(camL, 'net', swFoh, 'p7', 50)
-  link(camR, 'net', swFoh, 'p8', 50)
+  link(swVideo, 'sfp1', swFoh, 'sfp2', 2, 'Liaison switch vidéo ↔ switch régie')
+  link(camL, 'net', swVideo, 'p1', 50, 'Alimente la caméra (PoE++)')
+  link(camR, 'net', swVideo, 'p2', 50, 'Alimente la caméra (PoE++)')
   link(proj, 'net', swFoh, 'p9', 40)
 
   /* ---------- Cables: lighting ---------- */
@@ -226,7 +234,6 @@ export function demoProject(): Project {
   // Lighting cabinet
   link(cabLx, 'p321', soca, 'in', 25)
   link(cabLx, 'p161', box16Foh, 'in', 60)
-  link(cabLx, 'p162', camStrip, 'in', 50)
   link(soca, 'soca1', brkA, 'in', 20)
   link(soca, 'soca2', brkB, 'in', 20)
   const chain = (from: DeviceNode, port: string, line: DeviceNode[]) => {
@@ -244,43 +251,67 @@ export function demoProject(): Project {
   chain(brkB, 'out5', [beams[2]])
   link(box16Foh, 'out1', ma, 'pwr', 2)
   link(box16Foh, 'out2', swFoh, 'pwr', 1)
-  link(camStrip, 'sch1', psuL, 'in', 2)
-  link(camStrip, 'sch2', psuR, 'in', 2)
-  link(psuL, 'out', camL, 'pwr', 2)
-  link(psuR, 'out', camR, 'pwr', 2)
+  link(iecVideo, 'iec6', swVideo, 'pwr', 1)
 
-  // Phases chosen to balance the supply (see the Énergie page): each Socapex circuit, each 16 A outlet.
-  const key = (n: DeviceNode, port: string) => `${n.id}:${port}`
-  const phases = {
-    [key(brkA, 'out1')]: 'L1', [key(brkA, 'out2')]: 'L2', [key(brkA, 'out3')]: 'L3', [key(brkA, 'out4')]: 'L3',
-    [key(brkB, 'out1')]: 'L1', [key(brkB, 'out2')]: 'L2', [key(brkB, 'out3')]: 'L1', [key(brkB, 'out4')]: 'L2', [key(brkB, 'out5')]: 'L3',
-    [key(cabLx, 'p161')]: 'L3', [key(cabLx, 'p162')]: 'L3',
-    [key(cabAv, 'p161')]: 'L1', [key(cabAv, 'p162')]: 'L2', [key(cabAv, 'p163')]: 'L3',
-    [key(ampPwr, 'out1')]: 'L1', [key(ampPwr, 'out2')]: 'L2', [key(ampPwr, 'out3')]: 'L3', [key(ampPwr, 'out4')]: 'L1',
-    [key(ledPwr, 'out1')]: 'L1', [key(ledPwr, 'out2')]: 'L2',
-  } as const
+
+  /* ---------- Rigging: motors, trusses, frames ---------- */
+  const rig = (id: string, name: string, point: string, qty = 1) => {
+    const n = add(id, 0, 0, point.startsWith('Façade') ? 'Façade' : 'Grill', name, { rigPoint: point })
+    if (qty > 1) n.data.qty = qty
+    return n
+  }
+  const bumperL = rig('bumper-la', 'Bumper K2 jardin', 'Façade jardin')
+  const bumperR = rig('bumper-la', 'Bumper K2 cour', 'Façade cour')
+  const motorsL = rig('motor-1000', 'Palans façade jardin', 'Façade jardin', 2)
+  const motorsR = rig('motor-1000', 'Palans façade cour', 'Façade cour', 2)
+  const trussBack = rig('truss-30-3m', 'Pont de contre', 'Pont de contre', 4)
+  const motorsBack = rig('motor-500', 'Palans pont de contre', 'Pont de contre', 2)
+  const trussFront = rig('truss-30-3m', 'Pont de face', 'Pont de face', 4)
+  const motorsFront = rig('motor-500', 'Palans pont de face', 'Pont de face', 2)
+  const trussLed = rig('truss-40-3m', 'Pont écran LED', 'Écran LED', 2)
+  const motorsLed = rig('motor-500', 'Palans écran LED', 'Écran LED', 2)
+  for (const n of [...spots, ...strobes, ...beams]) n.data.config.rigPoint = 'Pont de contre'
+  for (const n of washes) n.data.config.rigPoint = 'Pont de face'
+  for (const n of tiles) n.data.config.rigPoint = 'Écran LED'
+  const hoists = add('motor-ctrl-8', 0, 0, 'Coulisses', 'Pupitre palans')
+  link(cabLx, 'p322', hoists, 'in', 30)
+  ;[motorsL, motorsR, motorsBack, motorsFront, motorsLed].forEach((m, i) => link(hoists, `m${i + 1}`, m, 'pwr', 30))
+
+  /* ---------- Intercom ---------- */
+  const icBase = add('ic-base-2ch', 0, 0, 'Régie FOH', 'Intercom régie')
+  const icStage = add('ic-beltpack', 0, 0, 'Plateau', 'Intercom régisseur plateau')
+  const icMon = add('ic-beltpack', 0, 0, 'Retours', 'Intercom retours')
+  const icLight = add('ic-beltpack', 0, 0, 'Grill', 'Intercom lumière')
+  link(icBase, 'ch1', icStage, 'in', 80, 'Canal A : son et plateau')
+  link(icStage, 'thru', icMon, 'in', 10)
+  link(icBase, 'ch2', icLight, 'in', 60, 'Canal B : lumière')
+  link(iecFoh, 'iec3', icBase, 'pwr', 1)
 
   /* ---------- Layout: one band per trade, each rack's devices together ---------- */
   const at: Record<string, [number, number]> = {
     // Stage: sources, then the stage rack (two columns)
     'Grosse caisse': [0, 0], 'Caisse claire': [0, 100], 'Tom 1': [0, 200], 'Tom basse': [0, 300], 'Chant lead (filaire)': [0, 400], 'DI clavier': [0, 520],
-    'Antenne HF A': [0, 800], 'Antenne HF B': [0, 900], 'Micro HF chant 1': [0, 1040], 'Micro HF chant 2': [0, 1140],
+    'Antenne HF A': [0, 800], 'Antenne HF B': [0, 900], 'Micro HF chant 1': [0, 1040], 'Micro HF chant 2': [0, 1140], 'Ears batteur': [0, 1260], 'Ears chant': [0, 1360],
     'Stagebox plateau': [330, 0], 'Récepteur HF chant': [330, 560], 'Distributeur antennes': [330, 820], 'Émetteur ears musiciens': [330, 1080],
     'Switch plateau': [650, 0], 'Node DMX plateau': [650, 420], 'Distribution rack plateau': [650, 680], 'Tiroir accessoires': [650, 980],
     // Amplifiers rack, then the speakers
     'LA12X façade jardin': [1050, 0], 'LA12X façade cour': [1050, 400], 'LA12X subs': [1050, 800], 'LA4X lipfills et retours': [1050, 1200], 'Distribution amplis': [1050, 1600],
-    'K2 jardin (12 boîtes)': [1400, 0], 'K2 cour (12 boîtes)': [1400, 400], 'KS28 jardin (4 boîtes)': [1400, 800], 'KS28 cour (4 boîtes)': [1400, 900],
+    'K2 jardin': [1400, 0], 'K2 cour': [1400, 400], 'KS28 jardin': [1400, 800], 'KS28 cour': [1400, 900],
     'Lipfill jardin': [1400, 1200], 'Lipfill cour': [1400, 1300], 'Retour chant': [1400, 1400], 'Retour clavier': [1400, 1500],
     // FOH: desks, then the FOH rack (two columns), then video outputs
     'Console son FOH': [1800, 0], 'Console lumière': [1800, 700],
     'Switch régie': [2200, 0], 'Playback et enregistrement': [2200, 520], 'Enregistreur vidéo': [2200, 900],
     'Mélangeur vidéo': [2550, 0], 'Processeur écran LED': [2550, 520], 'Tablette régie': [2550, 1000], 'Multiprise IEC régie': [2550, 1150], 'Multiprise IEC vidéo': [2550, 1350],
     'Écran retour vidéo régie': [2950, 700], 'Vidéoprojecteur écran latéral': [2950, 900],
-    'Caméra PTZ jardin': [1800, 1250], 'Caméra PTZ cour': [1800, 1450], 'Alim caméra jardin': [1800, 1650], 'Alim caméra cour': [1800, 1750],
+    'Caméra PTZ jardin': [1800, 1250], 'Caméra PTZ cour': [1800, 1450], 'Switch vidéo PoE': [2200, 1250],
     // Power, bottom left
     'Arrivée 125A tri (TGBT du site)': [0, 3100], 'Armoire générale 125A': [300, 3100], 'Armoire son et vidéo 63A': [620, 2980], 'Armoire lumière 63A': [620, 3300],
     'Boîte 16A plateau': [950, 2900], 'Distribution écran LED': [950, 3050], 'Distribution grill': [950, 3350], 'Éclaté Socapex A': [1280, 3280], 'Éclaté Socapex B': [1280, 3500],
-    'Boîte 16A régie': [950, 3600], 'Multiprise caméras': [950, 3780],
+    'Boîte 16A régie': [950, 3600], 'Pupitre palans': [950, 3800],
+    'Bumper K2 jardin': [1650, 0], 'Palans façade jardin': [1650, 120], 'Bumper K2 cour': [1650, 400], 'Palans façade cour': [1650, 520],
+    'Pont de contre': [330, 1900], 'Palans pont de contre': [610, 1900], 'Pont de face': [890, 1900], 'Palans pont de face': [1170, 1900],
+    'Pont écran LED': [2950, 650], 'Palans écran LED': [3210, 650],
+    'Intercom régie': [2550, 1550], 'Intercom régisseur plateau': [0, 1500], 'Intercom retours': [0, 1610], 'Intercom lumière': [1450, 1900],
   }
   tiles.forEach((t, i) => (at[t.data.name] = [2950 + (i % 3) * 260, i < 3 ? 0 : 320]))
   spots.forEach((n, i) => (at[n.data.name] = [330 + i * 280, 2150]))
@@ -371,11 +402,11 @@ export function demoProject(): Project {
   stageRack.rackU = 12
   rack(stageRack, [[rio, 1], [hf, 5], [ua844, 6], [iem, 7], [swStage, 8], [node, 9], [drawer, 10], [rackPwr, 12]])
   rack(box('Rack amplis façade', 'Rack amplis 16U sur roulettes', SON, 'AMPLIS FAÇADE', [ampPwr, la1, la2, la3, la4], 'Câbles NL8 25 m × 2\nCâbles NL4 15 m × 6'), [[ampPwr, 1], [la1, 2], [la2, 4], [la3, 6], [la4, 8]]).rackU = 10
-  const fohRack = box('Rack régie', 'Rack 19" 12U sur roulettes', VIDEO, 'RACK RÉGIE', [swFoh, playback, atem, deck, ledProc, iecFoh, iecVideo], 'Câbles SDI 50 m × 3 sur touret\nCâble HDMI 3 m')
+  const fohRack = box('Rack régie', 'Rack 19" 12U sur roulettes', VIDEO, 'RACK RÉGIE', [swFoh, swVideo, playback, atem, deck, ledProc, icBase, iecFoh, iecVideo], 'Câbles SDI 50 m × 3 sur touret\nCâble HDMI 3 m')
   const fohShelf = add('rack-shelf-zip-2u', 2550, 1000, 'Régie FOH', 'Tablette régie')
   fohRack.devices.push(fohShelf.id)
-  rack(fohRack, [[swFoh, 1], [playback, 2], [atem, 4], [deck, 5], [ledProc, 6], [fohShelf, 8]])
-  fohRack.rackU = 10
+  rack(fohRack, [[swFoh, 1], [swVideo, 2], [playback, 3], [atem, 5], [deck, 6], [ledProc, 7], [icBase, 9], [fohShelf, 10]])
+  fohRack.rackU = 12
   fohRack.held = { [iecFoh.id]: fohShelf.id, [iecVideo.id]: fohShelf.id }
   box('Flight console son', 'Flight console grand format (CL5, dLive S7000)', SON, 'CONSOLE FOH', [desk], 'Lampe col de cygne\nCasque de contrôle')
   box('Flight console lumière', 'Flight console 16-24 voies', LUMIERE, 'GRANDMA3', [ma], 'Écran tactile externe\nClé USB show')
@@ -384,15 +415,33 @@ export function demoProject(): Project {
   box('Malle effets', 'Malle 120 × 60 × 60 sur roulettes', LUMIERE, 'STRIKE / SPIIDER', [...strobes, ...beams])
   box('Malle câbles lumière', 'Malle à câbles 80 × 50 × 50', LUMIERE, 'CÂBLES DMX', [], 'DMX 5 pts 20 m × 4\nDMX 5 pts 3 m × 10\npowerCON TRUE1 3 m × 10\nSocapex 20 m × 2')
   box('Bac micros', 'Bac crocodile 600 × 400 × 320 (60 L)', SON, 'MICROS', [kick, snare, tom1, tom2, voc, keys], 'Pinces de batterie × 4\nCâbles XLR 10 m × 12')
-  box('Valise micros HF', 'Valise micros 50 × 35 × 18 (mousse découpée)', SON, 'MICROS HF', nodes.filter((n) => n.data.name.startsWith('Micro HF')), 'Piles AA × 8 (rechargeables ou neuves)')
-  box('Malle câbles son', 'Malle à câbles 80 × 50 × 50', SON, 'CÂBLES SON', [antA, antB], 'Câbles BNC 15 m × 2\nCâbles XLR 20 m × 8')
+  box('Valise micros HF', 'Valise micros 50 × 35 × 18 (mousse découpée)', SON, 'MICROS HF', [...nodes.filter((n) => n.data.name.startsWith('Micro HF')), ek1, ek2], 'Piles AA × 12 (rechargeables ou neuves)')
+  box('Malle câbles son', 'Malle à câbles 80 × 50 × 50', SON, 'CÂBLES SON', [antA, antB, icStage, icMon, icLight], 'Câbles BNC 15 m × 2\nCâbles XLR 20 m × 8\nMicro-casques intercom × 3')
+  box('Malle palans', 'Malle 120 × 60 × 60 sur roulettes', ENERGIE, 'PALANS', [motorsL, motorsR, motorsBack, motorsFront, motorsLed, hoists], 'Câbles de commande Harting 30 m × 5\nÉlingues, manilles, chaînes de sécurité')
+  box('Chariot ponts', 'Chariot plateau 900 × 600 (dolly pour flight)', ENERGIE, 'PONTS', [trussBack, trussFront, trussLed, bumperL, bumperR], 'Manchons et goupilles de pont')
   box('Malle dalles LED', 'Malle 120 × 60 × 60 sur roulettes', VIDEO, 'DALLES LED × 6', tiles, 'Câbles data etherCON 0,5 m × 4\nCâbles etherCON 60 m × 2')
-  box('Valise caméras', 'Valise HF 4 récepteurs', VIDEO, 'PTZ × 2', [camL, camR, psuL, psuR], 'Supports de caméra × 2')
+  box('Valise caméras', 'Valise HF 4 récepteurs', VIDEO, 'PTZ × 2', [camL, camR], 'Supports de caméra × 2')
   box('Flight vidéoprojecteur', 'Malle 120 × 60 × 60 sur roulettes', VIDEO, 'UDX-4K32', [proj, monitor], 'Lentille 1,5-2,0:1')
   box('Palox câbles électriques', 'Palox plastique 1200 × 800 × 760 (500 L)', ENERGIE, 'ÉLECTRICITÉ', [supply, main, cabAv, cabLx], 'P17 125A 5 m\nP17 63A 10 m × 2\nP17 32A 25 m × 3\nP17 16A 20 à 60 m × 4\nSocapex 20 m × 2')
-  box('Bac distribution', 'Bac crocodile 800 × 600 × 400 (140 L)', ENERGIE, 'DISTRIBUTION', [box16Stage, ledPwr, soca, brkA, brkB, box16Foh, camStrip], 'Rallonges powerCON TRUE1 × 10\nRallonges Schuko × 4')
+  box('Bac distribution', 'Bac crocodile 800 × 600 × 400 (140 L)', ENERGIE, 'DISTRIBUTION', [box16Stage, ledPwr, soca, brkA, brkB, box16Foh], 'Rallonges powerCON TRUE1 × 10\nRallonges Schuko × 4')
 
-  return {
+  // The second band of the night: same system, its own channel names.
+  const band2 = {
+    inputs: Object.fromEntries([
+      pin('in1', 'Grosse caisse', { stand: 'Petit pied' }),
+      pin('in2', 'Caisse claire', { stand: 'Pince' }),
+      pin('in3', 'Basse (DI)', { phantom: true }),
+      pin('in4', 'Guitare (micro ampli)', { stand: 'Petit pied' }),
+      pin('in5', 'Synthé L', { phantom: true }),
+      pin('in6', 'Synthé R', { phantom: true }),
+      pin('in7', 'Chœurs', { stand: 'Grand pied perche' }),
+      pin('in9', 'Chant lead HF'),
+      pin('in10', 'Chant 2 HF'),
+    ]),
+    outputs: patch.outputs,
+  }
+
+  const project: Project = {
     version: 1,
     name: 'Festival des Lucioles — Grande scène',
     venue: 'Parc des expositions',
@@ -403,8 +452,9 @@ export function demoProject(): Project {
     progress: {},
     customTemplates: [],
     view: { compact: true },
-    power: { phases },
     patch,
+    patchVariant: 'Groupe 1 — Lucioles Orchestra',
+    patchVariants: { 'Groupe 2 — Les Hirondelles': band2 },
     stage,
     info: {
       description: 'Scène principale d’un festival de musiques actuelles : 1 500 spectateurs, deux plateaux par soir. Exemple complet de SynopGig.',
@@ -416,4 +466,6 @@ export function demoProject(): Project {
       room: 'Grande scène',
     },
   }
+  // Phases spread by the same tool as the Énergie page's « Équilibrer ».
+  return { ...project, power: { phases: balancePhases(project) } }
 }

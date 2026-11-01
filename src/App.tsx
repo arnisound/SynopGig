@@ -46,7 +46,11 @@ const SHARED_ID = sharedIdFromHash()
 const TARGET = sharedTargetFromHash()
 
 function initialProject(): Project {
-  if (!SHARED_ID) return loadProject(demoProject)
+  if (!SHARED_ID) {
+    // The festival demo opens by default, and replaces the former small demo left in the browser.
+    const saved = loadProject(demoProject)
+    return saved.name === 'Concert démo' && saved.venue === 'Salle des fêtes' ? demoProject() : saved
+  }
   const cached = cachedShared(SHARED_ID)
   return { ...(cached?.project ?? { ...emptyProject(), name: 'Chargement du projet partagé…' }), progress: sharedProgress(SHARED_ID) }
 }

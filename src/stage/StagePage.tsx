@@ -66,6 +66,18 @@ export default function StagePage({ project, setProject }: Props) {
     setSelected(item.id)
   }
 
+  /** Sets every device of a zone on the stage at once, each on a free spot, to be dragged into place. */
+  const placeZone = (zone: string) =>
+    setStage((s) => {
+      const k = KINDS.device
+      const items = [...s.items]
+      for (const n of unplaced.filter((x) => (x.data.zone || 'Sans zone') === zone)) {
+        const spot = freeSpot({ ...s, items }, k.w, k.h, false)
+        items.push({ id: `s-${uid()}`, kind: 'device', nodeId: n.id, label: n.data.name, x: spot.x, y: spot.y, w: k.w, h: k.h, rot: 0 })
+      }
+      return { ...s, items }
+    })
+
   const placed = new Set(stage.items.map((i) => i.nodeId).filter(Boolean))
   const unplaced = project.nodes.filter((n) => !placed.has(n.id) && !n.data.panel && n.data.category !== 'Câblage')
   const zones = [...new Set(unplaced.map((n) => n.data.zone || 'Sans zone'))].sort((a, b) => Number(b === 'Plateau') - Number(a === 'Plateau') || a.localeCompare(b))
@@ -127,7 +139,10 @@ export default function StagePage({ project, setProject }: Props) {
         <div className="pick-list">
           {zones.map((z) => (
             <details key={z} open={z === 'Plateau'}>
-              <summary>{z}</summary>
+              <summary>
+                {z}{' '}
+                <button className="small-btn" onClick={(e) => { e.preventDefault(); placeZone(z) }} title="Poser tout le matériel de cette zone, puis le faire glisser à sa place">Tout poser</button>
+              </summary>
               {unplaced
                 .filter((n) => (n.data.zone || 'Sans zone') === z)
                 .map((n) => (

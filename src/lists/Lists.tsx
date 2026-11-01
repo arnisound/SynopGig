@@ -23,7 +23,7 @@ function Table({ head, rows, alerts }: { head: string[]; rows: Cell[][]; alerts?
 
 export default function Lists({ project }: { project: Project }) {
   const base = slug(project.name)
-  const blocks = useMemo(() => buildTables(project), [project])
+  const blocks = useMemo(() => buildTables(project).filter((b) => !b.optional || b.rows.length > 0), [project])
 
   return (
     <div className="page lists">
@@ -34,8 +34,11 @@ export default function Lists({ project }: { project: Project }) {
         </div>
         <button className="no-print" onClick={() => window.print()}>Imprimer / PDF</button>
       </header>
+      <nav className="list-nav no-print">
+        {blocks.map((b) => <a key={b.file} href={`#list-${b.file}`}>{b.title}</a>)}
+      </nav>
       {blocks.map((b) => (
-        <section key={b.file}>
+        <section key={b.file} id={`list-${b.file}`}>
           <div className="section-head">
             <h3>{b.title}</h3>
             <button className="no-print" onClick={() => download(`${base}-${b.file}.csv`, toCsv([b.head, ...b.rows]), 'text/csv')}>

@@ -92,3 +92,26 @@ describe('power budget', () => {
     expect(powerBudget({ ...p, nodes: [...p.nodes, lone] }).unpowered.map((n) => n.data.model)).toEqual(['Seule'])
   })
 })
+
+describe('PoE', () => {
+  it('counts a PoE camera on its switch, not as unpowered', () => {
+    let p: Project = emptyProject()
+    const add = (id: string) => {
+      const n = createDevice(LIBRARY.find((t) => t.id === id)!, { x: 0, y: 0 }, p.nodes)
+      p = { ...p, nodes: [...p.nodes, n] }
+      return n
+    }
+    const src = add('src-16-mono')
+    const box = add('distro-16-6')
+    const sw = add('netgear-m4250')
+    const cam = add('pana-ue150')
+    p = connectPorts(p, { node: src.id, port: 'out' }, { node: box.id, port: 'in' })!
+    const swIn = sw.data.ports.find((x) => x.signal === 'power' && x.dir === 'in')!
+    const swPort = sw.data.ports.find((x) => x.signal === 'network' && x.dir === 'io')!
+    p = connectPorts(p, { node: box.id, port: 'out1' }, { node: sw.id, port: swIn.id }) ?? p
+    p = connectPorts(p, { node: cam.id, port: 'net' }, { node: sw.id, port: swPort.id })!
+    const b = powerBudget(p)
+    expect(b.unpowered.map((n) => n.data.name)).not.toContain(cam.data.name)
+    expect(b.poe[0]?.devices.map((d) => d.id)).toEqual([cam.id])
+  })
+})

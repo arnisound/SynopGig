@@ -1,6 +1,6 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { FLIGHT, KINDS } from '../cases/models'
-import { resolveCables } from '../project'
+import { resolveCables, weightOf } from '../project'
 import { shareLink } from '../share/share'
 import type { Project } from '../types'
 
@@ -63,7 +63,7 @@ export function caseLabels(project: Project): ThingLabel[] {
   const byId = new Map(project.nodes.map((n) => [n.id, n]))
   return project.cases.map((c) => {
     const inside = c.devices.map((id) => byId.get(id)).filter((n) => n !== undefined)
-    const weight = inside.reduce((s, n) => s + (n.data.weight ?? 0), 0) + (c.emptyWeight ?? 0)
+    const weight = inside.reduce((s, n) => s + weightOf(n.data), 0) + (c.emptyWeight ?? 0)
     return {
       title: `${c.number} · ${c.name}`,
       lines: [

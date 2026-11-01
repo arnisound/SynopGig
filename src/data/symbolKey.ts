@@ -37,6 +37,11 @@ export function symbolKey(t: { family?: string; templateId?: string; id?: string
     [/Accessoires de rack/, /ventilation/, 'fan'],
     [/Accessoires de rack/, /micros hf/, 'handheld'],
     [/Fixations et adaptateurs/, /plaque|tablette|adaptateur|oreilles|plateau/, 'blank'],
+    [/Accroche/, /palan|pupitre/, 'hoist'],
+    [/Accroche/, /pont|bumper|cadre/, 'truss'],
+    [/Intercom/, /base|station|talkback/, 'receiver'],
+    [/Intercom/, /antenne/, 'antenna'],
+    [/Intercom/, /ceinture/, 'bodypack'],
   ]
   for (const [fam, re, key] of byModel) if (fam.test(f) && re.test(m)) return key
   const rules: [RegExp, string][] = [
@@ -83,6 +88,7 @@ export function symbolKey(t: { family?: string; templateId?: string; id?: string
     [/Bandeaux/, 'panel'],
     [/Accessoires de rack/, 'drawer'],
     [/Fixations et adaptateurs/, 'drawer'],
+    [/^Intercom/, 'headset'],
   ]
   for (const [re, key] of rules) if (re.test(f)) return key
   // Generic models without a family.

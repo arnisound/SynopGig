@@ -1,5 +1,5 @@
 import { prefixOf } from './data/cableFamily'
-import { checkLink, type Issue } from './data/connectors'
+import { checkLink, checkRun, type Issue } from './data/connectors'
 import { LIBRARY } from './data/library'
 import { panelPorts } from './data/panels'
 import type {
@@ -18,6 +18,11 @@ import type {
 const STORAGE_KEY = 'synopgig.project'
 
 export const uid = () => Math.random().toString(36).slice(2, 10)
+
+/** Units shown by a box (1 unless it stands for a line array, a row of lights…). */
+export const qtyOf = (d: { qty?: number }) => Math.max(1, Math.round(d.qty ?? 1))
+/** Weight of a box, all its units together. */
+export const weightOf = (d: { qty?: number; weight?: number }) => (d.weight ?? 0) * qtyOf(d)
 
 const optionOf = (d: DeviceData, key: string) => d.options?.find((o) => o.id === key.split(':')[0])
 
@@ -228,7 +233,7 @@ export function resolveCables(nodes: DeviceNode[], edges: CableEdge[]): Resolved
       const to = byId.get(edge.target)
       const fromPort = from?.data.ports.find((p) => p.id === edge.sourceHandle)
       const toPort = to?.data.ports.find((p) => p.id === edge.targetHandle)
-      return { edge, from, to, fromPort, toPort, issues: checkLink(fromPort, toPort) }
+      return { edge, from, to, fromPort, toPort, issues: [...checkLink(fromPort, toPort), ...checkRun(fromPort, toPort, edge.data?.length)] }
     })
     .sort((a, b) => (a.edge.data?.cableId ?? '').localeCompare(b.edge.data?.cableId ?? ''))
 }

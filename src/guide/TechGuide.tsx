@@ -14,13 +14,19 @@ export default function TechGuide({ project, setProject, onShow, initialQuery = 
   const { progress } = project
   const [query, setQuery] = useState(initialQuery)
   const [left, setLeft] = useState(false)
+  // One trade only: the light crew does not need the sound cables.
+  const [trade, setTrade] = useState('')
 
   const sections = useMemo(() => buildGuide(project), [project])
 
   const all = sections.flatMap((s) => s.steps)
   const done = all.filter((s) => progress[s.id]).length
   const pct = all.length ? Math.round((done / all.length) * 100) : 0
-  const shown = useMemo(() => (query.trim() || left ? findSteps(sections, query, left ? progress : undefined) : sections), [sections, query, left, progress])
+  const trades = useMemo(() => [...new Set(sections.flatMap((s) => s.steps.map((x) => x.trade)).filter((t): t is string => !!t))], [sections])
+  const shown = useMemo(() => {
+    const base = query.trim() || left ? findSteps(sections, query, left ? progress : undefined) : sections
+    return trade ? base.map((s) => ({ ...s, steps: s.steps.filter((x) => x.trade === trade) })).filter((s) => s.steps.length) : base
+  }, [sections, query, left, progress, trade])
   const found = shown.reduce((n, s) => n + s.steps.length, 0)
 
   const toggle = (id: string) =>
@@ -56,6 +62,10 @@ export default function TechGuide({ project, setProject, onShow, initialQuery = 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <select value={trade} onChange={(e) => setTrade(e.target.value)} aria-label="Métier">
+          <option value="">Tous les métiers</option>
+          {trades.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
         <label className="check">
           <input type="checkbox" checked={left} onChange={(e) => setLeft(e.target.checked)} /> Reste à faire
         </label>

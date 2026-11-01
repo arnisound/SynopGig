@@ -10,7 +10,7 @@ import type { CableData, Category, DeviceData, DeviceNode, PanelSpec } from '../
 import PortsEditor from './PortsEditor'
 import PanelView from '../ui/PanelView'
 import { FindDocsButton, PhotoPicker } from './ProductMedia'
-import { wattsOf } from '../power/power'
+import { unitWatts } from '../power/power'
 
 const CATEGORIES: Category[] = ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie', 'Câblage', 'Autre']
 
@@ -24,6 +24,8 @@ interface Props {
   onDelete: () => void
   /** What is wrong with the selected device's IP address. */
   ipIssues?: string[]
+  /** Every device of the project: hanging points, wireless pairs. */
+  nodes?: DeviceNode[]
   /** Changes when the user asks for the cards of the selected device (the + cartes of its box). */
   cardsRequest?: number
 }
@@ -39,7 +41,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 type Tab = 'fiche' | 'ports' | 'specs' | 'docs'
 
-export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete, ipIssues, cardsRequest }: Props) {
+export default function Inspector({ node, cable, onNode, onCable, onPanel, onSaveTemplate, onDelete, ipIssues, cardsRequest, nodes = [] }: Props) {
   const [holes, setHoles] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<Tab>('fiche')
   const [lastRequest, setLastRequest] = useState(cardsRequest)
@@ -166,7 +168,7 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
             <input value={d.url ?? ''} placeholder="https://…" onChange={(e) => set({ url: e.target.value || undefined })} />
           </Field>
           <Field label="Consommation (W)">
-            <input type="number" min={0} value={d.watts ?? ''} placeholder={wattsOf(d) ? `${wattsOf(d)} (lu dans ses caractéristiques)` : 'pour le bilan électrique'} onChange={(e) => set({ watts: e.target.value ? Number(e.target.value) : undefined, wattsEstimated: undefined })} />
+            <input type="number" min={0} value={d.watts ?? ''} placeholder={unitWatts(d) ? `${unitWatts(d)} (lu dans ses caractéristiques)` : 'pour le bilan électrique'} onChange={(e) => set({ watts: e.target.value ? Number(e.target.value) : undefined, wattsEstimated: undefined })} />
             {d.wattsEstimated && <small className="muted">Estimation : remplacez-la par la valeur de la fiche si vous l’avez.</small>}
           </Field>
           {d.url && /^https?:\/\//.test(d.url) && (
@@ -191,6 +193,17 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
               <input type="number" min={0} value={d.weight ?? ''} onChange={(e) => set({ weight: e.target.value ? Number(e.target.value) : undefined })} />
             </Field>
           </div>
+          <div className="row">
+            <Field label="Quantité">
+              <input type="number" min={1} value={d.qty ?? 1} title="Boîtes identiques représentées par cet appareil (une ligne de 12 enceintes, une rampe de 6 projecteurs) : comptées dans les poids, la consommation et la nomenclature." onChange={(e) => set({ qty: Number(e.target.value) > 1 ? Math.round(Number(e.target.value)) : undefined })} />
+            </Field>
+            <Field label="Point d’accroche">
+              <input list="rig-points" value={d.config.rigPoint ?? ''} placeholder="Façade jardin, pont de contre…" onChange={(e) => setConfig({ rigPoint: e.target.value || undefined })} />
+              <datalist id="rig-points">
+                {[...new Set(nodes.map((n) => n.data.config.rigPoint).filter(Boolean))].map((p) => <option key={p} value={p} />)}
+              </datalist>
+            </Field>
+          </div>
 
           <h4>Réglages</h4>
           <Field label="Adresse IP">
@@ -208,6 +221,34 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
           <Field label="Mode / preset">
             <input value={d.config.mode ?? ''} onChange={(e) => setConfig({ mode: e.target.value })} />
           </Field>
+          {(d.ports.some((p) => p.signal === 'rf') || /HF|Ears|Sans fil/i.test(d.family ?? '')) && (
+            <div className="row">
+              <Field label="Fréquence (MHz)">
+                <input inputMode="decimal" placeholder="606,125" value={d.config.freq ?? ''} onChange={(e) => setConfig({ freq: e.target.value || undefined })} />
+              </Field>
+              <Field label="Associé à">
+                <select value={d.config.pair ?? ''} onChange={(e) => setConfig({ pair: e.target.value || undefined })}>
+                  <option value="">—</option>
+                  {nodes.filter((n) => n.id !== node.id && (n.data.ports.some((p) => p.signal === 'rf') || /HF|Ears|Sans fil/i.test(n.data.family ?? ''))).map((n) => <option key={n.id} value={n.id}>{n.data.name}</option>)}
+                </select>
+              </Field>
+            </div>
+          )}
+          {d.ports.some((p) => p.signal === 'dante' || p.signal === 'avb') && (
+            <>
+              <div className="row">
+                <Field label="Nom sur le réseau audio">
+                  <input placeholder="FOH-CL5" value={d.config.danteName ?? ''} onChange={(e) => setConfig({ danteName: e.target.value || undefined })} />
+                </Field>
+                <label className="toggle">
+                  <input type="checkbox" checked={!!d.config.clockLeader} onChange={(e) => setConfig({ clockLeader: e.target.checked || undefined })} /> Horloge leader
+                </label>
+              </div>
+              <Field label="Abonnements (qui écoute quoi)">
+                <textarea rows={2} placeholder="Rio 1-32 → CL5 1-32" value={d.config.subscriptions ?? ''} onChange={(e) => setConfig({ subscriptions: e.target.value || undefined })} />
+              </Field>
+            </>
+          )}
           <Field label="Consignes de configuration">
             <textarea rows={3} value={d.config.notes ?? ''} onChange={(e) => setConfig({ notes: e.target.value })} />
           </Field>

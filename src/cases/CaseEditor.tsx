@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { createCase, download, slug, toCsv } from '../project'
+import { createCase, download, qtyOf, slug, toCsv, weightOf } from '../project'
 import type { CaseKind, FlightCase, Project } from '../types'
 import RackFace from '../racks/RackFace'
 import CaseImport from './CaseImport'
@@ -75,7 +75,7 @@ export default function CaseEditor({ project, setProject, focusCase }: Props) {
   for (const c of cases) if (c.id !== fc?.id) for (const d of c.devices) inOtherCase.set(d, c.name)
 
   const devices = fc ? fc.devices.map((id) => nodes.find((n) => n.id === id)).filter((n) => n !== undefined) : []
-  const weight = devices.reduce((s, d) => s + (d.data.weight ?? 0), 0)
+  const weight = devices.reduce((s, d) => s + weightOf(d.data), 0)
   const usedU = devices.reduce((s, d) => s + (d.data.rackU ?? 0), 0)
 
   const onLogo = (file?: File) => {
@@ -125,7 +125,7 @@ export default function CaseEditor({ project, setProject, focusCase }: Props) {
     for (const c of cases) {
       for (const id of c.devices) {
         const n = nodes.find((x) => x.id === id)
-        if (n) rows.push([c.name, c.number, KINDS[c.kind], n.data.name, n.data.model, n.data.weight])
+        if (n) rows.push([c.name, c.number, KINDS[c.kind], qtyOf(n.data) > 1 ? `${n.data.name} × ${qtyOf(n.data)}` : n.data.name, n.data.model, weightOf(n.data) || undefined])
       }
       for (const l of c.extras.split('\n').filter((x) => x.trim())) rows.push([c.name, c.number, KINDS[c.kind], l, '', ''])
     }

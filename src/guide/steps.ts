@@ -1,5 +1,6 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
+import { familyOf } from '../data/cableFamily'
 import { internalRack, rackOfNode, resolveCables, throughPanels, type ResolvedCable } from '../project'
 import type { DeviceNode, Project } from '../types'
 
@@ -10,7 +11,11 @@ export interface Step {
   detail?: string
   warnings?: string[]
   color: string
+  /** The trade it belongs to (Son, Lumière…), for the technician who only does that. */
+  trade?: string
 }
+
+const TRADE_OF_FAMILY: Record<string, string> = { audio: 'Son', light: 'Lumière', video: 'Vidéo', network: 'Réseau', power: 'Énergie', control: 'Réseau' }
 
 function hasConfig(n: DeviceNode) {
   const c = n.data.config
@@ -35,6 +40,7 @@ export function buildGuide(project: Project): GuideSection[] {
         title: `${z} — installer « ${n.data.name} »`,
         detail: n.data.model,
         color: CATEGORY_COLORS[n.data.category],
+        trade: n.data.category,
       })),
   )
   const racks = rackOfNode(project.cases)
@@ -62,6 +68,7 @@ export function buildGuide(project: Project): GuideSection[] {
         .join(' · '),
       warnings: c.issues.map((i) => i.message),
       color: c.fromPort ? SIGNALS[c.fromPort.signal].color : '#888',
+      trade: TRADE_OF_FAMILY[familyOf(c.fromPort?.signal ?? c.toPort?.signal) ?? ''],
     }
   }
   const all = resolveCables(nodes, edges)
@@ -77,7 +84,7 @@ export function buildGuide(project: Project): GuideSection[] {
           .map(([id, host]) => {
             const shelf = byId.get(host)!
             const how = /scratch/i.test(shelf.data.model) ? 'avec les sangles scratch' : /collier|perfor/i.test(shelf.data.model) ? 'avec des colliers serre-câbles' : /½|⅓|oreille/i.test(shelf.data.model) ? 'sur ses oreilles' : 'et le sangler'
-            return { id: `fix-${id}`, focus: [id], title: `Fixer « ${byId.get(id)!.data.name} » sur « ${shelf.data.name} » ${how}`, color: CATEGORY_COLORS[byId.get(id)!.data.category] }
+            return { trade: byId.get(id)!.data.category, id: `fix-${id}`, focus: [id], title: `Fixer « ${byId.get(id)!.data.name} » sur « ${shelf.data.name} » ${how}`, color: CATEGORY_COLORS[byId.get(id)!.data.category] }
           }),
       )
   const heldRacks = project.cases.filter((c) => c.kind === 'rack' && Object.keys(c.held ?? {}).length).map((c) => c.name)
@@ -101,6 +108,7 @@ export function buildGuide(project: Project): GuideSection[] {
         .filter(Boolean)
         .join('\n'),
       color: CATEGORY_COLORS[n.data.category],
+      trade: n.data.category,
     }
   })
   return [

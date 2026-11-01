@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { CONNECTORS } from '../data/connectors'
 import type { DeviceNode, Phase, Project } from '../types'
-import { outletKey, powerBudget, VOLTS, wattsOf } from './power'
+import { balancePhases, generatorFor, outletKey, powerBudget, VOLTS, wattsOf } from './power'
 
 interface Props {
   project: Project
@@ -53,7 +53,12 @@ export default function PowerPage({ project, setProject }: Props) {
             pour préparer, pas une étude d’électricien.
           </p>
         </div>
-        <button className="no-print" onClick={() => window.print()}>Imprimer / PDF</button>
+        <div className="actions no-print">
+          <button disabled={!b.sources.some((s) => s.threePhase)} onClick={() => setProject((p) => ({ ...p, power: { ...p.power, phases: balancePhases(p) } }))} title="Répartit les départs monophasés de chaque armoire triphasée sur L1, L2, L3">
+            Équilibrer les phases
+          </button>
+          <button onClick={() => window.print()}>Imprimer / PDF</button>
+        </div>
       </header>
 
       {estimated.length > 0 && (
@@ -62,6 +67,33 @@ export default function PowerPage({ project, setProject }: Props) {
           {estimated.length > 6 ? '…' : ''}). Remplacez-la par la valeur du fabricant pour un bilan exact.
         </p>
       )}
+      {b.sources.length > 0 && (() => {
+        const tops = b.sources.filter((s) => !s.parent)
+        const watts = tops.reduce((sum, s) => sum + s.watts, 0)
+        const cos = project.power?.cosPhi ?? 0.9
+        const g = generatorFor(watts, cos)
+        return (
+          <section className="card power-total">
+            <div>
+              <b>{g.kw.toFixed(1)} kW</b> au total, soit <b>{g.kva.toFixed(1)} kVA</b> à cos φ
+              <input
+                className="watts"
+                type="number"
+                min={0.5}
+                max={1}
+                step={0.05}
+                value={cos}
+                title="Facteur de puissance : 0,9 pour du matériel récent, 0,8 pour un parc ancien ou des moteurs"
+                onChange={(e) => setProject((p) => ({ ...p, power: { ...p.power, cosPhi: Math.min(1, Math.max(0.5, Number(e.target.value) || 0.9)) } }))}
+              />
+            </div>
+            <div className="muted small">
+              {g.size ? `Groupe électrogène conseillé : ${g.size} kVA (25 % de marge pour les appels de courant).` : 'Au-delà de 500 kVA : plusieurs groupes, à étudier avec le prestataire.'}
+            </div>
+          </section>
+        )
+      })()}
+
       {b.alerts.length > 0 && (
         <section className="power-alerts">
           {b.alerts.map((a) => <div key={a} className="issue danger">{a}</div>)}
@@ -149,6 +181,25 @@ export default function PowerPage({ project, setProject }: Props) {
           </table>
         </section>
       ))}
+
+      {b.poe.length > 0 && (
+        <section className="card">
+          <h3>Alimentation par le câble réseau (PoE)</h3>
+          <p className="muted small">Comptée dans la consommation du switch qui la fournit.</p>
+          <table>
+            <thead><tr><th>Switch</th><th>Appareils alimentés</th><th>Puissance PoE</th></tr></thead>
+            <tbody>
+              {b.poe.map((p) => (
+                <tr key={p.switch.id}>
+                  <td>{p.switch.data.name} <small className="muted">{p.switch.data.model}</small></td>
+                  <td>{p.devices.map((d) => `${d.data.name} (${wattsOf(d.data) ?? '?'} W)`).join(', ')}</td>
+                  <td>{Math.round(p.watts)} W</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
 
       {(b.unpowered.length > 0 || missing.length > 0) && (
         <section className="card">

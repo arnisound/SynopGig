@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { demoProject } from './demo'
 import { powerBudget } from './power/power'
+import { buildTables } from './lists/tables'
 import { checkLink } from './data/connectors'
 import { LIBRARY } from './data/library'
 import { emptyPanel, fillHoles, HOLE_TYPES, panelPorts } from './data/panels'
@@ -115,6 +116,14 @@ describe('festival demo', () => {
     const ips = p.nodes.map((n) => n.data.config.ip).filter(Boolean)
     expect(new Set(ips).size).toBe(ips.length)
     expect(new Set(p.edges.map((e) => e.data?.cableId)).size).toBe(p.edges.length)
+  })
+
+  it('has no alert in rigging, wireless, audio over IP or DMX, and powers its cameras by PoE', () => {
+    for (const t of buildTables(p).filter((x) => ['accroche', 'frequences', 'audio-ip', 'dmx'].includes(x.file))) {
+      expect(t.rows.length, t.title).toBeGreaterThan(0)
+      expect(t.rows.map((r) => r.at(-1)).filter(Boolean), t.title).toEqual([])
+    }
+    expect(powerBudget(p).poe[0]?.devices.length).toBe(2)
   })
 
   it('covers every trade, in racks and cases', () => {

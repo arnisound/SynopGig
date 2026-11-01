@@ -63,6 +63,8 @@ const S: Record<string, ReactNode> = {
   ceiling: <><path d="M3 4h18" /><rect x="5" y="6" width="14" height="5" rx="1" />{[8, 12, 16].map((x) => <circle key={x} cx={x} cy="8.5" r="0.9" />)}<path d="M8 15l-2 3M12 15v4M16 15l2 3" /></>,
   gooseneck: <><path d="M4 21h9M8.5 21v-3" /><rect x="4" y="15" width="9" height="3" rx="1" /><path d="M8.5 15c0-6 3-9 9-10" /><rect x="16.5" y="3" width="4" height="3" rx="1" transform="rotate(-20 18.5 4.5)" /></>,
   earphones: <><circle cx="7" cy="8" r="3" /><circle cx="17" cy="8" r="3" /><path d="M7 11c0 5 5 5 5 9M17 11c0 5-5 5-5 9" /></>,
+  hoist: <><path d="M12 2v3" /><rect x="7" y="5" width="10" height="8" rx="2" /><path d="M12 13v3M9.5 16.5h5l-1 2.5a1.5 1.5 0 0 1-3 0z" /><path d="M17 8h3v8" /><circle cx="20" cy="18" r="1" /></>,
+  truss: <><path d="M2.5 8h19M2.5 16h19" /><path d="M2.5 16 6 8l3.5 8 3.5-8 3.5 8 3.5-8 1.5 4" /></>,
   blank: <><rect x="2.5" y="8" width="19" height="8" rx="1" /><circle cx="5" cy="12" r="0.8" /><circle cx="19" cy="12" r="0.8" /></>,
   lamp: <><path d="M5 21h6M8 21v-3" /><path d="M8 18c0-7 3-11 9-12" /><path d="M14 4l6 2-1.5 4.5" /></>,
   fan: <><rect x="2.5" y="6" width="19" height="12" rx="1.2" /><circle cx="8" cy="12" r="3.5" /><circle cx="16" cy="12" r="3.5" /><path d="M8 8.5v7M16 8.5v7" /></>,

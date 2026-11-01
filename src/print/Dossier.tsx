@@ -2,7 +2,7 @@ import { CONNECTORS, SIGNALS } from '../data/connectors'
 import { CATEGORY_COLORS } from '../data/library'
 import { buildGuide } from '../guide/steps'
 import { buildTables, type TableBlock } from '../lists/tables'
-import { rackOfNode, resolveCables } from '../project'
+import { rackOfNode, resolveCables, weightOf } from '../project'
 import RackFace from '../racks/RackFace'
 import { BannerArt, CaseFront } from '../cases/CaseSvg'
 import { bannerSize, caseHeightMm } from '../cases/geometry'
@@ -19,7 +19,7 @@ import TitleBlock from './TitleBlock'
 import { orgOf } from '../settings/settings'
 import DeviceArt from '../ui/DeviceArt'
 
-const TABLE_OF: Partial<Record<SectionId, string | string[]>> = { cables: 'cables', bom: 'nomenclature', ip: ['ip', 'reseau'], dmx: 'dmx', panels: 'bandeaux', power: 'energie' }
+const TABLE_OF: Partial<Record<SectionId, string | string[]>> = { cables: 'cables', bom: 'nomenclature', ip: ['ip', 'reseau'], dmx: 'dmx', panels: 'bandeaux', power: 'energie', rigging: 'accroche', rf: ['frequences', 'audio-ip'], loading: ['cables-a-charger', 'camion'] }
 
 function Table({ block }: { block: Pick<TableBlock, 'head' | 'rows'> }) {
   return (
@@ -81,7 +81,7 @@ export default function Dossier({
     if (!has(id)) return null
     return [TABLE_OF[id] ?? []].flat().map((file) => {
       const t = tables.get(file)
-      if (!t || (file === 'reseau' && t.rows.length === 0)) return null
+      if (!t || ((file === 'reseau' || t.optional) && t.rows.length === 0)) return null
       return (
         <section key={file} className="d-page">
           <h2>{t.title}</h2>
@@ -231,11 +231,14 @@ export default function Dossier({
       {table('dmx')}
       {table('panels')}
       {table('power')}
+      {table('rigging')}
+      {table('rf')}
+      {table('loading')}
 
       {has('racks') &&
         racks.map((r) => {
           const members = nodes.filter((n) => r.devices.includes(n.id))
-          const weight = members.reduce((s, m) => s + (m.data.weight ?? 0), 0) + (r.emptyWeight ?? 0)
+          const weight = members.reduce((s, m) => s + weightOf(m.data), 0) + (r.emptyWeight ?? 0)
           return (
             <section key={r.id} className="d-page">
               <h2>Rack « {r.name} » <small>{r.rackU}U · {weight.toFixed(1)} kg · n° {r.number}</small></h2>
@@ -250,7 +253,7 @@ export default function Dossier({
       {has('cases') &&
         cases.map((c) => {
             const content = c.devices.map((id) => nodes.find((n) => n.id === id)).filter((n) => n !== undefined)
-            const weight = content.reduce((s, m) => s + (m.data.weight ?? 0), 0) + (c.emptyWeight ?? 0)
+            const weight = content.reduce((s, m) => s + weightOf(m.data), 0) + (c.emptyWeight ?? 0)
             const { bw, bh } = bannerSize(c)
             return (
               <section key={c.id} className="d-page">

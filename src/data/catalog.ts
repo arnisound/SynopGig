@@ -403,6 +403,8 @@ const ENERGIE: DeviceTemplate[] = [
     supply('src-32-tri', '32A tri', 'p17-32a', 32, true),
     supply('src-63-tri', '63A tri', 'p17-63a', 63, true),
     supply('src-125-tri', '125A tri', 'p17-125a', 125, true),
+    dev('gen-60', 'Générique', 'Groupe électrogène 60 kVA', 'Énergie', { kg: 1400, d: 'Groupe insonorisé 60 kVA (48 kW à cos φ 0,8), sortie P17 125 A tri : source autonome d’un plateau.', x: [['Alimentation', 'Puissance', '60', 'kVA'], ['Alimentation', 'Réseau', 'Triphasé 400 V (3P + N + T)']] }, [port('out', 'Sortie P17 125A tri', 'p17-125a', PWR, 'out')]),
+    dev('gen-100', 'Générique', 'Groupe électrogène 100 kVA', 'Énergie', { kg: 2200, d: 'Groupe insonorisé 100 kVA (80 kW à cos φ 0,8), sortie P17 125 A tri.', x: [['Alimentation', 'Puissance', '100', 'kVA'], ['Alimentation', 'Réseau', 'Triphasé 400 V (3P + N + T)']] }, [port('out', 'Sortie P17 125A tri', 'p17-125a', PWR, 'out')]),
     dev('src-wall-16', 'Générique', 'Prise murale 16A (Schuko)', 'Énergie', { d: 'Prise de courant du lieu, 230 V 16 A : pour les petites installations.', x: [['Alimentation', 'Calibre', '16', 'A'], ['Alimentation', 'Réseau', 'Monophasé 230 V (P + N + T)']] }, [port('out', 'Prise 16A', 'schuko', PWR, 'out')]),
   ]),
   ...family('Armoires de conversion', [
@@ -451,6 +453,30 @@ const ENERGIE: DeviceTemplate[] = [
     dev('charger-hf-rack-2u', 'Générique', 'Tiroir de charge 2U pour émetteurs HF (8 places)', 'Énergie', { u: 2, kg: 5 }, [iec()]),
     dev('charger-vmount-2', 'Générique', 'Chargeur 2 batteries V-Mount (caméra)', 'Énergie', { kg: 1.5 }, [iec()]),
     dev('charger-talkie-6', 'Générique', 'Chargeur 6 talkies-walkies', 'Énergie', { kg: 1 }, [dc()]),
+  ]),
+]
+
+const IC = 'intercom' as const
+/* Intercom: partyline, wireless, talkback; rigging: motors, truss, frames. */
+const INTERCOM_ACCROCHE: DeviceTemplate[] = [
+  ...family('Intercom', [
+    dev('ic-base-2ch', 'Générique', 'Station intercom filaire 2 canaux (partyline)', 'Son', { u: 1, kg: 3, w: 40, d: 'Station de base partyline : alimente et relie les boîtiers ceinture sur deux canaux en XLR 3.' }, [port('ch1', 'Ligne canal A', 'xlr3', IC, 'io'), port('ch2', 'Ligne canal B', 'xlr3', IC, 'io'), port('hs', 'Micro-casque', 'xlr4', IC, 'io'), port('4w', 'Interface 4 fils', 'rj45', IC, 'io'), iec()]),
+    dev('ic-beltpack', 'Générique', 'Boîtier ceinture intercom (partyline)', 'Son', { kg: 0.6, d: 'Boîtier ceinture filaire, alimenté par la ligne partyline, avec micro-casque.' }, [port('in', 'Ligne', 'xlr3', IC, 'io'), port('thru', 'Recopie ligne', 'xlr3', IC, 'io'), port('hs', 'Micro-casque', 'xlr4', IC, 'io')]),
+    dev('ic-wireless-base', 'Générique', 'Base intercom sans fil (4 antennes)', 'Son', { u: 1, kg: 4, w: 60, d: 'Base intercom sans fil numérique : antennes déportées en réseau, liaison partyline et 4 fils.' }, [...series('ant', 'Antenne déportée', 4, 'rj45', IC, 'io'), port('pl', 'Partyline', 'xlr3', IC, 'io'), port('net', 'Réseau', 'rj45', NET, 'io'), iec()]),
+    dev('ic-wireless-antenna', 'Générique', 'Antenne intercom sans fil (alimentée par le câble)', 'Son', { kg: 0.5, d: 'Antenne-relais déportée, alimentée par son câble réseau depuis la base.' }, [port('net', 'Liaison base (alimentée par le câble)', 'rj45', IC, 'io')]),
+    dev('ic-wireless-beltpack', 'Générique', 'Boîtier ceinture intercom sans fil', 'Son', { kg: 0.3, d: 'Boîtier ceinture sans fil sur batterie, relié à la base par les antennes.' }, [port('hs', 'Micro-casque', 'xlr4', IC, 'io')]),
+    dev('ic-headset', 'Générique', 'Micro-casque intercom simple oreille', 'Son', { kg: 0.2, d: 'Micro-casque léger pour boîtier ceinture, XLR 4 broches.' }, [port('out', 'Câble XLR 4', 'xlr4', IC, 'io')]),
+    dev('ic-talkback', 'Générique', 'Haut-parleur de régie intercom (talkback)', 'Son', { kg: 2, w: 20, d: 'Poste de table avec haut-parleur et micro col de cygne, sur la ligne partyline.' }, [port('in', 'Ligne', 'xlr3', IC, 'io'), iec()]),
+  ]),
+  ...family('Accroche', [
+    dev('motor-500', 'Générique', 'Palan électrique 500 kg (D8+)', 'Autre', { kg: 30, w: 600, d: 'Palan à chaîne 500 kg, classe D8+ (levage au-dessus des personnes), commandé depuis un pupitre.', x: [['Accroche', 'Charge maximale (CMU)', '500', 'kg'], ['Accroche', 'Vitesse', '4', 'm/min']] }, [port('pwr', 'Commande et puissance', 'harting', PWR, 'in')]),
+    dev('motor-1000', 'Générique', 'Palan électrique 1 t (D8+)', 'Autre', { kg: 55, w: 900, d: 'Palan à chaîne 1 tonne, classe D8+, pour système son ou pont principal.', x: [['Accroche', 'Charge maximale (CMU)', '1000', 'kg'], ['Accroche', 'Vitesse', '4', 'm/min']] }, [port('pwr', 'Commande et puissance', 'harting', PWR, 'in')]),
+    dev('motor-2000', 'Générique', 'Palan électrique 2 t (D8+)', 'Autre', { kg: 90, w: 1500, d: 'Palan à chaîne 2 tonnes, classe D8+, pour les charges lourdes (écran LED, gros système).', x: [['Accroche', 'Charge maximale (CMU)', '2000', 'kg'], ['Accroche', 'Vitesse', '2', 'm/min']] }, [port('pwr', 'Commande et puissance', 'harting', PWR, 'in')]),
+    dev('motor-ctrl-8', 'Générique', 'Pupitre de commande palans 8 voies', 'Énergie', { u: 4, kg: 18, d: 'Pupitre de commande directe pour 8 palans D8+, arrivée P17 32 A tri, sorties Harting.' }, [port('in', 'Arrivée P17 32A', 'p17-32a', PWR, 'in'), ...series('m', 'Sortie palan', 8, 'harting', PWR, 'out')]),
+    dev('truss-30-3m', 'Générique', 'Pont alu triangulaire 30 cm (3 m)', 'Autre', { kg: 15, d: 'Élément de pont triangulaire 30 cm, 3 m : grill lumière, accroche de projecteurs.', x: [['Accroche', 'Longueur', '3', 'm']] }, []),
+    dev('truss-40-3m', 'Générique', 'Pont alu carré 40 cm (3 m)', 'Autre', { kg: 22, d: 'Élément de pont carré 40 cm, 3 m : grills chargés, ponts de face.', x: [['Accroche', 'Longueur', '3', 'm']] }, []),
+    dev('bumper-la', 'Générique', 'Cadre d’accroche (bumper) line array', 'Autre', { kg: 60, d: 'Cadre d’accroche d’une ligne d’enceintes, avec manille et inclinomètre.' }, []),
+    dev('chain-hoist-manual', 'Générique', 'Palan manuel 1 t', 'Autre', { kg: 12, d: 'Palan à chaîne manuel 1 tonne, pour un élément fixe réglé une fois.', x: [['Accroche', 'Charge maximale (CMU)', '1000', 'kg']] }, []),
   ]),
 ]
 
@@ -505,4 +531,4 @@ function withBrands(base: DeviceTemplate[], brands: DeviceTemplate[]) {
   return all.map((t, i) => ({ t, i })).sort((a, b) => order.indexOf(a.t.family) - order.indexOf(b.t.family) || a.i - b.i).map((x) => x.t)
 }
 
-export const CATALOG: DeviceTemplate[] = [...withBrands(SON, BRANDS), ...LUMIERE, ...VIDEO, ...RESEAU, ...ENERGIE, ...ACCESSOIRES]
+export const CATALOG: DeviceTemplate[] = [...withBrands(SON, BRANDS), ...LUMIERE, ...VIDEO, ...RESEAU, ...ENERGIE, ...INTERCOM_ACCROCHE, ...ACCESSOIRES]

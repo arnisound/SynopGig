@@ -1,3 +1,4 @@
+import { SIGNALS } from '../data/connectors'
 import { resolveCables } from '../project'
 import type { ConnectorType, DeviceData, DeviceNode, Phase, Port, Project } from '../types'
 
@@ -9,6 +10,19 @@ import type { ConnectorType, DeviceData, DeviceNode, Phase, Port, Project } from
  */
 
 export const VOLTS = 230
+
+/** Usual generator sizes, kVA. */
+const GENERATORS = [20, 30, 45, 60, 80, 100, 150, 200, 250, 350, 500]
+
+/**
+ * The generator a show needs: its real power over the power factor gives the
+ * apparent power (kVA), plus 25 % margin for inrush and what was forgotten.
+ */
+export function generatorFor(watts: number, cosPhi = 0.9) {
+  const kva = watts / 1000 / cosPhi
+  const needed = kva * 1.25
+  return { kw: watts / 1000, kva, size: GENERATORS.find((g) => g >= needed) }
+}
 
 /** Usual breaker of an outlet, by its socket. */
 export const RATING: Partial<Record<ConnectorType, number>> = {
@@ -25,11 +39,17 @@ export const RATING: Partial<Record<ConnectorType, number>> = {
 }
 
 /** Three-phase inlets: their outlets are spread on L1, L2, L3. */
-// A Socapex carries six circuits spread on the three phases: counted as a three-phase line.
-export const THREE_PHASE = new Set<ConnectorType>(['p17-16a-tri', 'p17-32a', 'p17-63a', 'p17-125a', 'socapex'])
+// A Socapex carries six circuits spread on the three phases, a motor cable (Harting) a 400 V motor: three-phase lines.
+export const THREE_PHASE = new Set<ConnectorType>(['p17-16a-tri', 'p17-32a', 'p17-63a', 'p17-125a', 'socapex', 'harting'])
 
 /** The device's consumption: its own figure, else the one written in its characteristics. */
 export function wattsOf(d: DeviceData): number | undefined {
+  const one = unitWatts(d)
+  return one === undefined ? undefined : one * Math.max(1, Math.round(d.qty ?? 1))
+}
+
+/** The consumption of one unit. */
+export function unitWatts(d: DeviceData): number | undefined {
   if (d.watts && d.watts > 0) return d.watts
   for (const s of d.specs ?? []) {
     if (!/consomm|power consumption|puissance (?:consomm|absorb)|input power|leistungsaufnahme/i.test(s.label)) continue
@@ -42,6 +62,7 @@ export function wattsOf(d: DeviceData): number | undefined {
 }
 
 const isPower = (p?: Port) => p?.signal === 'power'
+const SIGNAL_IP = new Set(Object.entries(SIGNALS).filter(([, v]) => v.ip).map(([k]) => k as Port['signal']))
 export const outletKey = (nodeId: string, portId: string) => `${nodeId}:${portId}`
 
 export interface Outlet {
@@ -50,6 +71,8 @@ export interface Outlet {
   phase: Phase
   /** A three-phase outlet (its current is that of its most loaded phase). */
   threePhase?: boolean
+  /** Current it draws on each phase of its board. */
+  perPhase: Record<Phase, number>
   /** Devices plugged in, directly or further down (through their power links). */
   fed: DeviceNode[]
   /** What to list on the outlet: a board fed from it stands for everything it feeds (it has its own budget). */
@@ -83,6 +106,8 @@ export interface PowerBudget {
   alerts: string[]
   /** The alerts of a whole board (its inlet, its phases), not of one of its outlets. */
   boardAlerts: string[]
+  /** Switches powering devices by PoE, and what they give. */
+  poe: { switch: DeviceNode; watts: number; devices: DeviceNode[] }[]
 }
 
 export function powerBudget(project: Project): PowerBudget {
@@ -124,6 +149,20 @@ export function powerBudget(project: Project): PowerBudget {
   const outletsOf = (n: DeviceNode) => (n.data.panel ? [] : n.data.ports.filter((p) => isPower(p) && p.dir === 'out'))
   const needsPower = (n: DeviceNode) => !n.data.panel && n.data.ports.some((p) => isPower(p) && p.dir === 'in')
 
+  // PoE: a device whose network port says PoE, cabled to a switch and fed by nothing else, draws from that switch.
+  const isSwitch = (n: DeviceNode) => n.data.ports.filter((p) => SIGNAL_IP.has(p.signal) && p.dir === 'io').length >= 4
+  const poeFrom = new Map<string, DeviceNode>()
+  for (const c of cables) {
+    for (const [dev, port, other] of [[c.from, c.fromPort, c.to], [c.to, c.toPort, c.from]] as const) {
+      if (!dev || !port || !other || !/poe/i.test(port.label) || !isSwitch(other) || isSwitch(dev)) continue
+      if (needsPower(dev) && !fedBy.has(dev.id)) poeFrom.set(dev.id, other)
+    }
+  }
+  const poeLoad = new Map<string, number>()
+  for (const [id, sw] of poeFrom) poeLoad.set(sw.id, (poeLoad.get(sw.id) ?? 0) + (wattsOf(byId.get(id)!.data) ?? 0))
+  /** What a device draws from the mains: its own consumption, plus what it gives by PoE. */
+  const draw = (n: DeviceNode) => (wattsOf(n.data) ?? 0) + (poeLoad.get(n.id) ?? 0)
+
   /** Everything downstream of a device, itself included. */
   const below = (n: DeviceNode, seen: Set<string>): DeviceNode[] => {
     if (seen.has(n.id)) return []
@@ -147,7 +186,7 @@ export function powerBudget(project: Project): PowerBudget {
     const own = outletsOf(n).map((p) => RATING[p.connector] ?? 0)
     return own.length ? Math.max(...own) || undefined : undefined
   }
-  const totalWatts = (n: DeviceNode) => below(n, new Set()).reduce((s, d) => s + (wattsOf(d.data) ?? 0), 0)
+  const totalWatts = (n: DeviceNode) => below(n, new Set()).reduce((s, d) => s + draw(d), 0)
 
   /** Current per phase drawn through a three-phase board, from what each of its outlets carries. */
   const boardLoad = new Map<string, Record<Phase, number>>()
@@ -198,17 +237,19 @@ export function powerBudget(project: Project): PowerBudget {
     const outlets = fedOutlets(node).map((port): Outlet => {
       const fed = (feeds.get(outletKey(node.id, port.id)) ?? []).flatMap((f) => below(f.to, new Set([node.id])))
       const shown = (feeds.get(outletKey(node.id, port.id)) ?? []).flatMap((f) => (boards.includes(f.to) ? [f.to] : below(f.to, new Set([node.id]))))
-      const watts = fed.reduce((s, d) => s + (wattsOf(d.data) ?? 0), 0)
+      const watts = fed.reduce((s, d) => s + draw(d), 0)
       const rating = RATING[port.connector]
       const phase = threePhase ? phaseOf(node, port) : 'L1'
       const three = THREE_PHASE.has(port.connector)
       // A three-phase outlet is rated per phase: its most loaded one counts.
-      const amps = three ? Math.max(...Object.values(outletLoad(node, port, phase))) : watts / VOLTS
+      const perPhase = outletLoad(node, port, phase)
+      const amps = three ? Math.max(...Object.values(perPhase)) : watts / VOLTS
       return {
         node,
         port,
         phase,
         threePhase: three,
+        perPhase,
         fed,
         shown,
         watts,
@@ -234,7 +275,8 @@ export function powerBudget(project: Project): PowerBudget {
     }
   })
 
-  const unpowered = nodes.filter((n) => needsPower(n) && !fedBy.has(n.id) && !sources.some((s) => s.node.id === n.id))
+  const unpowered = nodes.filter((n) => needsPower(n) && !fedBy.has(n.id) && !poeFrom.has(n.id) && !sources.some((s) => s.node.id === n.id))
+  const poe = [...poeLoad].map(([id, watts]) => ({ switch: byId.get(id)!, watts, devices: [...poeFrom].filter(([, sw]) => sw.id === id).map(([d]) => byId.get(d)!) }))
   const alerts: string[] = []
   const boardAlerts: string[] = []
   for (const s of sources) {
@@ -248,5 +290,30 @@ export function powerBudget(project: Project): PowerBudget {
     const balanced = !inletOf(s.node) || inletOf(s.node)!.connector !== 'socapex'
     if (balanced && s.imbalance !== undefined && s.imbalance > 0.3 && worst > 5) boardAlerts.push(`${s.node.data.name} : phases déséquilibrées (${Math.round(s.imbalance * 100)} %), répartissez les départs`)
   }
-  return { sources, unpowered, alerts: [...boardAlerts, ...alerts], boardAlerts }
+  for (const p of poe) if (!/poe/i.test(p.switch.data.model)) alerts.push(`${p.switch.data.name} alimente ${p.devices.map((d) => d.data.name).join(', ')} par PoE : vérifiez que ce switch fournit du PoE (${Math.round(p.watts)} W)`)
+  return { sources, unpowered, alerts: [...boardAlerts, ...alerts], boardAlerts, poe }
+}
+
+/**
+ * Spreads the single-phase outlets of every three-phase board on L1, L2, L3
+ * so the phases carry the same current: the heaviest outlet first, on the
+ * least loaded phase. Boards are balanced from the bottom up, so a cabinet
+ * sees what its distributions really draw.
+ */
+export function balancePhases(project: Project): Record<string, Phase> {
+  const phases: Record<string, Phase> = { ...project.power?.phases }
+  const boards = powerBudget(project).sources.filter((s) => s.threePhase).reverse()
+  for (const board of boards) {
+    const b = powerBudget({ ...project, power: { ...project.power, phases } })
+    const s = b.sources.find((x) => x.node.id === board.node.id)
+    if (!s) continue
+    const load: Record<Phase, number> = { L1: 0, L2: 0, L3: 0 }
+    for (const o of s.outlets.filter((x) => x.threePhase)) for (const ph of ['L1', 'L2', 'L3'] as Phase[]) load[ph] += o.perPhase[ph]
+    for (const o of s.outlets.filter((x) => !x.threePhase).sort((x, y) => y.amps - x.amps)) {
+      const ph = (['L1', 'L2', 'L3'] as Phase[]).reduce((m, p) => (load[p] < load[m] ? p : m), 'L1')
+      phases[outletKey(s.node.id, o.port.id)] = ph
+      load[ph] += o.amps
+    }
+  }
+  return phases
 }

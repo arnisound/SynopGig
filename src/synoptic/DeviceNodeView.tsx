@@ -41,7 +41,7 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNode>) {
     >
       <div className={`device-head ${images ? 'with-art' : ''}`}>
         {images && <DeviceArt image={data.image} family={data.family} templateId={data.templateId} model={data.model} category={data.category} size={34} />}
-        <div className="device-name">{data.name}</div>
+        <div className="device-name">{data.name}{(data.qty ?? 1) > 1 && <span className="device-qty"> × {data.qty}</span>}</div>
         <div className="device-meta">
           {data.brand ? `${data.brand} ${data.model}` : data.model} · {data.zone}
         </div>

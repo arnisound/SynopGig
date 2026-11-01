@@ -945,3 +945,9 @@ button.link { border: none; background: none; padding: 0; color: var(--accent); 
 .face-host .host-name { position: absolute; right: 6px; bottom: 0; font-size: 8px; opacity: 0.5; color: #fff; pointer-events: none; }
 .carry-row { display: flex; align-items: center; gap: 6px; padding: 4px 6px; }
 .carry-row select { max-width: 52%; font-size: 12px; }
+.power-total { display: flex; flex-direction: column; gap: 4px; }
+.power-total input { width: 70px; margin-left: 6px; }
+.device-qty { color: var(--cat); font-weight: 800; }
+.list-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.list-nav a { font-size: 12px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; color: var(--text); background: var(--panel); }
+.list-nav a:hover { border-color: var(--accent); color: var(--accent); }

@@ -21,6 +21,35 @@ export default function PatchPage({ project, setProject }: Props) {
       return { ...p, patch: { ...lists, [list]: { ...cur, [key]: { ...cur[key], ...patch } } } }
     })
 
+  // Variants: one patch per band on the same system; switching keeps the other one aside.
+  const current = project.patchVariant ?? 'Patch principal'
+  const variants = [current, ...Object.keys(project.patchVariants ?? {}).filter((v) => v !== current)]
+  const switchTo = (name: string) =>
+    setProject((p) => {
+      const cur = p.patchVariant ?? 'Patch principal'
+      if (name === cur) return p
+      const all = { ...p.patchVariants, [cur]: p.patch ?? {} }
+      const next = all[name] ?? {}
+      delete all[name]
+      return { ...p, patch: next, patchVariants: all, patchVariant: name }
+    })
+  const newVariant = () => {
+    const name = prompt('Nom de la variante (par exemple le nom du groupe) :', `Groupe ${variants.length + 1}`)?.trim()
+    if (!name || variants.includes(name)) return
+    // A new band starts from the current patch, to be renamed channel by channel.
+    setProject((p) => ({ ...p, patchVariants: { ...p.patchVariants, [p.patchVariant ?? 'Patch principal']: p.patch ?? {} }, patch: structuredClone(p.patch ?? {}), patchVariant: name }))
+  }
+  const dropVariant = () => {
+    if (variants.length < 2 || !confirm(`Supprimer la variante « ${current} » ?`)) return
+    setProject((p) => {
+      const all = { ...p.patchVariants }
+      const [name] = Object.keys(all)
+      const next = all[name]
+      delete all[name]
+      return { ...p, patch: next, patchVariants: all, patchVariant: name }
+    })
+  }
+
   const reset = () => confirm('Revenir à la numérotation et aux noms générés depuis le synoptique ?') && setProject((p) => ({ ...p, patch: {} }))
 
   const csv = () => {
@@ -44,10 +73,15 @@ export default function PatchPage({ project, setProject }: Props) {
     <div className="page patch">
       <header className="page-head">
         <div>
-          <h2>Patch</h2>
+          <h2>Patch{variants.length > 1 ? ` — ${current}` : ''}</h2>
           <p>Listes d’entrées et de sorties, tirées du synoptique (consoles et stageboxes). Numéros, noms, pieds, 48 V et notes se modifient ici.</p>
         </div>
-        <div className="no-print">
+        <div className="no-print actions">
+          <select value={current} onChange={(e) => switchTo(e.target.value)} aria-label="Variante de patch" title="Un patch par groupe sur le même système">
+            {variants.map((v) => <option key={v}>{v}</option>)}
+          </select>
+          <button onClick={newVariant} title="Nouvelle variante, partant du patch affiché">+ Variante</button>
+          {variants.length > 1 && <button onClick={dropVariant}>Supprimer la variante</button>}
           <button onClick={csv}>Export CSV</button>
           <button onClick={() => window.print()}>Imprimer / PDF</button>
           <button onClick={reset}>Réinitialiser</button>

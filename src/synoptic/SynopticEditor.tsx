@@ -26,6 +26,7 @@ import CableEdgeView from './CableEdgeView'
 import { THEME_LABELS, type Theme } from '../theme'
 import DeviceNodeView from './DeviceNodeView'
 import { useCanvasModel } from './useCanvasModel'
+import { addressDmx, autoLayout, chainDevices, dmxFootprint, dmxIssues } from './tools'
 import RackFrameView, { type FrameNode } from './RackFrameView'
 import { DEFAULT_VIEW, viewOf } from './view'
 import { ViewContext } from './viewContext'
@@ -368,6 +369,28 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
     if (confirm(`Renommer ${misnamed} câble(s) selon leur nature (AUD-001, LUM-001, RES-001…) ?\nLes étiquettes déjà imprimées ne correspondront plus.`)) setProject(renameCablesByNature)
   }
   const selectedCount = nodes.filter((n) => n.selected).length
+  const selectedIds = nodes.filter((n) => n.selected).map((n) => n.id)
+  const dmxSelected = nodes.filter((n) => n.selected && n.data.ports.some((x) => x.signal === 'dmx' && x.dir === 'in'))
+  const chain = () => {
+    const r = chainDevices(project, selectedIds)
+    if (r.added) setProject(() => r.project)
+    else alert('Rien à chaîner : il faut des sorties de recopie (DMX out, recopie secteur, data out, link) libres, dans l’ordre de la rangée.')
+  }
+  const address = () => {
+    const at = prompt('Univers et adresse de départ (par exemple 1.1 ou 2.101) :', '1.1')?.trim()
+    if (!at) return
+    const [u, a] = at.split(/[.\s/]+/).map(Number)
+    if (!(u >= 1) || !(a >= 1 && a <= 512)) return alert('Format attendu : univers.adresse, par exemple 1.1')
+    const unknown = dmxSelected.filter((n) => dmxFootprint(n.data) === undefined)
+    const fallback = unknown.length ? Number(prompt(`Nombre de canaux pour ${unknown.map((n) => n.data.name).join(', ')} (mode non renseigné) :`, '16')) || 16 : 16
+    setProject((p) => addressDmx(p, dmxSelected.map((n) => n.id), u, a, fallback))
+  }
+  const dmx = useMemo(() => dmxIssues(project), [project])
+  const arrange = () => {
+    if (!confirm('Ranger tout le synoptique : chaque rack groupé, puis une bande par métier ? (Annuler revient en arrière.)')) return
+    setProject((p) => autoLayout(p, (n) => ({ w: n.measured?.width ?? 240, h: n.measured?.height ?? 200 })))
+    setTimeout(() => fitView({ duration: 400 }), 60)
+  }
 
   return (
     <div className={`synoptic ${drawer ? `show-${drawer}` : ''}`} style={{ '--inspector-w': `${inspectorW}px` } as CSSProperties}>
@@ -497,6 +520,7 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
               </select>
             </label>
             <div className="actions">
+              <button onClick={arrange} title="Chaque rack groupé, puis une bande par métier">Ranger automatiquement</button>
               <button onClick={exportPng}>Exporter en PNG</button>
               <button onClick={() => setView(DEFAULT_VIEW)}>Réinitialiser</button>
             </div>
@@ -530,6 +554,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
             <span>{selectedCount} sélectionné{selectedCount > 1 ? 's' : ''}</span>
             <button className="mobile-only" onClick={() => setDrawer('inspector')}>Détails</button>
             <button onClick={duplicate} title="Dupliquer la sélection avec ses câbles (Ctrl+D)">Dupliquer</button>
+            {selectedCount > 1 && <button onClick={chain} title="Relier la rangée : DMX, recopie secteur, data, link, de gauche à droite">Chaîner</button>}
+            {dmxSelected.length > 0 && <button onClick={address} title="Adresses DMX à la suite, selon le nombre de canaux du mode">Adresser DMX</button>}
             <button onClick={createRackFromSelection}>Mettre en rack</button>
             <button onClick={saveBlock} title="Garder ces équipements et leurs câbles pour les reposer dans un autre projet">Enregistrer en bloc</button>
             <button className="danger" onClick={deleteSelection}>Supprimer</button>
@@ -559,7 +585,8 @@ export default function SynopticEditor({ project, setProject, templates, focus, 
       <button className="sheet-close" onClick={() => setDrawer(undefined)} aria-label="Fermer">✕</button>
       <Inspector
         node={selectedNode}
-        ipIssues={selectedNode ? ips.get(selectedNode.id) : undefined}
+        ipIssues={selectedNode ? [...(ips.get(selectedNode.id) ?? []), ...(dmx.get(selectedNode.id) ?? [])] : undefined}
+        nodes={nodes}
         cardsRequest={cardsRequest}
         cable={selectedEdge ? cableByEdge.get(selectedEdge.id) : undefined}
         onNode={(id, patch) =>
