@@ -79,6 +79,8 @@ export interface PowerBudget {
   /** Devices that need power and are fed by nothing. */
   unpowered: DeviceNode[]
   alerts: string[]
+  /** The alerts of a whole board (its inlet, its phases), not of one of its outlets. */
+  boardAlerts: string[]
 }
 
 export function powerBudget(project: Project): PowerBudget {
@@ -230,14 +232,15 @@ export function powerBudget(project: Project): PowerBudget {
 
   const unpowered = nodes.filter((n) => needsPower(n) && !fedBy.has(n.id) && !sources.some((s) => s.node.id === n.id))
   const alerts: string[] = []
+  const boardAlerts: string[] = []
   for (const s of sources) {
     for (const o of s.outlets) {
       if (o.load !== undefined && o.load > 1) alerts.push(`${s.node.data.name} · ${o.port.label} : ${o.amps.toFixed(1)} A pour un départ de ${o.rating} A, surcharge`)
       else if (o.load !== undefined && o.load > 0.8) alerts.push(`${s.node.data.name} · ${o.port.label} : ${Math.round(o.load * 100)} % du départ, peu de marge`)
     }
     const worst = Math.max(...Object.values(s.phases))
-    if (s.inletRating && worst > s.inletRating) alerts.push(`${s.node.data.name} : ${worst.toFixed(1)} A ${s.threePhase ? 'sur une phase ' : ''}pour une arrivée de ${s.inletRating} A`)
-    if (s.imbalance !== undefined && s.imbalance > 0.3 && worst > 5) alerts.push(`${s.node.data.name} : phases déséquilibrées (${Math.round(s.imbalance * 100)} %), répartissez les départs`)
+    if (s.inletRating && worst > s.inletRating) boardAlerts.push(`${s.node.data.name} : ${worst.toFixed(1)} A ${s.threePhase ? 'sur une phase ' : ''}pour une arrivée de ${s.inletRating} A`)
+    if (s.imbalance !== undefined && s.imbalance > 0.3 && worst > 5) boardAlerts.push(`${s.node.data.name} : phases déséquilibrées (${Math.round(s.imbalance * 100)} %), répartissez les départs`)
   }
-  return { sources, unpowered, alerts }
+  return { sources, unpowered, alerts: [...boardAlerts, ...alerts], boardAlerts }
 }

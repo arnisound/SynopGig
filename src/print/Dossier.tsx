@@ -6,6 +6,7 @@ import { rackOfNode, resolveCables } from '../project'
 import RackFace from '../racks/RackFace'
 import { BannerArt, CaseFront } from '../cases/CaseSvg'
 import { bannerSize, caseHeightMm } from '../cases/geometry'
+import { FLIGHT, KINDS } from '../cases/models'
 import type { DeviceNode, Project } from '../types'
 import { departmentsOf, SECTIONS, type SectionId } from './sections'
 import type { Shot } from './SynopticShooter'
@@ -253,11 +254,12 @@ export default function Dossier({
             const { bw, bh } = bannerSize(c)
             return (
               <section key={c.id} className="d-page">
-                <h2>Flight case n° {c.number} « {c.name} »</h2>
+                <h2>{FLIGHT.includes(c.kind) ? 'Flight case' : KINDS[c.kind]} n° {c.number} « {c.name} »</h2>
                 <div className="d-case">
                   <CaseFront fc={c} />
                   <div>
                     <dl className="d-specs">
+                      <div><dt>Type</dt><dd>{KINDS[c.kind]}{c.kind === 'rack' ? ` ${c.rackU}U` : ''}</dd></div>
                       <div><dt>Dimensions ext.</dt><dd>{c.width} × {Math.round(caseHeightMm(c) / 10)} × {c.depth} cm</dd></div>
                       <div><dt>Poids total</dt><dd>{weight.toFixed(1)} kg</dd></div>
                       <div><dt>Roulettes</dt><dd>{c.wheels ? 'oui' : 'non'}</dd></div>
@@ -265,7 +267,10 @@ export default function Dossier({
                     </dl>
                     <h3>Contenu</h3>
                     <ul>
-                      {content.map((n) => <li key={n.id}>{n.data.name} — {deviceName(n)}</li>)}
+                      {content.map((n) => {
+                        const host = c.held?.[n.id] && !((n.data.rackU ?? 0) > 0) && nodes.find((x) => x.id === c.held![n.id])
+                        return <li key={n.id}>{n.data.name} — {deviceName(n)}{host && c.devices.includes(host.id) ? ` (sur ${host.data.name})` : ''}</li>
+                      })}
                       {c.extras.split('\n').filter((l) => l.trim()).map((l, i) => <li key={`x${i}`}>{l}</li>)}
                     </ul>
                   </div>

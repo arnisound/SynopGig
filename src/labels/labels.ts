@@ -1,4 +1,5 @@
 import { CONNECTORS, SIGNALS } from '../data/connectors'
+import { FLIGHT, KINDS } from '../cases/models'
 import { resolveCables } from '../project'
 import { shareLink } from '../share/share'
 import type { Project } from '../types'
@@ -66,7 +67,7 @@ export function caseLabels(project: Project): ThingLabel[] {
     return {
       title: `${c.number} · ${c.name}`,
       lines: [
-        `${c.banner.title}${c.banner.subtitle ? ` · ${c.banner.subtitle}` : ''}`,
+        `${c.banner.title}${c.banner.subtitle ? ` · ${c.banner.subtitle}` : ''}${FLIGHT.includes(c.kind) ? '' : ` · ${KINDS[c.kind]}`}`,
         `${inside.length} équipement(s)${weight ? ` · ${weight.toFixed(1)} kg` : ''}`,
         inside
           .slice(0, 4)

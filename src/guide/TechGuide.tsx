@@ -51,7 +51,7 @@ export default function TechGuide({ project, setProject, onShow, initialQuery = 
       <div className="guide-find no-print">
         <input
           type="search"
-          placeholder="Où va… un câble (C-042), un équipement, un port"
+          placeholder="Où va… un câble (AUD-042), un équipement, un port"
           aria-label="Chercher dans le guide"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

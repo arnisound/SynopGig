@@ -8,6 +8,8 @@ interface Props {
   project: Project
   setProject: (fn: (p: Project) => Project) => void
   onClose: () => void
+  /** A shared project: shown, not edited. */
+  readOnly?: boolean
 }
 
 const MAX_LOGO = 2 * 1024 * 1024
@@ -38,7 +40,7 @@ function LogoPicker({ logo, onChange, label }: { logo?: string; onChange: (logo?
 }
 
 /** The project's information (client, title block) and the settings of this browser (organisation, clients). */
-export default function ProjectInfoDialog({ project, setProject, onClose }: Props) {
+export default function ProjectInfoDialog({ project, setProject, onClose, readOnly }: Props) {
   const settings = useSettings()
   const [tab, setTab] = useState<'project' | 'settings'>('project')
   const [newClient, setNewClient] = useState<string>()
@@ -82,13 +84,16 @@ export default function ProjectInfoDialog({ project, setProject, onClose }: Prop
           <h3>{tab === 'project' ? 'Informations du projet' : 'Paramètres'}</h3>
           <button className="icon" onClick={onClose} aria-label="Fermer">✕</button>
         </div>
-        <div className="seg">
-          <button className={tab === 'project' ? 'active' : ''} onClick={() => setTab('project')}>Projet</button>
-          <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>Organisation et clients</button>
-        </div>
+        {!readOnly && (
+          <div className="seg">
+            <button className={tab === 'project' ? 'active' : ''} onClick={() => setTab('project')}>Projet</button>
+            <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>Organisation et clients</button>
+          </div>
+        )}
 
-        {tab === 'project' ? (
-          <div className="info-form">
+        {tab === 'project' || readOnly ? (
+          <fieldset className="info-form" disabled={readOnly}>
+            {readOnly && <p className="muted small">Projet partagé : informations en lecture seule.</p>}
             <label className="field">
               <span>Nom du projet</span>
               <input value={project.name} onChange={(e) => setProject((p) => ({ ...p, name: e.target.value }))} />
@@ -149,7 +154,7 @@ export default function ProjectInfoDialog({ project, setProject, onClose }: Prop
               {field('site', 'Site', 'Adresse ou bâtiment')}
               {field('room', 'Salle', 'Salle 204')}
             </div>
-          </div>
+          </fieldset>
         ) : (
           <div className="info-form">
             <p className="muted small">Gardés dans ce navigateur, pour tous vos projets.</p>

@@ -52,7 +52,17 @@ export function projectChanges(before: Project, after: Project): string[] {
 
   const oldCases = new Map(before.cases.map((c) => [c.id, c]))
   const newCases = new Set(after.cases.map((c) => c.id))
-  for (const c of after.cases) if (!oldCases.has(c.id)) out.push(`Flight case ajouté : ${c.name}`)
+  for (const c of after.cases) {
+    const o = oldCases.get(c.id)
+    if (!o) out.push(`Flight case ajouté : ${c.name}`)
+    else if (o.devices.length !== c.devices.length || o.devices.some((d) => !c.devices.includes(d))) out.push(`Contenu de « ${c.name} » modifié`)
+  }
+  const info = (p: Project) => p.info ?? {}
+  const fields: [keyof NonNullable<Project['info']>, string][] = [['revision', 'Indice'], ['status', 'Statut'], ['docType', 'Type de document'], ['site', 'Site'], ['room', 'Salle']]
+  for (const [k, label] of fields) if ((info(before)[k] ?? '') !== (info(after)[k] ?? '')) out.push(`${label} : ${String(info(before)[k] ?? '') || '—'} → ${String(info(after)[k] ?? '') || '—'}`)
+  if ((info(before).client?.name ?? '') !== (info(after).client?.name ?? '')) out.push(`Client : ${info(before).client?.name || '—'} → ${info(after).client?.name || '—'}`)
+  if (before.venue !== after.venue) out.push(`Lieu : ${before.venue || '—'} → ${after.venue || '—'}`)
+  if (before.date !== after.date) out.push(`Date : ${before.date || '—'} → ${after.date || '—'}`)
   for (const c of before.cases) if (!newCases.has(c.id)) out.push(`Flight case retiré : ${c.name}`)
   return out
 }

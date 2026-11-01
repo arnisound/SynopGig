@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { FAMILIES, FAMILY_ORDER, signalsOf } from '../data/cableFamily'
+import { viewOf } from '../synoptic/view'
 import type { Project } from '../types'
 import Dossier from './Dossier'
 import type { SynopticMode } from './SynopticPages'
@@ -98,6 +100,17 @@ export default function DossierDialog({ project, onClose }: { project: Project; 
           </select>
         </label>
         <p className="muted small">Le synoptique imprimé est celui de l’écran, avec tous les réglages d’affichage (tracé, écart, étiquettes, couleurs, signaux masqués, département, ports libres).</p>
+        {(() => {
+          const v = viewOf(project)
+          const off = FAMILY_ORDER.filter((f) => signalsOf(f).some((s) => v.hiddenSignals.includes(s))).map((f) => FAMILIES[f].label)
+          return off.length || v.department !== 'all' ? (
+            <p className="issue warn">
+              Attention : {off.length ? `calque${off.length > 1 ? 's' : ''} ${off.join(', ')} masqué${off.length > 1 ? 's' : ''}` : ''}
+              {off.length && v.department !== 'all' ? ', ' : ''}
+              {v.department !== 'all' ? `vue limitée au département ${v.department}` : ''} sur le synoptique : ce sera aussi le cas sur le papier.
+            </p>
+          ) : null
+        })()}
         <div className="actions">
           <button onClick={() => save(new Set(ALL))}>Tout cocher</button>
           <button onClick={onClose}>Fermer</button>

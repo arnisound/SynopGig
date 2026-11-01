@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { ZONES } from '../data/library'
-import type { ResolvedCable } from '../project'
+import { FAMILIES, familyOf } from '../data/cableFamily'
+import { tagFollowsNature, type ResolvedCable } from '../project'
 import CardsPanel from './CardsPanel'
 import PanelEditor from '../racks/PanelEditor'
 import DeviceArt from '../ui/DeviceArt'
@@ -64,6 +65,17 @@ export default function Inspector({ node, cable, onNode, onCable, onPanel, onSav
         <Field label="Repère câble">
           <input value={d.cableId} onChange={(e) => onCable(cable.edge.id, { cableId: e.target.value })} />
         </Field>
+        {(() => {
+          const signal = cable.fromPort?.signal ?? cable.toPort?.signal
+          const f = familyOf(signal)
+          if (!f) return null
+          return (
+            <p className="muted small">
+              Nature : <b style={{ color: FAMILIES[f].color }}>{FAMILIES[f].label}</b> (calque {FAMILIES[f].label})
+              {!tagFollowsNature(d.cableId, signal) && ` · les repères ${FAMILIES[f].prefix}-… se renomment depuis Affichage.`}
+            </p>
+          )
+        })()}
         <Field label="Longueur (m)">
           <input
             type="number"

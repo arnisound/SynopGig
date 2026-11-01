@@ -66,9 +66,24 @@ export function buildGuide(project: Project): GuideSection[] {
   }
   const all = resolveCables(nodes, edges)
   const rackNames = [...new Set(all.map((c) => internalRack(racks, c.edge)?.name).filter((n) => n !== undefined))]
-  const workshop = rackNames.map((name) => ({
-    title: `Atelier — câblage interne « ${name} »`,
-    steps: all.filter((c) => internalRack(racks, c.edge)?.name === name).map(toStep),
+  // Gear that is not 19", strapped or tied on a shelf, before the rack is wired.
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  const fixings = (rack: string): Step[] =>
+    project.cases
+      .filter((c) => c.kind === 'rack' && c.name === rack)
+      .flatMap((c) =>
+        Object.entries(c.held ?? {})
+          .filter(([id, host]) => c.devices.includes(id) && c.devices.includes(host) && byId.has(id) && byId.has(host) && !((byId.get(id)!.data.rackU ?? 0) > 0))
+          .map(([id, host]) => {
+            const shelf = byId.get(host)!
+            const how = /scratch/i.test(shelf.data.model) ? 'avec les sangles scratch' : /collier|perfor/i.test(shelf.data.model) ? 'avec des colliers serre-câbles' : /½|⅓|oreille/i.test(shelf.data.model) ? 'sur ses oreilles' : 'et le sangler'
+            return { id: `fix-${id}`, focus: [id], title: `Fixer « ${byId.get(id)!.data.name} » sur « ${shelf.data.name} » ${how}`, color: CATEGORY_COLORS[byId.get(id)!.data.category] }
+          }),
+      )
+  const heldRacks = project.cases.filter((c) => c.kind === 'rack' && Object.keys(c.held ?? {}).length).map((c) => c.name)
+  const workshop = [...new Set([...heldRacks, ...rackNames])].map((name) => ({
+    title: `Atelier — rack « ${name} » : fixations et câblage interne`,
+    steps: [...fixings(name), ...all.filter((c) => internalRack(racks, c.edge)?.name === name).map(toStep)],
   }))
   const cabling = all.filter((c) => !internalRack(racks, c.edge)).map(toStep)
   const config: Step[] = nodes.filter(hasConfig).map((n) => {

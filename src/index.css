@@ -92,7 +92,7 @@ main { flex: 1; min-height: 0; overflow: auto; }
 .brand { font-weight: 800; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
 .logo { width: 28px; height: 28px; display: block; }
 /* The long logo replaces the round icon and the name, except on phones. */
-.brand .logo-long { height: 32px; width: auto; display: block; margin: -3px 0; }
+.brand .logo-long { height: 34px; width: auto; display: block; margin: -4px 0; }
 .maker-corner { position: fixed; left: 8px; bottom: 3px; z-index: 30; font-size: 10px; color: var(--muted); text-decoration: none; opacity: 0.75; pointer-events: auto; }
 .maker-corner:hover { color: var(--accent); opacity: 1; }
 .menu-maker { display: none; }
@@ -115,7 +115,7 @@ button.icon-only { padding: 4px 8px; min-width: 32px; }
 .menu-pop button:hover { background: var(--bg); }
 /* Project information */
 .modal.project-info { width: min(620px, 100%); }
-.info-form { display: flex; flex-direction: column; gap: 10px; }
+.info-form { display: flex; flex-direction: column; gap: 10px; border: none; padding: 0; margin: 0; min-width: 0; }
 .info-form h4 { margin: 8px 0 0; }
 .info-form .row input { flex: 1; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }

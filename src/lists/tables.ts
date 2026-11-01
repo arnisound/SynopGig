@@ -3,6 +3,7 @@ import { extId, intId } from '../data/panels'
 import { cableOn, internalRack, otherEnd, rackOfNode, resolveCables } from '../project'
 import { ipIssues, netLinks } from '../network/network'
 import { powerBudget, wattsOf } from '../power/power'
+import { FAMILIES, familyOf } from '../data/cableFamily'
 import type { Project } from '../types'
 
 export type Cell = string | number | undefined
@@ -21,9 +22,11 @@ export function buildTables(project: Project): TableBlock[] {
   const { nodes, edges } = project
   const cables = (() => {
     const racks = rackOfNode(project.cases)
-    const head = ['Repère', 'Liaison', 'De', 'Port', 'Vers', 'Port', 'Connecteurs', 'Signal', 'Longueur (m)', 'Alertes']
+    const head = ['Repère', 'Nature', 'Liaison', 'De', 'Port', 'Vers', 'Port', 'Connecteurs', 'Signal', 'Longueur (m)', 'Alertes']
+    const nature = (s?: Parameters<typeof familyOf>[0]) => (familyOf(s) ? FAMILIES[familyOf(s)!].label : '')
     const rows = resolveCables(nodes, edges).map((c) => [
       c.edge.data?.cableId,
+      nature(c.fromPort?.signal ?? c.toPort?.signal),
       internalRack(racks, c.edge) ? `Interne ${internalRack(racks, c.edge)!.name}` : 'Site',
       c.from?.data.name,
       c.fromPort?.label,
@@ -125,12 +128,13 @@ export function buildTables(project: Project): TableBlock[] {
 
   const power = (() => {
     const b = powerBudget(project)
-    const head = ['Source', 'Départ', 'Phase', 'Équipements', 'Puissance (W)', 'Intensité (A)', 'Calibre (A)', 'Alertes']
+    const head = ['Source / armoire', 'Alimentée par', 'Départ', 'Phase', 'Équipements', 'Puissance (W)', 'Intensité (A)', 'Calibre (A)', 'Alertes']
     const rows: Cell[][] = b.sources.flatMap((s) =>
       s.outlets.map((o) => [
         s.node.data.name,
+        s.parent?.data.name ?? '—',
         o.port.label,
-        s.threePhase ? o.phase : 'mono',
+        o.threePhase ? 'L1 L2 L3' : s.threePhase ? o.phase : 'mono',
         o.fed.map((n) => n.data.name).join(', '),
         Math.round(o.watts),
         o.amps.toFixed(1),
@@ -140,7 +144,9 @@ export function buildTables(project: Project): TableBlock[] {
           .join(' / '),
       ]),
     )
-    for (const n of b.unpowered) rows.push(['—', '—', '', n.data.name, wattsOf(n.data) ?? '', '', '', 'non alimenté sur le synoptique'])
+    for (const n of b.unpowered) rows.push(['—', '', '—', '', n.data.name, wattsOf(n.data) ?? '', '', '', 'non alimenté sur le synoptique'])
+    // Alerts of a whole board (inlet overloaded, phases unbalanced) besides those of its outlets.
+    for (const a of b.boardAlerts) rows.push(['—', '', '', '', '', '', '', '', a])
     return { head, rows }
   })()
 
