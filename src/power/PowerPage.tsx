@@ -132,10 +132,10 @@ export default function PowerPage({ project, setProject }: Props) {
                     </td>
                   )}
                   <td>
-                    {o.fed.map((n) => (
+                    {o.shown.map((n) => (
                       <span key={n.id} className="fed">
                         {n.data.name}
-                        {n.data.category === 'Énergie' ? <small className="muted"> (armoire)</small> : wattsOf(n.data) === undefined ? wattsInput(n) : <small className="muted" title={n.data.wattsEstimated ? 'Consommation estimée' : undefined}> {n.data.wattsEstimated ? '≈ ' : ''}{wattsOf(n.data)} W</small>}
+                        {n.data.category === 'Énergie' ? <small className="muted"> ({b.sources.some((x) => x.node.id === n.id) ? `armoire, ${Math.round(b.sources.find((x) => x.node.id === n.id)!.watts)} W, détail plus bas` : 'armoire'})</small> : wattsOf(n.data) === undefined ? wattsInput(n) : <small className="muted" title={n.data.wattsEstimated ? 'Consommation estimée' : undefined}> {n.data.wattsEstimated ? '≈ ' : ''}{wattsOf(n.data)} W</small>}
                       </span>
                     ))}
                   </td>

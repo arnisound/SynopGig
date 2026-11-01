@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import { buildGuide, findSteps } from './steps'
 
 describe('guide search', () => {
-  const p = demoProject()
+  const p = sampleProject()
   const sections = buildGuide(p)
   const edge = p.edges.find((e) => e.data?.cableId)!
   const cable = edge.data!.cableId

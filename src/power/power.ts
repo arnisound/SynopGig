@@ -22,11 +22,11 @@ export const RATING: Partial<Record<ConnectorType, number>> = {
   'p17-16a-tri': 16,
   'p17-63a': 63,
   'p17-125a': 125,
-  socapex: 16,
 }
 
 /** Three-phase inlets: their outlets are spread on L1, L2, L3. */
-export const THREE_PHASE = new Set<ConnectorType>(['p17-16a-tri', 'p17-32a', 'p17-63a', 'p17-125a'])
+// A Socapex carries six circuits spread on the three phases: counted as a three-phase line.
+export const THREE_PHASE = new Set<ConnectorType>(['p17-16a-tri', 'p17-32a', 'p17-63a', 'p17-125a', 'socapex'])
 
 /** The device's consumption: its own figure, else the one written in its characteristics. */
 export function wattsOf(d: DeviceData): number | undefined {
@@ -52,6 +52,8 @@ export interface Outlet {
   threePhase?: boolean
   /** Devices plugged in, directly or further down (through their power links). */
   fed: DeviceNode[]
+  /** What to list on the outlet: a board fed from it stands for everything it feeds (it has its own budget). */
+  shown: DeviceNode[]
   watts: number
   /** Devices fed whose consumption is not known. */
   unknown: DeviceNode[]
@@ -195,6 +197,7 @@ export function powerBudget(project: Project): PowerBudget {
     const threePhase = isThree(node)
     const outlets = fedOutlets(node).map((port): Outlet => {
       const fed = (feeds.get(outletKey(node.id, port.id)) ?? []).flatMap((f) => below(f.to, new Set([node.id])))
+      const shown = (feeds.get(outletKey(node.id, port.id)) ?? []).flatMap((f) => (boards.includes(f.to) ? [f.to] : below(f.to, new Set([node.id]))))
       const watts = fed.reduce((s, d) => s + (wattsOf(d.data) ?? 0), 0)
       const rating = RATING[port.connector]
       const phase = threePhase ? phaseOf(node, port) : 'L1'
@@ -207,6 +210,7 @@ export function powerBudget(project: Project): PowerBudget {
         phase,
         threePhase: three,
         fed,
+        shown,
         watts,
         unknown: fed.filter((d) => wattsOf(d.data) === undefined && needsPower(d) && d.data.category !== 'Énergie'),
         amps,
@@ -240,7 +244,9 @@ export function powerBudget(project: Project): PowerBudget {
     }
     const worst = Math.max(...Object.values(s.phases))
     if (s.inletRating && worst > s.inletRating) boardAlerts.push(`${s.node.data.name} : ${worst.toFixed(1)} A ${s.threePhase ? 'sur une phase ' : ''}pour une arrivée de ${s.inletRating} A`)
-    if (s.imbalance !== undefined && s.imbalance > 0.3 && worst > 5) boardAlerts.push(`${s.node.data.name} : phases déséquilibrées (${Math.round(s.imbalance * 100)} %), répartissez les départs`)
+    // Balance is the job of the cabinets and supply points (P17 tri), not of a Socapex breakout.
+    const balanced = !inletOf(s.node) || inletOf(s.node)!.connector !== 'socapex'
+    if (balanced && s.imbalance !== undefined && s.imbalance > 0.3 && worst > 5) boardAlerts.push(`${s.node.data.name} : phases déséquilibrées (${Math.round(s.imbalance * 100)} %), répartissez les départs`)
   }
   return { sources, unpowered, alerts: [...boardAlerts, ...alerts], boardAlerts }
 }

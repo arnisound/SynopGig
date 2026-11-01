@@ -21,7 +21,8 @@ import StagePage from './stage/StagePage'
 import { applyTheme, readTheme, THEME_LABELS, type Theme } from './theme'
 import Lists from './lists/Lists'
 import RackBuilder from './racks/RackBuilder'
-import { demoProject, download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
+import { demoProject } from './demo'
+import { download, emptyProject, loadProject, parseProject, saveProject, slug } from './project'
 import SynopticEditor from './synoptic/SynopticEditor'
 import type { Project } from './types'
 
@@ -45,7 +46,7 @@ const SHARED_ID = sharedIdFromHash()
 const TARGET = sharedTargetFromHash()
 
 function initialProject(): Project {
-  if (!SHARED_ID) return loadProject()
+  if (!SHARED_ID) return loadProject(demoProject)
   const cached = cachedShared(SHARED_ID)
   return { ...(cached?.project ?? { ...emptyProject(), name: 'Chargement du projet partagé…' }), progress: sharedProgress(SHARED_ID) }
 }

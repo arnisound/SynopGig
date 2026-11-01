@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import { makeBlock, placeBlock } from './blocks'
 
 describe('blocks', () => {
-  const p = demoProject()
+  const p = sampleProject()
   const linked = p.edges.find((e) => e.source !== e.target)!
   const ids = [linked.source, linked.target]
 

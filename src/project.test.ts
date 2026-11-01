@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest'
+import { demoProject } from './demo'
+import { powerBudget } from './power/power'
 import { checkLink } from './data/connectors'
 import { LIBRARY } from './data/library'
 import { emptyPanel, fillHoles, HOLE_TYPES, panelPorts } from './data/panels'
 import {
   connectPorts,
   createDevice,
-  demoProject,
   emptyProject,
   internalRack,
   rackOfNode,
   renameCablesByNature,
+  sampleProject,
   resolveCables,
   setPanel,
   throughPanels,
@@ -101,8 +103,31 @@ describe('cabling', () => {
   })
 })
 
-describe('demo project', () => {
+describe('festival demo', () => {
   const p = demoProject()
+
+  it('is wired without a single issue, every device powered and every address unique', () => {
+    const bad = resolveCables(p.nodes, p.edges).filter((c) => c.issues.length)
+    expect(bad.map((c) => `${c.edge.data?.cableId}: ${c.issues.map((i) => i.message)}`)).toEqual([])
+    const b = powerBudget(p)
+    expect(b.unpowered.map((n) => n.data.name)).toEqual([])
+    expect(b.alerts).toEqual([])
+    const ips = p.nodes.map((n) => n.data.config.ip).filter(Boolean)
+    expect(new Set(ips).size).toBe(ips.length)
+    expect(new Set(p.edges.map((e) => e.data?.cableId)).size).toBe(p.edges.length)
+  })
+
+  it('covers every trade, in racks and cases', () => {
+    const cats = new Set(p.nodes.map((n) => n.data.category))
+    for (const c of ['Son', 'Lumière', 'Vidéo', 'Réseau', 'Énergie']) expect(cats.has(c as never)).toBe(true)
+    const inCase = new Set(p.cases.flatMap((c) => c.devices))
+    expect(p.cases.filter((c) => c.kind === 'rack').length).toBeGreaterThanOrEqual(3)
+    expect(inCase.size).toBeGreaterThan(p.nodes.length * 0.8)
+  })
+})
+
+describe('sample project', () => {
+  const p = sampleProject()
 
   it('has no wiring issue', () => {
     const bad = resolveCables(p.nodes, p.edges).filter((c) => c.issues.length)

@@ -266,8 +266,8 @@ function tpl(id: string) {
   return t
 }
 
-/** A small concert setup so the app never opens on an empty page. */
-export function demoProject(): Project {
+/** A small concert setup: the fixture of the tests. */
+export function sampleProject(): Project {
   const nodes: DeviceNode[] = []
   const add = (id: string, x: number, y: number, zone: string, name?: string) => {
     const n = createDevice(tpl(id), { x, y }, nodes, zone)
@@ -373,14 +373,15 @@ export function emptyProject(): Project {
   }
 }
 
-export function loadProject(): Project {
+/** The saved project, else the one given (the app opens on the demo). */
+export function loadProject(fallback: () => Project = emptyProject): Project {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return parseProject(raw)
   } catch {
-    // Unreadable storage: start from the demo.
+    // Unreadable storage: start from the fallback.
   }
-  return demoProject()
+  return fallback()
 }
 
 export function clearSavedProject() {

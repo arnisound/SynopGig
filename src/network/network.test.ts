@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import type { Project } from '../types'
 import { ipIssues, netLinks, parseIp } from './network'
 
@@ -8,7 +8,7 @@ const withIps = (p: Project, ips: Record<number, string>) => ({ ...p, nodes: p.n
 it('reads addresses and flags duplicates, typos and the odd network out', () => {
   expect(parseIp('192.168.1.300')).toBeUndefined()
   expect(parseIp('10.0.0.5/16')).toEqual({ parts: [10, 0, 0, 5], prefix: 16 })
-  const p = withIps(demoProject(), { 0: '192.168.1.10', 1: '192.168.1.10', 2: '192.168.1.11', 3: '192.168.2.20', 4: '192.168.1' })
+  const p = withIps(sampleProject(), { 0: '192.168.1.10', 1: '192.168.1.10', 2: '192.168.1.11', 3: '192.168.2.20', 4: '192.168.1' })
   const issues = ipIssues(p)
   expect(issues.get(p.nodes[0].id)?.[0]).toContain('aussi sur')
   expect(issues.get(p.nodes[3].id)).toEqual(['hors du réseau 192.168.1.x des autres équipements'])
@@ -17,7 +17,7 @@ it('reads addresses and flags duplicates, typos and the odd network out', () => 
 })
 
 it('lists the links carrying network protocols', () => {
-  const { links } = netLinks(demoProject())
+  const { links } = netLinks(sampleProject())
   expect(links.length).toBeGreaterThan(0)
   expect(links.every((l) => l.protocol)).toBe(true)
 })

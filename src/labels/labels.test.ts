@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 
 vi.stubGlobal('location', { origin: 'https://arnisoundtools.com', pathname: '/synopgig/', hash: '' })
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import { sharedIdFromHash, sharedTargetFromHash, shareLink } from '../share/share'
 import { cableLabels, caseLabels, deviceLabels } from './labels'
 
 describe('labels', () => {
-  const p = demoProject()
+  const p = sampleProject()
 
   it('has a label per cable with its two ends', () => {
     const l = cableLabels(p)

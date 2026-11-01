@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import { DEFAULT_VIEW, viewOf, visibleParts } from './view'
 
 describe('synoptic view options', () => {
-  const p = demoProject()
+  const p = sampleProject()
 
   it('shows everything by default, older projects included', () => {
     const v = viewOf({ ...p, view: undefined })

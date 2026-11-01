@@ -135,7 +135,7 @@ export function buildTables(project: Project): TableBlock[] {
         s.parent?.data.name ?? '—',
         o.port.label,
         o.threePhase ? 'L1 L2 L3' : s.threePhase ? o.phase : 'mono',
-        o.fed.map((n) => n.data.name).join(', '),
+        o.shown.map((n) => n.data.name).join(', '),
         Math.round(o.watts),
         o.amps.toFixed(1),
         o.rating,

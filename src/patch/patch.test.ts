@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import { buildPatch, channelsBySource } from './patch'
 
 describe('patch lists', () => {
-  const p = demoProject()
+  const p = sampleProject()
 
   it('lists the stage sources on the stagebox inputs, through the patch panel', () => {
     const { inputs } = buildPatch(p)

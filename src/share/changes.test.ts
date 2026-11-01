@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { demoProject } from '../project'
+import { sampleProject } from '../project'
 import { projectChanges } from './changes'
 
 describe('project changes', () => {
-  const p = demoProject()
+  const p = sampleProject()
 
   it('sees nothing when nothing changed', () => {
     expect(projectChanges(p, structuredClone(p))).toEqual([])
