@@ -225,3 +225,7 @@ npm test         # tests unitaires (vitest)
 ```
 
 Stack : React 19, TypeScript, Vite, [React Flow](https://reactflow.dev) pour le canevas.
+
+## Licence
+
+Logiciel propriétaire, © 2026 Arnisound tools — tous droits réservés. Voir [LICENSE](LICENSE). Toute copie, modification ou redistribution est interdite sans accord écrit d'Arnisound tools.
