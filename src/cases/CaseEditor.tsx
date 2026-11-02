@@ -101,7 +101,7 @@ export default function CaseEditor({ project, setProject, focusCase }: Props) {
         return `<section><h2>${escapeHtml(c.name)} — bandeau ${bw / 10} × ${bh / 10} cm</h2>${svg}
           <div class="label"><b>${escapeHtml(project.name)}</b> · Case n° ${escapeHtml(c.number)} · ${escapeHtml(c.name)}
           <ul>${contents.map((l) => `<li>${escapeHtml(String(l))}</li>`).join('')}</ul>
-          <div class="maker">SynopGig · Arnisound tools · arnisoundtools.com</div></div></section>`
+          <div class="maker">SynopGig · Arnisound Tools · arnisoundtools.com</div></div></section>`
       })
       .join('')
     const w = window.open('', '_blank')

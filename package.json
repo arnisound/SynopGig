@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "license": "SEE LICENSE IN LICENSE",
-  "author": "Arnisound tools (https://arnisoundtools.com)",
+  "author": "Arnisound Tools (https://arnisoundtools.com)",
   "type": "module",
   "scripts": {
     "dev": "vite",

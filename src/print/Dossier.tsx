@@ -96,7 +96,7 @@ export default function Dossier({
   return (
     <div className="dossier">
       {/* Page footer of the file: project on the left, the app, its maker and the page number on the right. */}
-      <style>{`@page { size: A4; @bottom-left { content: "${cssString(project.name)}${project.venue ? ` — ${cssString(project.venue)}` : ''} · dossier technique"; font: 7pt Arial, sans-serif; color: #777; } @bottom-right { content: "SynopGig · Arnisound tools · arnisoundtools.com · page " counter(page) " / " counter(pages); font: 7pt Arial, sans-serif; color: #777; } }`}</style>
+      <style>{`@page { size: A4; @bottom-left { content: "${cssString(project.name)}${project.venue ? ` — ${cssString(project.venue)}` : ''} · dossier technique"; font: 7pt Arial, sans-serif; color: #777; } @bottom-right { content: "SynopGig · Arnisound Tools · arnisoundtools.com · page " counter(page) " / " counter(pages); font: 7pt Arial, sans-serif; color: #777; } }`}</style>
       {has('cover') && (
         <section className="d-page d-cover">
           {(() => {
@@ -126,7 +126,7 @@ export default function Dossier({
           <ol className="d-toc">
             {toc.map((s) => <li key={s.id}>{s.label}</li>)}
           </ol>
-          <p className="d-maker">SynopGig, une application <b>Arnisound tools</b> — arnisoundtools.com</p>
+          <p className="d-maker">SynopGig, une application <b>Arnisound Tools</b> — arnisoundtools.com</p>
           <p className="d-foot">Édité le {printedOn}. Connectique indicative : vérifiez les fiches constructeur.</p>
           <TitleBlock project={project} title="Dossier technique" />
         </section>

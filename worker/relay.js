@@ -1,5 +1,5 @@
 /*
- * SynopGig relay — an Arnisound tools app (arnisoundtools.com).
+ * SynopGig relay — an Arnisound Tools app (arnisoundtools.com).
  *
  * A free Cloudflare Worker that does for the app what a browser cannot: it
  * keeps the AI keys secret, searches the web, and reads pages and files of
@@ -19,7 +19,7 @@
 
 const DEFAULT_ORIGINS = 'https://arnisoundtools.com,https://www.arnisoundtools.com,https://arnisound.github.io,http://localhost:5173'
 const PROMPT_START = 'You are a live sound, lighting and video technician'
-const UA = 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound tools; +https://arnisoundtools.com)'
+const UA = 'Mozilla/5.0 (compatible; SynopGig/1.0 by Arnisound Tools; +https://arnisoundtools.com)'
 
 const sleep = (s) => new Promise((r) => setTimeout(r, s * 1000))
 const words = (s) =>

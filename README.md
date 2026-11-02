@@ -1,6 +1,6 @@
 # SynopGig
 
-*Une application **Arnisound tools** — [arnisoundtools.com](https://arnisoundtools.com).*
+*Une application **Arnisound Tools** — [arnisoundtools.com](https://arnisoundtools.com).*
 
 Application web pour **préparer et transmettre un montage technique de spectacle** :
 synoptique de câblage, guide pas-à-pas pour les techniciens, listes générées
@@ -185,7 +185,7 @@ automatiquement et conception de **flight cases avec bandeaux personnalisés**.
 - Il tient toujours sur la feuille A4 : en entier sur une page (tourné d’un quart
   comme un plan s’il est large), ou en **grand format** : vue d’ensemble quadrillée + planches
   A4 à assembler (A1, B1…), imprimées assez grand pour lire chaque port.
-- Chaque page porte le nom du projet, « SynopGig · Arnisound tools · arnisoundtools.com » et
+- Chaque page porte le nom du projet, « SynopGig · Arnisound Tools · arnisoundtools.com » et
   son numéro.
 
 ### Partage avec l’équipe
@@ -228,4 +228,4 @@ Stack : React 19, TypeScript, Vite, [React Flow](https://reactflow.dev) pour le 
 
 ## Licence
 
-Logiciel propriétaire, © 2026 Arnisound tools — tous droits réservés. Voir [LICENSE](LICENSE). Toute copie, modification ou redistribution est interdite sans accord écrit d'Arnisound tools.
+Logiciel propriétaire, © 2026 Arnisound Tools — tous droits réservés. Voir [LICENSE](LICENSE). Toute copie, modification ou redistribution est interdite sans accord écrit d'Arnisound Tools.

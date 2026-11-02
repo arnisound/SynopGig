@@ -409,7 +409,7 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
 }
 
 /* Every printed page names the app and its maker. */
-@page { @bottom-right { content: "SynopGig · Arnisound tools · arnisoundtools.com"; font: 7pt Arial, sans-serif; color: #777; } }
+@page { @bottom-right { content: "SynopGig · Arnisound Tools · arnisoundtools.com"; font: 7pt Arial, sans-serif; color: #777; } }
 
 @media print {
   .no-print, .topbar { display: none !important; }

@@ -1,7 +1,7 @@
 {
-  "name": "SynopGig — Arnisound tools",
+  "name": "SynopGig — Arnisound Tools",
   "short_name": "SynopGig",
-  "description": "Synoptique, patch, plan de scène, racks, flight cases et dossier technique de spectacle. Une application Arnisound tools.",
+  "description": "Synoptique, patch, plan de scène, racks, flight cases et dossier technique de spectacle. Une application Arnisound Tools.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

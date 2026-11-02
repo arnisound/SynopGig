@@ -158,7 +158,7 @@ export default function LibraryPage({ project, setProject, userLibrary, request,
   const copyReport = async () => {
     try {
       await navigator.clipboard.writeText(report)
-      setReportStatus('Rapport copié : collez-le dans la conversation avec Claude, ou envoyez-le à Arnisound tools.')
+      setReportStatus('Rapport copié : collez-le dans la conversation avec Claude, ou envoyez-le à Arnisound Tools.')
     } catch {
       download('rapport-analyse-synopgig.txt', report, 'text/plain')
       setReportStatus('Rapport téléchargé (copie impossible dans ce navigateur).')
